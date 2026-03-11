@@ -150,11 +150,11 @@ router.put('/:projectId/maps/:mapId', requireAuth, async (req, res, next) => {
     }
 
     // Уведомляем других участников проекта об изменении карты
-    const project = await pool.query('SELECT members, name FROM projects WHERE id = $1', [req.params.projectId]);
-    if (project.rows[0]) {
+    const projectInfo = await pool.query('SELECT members, name FROM projects WHERE id = $1', [req.params.projectId]);
+    if (projectInfo.rows[0]) {
       const mapName = rows[0].name || 'карта';
-      const projName = project.rows[0].name || 'проект';
-      const members = project.rows[0].members || [];
+      const projName = projectInfo.rows[0].name || 'проект';
+      const members = projectInfo.rows[0].members || [];
       for (const m of members) {
         if (m.email !== req.user.email && m.role !== 'viewer') {
           await createNotification(m.email, {
