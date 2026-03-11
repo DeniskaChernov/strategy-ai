@@ -5968,3 +5968,10 @@ export default function App(){
     </LangCtx.Provider>
   );
 }
+
+// ── Bootstrap — монтируем приложение в DOM ──
+import ReactDOM from "react-dom/client";
+const rootEl = document.getElementById("root");
+if (rootEl) {
+  ReactDOM.createRoot(rootEl).render(<App />);
+}
