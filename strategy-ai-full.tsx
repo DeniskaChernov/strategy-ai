@@ -479,7 +479,101 @@ const LANGS={
     ws_start_btn:"Начать бесплатно ✦",ws_login_btn:"Уже есть аккаунт — Войти →",
     ws_feat1:"Карты целей",ws_feat2:"AI советник",ws_feat3:"Gantt-план",
     ws_feat4:"PNG/JSON экспорт",ws_feat5:"1 сценарий",ws_feat6:"До 5 шагов",
-    ws_terms:"Нажимая «Начать», вы соглашаетесь с условиями использования"},
+    ws_terms:"Нажимая «Начать», вы соглашаетесь с условиями использования",
+    // VersionHistoryModal
+    trial_active:"Пробный период активен",trial_days_left:"дней осталось",
+    deadline_reminder:"Напоминания о дедлайнах",
+    restore_confirm:"Восстановить эту версию? Текущие данные будут заменены.",
+    versions_empty:"Нет сохранённых версий",restore_version:"Восстановить",
+    version_restored:"Версия восстановлена ✓",
+    // WeeklyBriefingModal
+    weekly_briefing:"Еженедельный брифинг",
+    weekly_briefing_date:"Неделя",
+    weekly_briefing_gen:"Анализирую карту…",
+    weekly_briefing_err:"Не удалось получить AI-анализ.",
+    // AI/export
+    ai_error:"Ошибка AI-анализа",
+    export_pdf:"Скачать PDF",export_pptx:"Скачать PPTX",
+    // MapEditor toasts & misc
+    imported_steps:"✅ Импортировано: {n} шагов",
+    json_invalid:"Некорректный формат JSON",
+    file_read_err:"Ошибка чтения файла",
+    png_exported:"PNG экспортирован ✓",
+    json_exported:"JSON экспортирован ✓",
+    share_create_err:"Ошибка создания ссылки",
+    popup_blocked:"Разрешите всплывающие окна для экспорта",
+    layout_applied:"⌥ Авто-раскладка применена",
+    min_2_steps:"Нужно минимум 2 шага",
+    ai_analyzing_links:"🔗 AI анализирует логику карты…",
+    links_added:"🔗 Добавлено: {n} связей",
+    links_optimal:"Связи уже оптимальны — добавить нечего",
+    copied:"📋 Скопировано",pasted:"📋 Вставлено",
+    confirm_restore:"Восстановить?",
+    confirm_delete_map:"Удалить карту?",
+    confirm_delete_proj:"Все карты и данные проекта будут удалены безвозвратно.",
+    // ProfileModal messages
+    profile_saved:"Профиль обновлён ✓",
+    fill_all_fields:"Заполните все поля",
+    min_6_chars:"Минимум 6 символов",
+    pw_mismatch:"Пароли не совпадают",
+    pw_changed:"Пароль изменён ✓",
+    pw_change_err:"Ошибка смены пароля",
+    wrong_pw:"Неверный текущий пароль",
+    delete_err:"Ошибка при удалении",
+    settings_saved:"Настройки сохранены ✓",
+    appearance:"Внешний вид",
+    light_theme_label:"☀️ Светлая",dark_theme_label:"🌙 Тёмная",
+    compact_desc:"Уменьшенные карточки узлов",
+    autosave_desc:"Сохранять карту при каждом изменении",
+    canvas_view:"🗺 Канвас",gantt_view:"📅 Gantt",list_view:"📋 Список",
+    ai_assistant_title:"🤖 AI-ассистент",notifications_title:"🔔 Уведомления",
+    save_settings:"Сохранить настройки",
+    maps_available:"Карт доступно",scenarios_available:"Сценариев",
+    projects_available:"Проектов",ai_level:"AI уровень",
+    // ProjectsPage/ProjectDetail
+    projects_of:"{n} из {max} проектов",
+    project_limit:"Лимит проектов для тарифа",
+    new_project_btn:"+ Проект",
+    scenarios_label:"Сценарии",
+    overdue_label:"просрочено",
+    updated_label:"обновлено",
+    steps_label:"шагов",
+    maps_label:"карт",
+    scenarios_count:"сцен.",
+    map_limit_tier:"Лимит карт для {tier}: {n}",
+    template_applied:"Шаблон применён ✓",
+    scenario_created:"Сценарий создан ✓",
+    scenario_limit:"Лимит сценариев для тарифа",
+    members_limit:"Лимит участников: {n}",
+    member_added_already:"Участник уже добавлен",
+    payment_success:"✅ Оплата прошла успешно! Тариф обновлён.",
+    // GanttView
+    steps_with_deadlines:"{n} шагов с дедлайнами",
+    days_overdue:"просрочено {n}д.",
+    days_left:"{n}д.",
+    tomorrow_label:"завтра",
+    // Onboarding / interview
+    analyzing_answers:"Анализирую ваши ответы и строю персональную карту…",
+    create_map_btn2:"Создать карту ✦",answer_btn:"Ответить →",
+    interview_count:"AI-интервью · {n}/{max} вопросов",
+    skip_interview_confirm:"Пропустить интервью и начать с пустой карты?",
+    // Simulation
+    sim_goal:"🎯 Желаемый результат",sim_metric:"📊 Целевая метрика",
+    sim_budget:"💰 Бюджет ($)",sim_team:"👥 Команда (чел)",
+    sim_revenue:"💵 Целевая выручка ($)",sim_timeline:"⏱ Срок",
+    sim_run:"▶ Запустить симуляцию",sim_stop:"⏹ Остановить",sim_reset:"↺ Сбросить",
+    sim_ask_ai:"✦ Спросить AI",sim_q_ph:"Вопрос о симуляции…",
+    // Tier-related
+    tier_activated:"Тариф {tier} активирован ✓",
+    stay_on_plan:"Остаться на {plan}",
+    go_to_plan:"Перейти на {plan} — {price}",
+    card_number_ph:"Номер карты…",card_holder_ph:"Имя держателя…",
+    card_expiry_ph:"ММ/ГГ",card_cvv_ph:"CVV",
+    card_data_title:"💳 Данные карты",
+    downgrade_warning:"После смены тарифа часть данных может быть ограничена.",
+    current_tier_badge:"✓ Текущий тариф",
+    alt_strategies:"Альтернативные стратегии сценария",
+    done:"Выполнено"},
   en:{
     save:'Save',cancel:'Cancel',delete:'Delete',add:'Add',
     edit:'Edit',close:'Close',confirm:'Confirm',back:'Back',
@@ -724,7 +818,101 @@ const LANGS={
     ws_start_btn:"Start free ✦",ws_login_btn:"Already have an account — Sign in →",
     ws_feat1:"Goal maps",ws_feat2:"AI advisor",ws_feat3:"Gantt plan",
     ws_feat4:"PNG/JSON export",ws_feat5:"1 scenario",ws_feat6:"Up to 5 steps",
-    ws_terms:"By clicking «Start», you agree to the Terms of Service"},
+    ws_terms:"By clicking «Start», you agree to the Terms of Service",
+    // VersionHistoryModal
+    trial_active:"Trial period active",trial_days_left:"days left",
+    deadline_reminder:"Deadline reminders",
+    restore_confirm:"Restore this version? Current data will be replaced.",
+    versions_empty:"No saved versions",restore_version:"Restore",
+    version_restored:"Version restored ✓",
+    // WeeklyBriefingModal
+    weekly_briefing:"Weekly briefing",
+    weekly_briefing_date:"Week",
+    weekly_briefing_gen:"Analyzing map…",
+    weekly_briefing_err:"Failed to get AI analysis.",
+    // AI/export
+    ai_error:"AI analysis error",
+    export_pdf:"Download PDF",export_pptx:"Download PPTX",
+    // MapEditor toasts & misc
+    imported_steps:"✅ Imported: {n} steps",
+    json_invalid:"Invalid JSON format",
+    file_read_err:"File read error",
+    png_exported:"PNG exported ✓",
+    json_exported:"JSON exported ✓",
+    share_create_err:"Failed to create share link",
+    popup_blocked:"Allow pop-ups for export",
+    layout_applied:"⌥ Auto-layout applied",
+    min_2_steps:"At least 2 steps required",
+    ai_analyzing_links:"🔗 AI is analyzing map logic…",
+    links_added:"🔗 Added: {n} connections",
+    links_optimal:"Connections are already optimal — nothing to add",
+    copied:"📋 Copied",pasted:"📋 Pasted",
+    confirm_restore:"Restore?",
+    confirm_delete_map:"Delete this map?",
+    confirm_delete_proj:"All maps and project data will be permanently deleted.",
+    // ProfileModal messages
+    profile_saved:"Profile updated ✓",
+    fill_all_fields:"Please fill all fields",
+    min_6_chars:"Minimum 6 characters",
+    pw_mismatch:"Passwords do not match",
+    pw_changed:"Password changed ✓",
+    pw_change_err:"Password change error",
+    wrong_pw:"Incorrect current password",
+    delete_err:"Error deleting account",
+    settings_saved:"Settings saved ✓",
+    appearance:"Appearance",
+    light_theme_label:"☀️ Light",dark_theme_label:"🌙 Dark",
+    compact_desc:"Smaller node cards",
+    autosave_desc:"Save map on every change",
+    canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 List",
+    ai_assistant_title:"🤖 AI Assistant",notifications_title:"🔔 Notifications",
+    save_settings:"Save settings",
+    maps_available:"Maps available",scenarios_available:"Scenarios",
+    projects_available:"Projects",ai_level:"AI level",
+    // ProjectsPage/ProjectDetail
+    projects_of:"{n} of {max} projects",
+    project_limit:"Project limit for plan",
+    new_project_btn:"+ Project",
+    scenarios_label:"Scenarios",
+    overdue_label:"overdue",
+    updated_label:"updated",
+    steps_label:"steps",
+    maps_label:"maps",
+    scenarios_count:"scen.",
+    map_limit_tier:"Map limit for {tier}: {n}",
+    template_applied:"Template applied ✓",
+    scenario_created:"Scenario created ✓",
+    scenario_limit:"Scenario limit for plan",
+    members_limit:"Member limit: {n}",
+    member_added_already:"Member already added",
+    payment_success:"✅ Payment successful! Plan updated.",
+    // GanttView
+    steps_with_deadlines:"{n} steps with deadlines",
+    days_overdue:"overdue {n}d.",
+    days_left:"{n}d.",
+    tomorrow_label:"tomorrow",
+    // Onboarding / interview
+    analyzing_answers:"Analyzing your answers and building a personal map…",
+    create_map_btn2:"Create map ✦",answer_btn:"Answer →",
+    interview_count:"AI interview · {n}/{max} questions",
+    skip_interview_confirm:"Skip interview and start with blank map?",
+    // Simulation
+    sim_goal:"🎯 Desired outcome",sim_metric:"📊 Target metric",
+    sim_budget:"💰 Budget ($)",sim_team:"👥 Team (people)",
+    sim_revenue:"💵 Target revenue ($)",sim_timeline:"⏱ Timeline",
+    sim_run:"▶ Run simulation",sim_stop:"⏹ Stop",sim_reset:"↺ Reset",
+    sim_ask_ai:"✦ Ask AI",sim_q_ph:"Question about simulation…",
+    // Tier-related
+    tier_activated:"Plan {tier} activated ✓",
+    stay_on_plan:"Stay on {plan}",
+    go_to_plan:"Switch to {plan} — {price}",
+    card_number_ph:"Card number…",card_holder_ph:"Cardholder name…",
+    card_expiry_ph:"MM/YY",card_cvv_ph:"CVV",
+    card_data_title:"💳 Card details",
+    downgrade_warning:"After downgrading, some data may be restricted.",
+    current_tier_badge:"✓ Current plan",
+    alt_strategies:"Alternative scenario strategies",
+    done:"Completed"},
   uz:{
     save:"Saqlash",cancel:"Bekor",delete:"O'chirish",add:"Qo'shish",
     edit:"Tahrirlash",close:"Yopish",confirm:"Tasdiqlash",back:"Orqaga",
@@ -971,7 +1159,101 @@ const LANGS={
     ws_start_btn:"Bepul boshlash ✦",ws_login_btn:"Hisobingiz bormi — Kirish →",
     ws_feat1:"Maqsad xaritalari",ws_feat2:"AI maslahatchi",ws_feat3:"Gantt rejasi",
     ws_feat4:"PNG/JSON eksport",ws_feat5:"1 stsenariy",ws_feat6:"5 tagacha qadam",
-    ws_terms:"«Boshlash» tugmasini bosish orqali foydalanish shartlariga rozisiz"
+    ws_terms:"«Boshlash» tugmasini bosish orqali foydalanish shartlariga rozisiz",
+    // VersionHistoryModal
+    trial_active:"Sinov davri faol",trial_days_left:"kun qoldi",
+    deadline_reminder:"Muddat eslatmalari",
+    restore_confirm:"Bu versiyani tiklashni xohlaysizmi? Joriy ma'lumotlar almashtiriladi.",
+    versions_empty:"Saqlangan versiyalar yo'q",restore_version:"Tiklash",
+    version_restored:"Versiya tiklandi ✓",
+    // WeeklyBriefingModal
+    weekly_briefing:"Haftalik xisobot",
+    weekly_briefing_date:"Hafta",
+    weekly_briefing_gen:"Xarita tahlil qilinmoqda…",
+    weekly_briefing_err:"AI tahlilini olib bo'lmadi.",
+    // AI/export
+    ai_error:"AI tahlil xatosi",
+    export_pdf:"PDF yuklab olish",export_pptx:"PPTX yuklab olish",
+    // MapEditor toasts & misc
+    imported_steps:"✅ Yuklandi: {n} qadam",
+    json_invalid:"Noto'g'ri JSON formati",
+    file_read_err:"Fayl o'qish xatosi",
+    png_exported:"PNG eksport qilindi ✓",
+    json_exported:"JSON eksport qilindi ✓",
+    share_create_err:"Havola yaratishda xato",
+    popup_blocked:"Eksport uchun oynalarga ruxsat bering",
+    layout_applied:"⌥ Avto-joylashtirildi",
+    min_2_steps:"Kamida 2 qadam kerak",
+    ai_analyzing_links:"🔗 AI xarita mantiqini tahlil qilmoqda…",
+    links_added:"🔗 Qo'shildi: {n} bog'liqlik",
+    links_optimal:"Bog'liqliklar allaqachon optimal — qo'shish uchun hech narsa yo'q",
+    copied:"📋 Nusxalandi",pasted:"📋 Qo'yildi",
+    confirm_restore:"Tiklashni xohlaysizmi?",
+    confirm_delete_map:"Xaritani o'chirishni xohlaysizmi?",
+    confirm_delete_proj:"Loyihaning barcha xaritalari va ma'lumotlari butunlay o'chiriladi.",
+    // ProfileModal messages
+    profile_saved:"Profil yangilandi ✓",
+    fill_all_fields:"Barcha maydonlarni to'ldiring",
+    min_6_chars:"Kamida 6 belgi",
+    pw_mismatch:"Parollar mos kelmaydi",
+    pw_changed:"Parol o'zgartirildi ✓",
+    pw_change_err:"Parol o'zgartirishda xato",
+    wrong_pw:"Joriy parol noto'g'ri",
+    delete_err:"O'chirishda xato",
+    settings_saved:"Sozlamalar saqlandi ✓",
+    appearance:"Ko'rinish",
+    light_theme_label:"☀️ Yorug'",dark_theme_label:"🌙 Qorong'u",
+    compact_desc:"Kichroq tugun kartalari",
+    autosave_desc:"Har bir o'zgarishda xaritani saqlash",
+    canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 Ro'yxat",
+    ai_assistant_title:"🤖 AI Yordamchi",notifications_title:"🔔 Bildirishnomalar",
+    save_settings:"Sozlamalarni saqlash",
+    maps_available:"Xaritalar mavjud",scenarios_available:"Stsenariylar",
+    projects_available:"Loyihalar",ai_level:"AI darajasi",
+    // ProjectsPage/ProjectDetail
+    projects_of:"{n} dan {max} loyiha",
+    project_limit:"Tarif uchun loyiha limiti",
+    new_project_btn:"+ Loyiha",
+    scenarios_label:"Stsenariylar",
+    overdue_label:"kechiktirilgan",
+    updated_label:"yangilangan",
+    steps_label:"qadam",
+    maps_label:"xarita",
+    scenarios_count:"stsen.",
+    map_limit_tier:"Tarif uchun xarita limiti {tier}: {n}",
+    template_applied:"Shablon qo'llanildi ✓",
+    scenario_created:"Stsenariy yaratildi ✓",
+    scenario_limit:"Tarif uchun stsenariy limiti",
+    members_limit:"A'zo limiti: {n}",
+    member_added_already:"A'zo allaqachon qo'shilgan",
+    payment_success:"✅ To'lov muvaffaqiyatli! Tarif yangilandi.",
+    // GanttView
+    steps_with_deadlines:"{n} qadam muddatlari bilan",
+    days_overdue:"kechiktirildi {n}k.",
+    days_left:"{n}k.",
+    tomorrow_label:"ertaga",
+    // Onboarding / interview
+    analyzing_answers:"Javoblaringizni tahlil qilmoqdaman va shaxsiy xarita quryapman…",
+    create_map_btn2:"Xarita yaratish ✦",answer_btn:"Javob berish →",
+    interview_count:"AI suhbat · {n}/{max} savol",
+    skip_interview_confirm:"Intervyuni o'tkazib yuborib, bo'sh xaritadan boshlashni xohlaysizmi?",
+    // Simulation
+    sim_goal:"🎯 Maqsadli natija",sim_metric:"📊 Maqsad metrikasi",
+    sim_budget:"💰 Byudjet ($)",sim_team:"👥 Jamoa (kishi)",
+    sim_revenue:"💵 Maqsad daromad ($)",sim_timeline:"⏱ Muddat",
+    sim_run:"▶ Simulyatsiyani ishga tushirish",sim_stop:"⏹ To'xtatish",sim_reset:"↺ Tiklash",
+    sim_ask_ai:"✦ AI dan so'rash",sim_q_ph:"Simulyatsiya haqida savol…",
+    // Tier-related
+    tier_activated:"{tier} tarifi faollashtirildi ✓",
+    stay_on_plan:"{plan} da qolish",
+    go_to_plan:"{plan} ga o'tish — {price}",
+    card_number_ph:"Karta raqami…",card_holder_ph:"Karta egasining ismi…",
+    card_expiry_ph:"OY/YIL",card_cvv_ph:"CVV",
+    card_data_title:"💳 Karta ma'lumotlari",
+    downgrade_warning:"Tarifni pasaytirgandan so'ng ba'zi ma'lumotlar cheklanishi mumkin.",
+    current_tier_badge:"✓ Joriy tarif",
+    alt_strategies:"Stsenariyning muqobil strategiyalari",
+    done:"Bajarildi"
   },
 };
 
@@ -1758,7 +2040,7 @@ function Toggle({val,onChange,label,desc}){
 
 // ── ProfileModal ──
 function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",onToggleTheme}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const tier=TIERS[user.tier]||TIERS.free;
   const isMobile=useIsMobile();
   const[tab,setTab]=useState("profile");
@@ -1786,23 +2068,23 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   const fi={width:"100%",padding:"10px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:9,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   function formatCardNum(v){return v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();}
   function formatExp(v){const d=v.replace(/\D/g,"").slice(0,4);return d.length>2?d.slice(0,2)+"/"+d.slice(2):d;}
-  async function saveName(){if(!name.trim())return;setLoading(true);const u=await patchUser(user.email,{name:name.trim(),bio:bio.trim()});onUpdate(u);setMsg({t:"Профиль обновлён!",ok:true});setLoading(false);}
+  async function saveName(){if(!name.trim())return;setLoading(true);const u=await patchUser(user.email,{name:name.trim(),bio:bio.trim()});onUpdate(u);setMsg({t:t("profile_saved","Профиль обновлён ✓"),ok:true});setLoading(false);}
   async function changePw(){
-    if(!cp||!np){setMsg({t:"Заполните поля",ok:false});return;}
-    if(np.length<6){setMsg({t:"Мин. 6 символов",ok:false});return;}
-    if(np!==cf){setMsg({t:"Пароли не совпадают",ok:false});return;}
+    if(!cp||!np){setMsg({t:t("fill_all_fields","Заполните все поля"),ok:false});return;}
+    if(np.length<6){setMsg({t:t("min_6_chars","Минимум 6 символов"),ok:false});return;}
+    if(np!==cf){setMsg({t:t("pw_mismatch","Пароли не совпадают"),ok:false});return;}
     setLoading(true);
     if(API_BASE){
       try{
         await apiFetch("/api/auth/change-password",{method:"POST",body:JSON.stringify({currentPassword:cp,newPassword:np})});
-        setCp("");setNp("");setCf("");setMsg({t:"Пароль изменён!",ok:true});
-      }catch(e:any){setMsg({t:e.message||"Ошибка смены пароля",ok:false});}
+        setCp("");setNp("");setCf("");setMsg({t:t("pw_changed","Пароль изменён ✓"),ok:true});
+      }catch(e:any){setMsg({t:e.message||t("pw_change_err","Ошибка смены пароля"),ok:false});}
       setLoading(false);return;
     }
     const a=await store.get("sa_acc")||[],acc=a.find((x:any)=>x.email===user.email);
-    if(!acc||acc.pwHash!==hashPw(user.email,cp)){setMsg({t:"Неверный текущий пароль",ok:false});setLoading(false);return;}
+    if(!acc||acc.pwHash!==hashPw(user.email,cp)){setMsg({t:t("wrong_pw","Неверный текущий пароль"),ok:false});setLoading(false);return;}
     await patchUser(user.email,{pwHash:hashPw(user.email,np)});
-    setCp("");setNp("");setCf("");setMsg({t:"Пароль изменён!",ok:true});setLoading(false);
+    setCp("");setNp("");setCf("");setMsg({t:t("pw_changed","Пароль изменён ✓"),ok:true});setLoading(false);
   }
   async function saveSettings(){
     setLoading(true);
@@ -1858,7 +2140,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
       await clearSession();
       onClose();
       onLogout();
-    }catch(e){setMsg({t:"Ошибка при удалении",ok:false});}
+    }catch(e){setMsg({t:t("delete_err","Ошибка при удалении"),ok:false});}
     setLoading(false);
   }
   useEffect(()=>{const h=e=>{if(e.key==="Escape"&&!buyPhase)onClose();};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);},[buyPhase]);
@@ -1928,7 +2210,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   </div>
                   <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:10}}>{t("account_created","Аккаунт создан")}</div>
                   <div style={{padding:"11px 14px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:16}}>
-                    <div style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.createdAt?new Date(user.createdAt).toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"}):"—"}</div>
+                    <div style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.createdAt?new Date(user.createdAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru-RU",{day:"numeric",month:"long",year:"numeric"}):"—"}</div>
                   </div>
                   <div style={{padding:"14px 16px",borderRadius:12,background:`${tier.color}10`,border:`1px solid ${tier.color}33`}}>
                     <div style={{fontSize:13,color:"var(--text4)",marginBottom:4}}>{t("current_plan","Текущий тариф")}</div>
@@ -2755,7 +3037,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
                 <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
                   <div style={{width:18,height:18,borderRadius:"50%",background:c.isAI?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:c.isAI?"#fff":"var(--text4)",fontWeight:700,flexShrink:0}}>{c.isAI?"✦":(c.author||"?")[0].toUpperCase()}</div>
                   <div style={{fontSize:13.5,fontWeight:700,color:c.isAI?"#818cf8":"var(--text3)"}}>{c.author}</div>
-                  <div style={{fontSize:12,color:"var(--text5)",marginLeft:"auto"}}>{new Date(c.at).toLocaleString("ru",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div>
+                  <div style={{fontSize:12,color:"var(--text5)",marginLeft:"auto"}}>{new Date(c.at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div>
                   {!readOnly&&!c.isAI&&<button onClick={()=>onUpdate({comments:comments.filter(x=>x.id!==c.id)})} style={{width:16,height:16,borderRadius:4,border:"none",background:"transparent",color:"var(--text5)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
                 </div>
                 <div style={{fontSize:13,color:"var(--text2)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>{c.text}</div>
@@ -2814,7 +3096,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
               <div key={h.id} style={{padding:"9px 11px",borderRadius:9,background:"var(--surface)",border:"1px solid var(--border)"}}>
                 <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
                   <span style={{fontSize:13.5,fontWeight:700,color:h.type==="ai_rephrase"?"#818cf8":"var(--text3)"}}>{h.type==="ai_rephrase"?"✦ AI переформулировал":"✏️ Изменено"}</span>
-                  <span style={{fontSize:12,color:"var(--text5)",marginLeft:"auto"}}>{new Date(h.at).toLocaleString("ru",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>
+                  <span style={{fontSize:12,color:"var(--text5)",marginLeft:"auto"}}>{new Date(h.at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>
                 </div>
                 <div style={{fontSize:13,color:"var(--text4)",marginBottom:3}}>Автор: {h.by}</div>
                 {h.before?.title&&<div style={{fontSize:13,color:"var(--text5)",padding:"3px 7px",background:"rgba(239,68,68,.04)",borderRadius:5,borderLeft:"2px solid rgba(239,68,68,.3)",marginBottom:2}}>До: {h.before.title}</div>}
@@ -3055,7 +3337,7 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,th
 
 // ── GanttView ──
 function GanttView({nodes,onClose}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const STATUS=getSTATUS(t);
   const withDates=nodes.filter(n=>n.deadline);
   const now=new Date();
@@ -3076,7 +3358,7 @@ function GanttView({nodes,onClose}){
     <div style={{position:"absolute",bottom:0,left:0,right:0,height:220,background:"var(--bg2)",borderTop:"1px solid var(--border)",zIndex:30,display:"flex",flexDirection:"column",animation:"slideUp .2s ease"}}>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <span style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{t("gantt","📅 Gantt")}</span>
-        <span style={{fontSize:13.5,color:"var(--text5)",flex:1}}>{sorted.length} шагов с дедлайнами</span>
+        <span style={{fontSize:13.5,color:"var(--text5)",flex:1}}>{t("steps_with_deadlines","{n} шагов с дедлайнами").replace("{n}",String(sorted.length))}</span>
         <button onClick={onClose} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
       </div>
       <div style={{flex:1,overflowY:"auto",overflowX:"auto",padding:"8px 14px"}}>
@@ -3095,7 +3377,7 @@ function GanttView({nodes,onClose}){
                 <div style={{position:"absolute",left:`${pct}%`,top:"50%",transform:"translate(-50%,-50%)",width:8,height:8,borderRadius:2,background:isPast?"#ef4444":st.c}}/>
               </div>
               <div style={{width:80,fontSize:13,color:isPast?"#ef4444":daysLeft<=7?"#f59e0b":"var(--text4)",textAlign:"right",flexShrink:0,fontWeight:isPast||daysLeft<=7?700:400}}>
-                {isPast?`просрочено ${-daysLeft}д`:daysLeft===0?"сегодня":daysLeft===1?"завтра":`${daysLeft}д`}
+                {isPast?t("days_overdue","просрочено {n}д.").replace("{n}",String(-daysLeft)):daysLeft===0?t("today","Сегодня"):daysLeft===1?t("tomorrow_label","завтра"):t("days_left","{n}д.").replace("{n}",String(daysLeft))}
               </div>
             </div>
           );
@@ -3155,7 +3437,7 @@ function DeadlineReminders({nodes,onGoToNode}:{nodes:any[],onGoToNode:(id:string
             onMouseOut={e=>(e.currentTarget as HTMLElement).style.background="transparent"}>
             <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:2}}>{n.title}</div>
             <div style={{fontSize:11,color:isOverdue?"#ef4444":"#f59e0b",fontWeight:600}}>
-              {isOverdue?`Просрочено на ${Math.abs(diff)} дн.`:`Через ${diff} дн. · ${n.deadline}`}
+              {isOverdue?t("days_overdue","просрочено {n}д.").replace("{n}",String(Math.abs(diff))):t("days_left","{n}д.").replace("{n}",String(diff))+" · "+n.deadline}
             </div>
           </div>
         );
@@ -3196,8 +3478,8 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,theme="dark"}:{m
             <div key={v.id} style={{padding:"14px 24px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:2}}>{v.label||`Версия ${versions.length-i}`}</div>
-                <div style={{fontSize:11,color:"var(--text3)"}}>{new Date(v.created_at).toLocaleString("ru")} · {v.user_email}</div>
-                <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{Array.isArray(v.nodes)?v.nodes.length:0} шагов</div>
+                <div style={{fontSize:11,color:"var(--text3)"}}>{new Date(v.created_at).toLocaleString()} · {v.user_email}</div>
+                <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{Array.isArray(v.nodes)?v.nodes.length:0} {t("steps_label","шагов")}</div>
               </div>
               <button onClick={()=>restore(v)} disabled={restoring===v.id} style={{padding:"7px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",opacity:restoring===v.id?.6:1}}>
                 {restoring===v.id?"…":t("restore_version","Восстановить")}
@@ -3218,7 +3500,7 @@ function sanitize(str:string|undefined|null):string{
 
 // ── WeeklyBriefingModal ──
 function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:any[],mapName:string,user:any,onClose:()=>void,theme?:string}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const[loading,setLoading]=useState(false);
   const[summary,setSummary]=useState("");
   const done=nodes.filter((n:any)=>n.status==="completed");
@@ -3231,7 +3513,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:an
     const ctx=`Карта: ${mapName}. Всего шагов: ${nodes.length}. Выполнено: ${done.length}. Заблокировано: ${blocked.length}. Критичных незавершённых: ${critical.length}. Health score: ${health}%. Шаги: ${nodes.slice(0,10).map((n:any)=>`${n.title}(${n.status})`).join(", ")}`;
     callAI([{role:"user",content:`Дай краткий еженедельный брифинг по стратегии (3-4 предложения). ${ctx}`}],
       `Ты AI-советник. Дай краткий профессиональный еженедельный брифинг: что сделано, что заблокировано, главная рекомендация на следующую неделю. Без списков, только текст.`,200)
-      .then(r=>setSummary(r)).catch(()=>setSummary("Не удалось получить AI-анализ.")).finally(()=>setLoading(false));
+      .then(r=>setSummary(r)).catch(()=>setSummary(t("weekly_briefing_err","Не удалось получить AI-анализ."))).finally(()=>setLoading(false));
   },[]);
 
   return(
@@ -3240,7 +3522,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:an
         <div style={{background:"linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1))",padding:"22px 26px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
-            <div style={{fontSize:12,color:"var(--text3)",marginTop:3}}>{mapName} · {new Date().toLocaleDateString("ru-RU",{weekday:"long",day:"numeric",month:"long"})}</div>
+            <div style={{fontSize:12,color:"var(--text3)",marginTop:3}}>{mapName} · {new Date().toLocaleDateString(lang==="uz"?"uz-UZ":lang==="en"?"en-US":"ru-RU",{weekday:"long",day:"numeric",month:"long"})}</div>
           </div>
           <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:20}}>✕</button>
         </div>
@@ -3295,7 +3577,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:an
 
 // ── MapEditor ──
 function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const STATUS=getSTATUS(t);
   const ETYPE=getETYPE(t);
   const[nodes,setNodes]=useState(mapData?.nodes||defaultNodes());
@@ -3417,9 +3699,9 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
           setNodes((d.nodes||[]).map(n=>({...n,comments:n.comments||[],history:n.history||[]})));
           setEdges(d.edges||[]);
           setTimeout(fitView,100);
-          addToast(`✅ Импортировано: ${(d.nodes||[]).length} шагов`,"success");
-        }else addToast("Некорректный формат JSON","error");
-      }catch{addToast("Ошибка чтения файла","error");}
+          addToast(t("imported_steps","✅ Импортировано: {n} шагов").replace("{n}",String((d.nodes||[]).length)),"success");
+        }else addToast(t("json_invalid","Некорректный формат JSON"),"error");
+      }catch{addToast(t("file_read_err","Ошибка чтения файла"),"error");}
       e.target.value="";
     };
     r.readAsText(f);
@@ -3428,7 +3710,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   function addNode(){
     const x=snap((-viewRef.current.x/viewRef.current.zoom)+W/viewRef.current.zoom/2-120);
     const y=snap((-viewRef.current.y/viewRef.current.zoom)+H/viewRef.current.zoom/2-64);
-    const n={id:uid(),x,y,title:"Новый шаг",reason:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:""};
+    const n={id:uid(),x,y,title:t("new_step_title","Новый шаг"),reason:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:""};
     pushUndo(nodes,edges);setNodes(ns=>[...ns,n]);setSelNode(n);
   }
 
@@ -3460,7 +3742,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
           a.download=`${mapData?.name||project?.name||"strategy"}.png`;
           a.click();
           setExporting(false);
-          addToast("PNG экспортирован","success");
+          addToast(t("png_exported","PNG экспортирован ✓"),"success");
         },"image/png");
       };
       img.onerror=()=>setExporting(false);
@@ -3475,7 +3757,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     const a=document.createElement("a");
     a.href=url;a.download=`${((mapData?.name||project?.name||"strategy").replace(/\s+/g,"-"))}.json`;a.click();
     URL.revokeObjectURL(url);
-    addToast("JSON экспортирован","success");
+    addToast(t("json_exported","JSON экспортирован ✓"),"success");
   }
 
   async function shareMap(){
@@ -3489,7 +3771,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
           body:JSON.stringify({mapId:mapData?.id,projectId:project?.id,projectName,mapData:mapPayload}),
         });
         url=d.url;
-      }catch(e:any){addToast(e.message||"Ошибка создания ссылки","error");return;}
+      }catch(e:any){addToast(e.message||t("share_create_err","Ошибка создания ссылки"),"error");return;}
     } else {
       const shareId=uid();
       await store.set("sa_share_"+shareId,{map:mapPayload,projectName,createdAt:Date.now()});
@@ -3515,11 +3797,11 @@ th{background:#f1f5f9;font-weight:600;font-size:12px}
 tr:nth-child(even){background:#f8fafc}
 </style></head><body>
 <h1>${sanitize(title)}</h1>
-<p class="meta">Экспорт от ${new Date().toLocaleDateString("ru-RU")} · ${nodes.length} шагов · Strategy AI</p>
-<table><thead><tr><th>Шаг</th><th>Статус</th><th>Прогресс</th><th>Дедлайн</th><th>Метрика</th></tr></thead><tbody>${rows}</tbody></table>
+<p class="meta">${new Date().toLocaleDateString()} · ${nodes.length} ${t("steps_label","шагов")} · Strategy AI</p>
+<table><thead><tr><th>${t("step","Шаг")}</th><th>${t("status","Статус")}</th><th>${t("progress","Прогресс")}</th><th>${t("deadline","Дедлайн")}</th><th>${t("metric","Метрика")}</th></tr></thead><tbody>${rows}</tbody></table>
 </body></html>`;
     const w=window.open("","_blank");
-    if(!w){addToast("Разрешите всплывающие окна для экспорта в PDF","warn");return;}
+    if(!w){addToast(t("popup_blocked","Разрешите всплывающие окна для экспорта"),"warn");return;}
     w.document.write(html);w.document.close();
     w.onload=()=>{w.print();(w as any).onafterprint=()=>w.close();};
   }
@@ -3540,7 +3822,7 @@ tr:nth-child(even){background:#f8fafc}
         ${n.reason?`<p class="reason">${sanitize(n.reason)}</p>`:""}
         ${n.metric?`<div class="metric">🎯 ${sanitize(n.metric)}</div>`:""}
         <div class="progress-wrap"><div class="progress-bar" style="width:${n.progress||0}%"></div></div>
-        <div class="prog-label">${n.progress||0}%${n.deadline?` · Дедлайн: ${n.deadline}`:""}</div>
+        <div class="prog-label">${n.progress||0}%${n.deadline?` · ${t("deadline","Deadline")}: ${n.deadline}`:""}</div>
       </div>`).join("");
 
     const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
@@ -3593,13 +3875,13 @@ ${slides}
       const col=safeIdx%4,row=Math.floor(safeIdx/4);
       return{...n,x:snap(60+col*300),y:snap(60+row*180)};
     });
-    pushUndo(nodes,edges);setNodes(newNodes);addToast("⌥ Авто-раскладка применена","info");
+    pushUndo(nodes,edges);setNodes(newNodes);addToast(t("layout_applied","⌥ Авто-раскладка применена"),"info");
     setTimeout(fitView,50);
   }
 
   async function autoConnect(){
-    if(nodes.length<2){addToast("Нужно минимум 2 шага","info");return;}
-    addToast("🔗 AI анализирует логику карты…","info");
+    if(nodes.length<2){addToast(t("min_2_steps","Нужно минимум 2 шага"),"info");return;}
+    addToast(t("ai_analyzing_links","🔗 AI анализирует логику карты…"),"info");
     const ctx=nodes.map(n=>`ID: ${n.id}\nНазвание: ${n.title}${n.reason?`\nОписание: ${n.reason}`:""}${n.metric?`\nМетрика: ${n.metric}`:""}${n.status?`\nСтатус: ${n.status}`:""}${n.tags?.length?`\nТеги: ${n.tags.join(", ")}`:""}`)
       .join("\n\n");
     const existingEdges=edges.map(e=>`${e.source} → ${e.target}`).join(", ")||"нет";
@@ -3637,7 +3919,7 @@ ${ctx}
       if(filtered.length){
         pushUndo(nodes,edges);
         setEdges(es=>[...es,...filtered.map(e=>({...e,id:uid(),label:e.reason||""}))]);
-        addToast(`🔗 Добавлено ${filtered.length} связей`,"success");
+        addToast(t("links_added","🔗 Добавлено: {n} связей").replace("{n}",String(filtered.length)),"success");
         // Open AI panel and show reasoning
         setShowAI(true);
         setSelNode(null);
@@ -3651,7 +3933,7 @@ ${ctx}
         // inject as AI message into chat
         setPendingAiMsgs(prev=>[...prev,{role:"assistant",content:msg,ts:Date.now()}]);
       } else {
-        addToast("Связи уже оптимальны — добавить нечего","info");
+        addToast(t("links_optimal","Связи уже оптимальны — добавить нечего"),"info");
         setShowAI(true);
         setPendingAiMsgs(prev=>[...prev,{role:"assistant",content:`🔍 **Анализ связей завершён**\n\n${parsed.summary||"Все логические связи уже присутствуют на карте. AI не нашёл новых обоснованных зависимостей."}`,ts:Date.now()}]);
       }
@@ -3701,8 +3983,8 @@ ${ctx}
       if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
       if((e.ctrlKey||e.metaKey)&&e.key==="z"&&!e.shiftKey){e.preventDefault();undo();}
       else if((e.ctrlKey||e.metaKey)&&(e.key==="y"||(e.key==="z"&&e.shiftKey))){e.preventDefault();redo();}
-      else if((e.ctrlKey||e.metaKey)&&e.key==="c"&&selNode){setClipboard(selNode);addToast("📋 Скопировано","info");}
-      else if((e.ctrlKey||e.metaKey)&&e.key==="v"&&clipboard){const copy={...clipboard,id:uid(),x:clipboard.x+60,y:clipboard.y+60};pushUndo(nodes,edges);setNodes(ns=>[...ns,copy]);addToast("📋 Вставлено","info");}
+      else if((e.ctrlKey||e.metaKey)&&e.key==="c"&&selNode){setClipboard(selNode);addToast(t("copied","📋 Скопировано"),"info");}
+      else if((e.ctrlKey||e.metaKey)&&e.key==="v"&&clipboard){const copy={...clipboard,id:uid(),x:clipboard.x+60,y:clipboard.y+60};pushUndo(nodes,edges);setNodes(ns=>[...ns,copy]);addToast(t("pasted","📋 Вставлено"),"info");}
       else if(e.key==="Escape"){setConnecting(false);setConnectSrc(null);}
       else if((e.key==="Delete"||e.key==="Backspace")&&selNode&&!connecting){deleteNode(selNode.id);}
       else if((e.key==="Delete"||e.key==="Backspace")&&selEdge){pushUndo(nodes,edges);setEdges(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}
@@ -3899,10 +4181,10 @@ ${ctx}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
             {ib(showAI,"AI-консультант",()=>{setShowAI((a:boolean)=>!a);setSelNode(null);},<>✦ AI</>,{width:"auto",padding:"0 10px",fontSize:13,fontWeight:600,color:showAI?"#818cf8":"#a78bfa",borderColor:showAI?"rgba(99,102,241,.5)":"rgba(139,92,246,.25)",background:showAI?"rgba(99,102,241,.14)":"rgba(139,92,246,.06)"})}
             {ib(showMini,"Миникарта",()=>setShowMini((m:boolean)=>!m),<>🗺</>)}
-            {ib(false,"Статистика",()=>setShowStats(true),<>📊</>)}
-            {ib(false,"Еженедельный брифинг",()=>setShowBriefing(true),<>📋</>)}
-            {ib(false,"Горячие клавиши",()=>setShowShortcuts(true),<>⌨️</>)}
-            {!readOnly&&ib(showDeadlines,"Напоминания о дедлайнах",()=>setShowDeadlines((d:boolean)=>!d),<>⏰</>,{borderColor:showDeadlines?"rgba(245,158,11,.5)":"",background:showDeadlines?"rgba(245,158,11,.08)":"",color:showDeadlines?"#f59e0b":""})}
+            {ib(false,t("stats_title","Статистика"),()=>setShowStats(true),<>📊</>)}
+            {ib(false,t("weekly_briefing","Еженедельный брифинг"),()=>setShowBriefing(true),<>📋</>)}
+            {ib(false,t("shortcuts_title","Горячие клавиши"),()=>setShowShortcuts(true),<>⌨️</>)}
+            {!readOnly&&ib(showDeadlines,t("deadline_reminder","Напоминания о дедлайнах"),()=>setShowDeadlines((d:boolean)=>!d),<>⏰</>,{borderColor:showDeadlines?"rgba(245,158,11,.5)":"",background:showDeadlines?"rgba(245,158,11,.08)":"",color:showDeadlines?"#f59e0b":""})}
           </div>
 
           {sep}
@@ -4120,7 +4402,7 @@ ${ctx}
 
 // ── ProjectsPage ──
 function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,theme,onToggleTheme}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const ROLES=getROLES(t);
   const[projects,setProjects]=useState([]);
   const[maps,setMaps]=useState({});
@@ -4213,7 +4495,7 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
                       <div style={{width:40,height:40,borderRadius:11,background:`linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08))`,border:"1px solid rgba(99,102,241,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div className="icard-title" style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:2}}>{p.name}</div>
-                        <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {new Date(p.createdAt).toLocaleDateString("ru",{day:"numeric",month:"short"})}</div>
+                        <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {new Date(p.createdAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"})}</div>
                       </div>
                       {p.owner===user.email&&(
                         <button onClick={e=>{e.stopPropagation();setDelId(p.id);}} style={{width:24,height:24,borderRadius:6,border:"none",background:"transparent",color:"var(--text4)",cursor:"pointer",fontSize:14,opacity:.4,display:"flex",alignItems:"center",justifyContent:"center"}} onMouseOver={e=>{e.stopPropagation();e.currentTarget.style.opacity="1";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.opacity=".4";e.currentTarget.style.color="var(--text4)";}}>🗑</button>
@@ -4265,7 +4547,7 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
 
 // ── ProjectDetail ──
 function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const[maps,setMaps]=useState([]);
   const[loading,setLoading]=useState(true);
   const[tab,setTab]=useState("maps");
@@ -4301,7 +4583,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     try{
       const cur=await getMaps(proj.id);
       const reg=cur.filter(m=>!m.isScenario);
-      if(reg.length>=tier.maps){setToast({msg:`Лимит карт для ${tier.label}: ${fmt(tier.maps)}`,type:"warn"});return;}
+      if(reg.length>=tier.maps){setToast({msg:t("map_limit_tier","Лимит карт для {tier}: {n}").replace("{tier}",tier.label).replace("{n}",String(fmt(tier.maps))),type:"warn"});return;}
       const map={id:uid(),name:tmpl?tmpl.name:`Карта ${reg.length+1}`,nodes:tmpl?.nodes||[],edges:tmpl?.edges||[],ctx:"",isScenario:false,createdAt:Date.now()};
       await saveMap(proj.id,map);
       if(tmpl){await load();setToast({msg:`Шаблон "${tmpl.name}" применён!`,type:"success"});}
@@ -4329,22 +4611,22 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   }
 
   async function tryCreateScenario(){
-    if(tier.scenarios===0){setToast({msg:"Сценарии доступны с тарифа Pro.",type:"warn"});return;}
+    if(tier.scenarios===0){setToast({msg:t("scenarios_pro","Сценарии доступны с Pro"),type:"warn"});return;}
     const sc=(await getMaps(proj.id)).filter(m=>m.isScenario);
-    if(sc.length>=tier.scenarios){setToast({msg:`Лимит сценариев для ${tier.label}: ${fmt(tier.scenarios)}`,type:"warn"});return;}
+    if(sc.length>=tier.scenarios){setToast({msg:t("scenario_limit","Лимит сценариев для тарифа")+" "+tier.label+": "+fmt(tier.scenarios),type:"warn"});return;}
     setShowScChoice(true);
   }
 
   async function delMap(id){
-    if(!confirm("Удалить карту?"))return;
+    if(!confirm(t("confirm_delete_map","Удалить карту?")))return;
     await deleteMap(proj.id,id);
     await load();
   }
 
   async function addMember(){
     if(!newMember.trim())return;
-    if((proj.members||[]).length>=tier.users){setToast({msg:`Лимит участников: ${tier.users}`,type:"warn"});return;}
-    if(proj.members?.find(m=>m.email===newMember.trim())){setToast({msg:"Участник уже добавлен",type:"info"});return;}
+    if((proj.members||[]).length>=tier.users){setToast({msg:t("members_limit","Лимит участников: {n}").replace("{n}",String(tier.users)),type:"warn"});return;}
+    if(proj.members?.find(m=>m.email===newMember.trim())){setToast({msg:t("member_added_already","Участник уже добавлен"),type:"info"});return;}
     const updated={...proj,members:[...(proj.members||[]),{email:newMember.trim(),role:nmRole}]};
     await saveProject(updated);setProj(updated);setNewMember("");
   }
@@ -4381,7 +4663,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
           </div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name||"Без названия"}</div>
-            <div style={{fontSize:13.5,color:"var(--text5)"}}>{ns.length} шагов • обновлено {m.updatedAt?new Date(m.updatedAt).toLocaleDateString("ru",{day:"2-digit",month:"short"}):"—"}</div>
+            <div style={{fontSize:13.5,color:"var(--text5)"}}>{ns.length} {t("steps_label","шагов")} • {t("updated_label","обновлено")} {m.updatedAt?new Date(m.updatedAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short"}):"—"}</div>
           </div>
           {canEdit&&<button onClick={e=>{e.stopPropagation();delMap(m.id);}} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}}
             onMouseOver={e=>{e.currentTarget.style.opacity="1";}} onMouseOut={e=>{e.currentTarget.style.opacity="0";}}>🗑</button>}
@@ -4558,7 +4840,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               </div>
             </div>
             {isOwner&&(
-              <button onClick={async()=>{if(!confirm("Удалить проект и все карты? Это нельзя отменить."))return;await deleteProject(proj.id);onBack();}} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10}}>🗑 Удалить проект</button>
+              <button onClick={async()=>{if(!confirm(t("confirm_delete_proj","Все карты и данные проекта будут удалены безвозвратно.")))return;await deleteProject(proj.id);onBack();}} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10}}>🗑 {t("delete_project","Удалить проект")}</button>
             )}
           </div>
         )}
@@ -5356,7 +5638,7 @@ function useImportJSON(onImport){
           try{
             const d=JSON.parse(ev.target.result);
             if(d.nodes||d.edges){onImport({nodes:d.nodes||[],edges:d.edges||[],name:d.name||f.name.replace(".json","")});}
-          }catch{alert("Некорректный JSON файл");}
+          }catch{alert(t("json_invalid","Некорректный JSON файл"));}
           e.target.value="";
         };
         r.readAsText(f);
@@ -6047,7 +6329,7 @@ export default function App(){
             if(d.user){
               setUser(d.user);
               if(paymentStatus==="success"){
-                addToast("✅ Оплата прошла успешно! Ваш тариф обновлён.","success");
+                addToast(t("payment_success","✅ Оплата прошла успешно! Тариф обновлён."),"success");
               }
               setScreen("projects");return;
             }
