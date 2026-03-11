@@ -460,7 +460,21 @@ const LANGS={
     lm1_sfx:"мин",lm1_lbl:"от вопроса до первой стратегической карты",
     lm2_lbl:"точность AI-анализа на тестовых кейсах McKinsey",
     lm3_lbl:"уровней экспертной глубины — от Free до Enterprise",
-    lm4_lbl:"сценариев для анализа альтернативных исходов"},
+    lm4_lbl:"сценариев для анализа альтернативных исходов",
+    // Cookie consent
+    cookie_text:"🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей",cookie_policy:"Политикой конфиденциальности",cookie_accept:"Принять",
+    // Footer columns
+    footer_product:"Продукт",footer_company:"Компания",footer_legal:"Правовое",
+    footer_features:"Возможности",footer_pricing_link:"Тарифы",footer_templates:"Шаблоны",footer_changelog:"Changelog",
+    footer_about:"О нас",footer_blog:"Блог",footer_careers:"Карьера",footer_contact:"Контакты",
+    footer_privacy:"Политика конфиденциальности",footer_terms:"Условия использования",footer_cookies:"Cookies",footer_gdpr:"GDPR",
+    footer_tagline:"Визуальное стратегическое планирование с AI-советником уровня McKinsey.",
+    footer_rights:"© 2026 Strategy AI. Все права защищены.",
+    // App misc
+    delete_forever:"Удалить навсегда",
+    by_statuses:"По статусам",by_priorities:"По приоритетам",
+    member_limit:"Лимит участников для {plan}: {n}.",
+    project_name_label:"Название проекта",saved_ok:"Сохранено"},
   en:{
     save:'Save',cancel:'Cancel',delete:'Delete',add:'Add',
     edit:'Edit',close:'Close',confirm:'Confirm',back:'Back',
@@ -686,7 +700,21 @@ const LANGS={
     lm1_sfx:"min",lm1_lbl:"from question to first strategy map",
     lm2_lbl:"AI analysis accuracy on McKinsey test cases",
     lm3_lbl:"levels of expert depth — from Free to Enterprise",
-    lm4_lbl:"scenarios for analyzing alternative outcomes"},
+    lm4_lbl:"scenarios for analyzing alternative outcomes",
+    // Cookie consent
+    cookie_text:"🍪 We use cookies for analytics and service improvement. By continuing, you agree to our",cookie_policy:"Privacy Policy",cookie_accept:"Accept",
+    // Footer columns
+    footer_product:"Product",footer_company:"Company",footer_legal:"Legal",
+    footer_features:"Features",footer_pricing_link:"Pricing",footer_templates:"Templates",footer_changelog:"Changelog",
+    footer_about:"About",footer_blog:"Blog",footer_careers:"Careers",footer_contact:"Contact",
+    footer_privacy:"Privacy Policy",footer_terms:"Terms of Service",footer_cookies:"Cookies",footer_gdpr:"GDPR",
+    footer_tagline:"Visual strategic planning with a McKinsey-level AI advisor.",
+    footer_rights:"© 2026 Strategy AI. All rights reserved.",
+    // App misc
+    delete_forever:"Delete permanently",
+    by_statuses:"By statuses",by_priorities:"By priorities",
+    member_limit:"Member limit for {plan}: {n}.",
+    project_name_label:"Project name",saved_ok:"Saved"},
   uz:{
     save:"Saqlash",cancel:"Bekor",delete:"O'chirish",add:"Qo'shish",
     edit:"Tahrirlash",close:"Yopish",confirm:"Tasdiqlash",back:"Orqaga",
@@ -914,7 +942,21 @@ const LANGS={
     lm1_sfx:"daq",lm1_lbl:"savoldan birinchi strategiya xaritasigacha",
     lm2_lbl:"McKinsey test holatlarida AI tahlil aniqligi",
     lm3_lbl:"ekspert chuqurligi darajalari — Free dan Enterprise gacha",
-    lm4_lbl:"muqobil natijalarni tahlil qilish stsenariylari"
+    lm4_lbl:"muqobil natijalarni tahlil qilish stsenariylari",
+    // Cookie consent
+    cookie_text:"🍪 Biz analitika va xizmatni yaxshilash uchun cookies ishlatamiz. Davom etish orqali siz bizning",cookie_policy:"Maxfiylik siyosati",cookie_accept:"Qabul qilish",
+    // Footer columns
+    footer_product:"Mahsulot",footer_company:"Kompaniya",footer_legal:"Huquqiy",
+    footer_features:"Imkoniyatlar",footer_pricing_link:"Narxlar",footer_templates:"Shablonlar",footer_changelog:"Changelog",
+    footer_about:"Biz haqimizda",footer_blog:"Blog",footer_careers:"Karyera",footer_contact:"Aloqa",
+    footer_privacy:"Maxfiylik siyosati",footer_terms:"Foydalanish shartlari",footer_cookies:"Cookies",footer_gdpr:"GDPR",
+    footer_tagline:"McKinsey darajasidagi AI maslahatchi bilan vizual strategik rejalashtirish.",
+    footer_rights:"© 2026 Strategy AI. Barcha huquqlar himoyalangan.",
+    // App misc
+    delete_forever:"Butunlay o'chirish",
+    by_statuses:"Holat bo'yicha",by_priorities:"Muhimlik bo'yicha",
+    member_limit:"A'zo limiti {plan} uchun: {n}.",
+    project_name_label:"Loyiha nomi",saved_ok:"Saqlandi"
   },
 };
 
@@ -1927,7 +1969,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                       <div style={{fontSize:13.5,color:"var(--text3)",marginBottom:20}}>{t("delete_warning","Все данные будут удалены безвозвратно")}</div>
                       <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
                         <button onClick={()=>setShowDeleteConfirm(false)} style={{padding:"10px 20px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("cancel","Отмена")}</button>
-                        <button onClick={handleDeleteAccount} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"#ef4444",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>Удалить навсегда</button>
+                        <button onClick={handleDeleteAccount} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"#ef4444",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("delete_forever","Удалить навсегда")}</button>
                       </div>
                     </div>
                   </div>
@@ -2207,6 +2249,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
 
 // ── CookieConsent ──
 function CookieConsent(){
+  const{t}=useLang();
   const[shown,setShown]=useState(()=>{
     try{return!localStorage.getItem("sa_cookie_ok");}catch{return true;}
   });
@@ -2214,14 +2257,20 @@ function CookieConsent(){
   function accept(){try{localStorage.setItem("sa_cookie_ok","1");}catch{}setShown(false);}
   return(
     <div style={{position:"fixed",bottom:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:"rgba(15,23,42,.95)",backdropFilter:"blur(12px)",border:"1px solid rgba(99,102,241,.25)",borderRadius:14,padding:"14px 20px",display:"flex",alignItems:"center",gap:16,maxWidth:560,width:"92vw",boxShadow:"0 8px 32px rgba(0,0,0,.4)"}}>
-      <span style={{fontSize:12,color:"#94a3b8",flex:1,lineHeight:1.5}}>🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей <a href="/privacy" target="_blank" style={{color:"#818cf8",textDecoration:"underline"}}>Политикой конфиденциальности</a>.</span>
-      <button onClick={accept} style={{padding:"8px 18px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>Принять</button>
+      <span style={{fontSize:12,color:"#94a3b8",flex:1,lineHeight:1.5}}>{t("cookie_text","🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей")} <a href="/privacy" target="_blank" style={{color:"#818cf8",textDecoration:"underline"}}>{t("cookie_policy","Политикой конфиденциальности")}</a>.</span>
+      <button onClick={accept} style={{padding:"8px 18px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>{t("cookie_accept","Принять")}</button>
     </div>
   );
 }
 
 // ── LandingFooter ──
 function LandingFooter(){
+  const{t}=useLang();
+  const cols=[
+    {titleKey:"footer_product",links:[{labelKey:"footer_features",href:"#features"},{labelKey:"footer_pricing_link",href:"#pricing"},{labelKey:"footer_templates",href:"#templates"},{labelKey:"footer_changelog",href:"/changelog"}]},
+    {titleKey:"footer_company",links:[{labelKey:"footer_about",href:"/about"},{labelKey:"footer_blog",href:"/blog"},{labelKey:"footer_careers",href:"/careers"},{labelKey:"footer_contact",href:"/contact"}]},
+    {titleKey:"footer_legal",links:[{labelKey:"footer_privacy",href:"/privacy"},{labelKey:"footer_terms",href:"/terms"},{labelKey:"footer_cookies",href:"/cookies"},{labelKey:"footer_gdpr",href:"/gdpr"}]},
+  ];
   return(
     <footer style={{background:"rgba(15,23,42,.8)",backdropFilter:"blur(8px)",borderTop:"1px solid rgba(99,102,241,.1)",padding:"28px 40px",marginTop:40}}>
       <div style={{maxWidth:1100,margin:"0 auto",display:"flex",flexWrap:"wrap",gap:24,justifyContent:"space-between",alignItems:"flex-start"}}>
@@ -2230,25 +2279,21 @@ function LandingFooter(){
             <div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>✦</div>
             <span style={{fontSize:14,fontWeight:800,color:"#f1f5f9"}}>Strategy AI</span>
           </div>
-          <p style={{fontSize:12,color:"#64748b",maxWidth:200,lineHeight:1.6,margin:0}}>Визуальное стратегическое планирование с AI-советником уровня McKinsey.</p>
+          <p style={{fontSize:12,color:"#64748b",maxWidth:200,lineHeight:1.6,margin:0}}>{t("footer_tagline","Визуальное стратегическое планирование с AI-советником уровня McKinsey.")}</p>
         </div>
-        {[
-          {title:"Продукт",links:[{label:"Возможности",href:"#features"},{label:"Тарифы",href:"#pricing"},{label:"Шаблоны",href:"#templates"},{label:"Changelog",href:"/changelog"}]},
-          {title:"Компания",links:[{label:"О нас",href:"/about"},{label:"Блог",href:"/blog"},{label:"Карьера",href:"/careers"},{label:"Контакты",href:"/contact"}]},
-          {title:"Правовое",links:[{label:"Политика конфиденциальности",href:"/privacy"},{label:"Условия использования",href:"/terms"},{label:"Cookies",href:"/cookies"},{label:"GDPR",href:"/gdpr"}]},
-        ].map(col=>(
-          <div key={col.title}>
-            <div style={{fontSize:12,fontWeight:700,color:"#94a3b8",marginBottom:10,textTransform:"uppercase",letterSpacing:.8}}>{col.title}</div>
+        {cols.map(col=>(
+          <div key={col.titleKey}>
+            <div style={{fontSize:12,fontWeight:700,color:"#94a3b8",marginBottom:10,textTransform:"uppercase",letterSpacing:.8}}>{t(col.titleKey)}</div>
             {col.links.map(l=>(
-              <a key={l.label} href={l.href} style={{display:"block",fontSize:13,color:"#64748b",marginBottom:6,textDecoration:"none",transition:"color .15s"}}
+              <a key={l.labelKey} href={l.href} style={{display:"block",fontSize:13,color:"#64748b",marginBottom:6,textDecoration:"none",transition:"color .15s"}}
                 onMouseOver={e=>(e.target as HTMLElement).style.color="#818cf8"}
-                onMouseOut={e=>(e.target as HTMLElement).style.color="#64748b"}>{l.label}</a>
+                onMouseOut={e=>(e.target as HTMLElement).style.color="#64748b"}>{t(l.labelKey)}</a>
             ))}
           </div>
         ))}
       </div>
       <div style={{maxWidth:1100,margin:"20px auto 0",paddingTop:16,borderTop:"1px solid rgba(99,102,241,.1)",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-        <span style={{fontSize:12,color:"#475569"}}>© 2026 Strategy AI. Все права защищены.</span>
+        <span style={{fontSize:12,color:"#475569"}}>{t("footer_rights","© 2026 Strategy AI. Все права защищены.")}</span>
         <div style={{display:"flex",gap:14}}>
           {[{icon:"𝕏",href:"https://twitter.com/strategyai"},{icon:"in",href:"https://linkedin.com/company/strategyai"},{icon:"💬",href:"https://t.me/strategyai"}].map(s=>(
             <a key={s.icon} href={s.href} target="_blank" rel="noopener noreferrer" style={{width:30,height:30,borderRadius:8,background:"rgba(99,102,241,.1)",border:"1px solid rgba(99,102,241,.2)",display:"flex",alignItems:"center",justifyContent:"center",color:"#818cf8",fontSize:12,fontWeight:700,textDecoration:"none"}}>{s.icon}</a>
@@ -2478,7 +2523,7 @@ function StatsPopup({nodes,edges,onClose}){
         </div>
         {/* Status breakdown */}
         <div style={{marginBottom:14}}>
-          <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.6,marginBottom:8}}>По статусам</div>
+          <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.6,marginBottom:8}}>{t("by_statuses","По статусам")}</div>
           <div style={{display:"flex",flexDirection:"column",gap:5}}>
             {statusBreakdown.map(s=>(
               <div key={s.k} style={{display:"flex",alignItems:"center",gap:10}}>
@@ -2495,7 +2540,7 @@ function StatsPopup({nodes,edges,onClose}){
         {/* Priority breakdown */}
         {priorityBreakdown.length>0&&(
           <div>
-            <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.6,marginBottom:8}}>По приоритетам</div>
+            <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.6,marginBottom:8}}>{t("by_priorities","По приоритетам")}</div>
             <div style={{display:"flex",gap:8}}>
               {priorityBreakdown.map(p=>(
                 <div key={p.k} style={{flex:1,padding:"8px",borderRadius:10,background:`${p.c}10`,border:`1px solid ${p.c}25`,textAlign:"center"}}>
@@ -4418,13 +4463,13 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"#fff",fontWeight:800,flexShrink:0}}>{(m.email||"?")[0].toUpperCase()}</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.email}</div>
-                  <div style={{fontSize:13.5,color:"var(--text5)"}}>{m.role==="owner"?"Владелец":m.role==="editor"?"Редактор":"Наблюдатель"}</div>
+                  <div style={{fontSize:13.5,color:"var(--text5)"}}>{m.role==="owner"?t("role_owner","Владелец"):m.role==="editor"?t("role_editor","Редактор"):t("observer","Наблюдатель")}</div>
                 </div>
                 {isOwner&&m.email!==proj.owner&&(
                   <div style={{display:"flex",gap:6}}>
                     <select value={m.role} onChange={async e=>{const updated={...proj,members:(proj.members||[]).map(x=>x.email===m.email?{...x,role:e.target.value}:x)};await saveProject(updated);setProj(updated);}} style={{padding:"4px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--surface2)",color:"var(--text)",fontSize:13,cursor:"pointer"}}>
-                      <option value="editor">Редактор</option>
-                      <option value="viewer">Наблюдатель</option>
+                      <option value="editor">{t("role_editor","Редактор")}</option>
+                      <option value="viewer">{t("observer","Наблюдатель")}</option>
                     </select>
                     <button onClick={()=>removeMember(m.email)} style={{width:26,height:26,borderRadius:6,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
                   </div>
@@ -4435,13 +4480,13 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               <div style={{display:"flex",gap:9,padding:"12px 16px",borderRadius:12,border:"1px dashed var(--border2)",background:"var(--surface)"}}>
                 <input value={newMember} onChange={e=>setNewMember(e.target.value)} placeholder="Email участника" onKeyDown={e=>{if(e.key==="Enter")addMember();}} style={{flex:1,padding:"8px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:13,outline:"none"}}/>
                 <select value={nmRole} onChange={e=>setNmRole(e.target.value)} style={{padding:"8px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface2)",color:"var(--text)",fontSize:13}}>
-                  <option value="editor">Редактор</option>
-                  <option value="viewer">Наблюдатель</option>
+                  <option value="editor">{t("role_editor","Редактор")}</option>
+                  <option value="viewer">{t("observer","Наблюдатель")}</option>
                 </select>
                 <button onClick={addMember} style={{padding:"8px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add","Добавить")}</button>
               </div>
             )}
-            {(proj.members||[]).length>=tier.users&&<div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",padding:"8px",borderRadius:8,border:"1px dashed var(--border2)"}}>Лимит участников для {tier.label}: {tier.users}. <span onClick={onChangeTier} style={{color:"#8b5cf6",cursor:"pointer",fontWeight:700}}>Улучшить тариф</span></div>}
+            {(proj.members||[]).length>=tier.users&&<div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",padding:"8px",borderRadius:8,border:"1px dashed var(--border2)"}}>{t("member_limit","Лимит участников для {plan}: {n}.").replace("{plan}",tier.label).replace("{n}",String(tier.users))} <span onClick={onChangeTier} style={{color:"#8b5cf6",cursor:"pointer",fontWeight:700}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</span></div>}
           </div>
         )}
 
@@ -4449,8 +4494,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
         {tab==="settings"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14,maxWidth:460}}>
             <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:5}}>Название проекта</div>
-              <input value={proj.name||""} onChange={e=>setProj(p=>({...p,name:e.target.value}))} onBlur={async()=>{await saveProject(proj);setToast({msg:"Сохранено",type:"success"});}} style={{width:"100%",padding:"9px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:13,outline:"none",fontFamily:"inherit"}}/>
+              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:5}}>{t("project_name_label","Название проекта")}</div>
+              <input value={proj.name||""} onChange={e=>setProj(p=>({...p,name:e.target.value}))} onBlur={async()=>{await saveProject(proj);setToast({msg:t("saved_ok","Сохранено"),type:"success"});}} style={{width:"100%",padding:"9px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:13,outline:"none",fontFamily:"inherit"}}/>
             </div>
             <div>
               <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:5}}>Тариф</div>
