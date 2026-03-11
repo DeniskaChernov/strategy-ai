@@ -474,7 +474,12 @@ const LANGS={
     delete_forever:"Удалить навсегда",
     by_statuses:"По статусам",by_priorities:"По приоритетам",
     member_limit:"Лимит участников для {plan}: {n}.",
-    project_name_label:"Название проекта",saved_ok:"Сохранено"},
+    project_name_label:"Название проекта",saved_ok:"Сохранено",
+    // WelcomeScreen
+    ws_start_btn:"Начать бесплатно ✦",ws_login_btn:"Уже есть аккаунт — Войти →",
+    ws_feat1:"Карты целей",ws_feat2:"AI советник",ws_feat3:"Gantt-план",
+    ws_feat4:"PNG/JSON экспорт",ws_feat5:"1 сценарий",ws_feat6:"До 5 шагов",
+    ws_terms:"Нажимая «Начать», вы соглашаетесь с условиями использования"},
   en:{
     save:'Save',cancel:'Cancel',delete:'Delete',add:'Add',
     edit:'Edit',close:'Close',confirm:'Confirm',back:'Back',
@@ -714,7 +719,12 @@ const LANGS={
     delete_forever:"Delete permanently",
     by_statuses:"By statuses",by_priorities:"By priorities",
     member_limit:"Member limit for {plan}: {n}.",
-    project_name_label:"Project name",saved_ok:"Saved"},
+    project_name_label:"Project name",saved_ok:"Saved",
+    // WelcomeScreen
+    ws_start_btn:"Start free ✦",ws_login_btn:"Already have an account — Sign in →",
+    ws_feat1:"Goal maps",ws_feat2:"AI advisor",ws_feat3:"Gantt plan",
+    ws_feat4:"PNG/JSON export",ws_feat5:"1 scenario",ws_feat6:"Up to 5 steps",
+    ws_terms:"By clicking «Start», you agree to the Terms of Service"},
   uz:{
     save:"Saqlash",cancel:"Bekor",delete:"O'chirish",add:"Qo'shish",
     edit:"Tahrirlash",close:"Yopish",confirm:"Tasdiqlash",back:"Orqaga",
@@ -956,7 +966,12 @@ const LANGS={
     delete_forever:"Butunlay o'chirish",
     by_statuses:"Holat bo'yicha",by_priorities:"Muhimlik bo'yicha",
     member_limit:"A'zo limiti {plan} uchun: {n}.",
-    project_name_label:"Loyiha nomi",saved_ok:"Saqlandi"
+    project_name_label:"Loyiha nomi",saved_ok:"Saqlandi",
+    // WelcomeScreen
+    ws_start_btn:"Bepul boshlash ✦",ws_login_btn:"Hisobingiz bormi — Kirish →",
+    ws_feat1:"Maqsad xaritalari",ws_feat2:"AI maslahatchi",ws_feat3:"Gantt rejasi",
+    ws_feat4:"PNG/JSON eksport",ws_feat5:"1 stsenariy",ws_feat6:"5 tagacha qadam",
+    ws_terms:"«Boshlash» tugmasini bosish orqali foydalanish shartlariga rozisiz"
   },
 };
 
@@ -5905,13 +5920,13 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
               style={{padding:"16px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 10px 32px rgba(99,102,241,.5)",transition:"all .2s",letterSpacing:-.2}}
               onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 16px 44px rgba(99,102,241,.6)";}}
               onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 10px 32px rgba(99,102,241,.5)";}}>
-              Начать бесплатно ✦
+              {t("ws_start_btn","Начать бесплатно ✦")}
             </button>
             <button onClick={onLogin}
               style={{padding:"15px",borderRadius:14,border:"1.5px solid rgba(255,255,255,.15)",background:"rgba(255,255,255,.04)",color:"#e2e8f0",fontSize:15,fontWeight:700,cursor:"pointer",transition:"all .2s",letterSpacing:-.2}}
               onMouseOver={e=>{e.currentTarget.style.background="rgba(255,255,255,.09)";e.currentTarget.style.borderColor="rgba(255,255,255,.28)";}}
               onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="rgba(255,255,255,.15)";}}>
-              Уже есть аккаунт — Войти →
+              {t("ws_login_btn","Уже есть аккаунт — Войти →")}
             </button>
           </div>
           {/* Divider */}
@@ -5922,7 +5937,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
           </div>
           {/* Features grid */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-            {[["🗺","Карты целей"],["✦","AI советник"],["📅","Gantt-план"],["⬇","PNG/JSON экспорт"],["⎇","1 сценарий"],["📌","До 5 шагов"]].map(([ic,lbl])=>(
+            {[["🗺",t("ws_feat1","Карты целей")],["✦",t("ws_feat2","AI советник")],["📅",t("ws_feat3","Gantt-план")],["⬇",t("ws_feat4","PNG/JSON экспорт")],["⎇",t("ws_feat5","1 сценарий")],["📌",t("ws_feat6","До 5 шагов")]].map(([ic,lbl])=>(
               <div key={lbl} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:11,background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)"}}>
                 <span style={{fontSize:16,flexShrink:0}}>{ic}</span>
                 <span style={{fontSize:13.5,color:"#94a3b8",fontWeight:600}}>{lbl}</span>
@@ -5931,7 +5946,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
           </div>
         </div>
         <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"#334155"}}>
-          Нажимая «Начать», вы соглашаетесь с условиями использования
+          {t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
         </div>
       </div>
     </div>
