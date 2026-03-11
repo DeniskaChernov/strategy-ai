@@ -187,15 +187,28 @@ app.use((err, req, res, _next) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 async function start() {
+  // Проверяем обязательные переменные окружения
+  if (!process.env.DATABASE_URL) {
+    console.error('❌ DATABASE_URL is not set! Add PostgreSQL to your Railway project and link DATABASE_URL.');
+    process.exit(1);
+  }
+  if (!process.env.JWT_SECRET) {
+    console.warn('⚠️  JWT_SECRET not set — using default (change in production!)');
+  }
+
+  console.log('🔄 Connecting to database...');
   await initDB();
+
   server.listen(PORT, () => {
     console.log(`🚀 Strategy AI Server v1.1 running on port ${PORT}`);
     console.log(`   ENV: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`   WebSocket: enabled`);
+    console.log(`   DB:  connected`);
+    console.log(`   WS:  enabled`);
   });
 }
 
 start().catch(err => {
-  console.error('Fatal startup error:', err.message);
+  console.error('❌ Fatal startup error:', err.message);
+  console.error(err.stack);
   process.exit(1);
 });

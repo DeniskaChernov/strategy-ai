@@ -133,8 +133,8 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_shares_sid       ON shares(share_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_map_versions_map ON map_versions(map_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_notif_user       ON notifications(user_email, is_read)`);
-    // Полнотекстовый поиск по картам
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_maps_search ON maps USING gin(to_tsvector('russian', name || ' ' || ctx))`);
+    // Полнотекстовый поиск — используем 'simple' (поддерживается везде, включая Railway)
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_maps_search ON maps USING gin(to_tsvector('simple', name || ' ' || ctx))`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_maps_nodes_search ON maps USING gin(nodes)`);
 
     // Миграция: добавляем новые колонки если их нет (для уже существующих БД)
