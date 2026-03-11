@@ -122,16 +122,21 @@ router.put('/:projectId/maps/:mapId', requireAuth, async (req, res, next) => {
     );
     if (!rows[0]) return res.status(404).json({ error: 'Карта не найдена' });
 
-    // Автосохранение версии каждые 10 изменений (по количеству узлов)
+    // Автосохранение версии каждые 10 сохранений (не на каждый PUT)
     try {
       const { rows: vCount } = await pool.query(
-        'SELECT count(*) FROM map_versions WHERE map_id = $1', [req.params.mapId]
+        `SELECT count(*), MAX(created_at) as last_version FROM map_versions WHERE map_id = $1`,
+        [req.params.mapId]
       );
-      const shouldSaveVersion =
-        parseInt(vCount[0].count) === 0 ||
-        (nodes && Array.isArray(nodes) && nodes.length > 0);
+      const totalVersions = parseInt(vCount[0].count);
+      const lastVersion = vCount[0].last_version;
+      const minutesSinceLast = lastVersion
+        ? (Date.now() - new Date(lastVersion).getTime()) / 60000
+        : Infinity;
+      // Сохраняем версию: если первая или прошло больше 10 минут с последней
+      const shouldSaveVersion = totalVersions === 0 || minutesSinceLast >= 10;
 
-      if (shouldSaveVersion) {
+      if (shouldSaveVersion && nodes && Array.isArray(nodes)) {
         await pool.query(
           `INSERT INTO map_versions (map_id, user_email, label, nodes, edges, ctx)
            VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -149,20 +154,24 @@ router.put('/:projectId/maps/:mapId', requireAuth, async (req, res, next) => {
       console.warn('Version save error (non-fatal):', vErr.message);
     }
 
-    // Уведомляем других участников проекта об изменении карты
-    const projectInfo = await pool.query('SELECT members, name FROM projects WHERE id = $1', [req.params.projectId]);
-    if (projectInfo.rows[0]) {
+    // Уведомляем других участников проекта об изменении карты (не чаще раза в 5 минут)
+    // используем уже загруженный project из getProjectAccess выше
+    if (project) {
       const mapName = rows[0].name || 'карта';
-      const projName = projectInfo.rows[0].name || 'проект';
-      const members = projectInfo.rows[0].members || [];
-      for (const m of members) {
-        if (m.email !== req.user.email && m.role !== 'viewer') {
-          await createNotification(m.email, {
-            type: 'info',
-            title: `✏️ Карта обновлена`,
-            body: `${req.user.name || req.user.email} обновил карту «${mapName}» в проекте «${projName}»`,
-          }).catch(() => {});
-        }
+      const projName = project.name || 'проект';
+      const members = project.members || [];
+      // Включаем владельца (owner_email) и участников, исключая редактора и viewer
+      const recipientEmails = [
+        project.owner_email,
+        ...members.filter(m => m.role !== 'viewer').map(m => m.email),
+      ].filter((e, i, arr) => e && e !== req.user.email && arr.indexOf(e) === i);
+
+      for (const email of recipientEmails) {
+        createNotification(email, {
+          type: 'info',
+          title: `✏️ Карта обновлена`,
+          body: `${req.user.name || req.user.email} обновил карту «${mapName}» в проекте «${projName}»`,
+        }).catch(() => {});
       }
     }
 

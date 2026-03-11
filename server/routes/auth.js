@@ -5,14 +5,22 @@ const { pool } = require('../db');
 const { signToken, signRefreshToken, requireAuth } = require('../middleware/auth');
 const { sendEmail, welcomeEmail, resetPasswordEmail } = require('./email');
 
-// Вспомогательная функция: пользователь без пароля
+// Вспомогательная функция: пользователь без пароля и чувствительных полей
 function safeUser(row) {
-  const { password_hash, ...rest } = row;
+  const {
+    password_hash,
+    reset_token,
+    reset_token_expires,
+    stripe_customer_id,
+    stripe_subscription_id,
+    ...rest
+  } = row;
   return rest;
 }
 
 // POST /api/auth/register
 router.post('/register', async (req, res, next) => {
+  const client = await pool.connect();
   try {
     const { email, password, name } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email и пароль обязательны' });
@@ -23,49 +31,55 @@ router.post('/register', async (req, res, next) => {
       return res.status(400).json({ error: 'Некорректный формат email' });
     }
 
-    const existing = await pool.query('SELECT id FROM users WHERE email = $1', [emailLower]);
-    if (existing.rows[0]) return res.status(409).json({ error: 'Email уже зарегистрирован' });
-
+    const displayName = (name?.trim() || emailLower.split('@')[0]).substring(0, 100);
     const hash = await bcrypt.hash(password, 12);
-    const displayName = name?.trim() || emailLower.split('@')[0];
 
-    const { rows } = await pool.query(
-      `INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3)
-       RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, created_at`,
-      [emailLower, hash, displayName]
-    );
+    await client.query('BEGIN');
 
-    const user = rows[0];
-    // Создаём дефолтный проект
-    await pool.query(
+    // Атомарный INSERT — если email уже есть, PostgreSQL бросит 23505
+    let user;
+    try {
+      const trialDays = parseInt(process.env.TRIAL_DAYS || '7');
+      const trialEndsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
+
+      const { rows } = await client.query(
+        `INSERT INTO users (email, password_hash, name, tier, trial_ends_at)
+         VALUES ($1, $2, $3, 'starter', $4)
+         RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push,
+                   auto_save, compact_mode, default_view, trial_ends_at, created_at`,
+        [emailLower, hash, displayName, trialEndsAt.toISOString()]
+      );
+      user = rows[0];
+    } catch (insertErr) {
+      await client.query('ROLLBACK');
+      if (insertErr.code === '23505') {
+        return res.status(409).json({ error: 'Email уже зарегистрирован' });
+      }
+      throw insertErr;
+    }
+
+    // Создаём дефолтный проект в той же транзакции
+    await client.query(
       `INSERT INTO projects (owner_email, name, members)
        VALUES ($1, 'Моя стратегия', $2)`,
       [emailLower, JSON.stringify([{ email: emailLower, role: 'owner' }])]
     );
 
-    // Триальный период: 7 дней Pro бесплатно
-    const trialDays = parseInt(process.env.TRIAL_DAYS || '7');
-    const trialEndsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
-    await pool.query(
-      `UPDATE users SET tier = 'starter', trial_ends_at = $1 WHERE email = $2`,
-      [trialEndsAt.toISOString(), emailLower]
-    );
+    await client.query('COMMIT');
 
     const token = signToken({ email: user.email, id: user.id });
     const refreshToken = signRefreshToken({ email: user.email, id: user.id });
 
-    // Отправляем welcome email асинхронно
+    // Welcome email асинхронно — не блокируем ответ
     const { subject, html } = welcomeEmail(displayName);
     sendEmail({ to: emailLower, subject, html }).catch(() => {});
 
-    // Обновляем пользователя с trial-тарифом
-    const { rows: trialUser } = await pool.query(
-      'SELECT id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, trial_ends_at, created_at FROM users WHERE email = $1',
-      [emailLower]
-    );
-    res.status(201).json({ token, refreshToken, user: safeUser(trialUser[0] || user), isNew: true });
+    res.status(201).json({ token, refreshToken, user: safeUser(user), isNew: true });
   } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
     next(err);
+  } finally {
+    client.release();
   }
 });
 
@@ -100,6 +114,18 @@ router.get('/me', requireAuth, (req, res) => {
 router.patch('/profile', requireAuth, async (req, res, next) => {
   try {
     const { name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view } = req.body;
+
+    // Валидация входных данных
+    const ALLOWED_VIEWS = ['canvas', 'list', 'gantt'];
+    if (default_view && !ALLOWED_VIEWS.includes(default_view)) {
+      return res.status(400).json({ error: 'Недопустимое значение default_view' });
+    }
+    if (name && typeof name === 'string' && name.length > 100) {
+      return res.status(400).json({ error: 'Имя не может быть длиннее 100 символов' });
+    }
+    if (bio && typeof bio === 'string' && bio.length > 500) {
+      return res.status(400).json({ error: 'Bio не может быть длиннее 500 символов' });
+    }
     const { rows } = await pool.query(
       `UPDATE users SET
         name         = COALESCE($1, name),
@@ -206,9 +232,18 @@ router.post('/reset-password', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// DELETE /api/auth/account — удалить аккаунт
+// DELETE /api/auth/account — удалить аккаунт (требует подтверждения паролем)
 router.delete('/account', requireAuth, async (req, res, next) => {
   try {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ error: 'Для удаления аккаунта введите пароль' });
+
+    const { rows } = await pool.query('SELECT password_hash FROM users WHERE email = $1', [req.user.email]);
+    if (!rows[0]) return res.status(404).json({ error: 'Пользователь не найден' });
+
+    const valid = await bcrypt.compare(password, rows[0].password_hash);
+    if (!valid) return res.status(403).json({ error: 'Неверный пароль' });
+
     await pool.query('DELETE FROM users WHERE email = $1', [req.user.email]);
     res.json({ ok: true });
   } catch (err) {

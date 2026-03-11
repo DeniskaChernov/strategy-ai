@@ -137,10 +137,14 @@ async function initDB() {
     await client.query(`CREATE INDEX IF NOT EXISTS idx_maps_search ON maps USING gin(to_tsvector('simple', name || ' ' || ctx))`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_maps_nodes_search ON maps USING gin(nodes)`);
 
+    // Недостающие индексы
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(reset_token) WHERE reset_token IS NOT NULL`);
+
     // Миграция: добавляем новые колонки если их нет (для уже существующих БД)
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token TEXT`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMPTZ`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_cancel_at TIMESTAMPTZ`);
 
     await client.query('COMMIT');
     console.log('✅ Database initialized');
@@ -220,7 +224,7 @@ async function seedDB() {
       [proj[0].id, JSON.stringify(sampleNodes), JSON.stringify(sampleEdges), 'Стартап, SaaS, выход на рынок']
     );
 
-    console.log(`✅ Dev account created: ${DEV_EMAIL} / ${DEV_PASSWORD} (tier: ${DEV_TIER})`);
+    console.log(`✅ Dev account created: ${DEV_EMAIL} (tier: ${DEV_TIER})`);
   } catch (err) {
     // Seed — некритичная операция, не останавливаем сервер
     console.warn('⚠️  Seed warning (non-fatal):', err.message);

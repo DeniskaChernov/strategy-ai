@@ -32,6 +32,8 @@ router.post('/stripe', async (req, res) => {
         if (!userEmail || !tierKey) break;
 
         const isActive = ['active', 'trialing'].includes(sub.status);
+        const isCancelingAtPeriodEnd = sub.cancel_at_period_end === true;
+
         const validUntil = isActive
           ? new Date(sub.current_period_end * 1000).toISOString()
           : null;
@@ -42,16 +44,28 @@ router.post('/stripe', async (req, res) => {
              stripe_subscription_id = $2,
              tier_valid_until = $3,
              trial_ends_at = NULL,
+             subscription_cancel_at = $4,
              updated_at = now()
-           WHERE email = $4`,
+           WHERE email = $5`,
           [
             isActive ? tierKey : 'free',
             sub.id,
             validUntil,
+            isCancelingAtPeriodEnd ? new Date(sub.current_period_end * 1000).toISOString() : null,
             userEmail,
           ]
         );
-        console.log(`✅ User ${userEmail} tier → ${isActive ? tierKey : 'free'}`);
+
+        if (isCancelingAtPeriodEnd) {
+          const cancelDate = new Date(sub.current_period_end * 1000).toLocaleDateString('ru');
+          await createNotification(userEmail, {
+            type: 'warning',
+            title: 'Подписка будет отменена',
+            body: `Ваша подписка ${tierKey} активна до ${cancelDate}. После этого перейдёте на Free.`,
+          }).catch(() => {});
+        }
+
+        console.log(`✅ User ${userEmail} tier → ${isActive ? tierKey : 'free'}${isCancelingAtPeriodEnd ? ' (canceling)' : ''}`);
         break;
       }
 
@@ -145,6 +159,8 @@ router.post('/stripe', async (req, res) => {
     }
   } catch (dbErr) {
     console.error('❌ DB error in webhook:', dbErr.message);
+    // Возвращаем 500 чтобы Stripe повторил доставку события
+    return res.status(500).json({ error: 'Internal error processing webhook' });
   }
 
   res.json({ received: true });

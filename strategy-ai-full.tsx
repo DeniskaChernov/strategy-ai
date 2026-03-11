@@ -261,7 +261,7 @@ const LANGS={
     deadline:'Дедлайн',tags_label:'Теги',comments_label:'Комментарии',
     history_label:'История изменений',color_label:'Цвет',
     step_deleted:'удалён',undo_action:'↩ Отменить',
-    saved:'Сохранено ✓',saving:'Сохраняю…',connect_select_source:'⇒ выберите источник',
+    saved:'Сохранено ✓',saving:'Сохраняю…',save_error:'Ошибка сохранения',connect_select_source:'⇒ выберите источник',
     connect_select_target:'→ выберите цель',
     ai_title:'AI Советник',clear_chat:'Очистить чат',
     ask_placeholder:'Спросите о стратегии…',analyzing:'анализирую…',
@@ -506,7 +506,7 @@ const LANGS={
     deadline:'Deadline',tags_label:'Tags',comments_label:'Comments',
     history_label:'Change history',color_label:'Color',
     step_deleted:'deleted',undo_action:'↩ Undo',
-    saved:'Saved ✓',saving:'Saving…',connect_select_source:'⇒ select source',
+    saved:'Saved ✓',saving:'Saving…',save_error:'Save failed',connect_select_source:'⇒ select source',
     connect_select_target:'→ select target',
     ai_title:'AI Advisor',clear_chat:'Clear chat',
     ask_placeholder:'Ask about strategy…',analyzing:'analyzing…',
@@ -752,7 +752,7 @@ const LANGS={
     deadline:"Muddat",tags_label:"Teglar",comments_label:"Izohlar",
     history_label:"O'zgarishlar tarixi",color_label:"Rang",
     step_deleted:"o'chirildi",undo_action:"↩ Bekor qilish",
-    saved:"Saqlandi ✓",saving:"Saqlanmoqda…",
+    saved:"Saqlandi ✓",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",
     connect_select_source:"⇒ manba tanlang",connect_select_target:"→ maqsad tanlang",
     ai_title:"AI Maslahatchi",clear_chat:"Chatni tozalash",
     ask_placeholder:"Strategiya haqida so'rang…",analyzing:"tahlil qilinmoqda…",
@@ -1707,7 +1707,11 @@ function PostOnboardFlow({pendingMap,currentUser,theme='dark',onComplete,onBack}
   const[existingMaps,setExistingMaps]=useState([]);
   const[saving,setSaving]=useState(false);
   async function afterAuth(u,newUser){setUser(u);setIsNew(newUser);if(newUser){setStep("tier");}else{await runCheck(u);}}
-  async function afterTierSelect(tier){const upd=await patchUser(user.email,{tier});setUser(upd);await runCheck(upd);}
+  async function afterTierSelect(tier){
+    const upd=await patchUser(user.email,{tier});
+    if(upd){setUser(upd);await runCheck(upd);}
+    else{await runCheck(user);} // patchUser вернул null — используем текущего пользователя
+  }
   async function runCheck(u){
     setSaving(true);const tier=TIERS[u.tier]||TIERS.free;let projs=await getProjects(u.email);let proj=projs.find(p=>p.owner===u.email);
     if(!proj){proj={id:uid(),name:"Моя стратегия",owner:u.email,members:[{email:u.email,role:"owner"}],createdAt:Date.now()};await saveProject(proj);}
@@ -2722,7 +2726,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             </div>
             <div>
               <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("tags_label","Теги")}</div>
-              <input value={(node.tags||[]).join(", ")} onChange={e=>!readOnly&&onUpdate({tags:e.target.value.split(",").map(tc=>t.trim()).filter(Boolean)})} placeholder="тег1, тег2…" style={{...iS,resize:undefined}} readOnly={readOnly}/>
+              <input value={(node.tags||[]).join(", ")} onChange={e=>!readOnly&&onUpdate({tags:e.target.value.split(",").map(tc=>tc.trim()).filter(Boolean)})} placeholder="тег1, тег2…" style={{...iS,resize:undefined}} readOnly={readOnly}/>
             </div>
             <div>
               <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:5}}>{t("node_color_label","Цвет узла")}</div>
@@ -3344,27 +3348,44 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   }
   function pushUndo(n:any,e:any){setUndoStack((s:any[])=>[...s.slice(-29),{nodes:n,edges:e}]);setRedoStack([]);}
 
+  // Флаг: текущее изменение nodes/edges пришло от удалённого коллеги (не сохраняем локально)
+  const remoteUpdateRef=useRef(false);
+
   // ── WebSocket: подключаемся если есть API и карта имеет ID ──
   useEffect(()=>{
     if(!API_BASE||!mapData?.id||!user||readOnly)return;
-    const wsUrl=API_BASE.replace(/^http/,"ws");
     let socket:any;
     try{
-      // Динамически подгружаем socket.io-client из CDN если не bundled
       const io=(window as any).io;
-      if(!io){return;} // socket.io-client не загружен
-      socket=io(API_BASE,{transports:["websocket","polling"]});
+      if(!io){return;}
+      const token=getJWT();
+      socket=io(API_BASE,{transports:["websocket","polling"],auth:{token}});
       socketRef.current=socket;
-      socket.emit("join-map",{mapId:mapData.id,userEmail:user.email,userName:user.name||user.email});
+      socket.emit("join-map",{mapId:mapData.id,userName:user.name||user.email});
       socket.on("user-joined",(data:any)=>setOnlineUsers((u:any[])=>[...u.filter(x=>x.email!==data.email),data]));
       socket.on("user-left",(data:any)=>setOnlineUsers((u:any[])=>u.filter(x=>x.email!==data.email)));
-      socket.on("node-move",({nodeId,x,y}:any)=>setNodes((ns:any[])=>ns.map((n:any)=>n.id===nodeId?{...n,x,y}:n)));
-      socket.on("node-update",({node}:any)=>setNodes((ns:any[])=>ns.map((n:any)=>n.id===node.id?{...n,...node}:n)));
-      socket.on("node-add",({node}:any)=>setNodes((ns:any[])=>[...ns.filter((n:any)=>n.id!==node.id),node]));
-      socket.on("node-delete",({nodeId}:any)=>setNodes((ns:any[])=>ns.filter((n:any)=>n.id!==nodeId)));
-      socket.on("edge-update",({edges:es}:any)=>setEdges(es));
+      socket.on("node-move",({nodeId,x,y}:any)=>{
+        remoteUpdateRef.current=true;
+        setNodes((ns:any[])=>ns.map((n:any)=>n.id===nodeId?{...n,x,y}:n));
+      });
+      socket.on("node-update",({node}:any)=>{
+        remoteUpdateRef.current=true;
+        setNodes((ns:any[])=>ns.map((n:any)=>n.id===node.id?{...n,...node}:n));
+      });
+      socket.on("node-add",({node}:any)=>{
+        remoteUpdateRef.current=true;
+        setNodes((ns:any[])=>[...ns.filter((n:any)=>n.id!==node.id),node]);
+      });
+      socket.on("node-delete",({nodeId}:any)=>{
+        remoteUpdateRef.current=true;
+        setNodes((ns:any[])=>ns.filter((n:any)=>n.id!==nodeId));
+      });
+      socket.on("edge-update",({edges:es}:any)=>{
+        remoteUpdateRef.current=true;
+        setEdges(es);
+      });
       socket.on("cursor-move",({email,name,x,y}:any)=>setRemoteCursors(c=>({...c,[email]:{x,y,name,email}})));
-    }catch(e){console.warn("WebSocket init failed:",e);}
+    }catch(e){/* WebSocket недоступен — работаем без него */}
     return()=>{socket?.emit("leave-map",{mapId:mapData.id});socket?.disconnect();socketRef.current=null;setOnlineUsers([]);};
   },[mapData?.id,user?.email]);
 
@@ -3567,8 +3588,9 @@ ${slides}
   function autoLayout(){
     const sorted=topSort(nodes,edges);
     const newNodes=nodes.map(n=>{
-      const idx=sorted.indexOf(n.id);
-      const col=idx%4,row=Math.floor(idx/4);
+      const idx=sorted.findIndex(s=>s.id===n.id);
+      const safeIdx=idx<0?nodes.indexOf(n):idx;
+      const col=safeIdx%4,row=Math.floor(safeIdx/4);
       return{...n,x:snap(60+col*300),y:snap(60+row*180)};
     });
     pushUndo(nodes,edges);setNodes(newNodes);addToast("⌥ Авто-раскладка применена","info");
@@ -3653,12 +3675,21 @@ ${ctx}
 
   // save
   useEffect(()=>{
+    if(readOnly)return;
+    // Если изменение пришло от коллеги — не запускаем autosave, сбрасываем флаг
+    if(remoteUpdateRef.current){remoteUpdateRef.current=false;return;}
     setSaveState("saving");
     const tid=setTimeout(async()=>{
       try{
         const map={...mapData,nodes,edges,updatedAt:Date.now()};
-        await saveMap(project.id,map);setSaveState("saved");
-      }catch{setSaveState("saved");}
+        await saveMap(project.id,map);
+        setSaveState("saved");
+      }catch(e:any){
+        setSaveState("error");
+        if(!e?.message?.includes("MAP_LIMIT")){
+          console.warn("Autosave failed:",e?.message);
+        }
+      }
     },900);
     return()=>clearTimeout(tid);
   },[nodes,edges]);
@@ -3797,8 +3828,8 @@ ${ctx}
               {connecting?<><span style={{color:"#ef4444"}}>✕</span> Отмена</>:<>{t("link_btn","⇒ Связать")}</>}
             </button>
             {sep}
-            {ib(!undoStack.length?false:false,"Отменить (Ctrl+Z)",undo,<>↩</>,{opacity:undoStack.length?.9:.35})}
-            {ib(!redoStack.length?false:false,"Повторить (Ctrl+Y)",redo,<>↪</>,{opacity:redoStack.length?.9:.35})}
+            {ib(!undoStack.length,"Отменить (Ctrl+Z)",undo,<>↩</>,{opacity:undoStack.length?.9:.35})}
+            {ib(!redoStack.length,"Повторить (Ctrl+Y)",redo,<>↪</>,{opacity:redoStack.length?.9:.35})}
             </>}
           </div>
 
@@ -3831,8 +3862,8 @@ ${ctx}
               style={{width:32,height:32,borderRadius:"50%",border:`2px solid ${tier.color}55`,background:`linear-gradient(135deg,${tier.color}cc,${tier.color}44)`,color:"#fff",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               {(user?.name||user?.email||"U")[0].toUpperCase()}
             </button>
-            <div style={{display:"flex",alignItems:"center",gap:4,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":"#10b981"}}>
-              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> Сохраняю</>:<><span>✓</span> Сохранено</>}
+            <div style={{display:"flex",alignItems:"center",gap:4,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981"}}>
+              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")}</>:<><span>✓</span> {t("saved","Сохранено")}</>}
             </div>
               </>
             )}
@@ -4111,7 +4142,11 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
     if(!newName.trim())return;
     if(projects.filter(p=>p.owner===user.email).length>=tier.projects){return;}
     const p={id:uid(),name:newName.trim(),owner:user.email,members:[{email:user.email,role:"owner"}],createdAt:Date.now()};
-    await saveProject(p);setProjects(ps=>[...ps,p]);setMaps(m=>({...m,[p.id]:[]}));
+    const saved=await saveProject(p);
+    // Если сервер вернул проект с серверным ID — используем его, иначе локальный
+    const finalP=saved||p;
+    setProjects(ps=>[...ps,finalP]);
+    setMaps(m=>({...m,[finalP.id]:[]}));
     setNewName("");setCreating(false);
   }
   async function deleteProj(id){
@@ -5967,7 +6002,7 @@ export default function App(){
   const[authTab,setAuthTab]=useState("login");
   const[showProfile,setShowProfile]=useState(false);
   const[showTiers,setShowTiers]=useState(false);
-  const[lang,setLang]=useState(()=>localStorage.getItem("sa_lang")||"ru");
+  const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
   // t функция для LangCtx.Provider (App является корневым провайдером)
   const t=(k:string,fb?:string)=>{
@@ -5984,9 +6019,9 @@ export default function App(){
       const shareId=shareFromQuery||shareFromHash;
 
       // Обработка успешной оплаты через Stripe
+      // tier из URL не используем — берём актуальный tier с сервера после /me
       const paymentStatus=searchParams.get("payment");
-      const paidTier=searchParams.get("tier");
-      if(paymentStatus==="success"&&paidTier){
+      if(paymentStatus==="success"){
         window.history.replaceState({},"",window.location.pathname);
       }
 
@@ -6003,24 +6038,26 @@ export default function App(){
         }catch{}
       }
       await seedDefault();
-      const sess=await getSession();
-      if(sess?.email){
-        if(API_BASE){
+      if(API_BASE){
+        // Один запрос /api/auth/me — и проверка сессии, и получение данных пользователя
+        const jwt=getJWT();
+        if(jwt){
           try{
             const d=await apiFetch("/api/auth/me");
             if(d.user){
               setUser(d.user);
-              // Обновляем тариф после успешной оплаты
-              if(paymentStatus==="success"&&paidTier&&d.user.tier!==paidTier){
-                const upd=await patchUser(d.user.email,{tier:paidTier});
-                if(upd)setUser(upd);
+              if(paymentStatus==="success"){
+                addToast("✅ Оплата прошла успешно! Ваш тариф обновлён.","success");
               }
               setScreen("projects");return;
             }
           }catch(e:any){
-          if(e.message==="session_expired"){clearJWT();clearRefreshToken();}
+            if(e.message==="session_expired"){clearJWT();clearRefreshToken();}
+          }
         }
-        } else {
+      } else {
+        const sess=await getSession();
+        if(sess?.email){
           const accs=await store.get("sa_acc")||[];
           const u=(accs as any[]).find((a:any)=>a.email===sess.email);
           if(u){setUser(u);setScreen("projects");return;}

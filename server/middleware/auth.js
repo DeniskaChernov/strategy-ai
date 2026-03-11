@@ -37,17 +37,20 @@ async function requireAuth(req, res, next) {
 
     const user = rows[0];
 
-    // Если триал истёк и нет активной подписки — даунгрейд до free
+    // Если триал истёк и нет активной подписки — даунгрейд до free.
+    // Выполняем UPDATE только один раз (когда tier ещё не free),
+    // чтобы не делать лишний запрос на каждый API-вызов.
     if (
+      user.tier !== 'free' &&
       user.trial_ends_at &&
       new Date(user.trial_ends_at) < new Date() &&
-      !user.stripe_subscription_id &&
-      user.tier !== 'free'
+      !user.stripe_subscription_id
     ) {
-      await pool.query(
-        `UPDATE users SET tier = 'free', trial_ends_at = NULL WHERE email = $1`,
+      // Только один UPDATE — не на каждый запрос, а только когда нужна смена
+      pool.query(
+        `UPDATE users SET tier = 'free', trial_ends_at = NULL, updated_at = now() WHERE email = $1`,
         [user.email]
-      );
+      ).catch(e => console.error('Trial downgrade error:', e.message));
       user.tier = 'free';
       user.trial_ends_at = null;
     }

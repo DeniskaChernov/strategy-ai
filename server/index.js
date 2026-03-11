@@ -33,8 +33,16 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
 
 const corsOptions = {
   origin: (origin, cb) => {
+    // Разрешить запросы без origin (мобильные, curl, etc.)
     if (!origin) return cb(null, true);
-    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return cb(null, true);
+    // Если ALLOWED_ORIGINS не задан — разрешить только в development
+    if (allowedOrigins.length === 0) {
+      if (process.env.NODE_ENV === 'production') {
+        return cb(new Error(`CORS: ALLOWED_ORIGINS not configured in production`));
+      }
+      return cb(null, true);
+    }
+    if (allowedOrigins.includes(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
@@ -42,48 +50,72 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // ── WebSocket (Socket.IO) ──────────────────────────────────────────────────────
+const jwt = require('jsonwebtoken');
 const io = new SocketIO(server, {
   cors: corsOptions,
   pingTimeout: 60000,
 });
 
+// Middleware: проверяем JWT при подключении к Socket.IO
+io.use((socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+    if (!token) return next(new Error('Unauthorized: no token'));
+    const secret = process.env.JWT_SECRET || 'strategy-ai-secret-change-in-production';
+    const decoded = jwt.verify(token, secret);
+    socket.data.userEmail = decoded.email;
+    socket.data.userId = decoded.id;
+    next();
+  } catch (err) {
+    next(new Error('Unauthorized: invalid token'));
+  }
+});
+
 // Комнаты: map:{mapId} — все редакторы одной карты
 io.on('connection', (socket) => {
-  socket.on('join-map', ({ mapId, userEmail, userName }) => {
+  socket.on('join-map', ({ mapId, userName }) => {
+    // userEmail уже верифицирован из JWT — не доверяем клиенту
+    const userEmail = socket.data.userEmail;
     socket.join(`map:${mapId}`);
-    socket.data = { mapId, userEmail, userName };
+    socket.data = { ...socket.data, mapId, userName };
     socket.to(`map:${mapId}`).emit('user-joined', { email: userEmail, name: userName });
   });
 
   // Синхронизация перемещения узла
   socket.on('node-move', ({ mapId, nodeId, x, y }) => {
-    socket.to(`map:${mapId}`).emit('node-move', { nodeId, x, y, from: socket.data?.userEmail });
+    if (mapId !== socket.data?.mapId) return; // игнорируем чужие комнаты
+    socket.to(`map:${mapId}`).emit('node-move', { nodeId, x, y, from: socket.data.userEmail });
   });
 
   // Синхронизация изменения поля узла
   socket.on('node-update', ({ mapId, node }) => {
-    socket.to(`map:${mapId}`).emit('node-update', { node, from: socket.data?.userEmail });
+    if (mapId !== socket.data?.mapId) return;
+    socket.to(`map:${mapId}`).emit('node-update', { node, from: socket.data.userEmail });
   });
 
   // Синхронизация добавления узла
   socket.on('node-add', ({ mapId, node }) => {
-    socket.to(`map:${mapId}`).emit('node-add', { node, from: socket.data?.userEmail });
+    if (mapId !== socket.data?.mapId) return;
+    socket.to(`map:${mapId}`).emit('node-add', { node, from: socket.data.userEmail });
   });
 
   // Синхронизация удаления узла
   socket.on('node-delete', ({ mapId, nodeId }) => {
-    socket.to(`map:${mapId}`).emit('node-delete', { nodeId, from: socket.data?.userEmail });
+    if (mapId !== socket.data?.mapId) return;
+    socket.to(`map:${mapId}`).emit('node-delete', { nodeId, from: socket.data.userEmail });
   });
 
   // Синхронизация рёбер
   socket.on('edge-update', ({ mapId, edges }) => {
-    socket.to(`map:${mapId}`).emit('edge-update', { edges, from: socket.data?.userEmail });
+    if (mapId !== socket.data?.mapId) return;
+    socket.to(`map:${mapId}`).emit('edge-update', { edges, from: socket.data.userEmail });
   });
 
   // Курсор (live presence)
   socket.on('cursor-move', ({ mapId, x, y }) => {
+    if (mapId !== socket.data?.mapId) return;
     socket.to(`map:${mapId}`).emit('cursor-move', {
-      email: socket.data?.userEmail,
+      email: socket.data.userEmail,
       name: socket.data?.userName,
       x, y,
     });
@@ -91,12 +123,13 @@ io.on('connection', (socket) => {
 
   socket.on('leave-map', ({ mapId }) => {
     socket.leave(`map:${mapId}`);
-    socket.to(`map:${mapId}`).emit('user-left', { email: socket.data?.userEmail });
+    socket.to(`map:${mapId}`).emit('user-left', { email: socket.data.userEmail });
+    socket.data.mapId = null;
   });
 
   socket.on('disconnect', () => {
     if (socket.data?.mapId) {
-      socket.to(`map:${socket.data.mapId}`).emit('user-left', { email: socket.data?.userEmail });
+      socket.to(`map:${socket.data.mapId}`).emit('user-left', { email: socket.data.userEmail });
     }
   });
 });
