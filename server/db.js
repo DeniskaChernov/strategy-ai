@@ -153,4 +153,72 @@ async function initDB() {
   }
 }
 
-module.exports = { pool, initDB };
+// ── Seed: создаём dev-аккаунт и начальные данные ────────────────────────────
+async function seedDB() {
+  const bcrypt = require('bcryptjs');
+
+  const DEV_EMAIL    = process.env.DEV_EMAIL    || 'denisblackman2@gmail.com';
+  const DEV_PASSWORD = process.env.DEV_PASSWORD || 'Denis123';
+  const DEV_NAME     = process.env.DEV_NAME     || 'Denis';
+  const DEV_TIER     = process.env.DEV_TIER     || 'team';
+
+  try {
+    // Проверяем — существует ли уже dev-аккаунт
+    const { rows } = await pool.query('SELECT id, tier FROM users WHERE email = $1', [DEV_EMAIL]);
+
+    if (rows[0]) {
+      // Аккаунт есть — убеждаемся что тариф актуален
+      if (rows[0].tier !== DEV_TIER) {
+        await pool.query(
+          `UPDATE users SET tier = $1, trial_ends_at = NULL, updated_at = now() WHERE email = $2`,
+          [DEV_TIER, DEV_EMAIL]
+        );
+        console.log(`✅ Dev account tier updated → ${DEV_TIER}`);
+      } else {
+        console.log(`✅ Dev account exists (${DEV_EMAIL})`);
+      }
+      return;
+    }
+
+    // Создаём dev-аккаунт
+    const hash = await bcrypt.hash(DEV_PASSWORD, 12);
+    const { rows: newUser } = await pool.query(
+      `INSERT INTO users (email, password_hash, name, tier, trial_ends_at)
+       VALUES ($1, $2, $3, $4, NULL)
+       RETURNING id, email`,
+      [DEV_EMAIL, hash, DEV_NAME, DEV_TIER]
+    );
+
+    // Создаём дефолтный проект для dev-аккаунта
+    const { rows: proj } = await pool.query(
+      `INSERT INTO projects (owner_email, name, members)
+       VALUES ($1, 'Тестовый проект', $2)
+       RETURNING id`,
+      [DEV_EMAIL, JSON.stringify([{ email: DEV_EMAIL, role: 'owner' }])]
+    );
+
+    // Создаём приветственную карту
+    const sampleNodes = [
+      { id: 'n1', x: 200, y: 150, title: 'Анализ рынка', status: 'completed', priority: 'high', progress: 100, reason: 'Понять целевую аудиторию и конкурентов', metric: 'Отчёт готов', tags: ['research'], comments: [], history: [] },
+      { id: 'n2', x: 500, y: 150, title: 'MVP продукта', status: 'active', priority: 'critical', progress: 60, reason: 'Запустить минимальный рабочий продукт', metric: '100 первых пользователей', deadline: '2026-04-01', tags: ['product'], comments: [], history: [] },
+      { id: 'n3', x: 800, y: 150, title: 'Запуск маркетинга', status: 'planning', priority: 'high', progress: 0, reason: 'Привлечь первых платящих пользователей', metric: '$1000 MRR', tags: ['marketing'], comments: [], history: [] },
+    ];
+    const sampleEdges = [
+      { id: 'e1', source: 'n1', target: 'n2', from: 'n1', to: 'n2', type: 'requires', label: 'Требует' },
+      { id: 'e2', source: 'n2', target: 'n3', from: 'n2', to: 'n3', type: 'leads', label: 'Ведёт к' },
+    ];
+
+    await pool.query(
+      `INSERT INTO maps (project_id, name, nodes, edges, ctx)
+       VALUES ($1, 'Стратегия запуска', $2, $3, $4)`,
+      [proj[0].id, JSON.stringify(sampleNodes), JSON.stringify(sampleEdges), 'Стартап, SaaS, выход на рынок']
+    );
+
+    console.log(`✅ Dev account created: ${DEV_EMAIL} / ${DEV_PASSWORD} (tier: ${DEV_TIER})`);
+  } catch (err) {
+    // Seed — некритичная операция, не останавливаем сервер
+    console.warn('⚠️  Seed warning (non-fatal):', err.message);
+  }
+}
+
+module.exports = { pool, initDB, seedDB };

@@ -5,7 +5,7 @@ const { Server: SocketIO } = require('socket.io');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const { initDB } = require('./db');
+const { initDB, seedDB } = require('./db');
 
 // ── Sentry (опционально, если SENTRY_DSN задан) ──────────────────────────────
 let Sentry = null;
@@ -198,6 +198,7 @@ async function start() {
 
   console.log('🔄 Connecting to database...');
   await initDB();
+  await seedDB();
 
   server.listen(PORT, () => {
     console.log(`🚀 Strategy AI Server v1.1 running on port ${PORT}`);
