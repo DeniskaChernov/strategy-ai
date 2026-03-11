@@ -352,7 +352,6 @@ const LANGS={
     choose_btn:"Выбрать →",
     saving_map:"Сохраняю карту",
     preparing:"Подготавливаю ваше стратегическое пространство…",
-    current_password:"Текущий пароль",
     new_password_label:"Новый пароль",
     all_data_deleted:"Все данные будут удалены безвозвратно",
     change_pw_btn:"Изменить пароль",
@@ -423,7 +422,45 @@ const LANGS={
     downgrade_to:"Перейти на ",
     replacing:"Заменяю…",
     replace_btn:"🗑 Заменить",
-    upgrade_tier:"✦ Расширить тариф"},
+    upgrade_tier:"✦ Расширить тариф",
+    // Landing page nav
+    nav_features:"Возможности",nav_process:"Процесс",nav_pricing:"Тарифы",
+    // Landing hero
+    hero_sub:"AI анализирует ваш бизнес, строит стратегическую карту и даёт консультацию уровня McKinsey. Для тех, кто принимает решения с последствиями.",
+    // Landing features section
+    tag_features:"Возможности",feat_sub:"Каждый инструмент создан для людей, которые принимают решения с последствиями. Не для экспериментов — для результата.",
+    feat_leader_word:"лидера",
+    lf1_title:"Стратегические карты",lf1_desc:"Причинно-следственные связи между решениями и результатами. Drag-and-drop узлы, зависимости, метрики, дедлайны на одном интерактивном canvas.",
+    lf2_title:"AI-консультант",lf2_desc:"SWOT, OKR, First Principles, BCG-матрица, Porter's Five Forces. AI задаёт правильные вопросы и вскрывает системные ограничения вашего бизнеса.",
+    lf3_title:"Симуляция сценариев",lf3_desc:"Три версии будущего до принятия решения. Каскадный анализ последствий. Видьте узкие места прежде, чем они станут кризисом.",
+    lf4_title:"Gantt-таймлайн",lf4_desc:"Временная шкала, критический путь, роли и зоны ответственности. Стратегия не как идея, а как план с конкретными дедлайнами.",
+    lf5_title:"Командная работа",lf5_desc:"Роли, комментарии, история изменений, автосохранение. Стратегия как живой командный документ, а не PDF в чьей-то папке.",
+    lf6_title:"Health Score аналитика",lf6_desc:"Сводная оценка здоровья стратегии в одном числе. Приоритеты, риски, прогресс по узлам. Управляйте через данные.",
+    // Landing process section
+    tag_process:"Процесс",proc_heading_end:"стратегии",to_working:"до рабочей",proc_sub:"Никаких шаблонов. AI строит карту с нуля, опираясь исключительно на контекст вашего бизнеса.",
+    lstep1_tag:"Шаг первый",lstep1_title:"AI-интервью",lstep1_desc:"Шесть точных вопросов. AI выявляет цели, скрытые риски и системные ограничения — то, что консалтинг находит за неделю и $50 000.",
+    lstep2_tag:"Шаг второй",lstep2_title:"Построение карты",lstep2_desc:"Персональная стратегическая карта с причинно-следственными узлами, метриками, приоритетами и временными горизонтами. За 30 секунд.",
+    lstep3_tag:"Шаг третий",lstep3_title:"Консультация",lstep3_desc:"Конкретные следующие шаги, расчёт рисков, альтернативные сценарии. Без воды — только применимые к вашей ситуации решения.",
+    // Landing testimonials section
+    tag_testimonials:"Отзывы",testi_checked:"проверил",
+    lt1_q:"Strategy AI структурировал хаос из идей в чёткий план за двадцать минут. Раньше это стоило консалтинга на десятки тысяч долларов и занимало месяц.",lt1_role:"CEO, Series A стартап",
+    lt2_q:"Инструмент, который мыслит как McKinsey. Карты, сценарии и Gantt в одном месте изменили наш product-процесс фундаментально.",lt2_role:"CPO, B2B SaaS",
+    lt3_q:"Симуляция сценариев — это отдельный класс. Мы теперь входим в любые переговоры с тремя готовыми исходами вместо одного.",lt3_role:"Управляющий партнёр",
+    // Landing pricing section
+    tag_pricing_label:"Тарифы",pricing_start_word:"Начните",pricing_sub:"Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.",
+    pricing_hot_badge:"★ ТОП",
+    lpr1_desc:"Для знакомства с инструментом",lpr1_f1:"1 проект и 1 стратегическая карта",lpr1_f2:"AI-интервью и генерация карты",lpr1_f3:"Gantt-таймлайн",lpr1_f4:"PNG / JSON экспорт",start_free_cta:"Начать бесплатно",
+    lpr2_desc:"Для профессионалов и команд",lpr2_f1:"10 проектов, 5 карт каждая",lpr2_f2:"SWOT, OKR, BCG, Porter AI-анализ",lpr2_f3:"5 сценариев + симуляция последствий",lpr2_f4:"Клонирование и версионирование карт",lpr2_f5:"Командная работа до 3 человек",lpr2_cta:"Перейти на Pro →",
+    lpr3_desc:"Для организаций с системным подходом",lpr3_f1:"Без ограничений: проекты, карты, сценарии",lpr3_f2:"C-level AI коллегиум (5 экспертных ролей)",lpr3_f3:"PPTX-отчёты для совета директоров",lpr3_f4:"White-label и API-интеграции",lpr3_f5:"Выделенный менеджер поддержки",lpr3_cta:"Связаться",
+    // Landing CTA section
+    cta_h1:"Первый шаг",cta_h2:"занимает",cta_h3:"две минуты",
+    cta_sub:"Создайте первую стратегическую карту прямо сейчас. Без кредитной карты. Без шаблонов — только ваш бизнес и AI.",
+    cta_trust1:"Бесплатно навсегда",cta_trust2:"Без кредитной карты",cta_trust3:"Данные только ваши",
+    // Landing metrics
+    lm1_sfx:"мин",lm1_lbl:"от вопроса до первой стратегической карты",
+    lm2_lbl:"точность AI-анализа на тестовых кейсах McKinsey",
+    lm3_lbl:"уровней экспертной глубины — от Free до Enterprise",
+    lm4_lbl:"сценариев для анализа альтернативных исходов"},
   en:{
     save:'Save',cancel:'Cancel',delete:'Delete',add:'Add',
     edit:'Edit',close:'Close',confirm:'Confirm',back:'Back',
@@ -541,7 +578,6 @@ const LANGS={
     choose_btn:"Choose →",
     saving_map:"Saving map",
     preparing:"Preparing your strategic workspace…",
-    current_password:"Current password",
     new_password_label:"New password",
     all_data_deleted:"All data will be permanently deleted",
     change_pw_btn:"Change password",
@@ -612,7 +648,45 @@ const LANGS={
     downgrade_to:"Switch to ",
     replacing:"Replacing…",
     replace_btn:"🗑 Replace",
-    upgrade_tier:"✦ Upgrade plan"},
+    upgrade_tier:"✦ Upgrade plan",
+    // Landing page nav
+    nav_features:"Features",nav_process:"Process",nav_pricing:"Pricing",
+    // Landing hero
+    hero_sub:"AI analyzes your business, builds a strategic map and delivers McKinsey-level consultation. For those who make decisions with consequences.",
+    // Landing features section
+    tag_features:"Features",feat_sub:"Every tool is built for people who make decisions with real consequences. Not for experimentation — for results.",
+    feat_leader_word:"leader",
+    lf1_title:"Strategy Maps",lf1_desc:"Cause-and-effect relationships between decisions and outcomes. Drag-and-drop nodes, dependencies, metrics, and deadlines on one interactive canvas.",
+    lf2_title:"AI Consultant",lf2_desc:"SWOT, OKR, First Principles, BCG matrix, Porter's Five Forces. AI asks the right questions and uncovers systemic constraints in your business.",
+    lf3_title:"Scenario Simulation",lf3_desc:"Three versions of the future before making a decision. Cascading analysis of consequences. See bottlenecks before they become a crisis.",
+    lf4_title:"Gantt Timeline",lf4_desc:"Timeline, critical path, roles and responsibility areas. Strategy not as an idea, but as a plan with concrete deadlines.",
+    lf5_title:"Team Collaboration",lf5_desc:"Roles, comments, change history, auto-save. Strategy as a living team document, not a PDF in someone's folder.",
+    lf6_title:"Health Score Analytics",lf6_desc:"A single number that summarizes the health of your strategy. Priorities, risks, node progress. Manage through data.",
+    // Landing process section
+    tag_process:"Process",proc_heading_end:"strategy",to_working:"to a working",proc_sub:"No templates. AI builds the map from scratch based exclusively on the context of your business.",
+    lstep1_tag:"Step one",lstep1_title:"AI Interview",lstep1_desc:"Six precise questions. AI identifies goals, hidden risks and systemic constraints — what consulting takes a week and $50,000 to find.",
+    lstep2_tag:"Step two",lstep2_title:"Map Building",lstep2_desc:"A personal strategy map with cause-and-effect nodes, metrics, priorities and time horizons. In 30 seconds.",
+    lstep3_tag:"Step three",lstep3_title:"Consultation",lstep3_desc:"Concrete next steps, risk assessment, alternative scenarios. No fluff — only solutions applicable to your specific situation.",
+    // Landing testimonials section
+    tag_testimonials:"Reviews",testi_checked:"tested it",
+    lt1_q:"Strategy AI structured the chaos of ideas into a clear plan in twenty minutes. Previously this cost tens of thousands in consulting and took a month.",lt1_role:"CEO, Series A startup",
+    lt2_q:"A tool that thinks like McKinsey. Maps, scenarios and Gantt in one place fundamentally changed our product process.",lt2_role:"CPO, B2B SaaS",
+    lt3_q:"Scenario simulation is a class of its own. We now enter any negotiation with three prepared outcomes instead of one.",lt3_role:"Managing Partner",
+    // Landing pricing section
+    tag_pricing_label:"Pricing",pricing_start_word:"Start",pricing_sub:"Your first map and first AI analysis are free. Pay only when you're convinced of the tool's value.",
+    pricing_hot_badge:"★ TOP",
+    lpr1_desc:"To get acquainted with the tool",lpr1_f1:"1 project and 1 strategy map",lpr1_f2:"AI interview and map generation",lpr1_f3:"Gantt timeline",lpr1_f4:"PNG / JSON export",start_free_cta:"Start free",
+    lpr2_desc:"For professionals and teams",lpr2_f1:"10 projects, 5 maps each",lpr2_f2:"SWOT, OKR, BCG, Porter AI-analysis",lpr2_f3:"5 scenarios + consequence simulation",lpr2_f4:"Map cloning and versioning",lpr2_f5:"Team collaboration up to 3 people",lpr2_cta:"Go Pro →",
+    lpr3_desc:"For organizations with a systematic approach",lpr3_f1:"Unlimited: projects, maps, scenarios",lpr3_f2:"C-level AI collegium (5 expert roles)",lpr3_f3:"PPTX reports for board of directors",lpr3_f4:"White-label and API integrations",lpr3_f5:"Dedicated support manager",lpr3_cta:"Contact us",
+    // Landing CTA section
+    cta_h1:"The first step",cta_h2:"takes only",cta_h3:"two minutes",
+    cta_sub:"Create your first strategy map right now. No credit card. No templates — just your business and AI.",
+    cta_trust1:"Free forever",cta_trust2:"No credit card",cta_trust3:"Your data only",
+    // Landing metrics
+    lm1_sfx:"min",lm1_lbl:"from question to first strategy map",
+    lm2_lbl:"AI analysis accuracy on McKinsey test cases",
+    lm3_lbl:"levels of expert depth — from Free to Enterprise",
+    lm4_lbl:"scenarios for analyzing alternative outcomes"},
   uz:{
     save:"Saqlash",cancel:"Bekor",delete:"O'chirish",add:"Qo'shish",
     edit:"Tahrirlash",close:"Yopish",confirm:"Tasdiqlash",back:"Orqaga",
@@ -732,7 +806,6 @@ const LANGS={
     choose_btn:"Tanlash →",
     saving_map:"Xarita saqlanmoqda",
     preparing:"Strategik ish maydoningiz tayyorlanmoqda…",
-    current_password:"Joriy parol",
     new_password_label:"Yangi parol",
     all_data_deleted:"Barcha ma'lumotlar butunlay o'chiriladi",
     change_pw_btn:"Parolni o'zgartirish",
@@ -803,7 +876,45 @@ const LANGS={
     downgrade_to:"Ga o'tish ",
     replacing:"Almashtirmoqda…",
     replace_btn:"🗑 Almashtirish",
-    upgrade_tier:"✦ Tarifni yaxshilash"
+    upgrade_tier:"✦ Tarifni yaxshilash",
+    // Landing page nav
+    nav_features:"Imkoniyatlar",nav_process:"Jarayon",nav_pricing:"Narxlar",
+    // Landing hero
+    hero_sub:"AI biznesingizni tahlil qiladi, strategik xarita tuzadi va McKinsey darajasida maslahat beradi. Oqibatli qarorlar qabul qiladiganlar uchun.",
+    // Landing features section
+    tag_features:"Imkoniyatlar",feat_sub:"Har bir vosita oqibatli qarorlar qabul qiladiganlar uchun yaratilgan. Tajriba uchun emas — natija uchun.",
+    feat_leader_word:"rahbar",
+    lf1_title:"Strategiya xaritalari",lf1_desc:"Qarorlar va natijalar o'rtasidagi sabab-oqibat munosabatlari. Bir interaktiv canvas'da drag-and-drop tugunlar, bog'liqliklar, metrikalar, muddatlar.",
+    lf2_title:"AI Maslahatchi",lf2_desc:"SWOT, OKR, First Principles, BCG matritsasi, Porter's Five Forces. AI to'g'ri savollar beradi va biznesingizdagi tizimli cheklovlarni ochib beradi.",
+    lf3_title:"Stsenariy simulyatsiyasi",lf3_desc:"Qaror qabul qilishdan oldin kelajakning uch versiyasi. Oqibatlarning kaskadli tahlili. Inqirozga aylanishidan oldin tor joylarni ko'ring.",
+    lf4_title:"Gantt taymlayn",lf4_desc:"Vaqt jadvali, kritik yo'l, rollar va mas'uliyat zonalari. Strategiya g'oya sifatida emas, balki aniq muddatli reja sifatida.",
+    lf5_title:"Jamoa hamkorligi",lf5_desc:"Rollar, izohlar, o'zgarishlar tarixi, avtosaqlash. Strategiya birovning papkasidagi PDF emas, balki jonli jamoa hujjati sifatida.",
+    lf6_title:"Health Score tahlili",lf6_desc:"Strategiyangiz salomatligini bitta raqamda. Ustuvorliklar, risklar, tugun bo'yicha progress. Ma'lumotlar orqali boshqaring.",
+    // Landing process section
+    tag_process:"Jarayon",proc_heading_end:"strategiyasi",to_working:"ishlaydigan",proc_sub:"Hech qanday shablon yo'q. AI xaritani noldan, faqat biznesingiz kontekstiga asoslanib tuzadi.",
+    lstep1_tag:"Birinchi qadam",lstep1_title:"AI suhbat",lstep1_desc:"Oltita aniq savol. AI maqsadlarni, yashirin risklarni va tizimli cheklovlarni aniqlaydi — konsalting bir haftada $50 000 ga topadigan narsani.",
+    lstep2_tag:"Ikkinchi qadam",lstep2_title:"Xarita qurilishi",lstep2_desc:"Sabab-oqibat tugunlari, metrikalar, ustuvorliklar va vaqt gorizontlari bilan shaxsiy strategiya xaritasi. 30 soniyada.",
+    lstep3_tag:"Uchinchi qadam",lstep3_title:"Maslahat",lstep3_desc:"Aniq keyingi qadamlar, risk hisob-kitobi, muqobil stsenariylar. Suvsiz — faqat sizning vaziyatingizga qo'llaniladigan echimlar.",
+    // Landing testimonials section
+    tag_testimonials:"Sharhlar",testi_checked:"tekshirdi",
+    lt1_q:"Strategy AI g'oyalar tartibsizligini yigirma daqiqada aniq rejaga tizimlashtirdi. Ilgari bu o'n minglab dollarlik konsalting va bir oy vaqtni olardi.",lt1_role:"CEO, Series A startap",
+    lt2_q:"McKinsey kabi o'ylaydigan vosita. Bir joyda xaritalar, stsenariylar va Gantt bizning mahsulot jarayonimizni tubdan o'zgartirdi.",lt2_role:"CPO, B2B SaaS",
+    lt3_q:"Stsenariy simulyatsiyasi alohida sinf. Endi biz har qanday muzokaralarga bitta o'rniga uchta tayyor natija bilan kiramiz.",lt3_role:"Boshqaruvchi hamkor",
+    // Landing pricing section
+    tag_pricing_label:"Narxlar",pricing_start_word:"Boshlang",pricing_sub:"Birinchi xarita va birinchi AI tahlil bepul. Faqat vosita qiymatiga ishonch hosil qilganingizdan keyin to'lang.",
+    pricing_hot_badge:"★ TOP",
+    lpr1_desc:"Vosita bilan tanishish uchun",lpr1_f1:"1 loyiha va 1 strategiya xaritasi",lpr1_f2:"AI suhbat va xarita generatsiyasi",lpr1_f3:"Gantt taymlayn",lpr1_f4:"PNG / JSON eksport",start_free_cta:"Bepul boshlash",
+    lpr2_desc:"Mutaxassislar va jamoalar uchun",lpr2_f1:"10 loyiha, har birida 5 xarita",lpr2_f2:"SWOT, OKR, BCG, Porter AI tahlili",lpr2_f3:"5 stsenariy + oqibatlar simulyatsiyasi",lpr2_f4:"Xaritani klonlash va versiyalash",lpr2_f5:"3 kishigacha jamoa hamkorligi",lpr2_cta:"Pro ga o'tish →",
+    lpr3_desc:"Tizimli yondashuvga ega tashkilotlar uchun",lpr3_f1:"Cheksiz: loyihalar, xaritalar, stsenariylar",lpr3_f2:"C-level AI kollegium (5 ekspert rol)",lpr3_f3:"Direktorlar kengashi uchun PPTX hisobotlar",lpr3_f4:"White-label va API integratsiyalar",lpr3_f5:"Maxsus qo'llab-quvvatlash menejeri",lpr3_cta:"Bog'lanish",
+    // Landing CTA section
+    cta_h1:"Birinchi qadam",cta_h2:"faqat",cta_h3:"ikki daqiqa oladi",
+    cta_sub:"Birinchi strategiya xaritangizni hoziroq yarating. Kredit kartasisiz. Shablonsiz — faqat sizning biznesingiz va AI.",
+    cta_trust1:"Abadiy bepul",cta_trust2:"Kredit kartasi shart emas",cta_trust3:"Ma'lumotlar faqat sizniki",
+    // Landing metrics
+    lm1_sfx:"daq",lm1_lbl:"savoldan birinchi strategiya xaritasigacha",
+    lm2_lbl:"McKinsey test holatlarida AI tahlil aniqligi",
+    lm3_lbl:"ekspert chuqurligi darajalari — Free dan Enterprise gacha",
+    lm4_lbl:"muqobil natijalarni tahlil qilish stsenariylari"
   },
 };
 
@@ -5297,30 +5408,37 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
   },[]);
 
   const FEATS=[
-    {n:"01",title:"Стратегические карты",desc:"Причинно-следственные связи между решениями и результатами. Drag-and-drop узлы, зависимости, метрики, дедлайны на одном интерактивном canvas."},
-    {n:"02",title:"AI-консультант",desc:"SWOT, OKR, First Principles, BCG-матрица, Porter's Five Forces. AI задаёт правильные вопросы и вскрывает системные ограничения вашего бизнеса."},
-    {n:"03",title:"Симуляция сценариев",desc:"Три версии будущего до принятия решения. Каскадный анализ последствий. Видьте узкие места прежде, чем они станут кризисом."},
-    {n:"04",title:"Gantt-таймлайн",desc:"Временная шкала, критический путь, роли и зоны ответственности. Стратегия не как идея, а как план с конкретными дедлайнами."},
-    {n:"05",title:"Командная работа",desc:"Роли, комментарии, история изменений, автосохранение. Стратегия как живой командный документ, а не PDF в чьей-то папке."},
-    {n:"06",title:"Health Score аналитика",desc:"Сводная оценка здоровья стратегии в одном числе. Приоритеты, риски, прогресс по узлам. Управляйте через данные."},
+    {n:"01",title:t("lf1_title","Стратегические карты"),desc:t("lf1_desc","Причинно-следственные связи между решениями и результатами. Drag-and-drop узлы, зависимости, метрики, дедлайны на одном интерактивном canvas.")},
+    {n:"02",title:t("lf2_title","AI-консультант"),desc:t("lf2_desc","SWOT, OKR, First Principles, BCG-матрица, Porter's Five Forces. AI задаёт правильные вопросы и вскрывает системные ограничения вашего бизнеса.")},
+    {n:"03",title:t("lf3_title","Симуляция сценариев"),desc:t("lf3_desc","Три версии будущего до принятия решения. Каскадный анализ последствий. Видьте узкие места прежде, чем они станут кризисом.")},
+    {n:"04",title:t("lf4_title","Gantt-таймлайн"),desc:t("lf4_desc","Временная шкала, критический путь, роли и зоны ответственности. Стратегия не как идея, а как план с конкретными дедлайнами.")},
+    {n:"05",title:t("lf5_title","Командная работа"),desc:t("lf5_desc","Роли, комментарии, история изменений, автосохранение. Стратегия как живой командный документ, а не PDF в чьей-то папке.")},
+    {n:"06",title:t("lf6_title","Health Score аналитика"),desc:t("lf6_desc","Сводная оценка здоровья стратегии в одном числе. Приоритеты, риски, прогресс по узлам. Управляйте через данные.")},
   ];
   const STEPS=[
-    {n:"I",tag:"Шаг первый",title:"AI-интервью",desc:"Шесть точных вопросов. AI выявляет цели, скрытые риски и системные ограничения — то, что консалтинг находит за неделю и $50 000."},
-    {n:"II",tag:"Шаг второй",title:"Построение карты",desc:"Персональная стратегическая карта с причинно-следственными узлами, метриками, приоритетами и временными горизонтами. За 30 секунд."},
-    {n:"III",tag:"Шаг третий",title:"Консультация",desc:"Конкретные следующие шаги, расчёт рисков, альтернативные сценарии. Без воды — только применимые к вашей ситуации решения."},
+    {n:"I",  tag:t("lstep1_tag","Шаг первый"), title:t("lstep1_title","AI-интервью"),     desc:t("lstep1_desc","Шесть точных вопросов. AI выявляет цели, скрытые риски и системные ограничения — то, что консалтинг находит за неделю и $50 000.")},
+    {n:"II", tag:t("lstep2_tag","Шаг второй"), title:t("lstep2_title","Построение карты"), desc:t("lstep2_desc","Персональная стратегическая карта с причинно-следственными узлами, метриками, приоритетами и временными горизонтами. За 30 секунд.")},
+    {n:"III",tag:t("lstep3_tag","Шаг третий"), title:t("lstep3_title","Консультация"),    desc:t("lstep3_desc","Конкретные следующие шаги, расчёт рисков, альтернативные сценарии. Без воды — только применимые к вашей ситуации решения.")},
   ];
   const TESTI=[
-    {q:"Strategy AI структурировал хаос из идей в чёткий план за двадцать минут. Раньше это стоило консалтинга на десятки тысяч долларов и занимало месяц.",name:"Алексей К.",role:"CEO, Series A стартап"},
-    {q:"Инструмент, который мыслит как McKinsey. Карты, сценарии и Gantt в одном месте изменили наш product-процесс фундаментально.",name:"Мария Д.",role:"CPO, B2B SaaS"},
-    {q:"Симуляция сценариев — это отдельный класс. Мы теперь входим в любые переговоры с тремя готовыми исходами вместо одного.",name:"Тимур Р.",role:"Управляющий партнёр"},
+    {q:t("lt1_q","Strategy AI структурировал хаос из идей в чёткий план за двадцать минут. Раньше это стоило консалтинга на десятки тысяч долларов и занимало месяц."),name:"Алексей К.",role:t("lt1_role","CEO, Series A стартап")},
+    {q:t("lt2_q","Инструмент, который мыслит как McKinsey. Карты, сценарии и Gantt в одном месте изменили наш product-процесс фундаментально."),name:"Мария Д.",role:t("lt2_role","CPO, B2B SaaS")},
+    {q:t("lt3_q","Симуляция сценариев — это отдельный класс. Мы теперь входим в любые переговоры с тремя готовыми исходами вместо одного."),name:"Тимур Р.",role:t("lt3_role","Управляющий партнёр")},
   ];
   const PRICING=[
-    {tier:"Free",price:"0",mo:"/месяц",desc:"Для знакомства с инструментом",hot:false,feats:["1 проект и 1 стратегическая карта","AI-интервью и генерация карты","Gantt-таймлайн","PNG / JSON экспорт"],cta:"Начать бесплатно",btnCls:"lp-ghost"},
-    {tier:"Pro",price:"29",mo:"/месяц",desc:"Для профессионалов и команд",hot:true,feats:["10 проектов, 5 карт каждая","SWOT, OKR, BCG, Porter AI-анализ","5 сценариев + симуляция последствий","Клонирование и версионирование карт","Командная работа до 3 человек"],cta:"Перейти на Pro →",btnCls:"lp-fill"},
-    {tier:"Enterprise",price:"149+",mo:"/месяц",desc:"Для организаций с системным подходом",hot:false,feats:["Без ограничений: проекты, карты, сценарии","C-level AI коллегиум (5 экспертных ролей)","PPTX-отчёты для совета директоров","White-label и API-интеграции","Выделенный менеджер поддержки"],cta:"Связаться",btnCls:"lp-ghost"},
+    {tier:"Free",   price:"0",  mo:t("per_month","/мес"),desc:t("lpr1_desc","Для знакомства с инструментом"),hot:false,
+     feats:[t("lpr1_f1","1 проект и 1 стратегическая карта"),t("lpr1_f2","AI-интервью и генерация карты"),t("lpr1_f3","Gantt-таймлайн"),t("lpr1_f4","PNG / JSON экспорт")],
+     cta:t("start_free_cta","Начать бесплатно"),btnCls:"lp-ghost"},
+    {tier:"Pro",    price:"29", mo:t("per_month","/мес"),desc:t("lpr2_desc","Для профессионалов и команд"),hot:true,
+     feats:[t("lpr2_f1","10 проектов, 5 карт каждая"),t("lpr2_f2","SWOT, OKR, BCG, Porter AI-анализ"),t("lpr2_f3","5 сценариев + симуляция последствий"),t("lpr2_f4","Клонирование и версионирование карт"),t("lpr2_f5","Командная работа до 3 человек")],
+     cta:t("lpr2_cta","Перейти на Pro →"),btnCls:"lp-fill"},
+    {tier:"Enterprise",price:"149+",mo:t("per_month","/мес"),desc:t("lpr3_desc","Для организаций с системным подходом"),hot:false,
+     feats:[t("lpr3_f1","Без ограничений: проекты, карты, сценарии"),t("lpr3_f2","C-level AI коллегиум (5 экспертных ролей)"),t("lpr3_f3","PPTX-отчёты для совета директоров"),t("lpr3_f4","White-label и API-интеграции"),t("lpr3_f5","Выделенный менеджер поддержки")],
+     cta:t("lpr3_cta","Связаться"),btnCls:"lp-ghost"},
   ];
 
-  const MARQUEE_ITEMS=["Стратегические карты","AI-консультант","Симуляция сценариев","Gantt-таймлайн",t("health_score","Health Score"),"Командная работа","McKinsey-level AI"];
+  const NAV_LINKS=[[t("nav_features","Возможности"),"#lfeatures"],[t("nav_process","Процесс"),"#lprocess"],[t("nav_pricing","Тарифы"),"#lpricing"]];
+  const MARQUEE_ITEMS=[t("lf1_title","Стратегические карты"),t("lf2_title","AI-консультант"),t("lf3_title","Симуляция сценариев"),t("lf4_title","Gantt-таймлайн"),t("health_score","Health Score"),t("lf5_title","Командная работа"),"McKinsey-level AI"];
 
   const tag=(label)=>(
     <div style={{display:"flex",alignItems:"center",gap:12,fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"#6366f1",letterSpacing:3,textTransform:"uppercase",marginBottom:22}}>
@@ -5470,8 +5588,8 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         </div>
         {!isMobile&&(
           <>
-        {[["Возможности","#lfeatures"],["Процесс","#lprocess"],["Тарифы","#lpricing"]].map(([label,href])=>(
-          <button key={label} onClick={()=>{const el=document.querySelector(href);if(el)el.scrollIntoView({behavior:'smooth'});setMenuOpen(false);}} style={{fontSize:13,color:"rgba(240,238,255,.45)",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",transition:"color .2s"}} onMouseOver={e=>e.currentTarget.style.color="#f0eeff"} onMouseOut={e=>e.currentTarget.style.color="rgba(240,238,255,.45)"}>{label}</button>
+        {NAV_LINKS.map(([label,href])=>(
+          <button key={href} onClick={()=>{const el=document.querySelector(href);if(el)el.scrollIntoView({behavior:'smooth'});setMenuOpen(false);}} style={{fontSize:13,color:"rgba(240,238,255,.45)",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",transition:"color .2s"}} onMouseOver={e=>e.currentTarget.style.color="#f0eeff"} onMouseOut={e=>e.currentTarget.style.color="rgba(240,238,255,.45)"}>{label}</button>
         ))}
         {/* Lang switcher */}
         <div style={{display:"flex",alignItems:"center",gap:3,padding:"4px 5px",borderRadius:9,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.04)"}}>
@@ -5495,8 +5613,8 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
             </button>
             {menuOpen&&(
               <div style={{position:"fixed",top:66,left:0,right:0,bottom:0,zIndex:299,background:"rgba(3,3,10,.95)",backdropFilter:"blur(20px)",padding:"24px 20px",display:"flex",flexDirection:"column",gap:8,animation:"slideDown .2s ease"}}>
-                {[["Возможности","#lfeatures"],["Процесс","#lprocess"],["Тарифы","#lpricing"]].map(([label,href])=>(
-                  <button key={label} onClick={()=>{const el=document.querySelector(href);if(el)el.scrollIntoView({behavior:'smooth'});setMenuOpen(false);}} style={{padding:"14px 0",fontSize:16,color:"#f0eeff",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",textAlign:"left",borderBottom:"1px solid rgba(255,255,255,.08)"}}>{label}</button>
+                {NAV_LINKS.map(([label,href])=>(
+                  <button key={href} onClick={()=>{const el=document.querySelector(href);if(el)el.scrollIntoView({behavior:'smooth'});setMenuOpen(false);}} style={{padding:"14px 0",fontSize:16,color:"#f0eeff",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",textAlign:"left",borderBottom:"1px solid rgba(255,255,255,.08)"}}>{label}</button>
                 ))}
                 <div style={{display:"flex",gap:8,padding:"16px 0"}}>
                   {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
@@ -5536,7 +5654,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
           </div>
           {/* subtext */}
           <p className="lhero-p" style={{fontSize:18,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.8,maxWidth:540,marginBottom:54,animation:"slideUp .8s .72s both"}}>
-            AI анализирует ваш бизнес, строит стратегическую карту и даёт консультацию уровня McKinsey. Для тех, кто принимает решения с последствиями.
+            {t("hero_sub","AI анализирует ваш бизнес, строит стратегическую карту и даёт консультацию уровня McKinsey. Для тех, кто принимает решения с последствиями.")}
           </p>
           {/* buttons */}
           <div className="lhero-btns" style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap",animation:"slideUp .8s .88s both"}}>
@@ -5562,7 +5680,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       {/* ── METRICS ── */}
       <div style={{position:"relative",zIndex:2,borderBottom:"1px solid rgba(255,255,255,.06)"}}>
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",maxWidth:1280,margin:"0 auto"}}>
-          {[{to:2,sfx:"мин",lbl:"от вопроса до первой стратегической карты"},{to:94,sfx:"%",lbl:"точность AI-анализа на тестовых кейсах McKinsey"},{to:5,sfx:"",lbl:"уровней экспертной глубины — от Free до Enterprise"},{to:null,sfx:"∞",lbl:"сценариев для анализа альтернативных исходов"}].map((m,i)=>(
+          {[{to:2,sfx:t("lm1_sfx","мин"),lbl:t("lm1_lbl","от вопроса до первой стратегической карты")},{to:94,sfx:"%",lbl:t("lm2_lbl","точность AI-анализа на тестовых кейсах McKinsey")},{to:5,sfx:"",lbl:t("lm3_lbl","уровней экспертной глубины — от Free до Enterprise")},{to:null,sfx:"∞",lbl:t("lm4_lbl","сценариев для анализа альтернативных исходов")}].map((m,i)=>(
             <div key={i} className="lmc" style={{padding:"58px 44px",borderRight:i<3?"1px solid rgba(255,255,255,.06)":undefined,transition:"background .38s"}} onMouseOver={e=>e.currentTarget.style.background="rgba(99,102,241,.05)"} onMouseOut={e=>e.currentTarget.style.background=""}>
               <div className="lmc-val" style={{fontSize:70,fontWeight:900,letterSpacing:-3.5,lineHeight:.88,color:"#f0eeff",marginBottom:14,display:"flex",alignItems:"flex-end",gap:3}}>
                 {m.to?<span className="lcnt" data-to={m.to}>0</span>:<span style={{fontSize:64,letterSpacing:-2}}>{m.sfx}</span>}
@@ -5579,10 +5697,10 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
             <div className="lrv-l">
-              {tag("Возможности")}
-              <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("tools_label","Инструментарий")}<br/>стратегического<br/><span className="lgrad">лидера</span></h2>
+              {tag(t("tag_features","Возможности"))}
+              <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("tools_label","Инструментарий")}<br/>{t("strategic_word","стратегического")}<br/><span className="lgrad">{t("feat_leader_word","лидера")}</span></h2>
             </div>
-            <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>Каждый инструмент создан для людей, которые принимают решения с последствиями. Не для экспериментов — для результата.</p>
+            <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("feat_sub","Каждый инструмент создан для людей, которые принимают решения с последствиями. Не для экспериментов — для результата.")}</p>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
             {FEATS.map((f,i)=>(
@@ -5601,10 +5719,10 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
             <div className="lrv-l">
-              {tag("Процесс")}
-              <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>Три шага<br/>до рабочей<br/><span className="lgrad">стратегии</span></h2>
+              {tag(t("tag_process","Процесс"))}
+              <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("three_steps","Три шага")}<br/>{t("to_working","до рабочей")}<br/><span className="lgrad">{t("proc_heading_end","стратегии")}</span></h2>
             </div>
-            <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>Никаких шаблонов. AI строит карту с нуля, опираясь исключительно на контекст вашего бизнеса.</p>
+            <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("proc_sub","Никаких шаблонов. AI строит карту с нуля, опираясь исключительно на контекст вашего бизнеса.")}</p>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
             {STEPS.map((s,i)=>(
@@ -5623,8 +5741,8 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       <section style={{padding:"0 0 130px",position:"relative",zIndex:2}}>
         <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
           <div className="lrv" style={{marginBottom:72}}>
-            {tag("Отзывы")}
-            <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("speaks_word","Говорят те,")}<br/>кто <span className="lgrad">проверил</span></h2>
+            {tag(t("tag_testimonials","Отзывы"))}
+            <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("speaks_word","Говорят те,")}<br/>{t("who_word","кто")} <span className="lgrad">{t("testi_checked","проверил")}</span></h2>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
             {TESTI.map((tc,i)=>(
@@ -5644,16 +5762,16 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
             <div className="lrv-l">
-              {tag("Тарифы")}
-              <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>Начните<br/>{t("for_free","бесплатно.")}<br/><span className="lgrad">Без лимитов.</span></h2>
+              {tag(t("tag_pricing_label","Тарифы"))}
+              <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("pricing_start_word","Начните")}<br/>{t("for_free","бесплатно.")}<br/><span className="lgrad">{t("no_limits","Без лимитов.")}</span></h2>
             </div>
-            <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.</p>
+            <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("pricing_sub","Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.")}</p>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)",alignItems:"start"}}>
             {PRICING.map((p,i)=>(
               <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"50px 42px",position:"relative",cursor:"default",transition:"background .35s"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
                 {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#6366f1,#8b5cf6)"}}/>}
-                {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(99,102,241,.18)",border:"1px solid rgba(99,102,241,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#818cf8",letterSpacing:2,textTransform:"uppercase"}}>★ ТОП</div>}
+                {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(99,102,241,.18)",border:"1px solid rgba(99,102,241,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#818cf8",letterSpacing:2,textTransform:"uppercase"}}>{t("pricing_hot_badge","★ ТОП")}</div>}
                 <span className="lprc-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:p.hot?"#818cf8":"rgba(240,238,255,.3)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:26}}>{p.tier}</span>
                 <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
                   <span style={{fontSize:p.tier==="Enterprise"?54:76,fontWeight:900,letterSpacing:p.tier==="Enterprise"?-2:-4.5,lineHeight:.88,color:"#f0eeff",...(p.hot?{background:"linear-gradient(135deg,#818cf8,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}:{})}}>{p.price}</span>
@@ -5686,16 +5804,16 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
             <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 88% 88% at 50% 50%,rgba(3,3,10,.88) 28%,rgba(3,3,10,.6) 100%)",zIndex:1,pointerEvents:"none"}}/>
             <div style={{position:"relative",zIndex:2}}>
               <h2 style={{fontSize:"clamp(48px,6.8vw,88px)",fontWeight:900,letterSpacing:-3.5,lineHeight:.88,color:"#f0eeff",marginBottom:22}}>
-                Первый шаг<br/>занимает<br/><span className="lgrad">две минуты</span>
+                {t("cta_h1","Первый шаг")}<br/>{t("cta_h2","занимает")}<br/><span className="lgrad">{t("cta_h3","две минуты")}</span>
               </h2>
               <p style={{fontSize:17,fontWeight:300,color:"rgba(240,238,255,.45)",lineHeight:1.78,maxWidth:500,margin:"0 auto 52px"}}>
-                Создайте первую стратегическую карту прямо сейчас. Без кредитной карты. Без шаблонов — только ваш бизнес и AI.
+                {t("cta_sub","Создайте первую стратегическую карту прямо сейчас. Без кредитной карты. Без шаблонов — только ваш бизнес и AI.")}
               </p>
               <button className="lbtn-prim" onClick={onGetStarted} style={{fontSize:17,padding:"18px 54px"}}>{t("start_work","Начать работу →")}</button>
               <div style={{display:"flex",gap:32,justifyContent:"center",marginTop:30,flexWrap:"wrap"}}>
-                {["Бесплатно навсегда","Без кредитной карты","Данные только ваши"].map(t=>(
-                  <div key={t} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.25)",letterSpacing:1,display:"flex",alignItems:"center",gap:9}}>
-                    <span style={{color:"#10b981",fontWeight:700}}>—</span>{t}
+                {[t("cta_trust1","Бесплатно навсегда"),t("cta_trust2","Без кредитной карты"),t("cta_trust3","Данные только ваши")].map(lbl=>(
+                  <div key={lbl} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.25)",letterSpacing:1,display:"flex",alignItems:"center",gap:9}}>
+                    <span style={{color:"#10b981",fontWeight:700}}>—</span>{lbl}
                   </div>
                 ))}
               </div>
