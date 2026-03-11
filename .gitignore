@@ -19,6 +19,8 @@ dist/
 build/
 .next/
 out/
+public/app.js
+public/app.js.map
 
 # OS files
 .DS_Store

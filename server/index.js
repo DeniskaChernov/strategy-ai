@@ -170,6 +170,15 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: '1.1.0', time: new Date().toISOString() });
 });
 
+// ── Фронтенд (статика из /public) ─────────────────────────────────────────────
+const path = require('path');
+const publicDir = path.join(__dirname, '..', 'public');
+app.use(express.static(publicDir));
+// SPA fallback — все не-API роуты отдают index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
+
 // ── Global error handler ──────────────────────────────────────────────────────
 if (Sentry) {
   app.use(Sentry.Handlers.errorHandler());
