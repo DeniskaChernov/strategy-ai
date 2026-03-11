@@ -157,10 +157,16 @@ async function initDB() {
 async function seedDB() {
   const bcrypt = require('bcryptjs');
 
-  const DEV_EMAIL    = process.env.DEV_EMAIL    || 'denisblackman2@gmail.com';
-  const DEV_PASSWORD = process.env.DEV_PASSWORD || 'Denis123';
-  const DEV_NAME     = process.env.DEV_NAME     || 'Denis';
+  const DEV_EMAIL    = process.env.DEV_EMAIL;
+  const DEV_PASSWORD = process.env.DEV_PASSWORD;
+  const DEV_NAME     = process.env.DEV_NAME     || 'Admin';
   const DEV_TIER     = process.env.DEV_TIER     || 'team';
+
+  // Пропускаем seed если переменные не заданы
+  if (!DEV_EMAIL || !DEV_PASSWORD) {
+    console.log('ℹ️  Seed skipped: DEV_EMAIL / DEV_PASSWORD not set in environment');
+    return;
+  }
 
   try {
     // Проверяем — существует ли уже dev-аккаунт
