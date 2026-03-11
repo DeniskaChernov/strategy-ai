@@ -170,15 +170,6 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: '1.1.0', time: new Date().toISOString() });
 });
 
-// ── Фронтенд (статика из /public) ─────────────────────────────────────────────
-const path = require('path');
-const publicDir = path.join(__dirname, '..', 'public');
-app.use(express.static(publicDir));
-// SPA fallback — все не-API роуты отдают index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
-});
-
 // ── Global error handler ──────────────────────────────────────────────────────
 if (Sentry) {
   app.use(Sentry.Handlers.errorHandler());
@@ -191,6 +182,18 @@ app.use((err, req, res, _next) => {
   }
   res.status(status).json({
     error: status === 500 ? 'Внутренняя ошибка сервера' : err.message,
+  });
+});
+
+// ── Фронтенд (статика из /public) — ПОСЛЕ error handler и API роутов ─────────
+const path = require('path');
+const publicDir = path.join(__dirname, '..', 'public');
+app.use(express.static(publicDir));
+// SPA fallback — все не-API роуты отдают index.html
+app.get('*', (req, res) => {
+  const indexFile = path.join(publicDir, 'index.html');
+  res.sendFile(indexFile, err => {
+    if (err) res.status(404).send('App not built yet. Run: npm run build');
   });
 });
 
