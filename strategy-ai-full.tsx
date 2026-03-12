@@ -1454,6 +1454,8 @@ function normalizeUser(raw:any){
     compactMode:raw.compactMode??raw.compact_mode,
     defaultView:raw.defaultView??raw.default_view,
     aiLang:raw.aiLang??raw.ai_lang,
+    theme:raw.theme??"dark",
+    palette:raw.palette??"indigo",
     createdAt:raw.createdAt??raw.created_at,
     trialEndsAt:raw.trialEndsAt??raw.trial_ends_at,
     emailVerified:raw.emailVerified??raw.email_verified??true,
@@ -1502,9 +1504,11 @@ async function patchUser(email:string,patch:any){
       if(patch.compactMode!==undefined)body.compact_mode=patch.compactMode;
       if(patch.defaultView!==undefined)body.default_view=patch.defaultView;
       if(patch.tier!==undefined)body.tier=patch.tier;
+      if(patch.theme!==undefined)body.theme=patch.theme;
+      if(patch.palette!==undefined)body.palette=patch.palette;
       const d=await apiFetch("/api/auth/profile",{method:"PATCH",body:JSON.stringify(body)});
       return normalizeUser(d.user);
-    }catch{return null;}
+    }catch(e:any){throw e;}
   }
   const a=await store.get("sa_acc")||[],upd=a.map((x:any)=>x.email===email?{...x,...patch}:x);
   await store.set("sa_acc",upd);return upd.find((x:any)=>x.email===email);
@@ -2195,9 +2199,11 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   async function saveName(){
     if(!name.trim())return;
     setLoading(true);
-    const u=await patchUser(user.email,{name:name.trim(),bio:bio.trim()});
-    if(u)onUpdate(u);
-    setMsg({t:t("profile_saved","Профиль обновлён ✓"),ok:true});
+    try{
+      const u=await patchUser(user.email,{name:name.trim(),bio:bio.trim()});
+      if(u)onUpdate(u);
+      setMsg({t:t("profile_saved","Профиль обновлён ✓"),ok:true});
+    }catch(e:any){setMsg({t:e?.message||t("save_error","Ошибка сохранения"),ok:false});}
     setLoading(false);
   }
   async function changePw(){
@@ -2218,12 +2224,15 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
     setCp("");setNp("");setCf("");setMsg({t:t("pw_changed","Пароль изменён ✓"),ok:true});setLoading(false);
   }
   async function saveSettings(){
-    setLoading(true);
-    const u=await patchUser(user.email,{notifEmail,notifPush,autoSave,compactMode,defaultView,aiLang});
-    if(u)onUpdate(u);
-    if(uiLang!==lang)setLang(uiLang);
-    setSettingsSaved(true);setLoading(false);
-    setTimeout(()=>setSettingsSaved(false),2200);
+    setLoading(true);setMsg(null);
+    try{
+      const u=await patchUser(user.email,{notifEmail,notifPush,autoSave,compactMode,defaultView,aiLang});
+      if(u)onUpdate(u);
+      if(uiLang!==lang)setLang(uiLang);
+      setSettingsSaved(true);
+      setTimeout(()=>setSettingsSaved(false),2200);
+    }catch(e:any){setMsg({t:e?.message||t("save_error","Ошибка сохранения"),ok:false});}
+    setLoading(false);
   }
   async function executeBuy(){
     // Dev-аккаунт — мгновенное переключение без оплаты
@@ -2492,11 +2501,12 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 </div>
               </div>
 
-              <div style={{marginTop:24,maxWidth:720,display:"flex",alignItems:"center",gap:12}}>
+              <div style={{marginTop:24,maxWidth:720,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
                 <button onClick={saveSettings} disabled={loading} style={{padding:"12px 28px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
                   {loading?t("saving","Сохраняю…"):t("save_settings","Сохранить настройки")}
                 </button>
                 {settingsSaved&&<div style={{fontSize:13.5,color:"#10b981",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> {t("settings_saved","Настройки сохранены ✓")}</div>}
+                {msg&&!settingsSaved&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#10b981":"#ef4444",fontSize:13.5}}>{msg.t}</div>}
               </div>
             </div>
           )}
@@ -6507,6 +6517,12 @@ export default function App(){
   const[paymentToast,setPaymentToast]=useState(false);
   const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
+  // Синхронизация темы и палитры из профиля пользователя (при загрузке с API)
+  useEffect(()=>{
+    if(!user?.theme&&!user?.palette)return;
+    if(user.theme){setTheme(user.theme);try{localStorage.setItem("sa_theme",user.theme);}catch{}}
+    if(user.palette){setPalette(user.palette);try{localStorage.setItem("sa_palette",user.palette);}catch{}}
+  },[user?.email]);
   // t функция для LangCtx.Provider (App является корневым провайдером)
   const t=(k:string,fb?:string)=>{
     try{const L=(LANGS as any);return(L[lang]||L.ru)?.[k]||fb||k;}catch{return fb||k;}
@@ -6626,8 +6642,8 @@ export default function App(){
     setMapData(m);setMapIsNew(isNew||false);setMapReadOnly(readOnlyMap);setScreen("map");
   }
 
-  function toggleTheme(){const next=t=>t==="dark"?"light":"dark";setTheme(t=>{const n=next(t);try{localStorage.setItem("sa_theme",n);}catch{};return n;});}
-  function changePalette(p:string){setPalette(p);try{localStorage.setItem("sa_palette",p);}catch{};}
+  function toggleTheme(){const next=t=>t==="dark"?"light":"dark";setTheme(t=>{const n=next(t);try{localStorage.setItem("sa_theme",n);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{theme:n}).catch(()=>{});return n;});}
+  function changePalette(p:string){setPalette(p);try{localStorage.setItem("sa_palette",p);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{palette:p}).catch(()=>{});}
 
   if(showTiers){
     return(

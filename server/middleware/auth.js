@@ -28,7 +28,7 @@ async function requireAuth(req, res, next) {
 
     // Проверяем, что пользователь ещё существует
     const { rows } = await pool.query(
-      'SELECT id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, trial_ends_at, stripe_subscription_id, tier_valid_until, created_at, email_verified FROM users WHERE email = $1',
+      'SELECT id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, theme, palette, trial_ends_at, stripe_subscription_id, tier_valid_until, created_at, email_verified FROM users WHERE email = $1',
       [decoded.email]
     );
     if (!rows[0]) {

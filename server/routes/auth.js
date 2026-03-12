@@ -48,7 +48,7 @@ router.post('/register', async (req, res, next) => {
         `INSERT INTO users (email, password_hash, name, tier, trial_ends_at, email_verified, email_verify_token)
          VALUES ($1, $2, $3, 'starter', $4, false, $5)
          RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push,
-                   auto_save, compact_mode, default_view, trial_ends_at, created_at, email_verified`,
+                   auto_save, compact_mode, default_view, theme, palette, trial_ends_at, created_at, email_verified`,
         [emailLower, hash, displayName, trialEndsAt.toISOString(), verifyToken]
       );
       user = rows[0];
@@ -163,13 +163,21 @@ router.post('/resend-verification', requireAuth, async (req, res, next) => {
 // PATCH /api/auth/profile — обновить профиль
 router.patch('/profile', requireAuth, async (req, res, next) => {
   try {
-    const { name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, tier } = req.body;
+    const { name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, tier, theme, palette } = req.body;
 
     // Валидация входных данных
     const ALLOWED_VIEWS = ['canvas', 'list', 'gantt'];
     const ALLOWED_TIERS = ['free', 'starter', 'pro', 'team', 'enterprise'];
+    const ALLOWED_THEMES = ['dark', 'light'];
+    const ALLOWED_PALETTES = ['indigo', 'ocean', 'forest', 'sunset', 'mono'];
     if (default_view && !ALLOWED_VIEWS.includes(default_view)) {
       return res.status(400).json({ error: 'Недопустимое значение default_view' });
+    }
+    if (theme && !ALLOWED_THEMES.includes(theme)) {
+      return res.status(400).json({ error: 'Недопустимое значение theme' });
+    }
+    if (palette && !ALLOWED_PALETTES.includes(palette)) {
+      return res.status(400).json({ error: 'Недопустимое значение palette' });
     }
     if (name && typeof name === 'string' && name.length > 100) {
       return res.status(400).json({ error: 'Имя не может быть длиннее 100 символов' });
@@ -193,10 +201,12 @@ router.patch('/profile', requireAuth, async (req, res, next) => {
         compact_mode = COALESCE($7, compact_mode),
         default_view = COALESCE($8, default_view),
         tier         = COALESCE($10, tier),
+        theme        = COALESCE($11, theme),
+        palette      = COALESCE($12, palette),
         updated_at   = now()
        WHERE email = $9
-       RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, trial_ends_at, created_at, email_verified`,
-      [name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, req.user.email, newTier]
+       RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, theme, palette, trial_ends_at, created_at, email_verified`,
+      [name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, req.user.email, newTier, theme, palette]
     );
     res.json({ user: rows[0] });
   } catch (err) {

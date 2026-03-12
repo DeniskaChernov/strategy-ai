@@ -27,6 +27,8 @@ async function initDB() {
         auto_save       BOOLEAN NOT NULL DEFAULT true,
         compact_mode    BOOLEAN NOT NULL DEFAULT false,
         default_view    TEXT NOT NULL DEFAULT 'canvas',
+        theme          TEXT NOT NULL DEFAULT 'dark',
+        palette        TEXT NOT NULL DEFAULT 'indigo',
         stripe_customer_id      TEXT,
         stripe_subscription_id  TEXT,
         tier_valid_until         TIMESTAMPTZ,
@@ -148,6 +150,8 @@ async function initDB() {
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT true`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_token TEXT`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_users_verify_token ON users(email_verify_token) WHERE email_verify_token IS NOT NULL`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS theme TEXT DEFAULT 'dark'`);
+    await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS palette TEXT DEFAULT 'indigo'`);
 
     await client.query('COMMIT');
     console.log('✅ Database initialized');
