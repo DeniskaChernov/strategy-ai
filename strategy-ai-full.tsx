@@ -2706,8 +2706,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px)",backgroundSize:"auto,60px 60px,60px 60px",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",padding:"14px 28px",position:"relative",zIndex:10}}>
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
-          <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,boxShadow:"0 4px 14px rgba(99,102,241,.4)"}}>✦</div>
-          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.4}}>Strategy AI</span>
+          <img src="/logo.svg" alt="Strategy AI" style={{height:26,width:"auto",objectFit:"contain"}}/>
         </div>
         <div style={{display:"flex",gap:10}}>
           <button onClick={onToggleTheme} style={{padding:"7px 12px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,cursor:"pointer"}}>{theme==="dark"?"☀️":"🌙"}</button>
@@ -2782,8 +2781,7 @@ function LandingFooter(){
       <div style={{maxWidth:1100,margin:"0 auto",display:"flex",flexWrap:"wrap",gap:24,justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>✦</div>
-            <span style={{fontSize:14,fontWeight:800,color:"#f1f5f9"}}>Strategy AI</span>
+            <img src="/logo.svg" alt="Strategy AI" style={{height:22,width:"auto",objectFit:"contain"}}/>
           </div>
           <p style={{fontSize:12,color:"#64748b",maxWidth:200,lineHeight:1.6,margin:0}}>{t("footer_tagline","Визуальное стратегическое планирование с AI-советником уровня McKinsey.")}</p>
         </div>
@@ -4693,8 +4691,7 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(99,102,241,.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:0}}>
-          <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>✦</div>
-          <span style={{fontSize:15,fontWeight:800,color:"var(--text)",letterSpacing:-.3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>Strategy AI</span>
+          <img src="/logo.svg" alt="Strategy AI" style={{height:26,width:"auto",objectFit:"contain",flexShrink:0}}/>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0}}>
           <button onClick={onToggleTheme} style={{padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{theme==="dark"?"☀️":"🌙"}</button>
@@ -6253,8 +6250,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         borderBottom:navSolid?"1px solid rgba(255,255,255,.06)":"none",
         transition:"background .5s,border-color .5s"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
-          <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,boxShadow:"0 6px 22px rgba(99,102,241,.5)",transition:"transform .4s",cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.transform="rotate(90deg) scale(1.1)"} onMouseOut={e=>e.currentTarget.style.transform=""}>✦</div>
-          <span style={{fontSize:17,fontWeight:900,letterSpacing:-.5,color:"#f0eeff"}}>Strategy AI</span>
+          <img src="/logo.svg" alt="Strategy AI" style={{height:28,width:"auto",objectFit:"contain",cursor:"pointer"}} onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}/>
         </div>
         {!isMobile&&(
           <>
@@ -6437,9 +6433,9 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
             </div>
             <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("pricing_sub","Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.")}</p>
           </div>
-          <div className="lpricing-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(255,255,255,.06)",alignItems:"start"}}>
+          <div className="lpricing-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"transparent",alignItems:"stretch"}}>
             {PRICING.map((p,i)=>(
-              <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"44px 36px",position:"relative",cursor:"default",transition:"background .35s"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
+              <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"44px 36px",position:"relative",cursor:"default",transition:"background .35s",display:"flex",flexDirection:"column"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
                 {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#6366f1,#8b5cf6)"}}/>}
                 {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(99,102,241,.18)",border:"1px solid rgba(99,102,241,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#818cf8",letterSpacing:2,textTransform:"uppercase"}}>{t("pricing_hot_badge","★ ТОП")}</div>}
                 <span className="lprc-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:p.hot?"#818cf8":"rgba(240,238,255,.3)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:26}}>{p.tier}</span>
@@ -6448,14 +6444,14 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
                   <span style={{fontSize:17,fontWeight:300,color:"rgba(240,238,255,.25)",marginBottom:10}}>{p.mo}</span>
                 </div>
                 <div className="lprc-desc" style={{fontSize:13,marginBottom:32,paddingBottom:32,borderBottom:"1px solid rgba(255,255,255,.06)",lineHeight:1.6}}>{p.desc}</div>
-                <ul style={{listStyle:"none",display:"flex",flexDirection:"column",gap:12,marginBottom:36,padding:0}}>
+                <ul style={{listStyle:"none",display:"flex",flexDirection:"column",gap:12,marginBottom:36,padding:0,flex:1}}>
                   {p.feats.map((f,j)=>(
                     <li key={j} className="lprc-feat" style={{display:"flex",alignItems:"flex-start",gap:10,fontSize:13.5,transition:"color .2s"}}>
                       <span style={{color:"rgba(240,238,255,.22)",flexShrink:0,marginTop:1}}>—</span>{f}
                     </li>
                   ))}
                 </ul>
-                <button className={p.btnCls} onClick={onGetStarted}>{p.cta}</button>
+                <button className={p.btnCls} onClick={onGetStarted} style={{marginTop:"auto"}}>{p.cta}</button>
               </div>
             ))}
           </div>
@@ -6506,24 +6502,25 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
 // ── WelcomeScreen (Auth) ──
 function WelcomeScreen({onLogin,onRegister,onBack,theme}){
   const{t}=useLang();
+  const isMobile=useIsMobile();
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg,#070b14)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
       <style>{CSS}</style>
       {/* Backgrounds */}
-      <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(99,102,241,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.04) 1px,transparent 1px)",backgroundSize:"50px 50px",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px)",backgroundSize:"50px 50px",pointerEvents:"none"}}/>
       <div style={{position:"absolute",width:700,height:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 65%)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",filter:"blur(80px)",pointerEvents:"none"}}/>
       {/* Back button */}
-      <button onClick={onBack} style={{position:"absolute",top:24,left:24,display:"flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:10,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.04)",color:"#94a3b8",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(255,255,255,.08)";e.currentTarget.style.color="#e2e8f0";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.color="#94a3b8";}}>{t("back_btn","← Назад")}</button>
+      <button onClick={onBack} style={{position:"absolute",top:24,left:24,display:"flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text2)";}}>{t("back_btn","← Назад")}</button>
       {/* Auth card */}
-      <div style={{width:"min(96vw,440px)",animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
+      <div style={{width:"min(96vw,440px)",padding:isMobile?16:0,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:32}}>
           <div style={{width:64,height:64,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 16px",boxShadow:"0 16px 48px rgba(99,102,241,.6)",animation:"float 3s ease infinite"}}>✦</div>
-          <div style={{fontSize:28,fontWeight:900,color:"#e2e8f0",letterSpacing:-1,marginBottom:6}}>Strategy AI</div>
-          <div style={{fontSize:14,color:"#64748b"}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
+          <div style={{fontSize:28,fontWeight:900,color:"var(--text)",letterSpacing:-1,marginBottom:6}}>Strategy AI</div>
+          <div style={{fontSize:14,color:"var(--text3)"}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
         </div>
         {/* Card */}
-        <div style={{background:"rgba(255,255,255,.04)",borderRadius:24,border:"1px solid rgba(255,255,255,.1)",padding:"36px",backdropFilter:"blur(20px)"}}>
+        <div style={{background:"var(--surface2)",borderRadius:24,border:"1px solid var(--border)",padding:isMobile?24:36,backdropFilter:"blur(20px)"}}>
           {/* Buttons */}
           <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
             <button onClick={onRegister}
@@ -6533,24 +6530,24 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
               {t("ws_start_btn","Начать бесплатно ✦")}
             </button>
             <button onClick={onLogin}
-              style={{padding:"15px",borderRadius:14,border:"1.5px solid rgba(255,255,255,.15)",background:"rgba(255,255,255,.04)",color:"#e2e8f0",fontSize:15,fontWeight:700,cursor:"pointer",transition:"all .2s",letterSpacing:-.2}}
-              onMouseOver={e=>{e.currentTarget.style.background="rgba(255,255,255,.09)";e.currentTarget.style.borderColor="rgba(255,255,255,.28)";}}
-              onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="rgba(255,255,255,.15)";}}>
+              style={{padding:"15px",borderRadius:14,border:"1.5px solid var(--border2)",background:"var(--surface)",color:"var(--text)",fontSize:15,fontWeight:700,cursor:"pointer",transition:"all .2s",letterSpacing:-.2}}
+              onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.borderColor="var(--accent-1)";}}
+              onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border2)";}}>
               {t("ws_login_btn","Уже есть аккаунт — Войти →")}
             </button>
           </div>
           {/* Divider */}
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:24}}>
-            <div style={{flex:1,height:1,background:"rgba(255,255,255,.08)"}}/>
+            <div style={{flex:1,height:1,background:"var(--divider)"}}/>
             <span style={{fontSize:13,color:"var(--text4)",fontWeight:600,letterSpacing:.5}}>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span>
-            <div style={{flex:1,height:1,background:"rgba(255,255,255,.08)"}}/>
+            <div style={{flex:1,height:1,background:"var(--divider)"}}/>
           </div>
           {/* Features grid */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:12}}>
             {[["🗺",t("ws_feat1","Карты целей")],["✦",t("ws_feat2","AI советник")],["📅",t("ws_feat3","Gantt-план")],["⬇",t("ws_feat4","PNG/JSON экспорт")],["⎇",t("ws_feat5","1 сценарий")],["📌",t("ws_feat6","До 5 шагов")]].map(([ic,lbl])=>(
-              <div key={lbl} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:11,background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)"}}>
+              <div key={lbl} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)"}}>
                 <span style={{fontSize:16,flexShrink:0}}>{ic}</span>
-                <span style={{fontSize:13.5,color:"#94a3b8",fontWeight:600}}>{lbl}</span>
+                <span style={{fontSize:13.5,color:"var(--text2)",fontWeight:600}}>{lbl}</span>
               </div>
             ))}
           </div>
