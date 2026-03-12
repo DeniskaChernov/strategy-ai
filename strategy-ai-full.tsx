@@ -479,6 +479,7 @@ const LANGS={
     lpr1_desc:"Для знакомства с инструментом",lpr1_f1:"1 проект и 1 стратегическая карта",lpr1_f2:"AI-интервью и генерация карты",lpr1_f3:"Gantt-таймлайн",lpr1_f4:"PNG / JSON экспорт",start_free_cta:"Начать бесплатно",
     lpr_starter_desc:"Мягкий вход в стратегическое планирование",lpr_starter_f1:"3 проекта, 3 карты каждый",lpr_starter_f2:"2 сценария + AI анализ рисков",lpr_starter_f3:"Полный Gantt + приоритеты",lpr_starter_f4:"1 500 AI-сообщений / мес",lpr_starter_cta:"Начать за $9 →",
     lpr2_desc:"Для профессионалов и команд",lpr2_f1:"10 проектов, 5 карт каждая",lpr2_f2:"SWOT, OKR, BCG, Porter AI-анализ",lpr2_f3:"5 сценариев + симуляция последствий",lpr2_f4:"Клонирование и версионирование карт",lpr2_f5:"Командная работа до 3 человек",lpr2_cta:"Перейти на Pro →",
+    lpr_team_desc:"Для команд до 10 человек",lpr_team_f1:"25 проектов, 15 карт каждая",lpr_team_f2:"Шаблоны и 15 сценариев",lpr_team_f3:"Командная работа до 10 человек",lpr_team_f4:"Полный AI + приоритетная поддержка",lpr_team_cta:"Перейти на Team →",
     lpr3_desc:"Для организаций с системным подходом",lpr3_f1:"Без ограничений: проекты, карты, сценарии",lpr3_f2:"C-level AI коллегиум (5 экспертных ролей)",lpr3_f3:"PPTX-отчёты для совета директоров",lpr3_f4:"White-label и API-интеграции",lpr3_f5:"Выделенный менеджер поддержки",lpr3_cta:"Связаться",
     // Landing CTA section
     cta_h1:"Первый шаг",cta_h2:"занимает",cta_h3:"две минуты",
@@ -523,6 +524,8 @@ const LANGS={
     // AI/export
     ai_error:"Ошибка AI-анализа",
     ai_comment_error:"Ошибка AI. Попробуйте ещё раз.",
+    ai_network_err:"Не удалось получить ответ AI. Проверьте сеть и ключ API. Попробуйте ещё раз.",
+    ai_map_fallback:"AI не удалось создать карту. Используем базовый шаблон — вы можете отредактировать его.",
     ai_generation_error:"Ошибка генерации. Попробуйте ещё раз.",
     ai_sim_error:"Ошибка AI-консультанта",
     export_pdf:"Скачать PDF",export_pptx:"Скачать PPTX",
@@ -833,6 +836,7 @@ const LANGS={
     lpr1_desc:"To get acquainted with the tool",lpr1_f1:"1 project and 1 strategy map",lpr1_f2:"AI interview and map generation",lpr1_f3:"Gantt timeline",lpr1_f4:"PNG / JSON export",start_free_cta:"Start free",
     lpr_starter_desc:"A gentle entry into strategic planning",lpr_starter_f1:"3 projects, 3 maps each",lpr_starter_f2:"2 scenarios + AI risk analysis",lpr_starter_f3:"Full Gantt + priorities",lpr_starter_f4:"1,500 AI messages / month",lpr_starter_cta:"Start for $9 →",
     lpr2_desc:"For professionals and teams",lpr2_f1:"10 projects, 5 maps each",lpr2_f2:"SWOT, OKR, BCG, Porter AI-analysis",lpr2_f3:"5 scenarios + consequence simulation",lpr2_f4:"Map cloning and versioning",lpr2_f5:"Team collaboration up to 3 people",lpr2_cta:"Go Pro →",
+    lpr_team_desc:"For teams up to 10 people",lpr_team_f1:"25 projects, 15 maps each",lpr_team_f2:"Templates and 15 scenarios",lpr_team_f3:"Team collaboration up to 10 people",lpr_team_f4:"Full AI + priority support",lpr_team_cta:"Go Team →",
     lpr3_desc:"For organizations with a systematic approach",lpr3_f1:"Unlimited: projects, maps, scenarios",lpr3_f2:"C-level AI collegium (5 expert roles)",lpr3_f3:"PPTX reports for board of directors",lpr3_f4:"White-label and API integrations",lpr3_f5:"Dedicated support manager",lpr3_cta:"Contact us",
     // Landing CTA section
     cta_h1:"The first step",cta_h2:"takes only",cta_h3:"two minutes",
@@ -877,6 +881,8 @@ const LANGS={
     // AI/export
     ai_error:"AI analysis error",
     ai_comment_error:"AI error. Please try again.",
+    ai_network_err:"Failed to get AI response. Check network and API key. Try again.",
+    ai_map_fallback:"AI couldn't create the map. Using a basic template — you can edit it.",
     ai_generation_error:"Generation error. Please try again.",
     ai_sim_error:"AI consultant error",
     export_pdf:"Download PDF",export_pptx:"Download PPTX",
@@ -1191,6 +1197,7 @@ const LANGS={
     lpr1_desc:"Vosita bilan tanishish uchun",lpr1_f1:"1 loyiha va 1 strategiya xaritasi",lpr1_f2:"AI suhbat va xarita generatsiyasi",lpr1_f3:"Gantt taymlayn",lpr1_f4:"PNG / JSON eksport",start_free_cta:"Bepul boshlash",
     lpr_starter_desc:"Strategik rejalashtishga yumshoq kirish",lpr_starter_f1:"3 loyiha, har birida 3 xarita",lpr_starter_f2:"2 stsenariy + AI xavf tahlili",lpr_starter_f3:"To'liq Gantt + ustuvorliklar",lpr_starter_f4:"1 500 AI xabarlari / oy",lpr_starter_cta:"$9 dan boshlash →",
     lpr2_desc:"Mutaxassislar va jamoalar uchun",lpr2_f1:"10 loyiha, har birida 5 xarita",lpr2_f2:"SWOT, OKR, BCG, Porter AI tahlili",lpr2_f3:"5 stsenariy + oqibatlar simulyatsiyasi",lpr2_f4:"Xaritani klonlash va versiyalash",lpr2_f5:"3 kishigacha jamoa hamkorligi",lpr2_cta:"Pro ga o'tish →",
+    lpr_team_desc:"10 kishigacha jamoalar uchun",lpr_team_f1:"25 loyiha, har birida 15 xarita",lpr_team_f2:"Shablonlar va 15 stsenariy",lpr_team_f3:"10 kishigacha jamoa hamkorligi",lpr_team_f4:"To'liq AI + ustuvor qo'llab-quvvatlash",lpr_team_cta:"Team ga o'tish →",
     lpr3_desc:"Tizimli yondashuvga ega tashkilotlar uchun",lpr3_f1:"Cheksiz: loyihalar, xaritalar, stsenariylar",lpr3_f2:"C-level AI kollegium (5 ekspert rol)",lpr3_f3:"Direktorlar kengashi uchun PPTX hisobotlar",lpr3_f4:"White-label va API integratsiyalar",lpr3_f5:"Maxsus qo'llab-quvvatlash menejeri",lpr3_cta:"Bog'lanish",
     // Landing CTA section
     cta_h1:"Birinchi qadam",cta_h2:"faqat",cta_h3:"ikki daqiqa oladi",
@@ -1235,6 +1242,8 @@ const LANGS={
     // AI/export
     ai_error:"AI tahlil xatosi",
     ai_comment_error:"AI xatosi. Qayta urining.",
+    ai_network_err:"AI javob olish muvaffaqiyatsiz. Tarmoq va API kalitini tekshiring.",
+    ai_map_fallback:"AI xarita yarata olmadi. Asosiy shablon ishlatiladi.",
     ai_generation_error:"Generatsiya xatosi. Qayta urining.",
     ai_sim_error:"AI maslahatchi xatosi",
     export_pdf:"PDF yuklab olish",export_pptx:"PPTX yuklab olish",
@@ -1941,7 +1950,7 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
         </div>
         <div style={{padding:"20px 24px 24px"}}>
           <div style={{textAlign:"center",marginBottom:22}}>
-            <img src="/logo.png" alt="" style={{width:48,height:48,objectFit:"contain",margin:"0 auto 12px",display:"block"}}/>
+            <img src="/logo.png" alt="Strategy AI" style={{width:48,height:48,objectFit:"contain",margin:"0 auto 12px",display:"block"}}/>
             <div style={{fontSize:18,fontWeight:700,color:"var(--text)"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
             {subtitle&&<div style={{fontSize:13,color:"var(--text4)",marginTop:6,lineHeight:1.5}}>{subtitle}</div>}
           </div>
@@ -2706,7 +2715,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px)",backgroundSize:"auto,60px 60px,60px 60px",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",padding:"14px 28px",position:"relative",zIndex:10}}>
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
-          <img src="/logo.png" alt="" style={{height:32,width:32,objectFit:"contain"}}/>
+          <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain"}}/>
           <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         <div style={{display:"flex",gap:10}}>
@@ -2782,7 +2791,7 @@ function LandingFooter(){
       <div style={{maxWidth:1100,margin:"0 auto",display:"flex",flexWrap:"wrap",gap:24,justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <img src="/logo.png" alt="" style={{height:28,width:28,objectFit:"contain"}}/>
+            <img src="/logo.png" alt="Strategy AI" style={{height:28,width:28,objectFit:"contain"}}/>
             <span style={{fontSize:15,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
           </div>
           <p style={{fontSize:12,color:"#64748b",maxWidth:200,lineHeight:1.6,margin:0}}>{t("footer_tagline","Визуальное стратегическое планирование с AI-советником уровня McKinsey.")}</p>
@@ -2831,8 +2840,8 @@ function Onboarding({onDone,onBack,theme="dark"}){
       if(reply.trim()==="READY"||hist.length>=MAX_Q*2){await buildMap(hist);}
       else{setMsgs(m=>[...m,{role:"ai",text:reply.trim()}]);setQCount(q=>q+1);setLoading(false);}
     }catch{
-      setMsgs(m=>[...m,{role:"ai",text:"Расскажите о своём продукте — что создаёте и для кого?"}]);
-      setQCount(1);setLoading(false);
+      setMsgs(m=>[...m,{role:"ai",text:t("ai_network_err","Не удалось получить ответ AI. Проверьте сеть и ключ API. Попробуйте ещё раз.")}]);
+      setLoading(false);
     }
   }
   async function submit(){
@@ -2854,8 +2863,9 @@ function Onboarding({onDone,onBack,theme="dark"}){
       const data=JSON.parse(clean);
       onDone({nodes:data.nodes||[],edges:data.edges||[],ctx});
     }catch{
+      setMsgs(m=>[...m,{role:"ai",text:t("ai_map_fallback","AI не удалось создать карту. Используем базовый шаблон — вы можете отредактировать его.")}]);
       onDone({nodes:defaultNodes(),edges:[{id:"e1",source:"n1",target:"n2",type:"requires",label:""},{id:"e2",source:"n2",target:"n4",type:"requires",label:""},{id:"e3",source:"n3",target:"n4",type:"affects",label:""}],ctx});
-    }
+    }finally{setGenerating(false);}
   }
   const progress=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
@@ -3914,6 +3924,8 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     return()=>{socket?.emit("leave-map",{mapId:mapData.id});socket?.disconnect();socketRef.current=null;setOnlineUsers([]);};
   },[mapData?.id,user?.email]);
 
+  useEffect(()=>{document.title=`${mapData?.name||project?.name||"Карта"} — Strategy AI`;return()=>{document.title="Strategy AI";};},[mapData?.name,project?.name]);
+
   // Трансляция перемещения узла через WebSocket
   function emitNodeMove(nodeId:string,x:number,y:number){
     socketRef.current?.emit("node-move",{mapId:mapData?.id,nodeId,x,y});
@@ -4322,7 +4334,7 @@ ${ctx}
   const sep=<div style={{width:1,height:22,background:"var(--border)",margin:"0 2px",flexShrink:0}}/>;
   // icon-only button
   const ib=(active,title,onClick,children,extraStyle={})=>(
-    <button onClick={onClick} title={title} style={{width:32,height:32,borderRadius:8,border:`1px solid ${active?"rgba(99,102,241,.5)":"var(--border)"}`,background:active?"rgba(99,102,241,.12)":"transparent",color:active?"#818cf8":"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s",...extraStyle}}
+    <button onClick={onClick} title={title} aria-label={title} style={{width:32,height:32,borderRadius:8,border:`1px solid ${active?"rgba(99,102,241,.5)":"var(--border)"}`,background:active?"rgba(99,102,241,.12)":"transparent",color:active?"#818cf8":"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s",...extraStyle}}
       onMouseOver={e=>{if(!active)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
       {children}
     </button>
@@ -4389,7 +4401,7 @@ ${ctx}
               <div style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",fontSize:13,fontWeight:600,color:"var(--text4)"}}>{t("read_only","Только просмотр")}</div>
             ):(
               <>
-            <button onClick={onProfile} title={t("profile_title","Профиль")}
+            <button onClick={onProfile} title={t("profile_title","Профиль")} aria-label={t("profile_title","Профиль")}
               style={{width:32,height:32,borderRadius:"50%",border:`2px solid ${tier.color}55`,background:`linear-gradient(135deg,${tier.color}cc,${tier.color}44)`,color:"#fff",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               {(user?.name||user?.email||"U")[0].toUpperCase()}
             </button>
@@ -4629,6 +4641,7 @@ ${ctx}
           <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(6px)"}} onClick={()=>setShowShortcuts(false)}>
             <div style={{background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",padding:"24px 28px",maxWidth:400,width:"90%",animation:"scaleIn .2s ease"}} onClick={e=>e.stopPropagation()}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:16}}>⌨️ Горячие клавиши</div>
+              <p style={{fontSize:12,color:"var(--text4)",marginBottom:12}}>💡 Ctrl+C / Ctrl+V работают и в этой модалке — можно скопировать комбинацию.</p>
               {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+F","Поиск шагов"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Escape","Выйти из режима связи"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Alt+Drag","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
                 <div key={row[0]} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--border)"}}>
                   <code style={{fontSize:13,background:"var(--surface)",padding:"2px 7px",borderRadius:5,color:"#818cf8",fontFamily:"'JetBrains Mono',monospace"}}>{row[0]}</code>
@@ -4670,6 +4683,8 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
     setMaps(mm);setLoading(false);
   })();},[]);
 
+  useEffect(()=>{document.title=loading?"Strategy AI — Загрузка…":"Strategy AI — Проекты";},[loading]);
+
   async function createProject(){
     if(!newName.trim())return;
     if(projects.filter(p=>p.owner===user.email).length>=tier.projects){return;}
@@ -4696,7 +4711,7 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(99,102,241,.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:0}}>
-          <img src="/logo.png" alt="" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
+          <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
           <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0}}>
@@ -4997,8 +5012,11 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               {canEdit&&tier.templates&&<button onClick={()=>setShowTmpls(true)} style={{padding:"7px 14px",borderRadius:9,border:"1px solid rgba(245,158,11,.25)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:13,fontWeight:700}}>📋 Из шаблона</button>}
               {canEdit&&<button onClick={()=>createMap()} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Новая карта</button>}
             </div>
-            {loading?<div style={{textAlign:"center",padding:"40px",color:"var(--text4)"}}>{t("loading_short","Загрузка…")}</div>
-            :regularMaps.length===0?(
+            {loading?(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:12}}>
+                {[1,2,3].map(i=><div key={i} style={{height:140,borderRadius:14,background:"var(--surface)",animation:"pulse 1.5s ease infinite",border:"1px solid var(--border)"}}/>)}
+              </div>
+            ):regularMaps.length===0?(
               <div style={{textAlign:"center",padding:"50px 20px",border:"1px dashed var(--border2)",borderRadius:16}}>
                 <div style={{fontSize:36,marginBottom:10}}>🗺️</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("no_maps","Нет карт")}</div>
@@ -5815,8 +5833,8 @@ function InMapOnboarding({project,tier,theme="dark",onDone,onSkip}){
       if(reply.trim()==="READY"||hist.length>=MAX_Q*2){await buildMap(hist);}
       else{setMsgs(m=>[...m,{role:"ai",text:reply.trim()}]);setQCount(q=>q+1);setLoading(false);}
     }catch{
-      setMsgs(m=>[...m,{role:"ai",text:`Расскажите о проекте "${project?.name}" — что создаёте и для кого?`}]);
-      setQCount(1);setLoading(false);
+      setMsgs(m=>[...m,{role:"ai",text:t("ai_network_err","Не удалось получить ответ AI. Проверьте сеть и ключ API. Попробуйте ещё раз.")}]);
+      setLoading(false);
     }
   }
   async function submit(){
@@ -5837,8 +5855,9 @@ function InMapOnboarding({project,tier,theme="dark",onDone,onSkip}){
       const data=JSON.parse(raw.replace(/```json|```/g,"").trim());
       onDone({nodes:data.nodes||[],edges:data.edges||[],ctx});
     }catch{
+      setMsgs(m=>[...m,{role:"ai",text:t("ai_map_fallback","AI не удалось создать карту. Используем базовый шаблон.")}]);
       onDone({nodes:defaultNodes(),edges:[],ctx});
-    }
+    }finally{setGenerating(false);}
   }
   const pct=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
@@ -5934,7 +5953,7 @@ function SplashScreen({onDone,theme}){
       <style>{CSS}</style>
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{animation:"float 3s ease infinite",marginBottom:32}}>
-        <img src="/logo.png" alt="" style={{width:96,height:96,objectFit:"contain"}}/>
+        <img src="/logo.png" alt="Strategy AI" style={{width:96,height:96,objectFit:"contain"}}/>
       </div>
       <div style={{fontSize:36,fontWeight:900,color:"var(--text,#e2e8f0)",letterSpacing:-1.5,marginBottom:6,animation:"slideUp .5s ease"}}>Strategy AI</div>
       
@@ -6076,6 +6095,9 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
     {tier:"Pro",    price:"29", mo:t("per_month","/мес"),desc:t("lpr2_desc","Для профессионалов и команд"),hot:true,
      feats:[t("lpr2_f1","10 проектов, 5 карт каждая"),t("lpr2_f2","SWOT, OKR, BCG, Porter AI-анализ"),t("lpr2_f3","5 сценариев + симуляция последствий"),t("lpr2_f4","Клонирование и версионирование карт"),t("lpr2_f5","Командная работа до 3 человек")],
      cta:t("lpr2_cta","Перейти на Pro →"),btnCls:"lp-fill"},
+    {tier:"Team",   price:"59", mo:t("per_month","/мес"),desc:t("lpr_team_desc","Для команд до 10 человек"),hot:false,
+     feats:[t("lpr_team_f1","25 проектов, 15 карт каждая"),t("lpr_team_f2","Шаблоны и 15 сценариев"),t("lpr_team_f3","Командная работа до 10 человек"),t("lpr_team_f4","Полный AI + приоритетная поддержка")],
+     cta:t("lpr_team_cta","Перейти на Team →"),btnCls:"lp-ghost"},
     {tier:"Enterprise",price:"149+",mo:t("per_month","/мес"),desc:t("lpr3_desc","Для организаций с системным подходом"),hot:false,
      feats:[t("lpr3_f1","Без ограничений: проекты, карты, сценарии"),t("lpr3_f2","C-level AI коллегиум (5 экспертных ролей)"),t("lpr3_f3","PPTX-отчёты для совета директоров"),t("lpr3_f4","White-label и API-интеграции"),t("lpr3_f5","Выделенный менеджер поддержки")],
      cta:t("lpr3_cta","Связаться"),btnCls:"lp-ghost"},
@@ -6109,8 +6131,8 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
     .lgc:nth-child(1),.ltc:nth-child(1),.lprc:nth-child(1),.lmc:nth-child(1),.lpc:nth-child(1){animation-delay:.05s}
     .lgc:nth-child(2),.ltc:nth-child(2),.lprc:nth-child(2),.lmc:nth-child(2),.lpc:nth-child(2){animation-delay:.13s}
     .lgc:nth-child(3),.ltc:nth-child(3),.lprc:nth-child(3),.lmc:nth-child(3),.lpc:nth-child(3){animation-delay:.21s}
-    .lgc:nth-child(4),.ltc:nth-child(4),.lmc:nth-child(4){animation-delay:.29s}
-    .lgc:nth-child(5),.ltc:nth-child(5){animation-delay:.37s}
+    .lgc:nth-child(4),.ltc:nth-child(4),.lmc:nth-child(4),.lprc:nth-child(4){animation-delay:.29s}
+    .lgc:nth-child(5),.ltc:nth-child(5),.lprc:nth-child(5){animation-delay:.37s}
     .lgc:nth-child(6),.ltc:nth-child(6){animation-delay:.45s}
     /* grid cell hover bottom line */
     .lgc,.ltc,.lprc,.lpc{position:relative;overflow:hidden;}
@@ -6261,7 +6283,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         borderBottom:navSolid?"1px solid rgba(255,255,255,.06)":"none",
         transition:"background .5s,border-color .5s"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1,cursor:"pointer"}} onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}>
-          <img src="/logo.png" alt="" style={{height:36,width:36,objectFit:"contain"}}/>
+          <img src="/logo.png" alt="Strategy AI" style={{height:36,width:36,objectFit:"contain"}}/>
           <span style={{fontSize:16,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         {!isMobile&&(
@@ -6446,7 +6468,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
             </div>
             <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("pricing_sub","Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.")}</p>
           </div>
-          <div className="lpricing-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"transparent",alignItems:"stretch"}}>
+          <div className="lpricing-grid" style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(5,1fr)",gap:1,background:"transparent",alignItems:"stretch"}}>
             {PRICING.map((p,i)=>(
               <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"44px 36px",position:"relative",cursor:"default",transition:"background .35s",display:"flex",flexDirection:"column"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
                 {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#6366f1,#8b5cf6)"}}/>}
@@ -6504,7 +6526,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       {/* ── FOOTER ── */}
       <footer style={{borderTop:"1px solid rgba(255,255,255,.05)",padding:"38px 60px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:2}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <img src="/logo.png" alt="" style={{height:32,width:32,objectFit:"contain"}}/>
+          <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain"}}/>
           <span style={{fontSize:15,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.2)",letterSpacing:2.5,textTransform:"uppercase"}}>© 2026 STRATEGY AI</span>
@@ -6528,7 +6550,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
       <div style={{width:"min(96vw,440px)",padding:isMobile?16:0,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:32}}>
-          <img src="/logo.png" alt="" style={{width:80,height:80,objectFit:"contain",margin:"0 auto 16px",display:"block",animation:"float 3s ease infinite"}}/>
+          <img src="/logo.png" alt="Strategy AI" style={{width:80,height:80,objectFit:"contain",margin:"0 auto 16px",display:"block",animation:"float 3s ease infinite"}}/>
           <div style={{fontSize:28,fontWeight:900,color:"var(--text)",letterSpacing:-1,marginBottom:6}}>Strategy AI</div>
           <div style={{fontSize:14,color:"var(--text3)"}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
         </div>
@@ -6732,6 +6754,19 @@ export default function App(){
       </LangCtx.Provider>
     );
   }
+
+  useEffect(()=>{
+    const titles:Record<string,string>={
+      splash:"Strategy AI",
+      landing:"Strategy AI — Визуальное стратегическое планирование с AI",
+      welcome:"Strategy AI — Начать",
+      projects:"Strategy AI — Проекты",
+      project:"Strategy AI — Проект",
+      map:"Strategy AI — Карта",
+      sharedMap:"Strategy AI — Просмотр карты",
+    };
+    document.title=titles[screen]||"Strategy AI";
+  },[screen]);
 
   const appPalette=screen==="landing"?undefined:palette;
   return(
