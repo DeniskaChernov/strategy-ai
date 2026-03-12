@@ -288,7 +288,7 @@ const LANGS={
     deadline:'Дедлайн',tags_label:'Теги',comments_label:'Комментарии',
     history_label:'История изменений',color_label:'Цвет',
     step_deleted:'удалён',undo_action:'↩ Отменить',
-    saved:'Сохранено ✓',saving:'Сохраняю…',save_error:'Ошибка сохранения',connect_select_source:'⇒ выберите источник',
+    saved:'Сохранено ✓',saving:'Сохраняю…',save_error:'Ошибка сохранения',retry:'Повторить',connect_select_source:'⇒ выберите источник',
     connect_select_target:'→ выберите цель',
     ai_title:'AI Советник',clear_chat:'Очистить чат',
     ask_placeholder:'Спросите о стратегии…',analyzing:'анализирую…',
@@ -404,7 +404,7 @@ const LANGS={
     history_empty2:"История изменений пуста.",
     metric_label:"Метрика успеха",
     observer:"Наблюдатель",
-    click_new_project:"Нажмите «+ Проект» чтобы начать",
+    click_new_project:"Нажмите «+ Проект» чтобы начать",continue_last:"Продолжить с",
     project_name:"Название проекта",
     start_free:"Начать бесплатно",
     start_free_arrow:"Начать бесплатно →",
@@ -544,7 +544,7 @@ const LANGS={
     links_optimal:"Связи уже оптимальны — добавить нечего",
     copied:"📋 Скопировано",pasted:"📋 Вставлено",
     confirm_restore:"Восстановить?",
-    confirm_delete_map:"Удалить карту?",
+    confirm_delete_map:"Удалить карту?",confirm_delete_map_desc:"Карта будет удалена без возможности восстановления.",
     confirm_delete_proj:"Все карты и данные проекта будут удалены безвозвратно.",
     // ProfileModal messages
     profile_saved:"Профиль обновлён ✓",
@@ -645,7 +645,7 @@ const LANGS={
     deadline:'Deadline',tags_label:'Tags',comments_label:'Comments',
     history_label:'Change history',color_label:'Color',
     step_deleted:'deleted',undo_action:'↩ Undo',
-    saved:'Saved ✓',saving:'Saving…',save_error:'Save failed',connect_select_source:'⇒ select source',
+    saved:'Saved ✓',saving:'Saving…',save_error:'Save failed',retry:'Retry',connect_select_source:'⇒ select source',
     connect_select_target:'→ select target',
     ai_title:'AI Advisor',clear_chat:'Clear chat',
     ask_placeholder:'Ask about strategy…',analyzing:'analyzing…',
@@ -761,7 +761,7 @@ const LANGS={
     history_empty2:"Change history is empty.",
     metric_label:"Success metric",
     observer:"Observer",
-    click_new_project:"Click «+ Project» to get started",
+    click_new_project:"Click «+ Project» to get started",continue_last:"Continue with",
     project_name:"Project name",
     start_free:"Start free",
     start_free_arrow:"Start free →",
@@ -901,7 +901,7 @@ const LANGS={
     links_optimal:"Connections are already optimal — nothing to add",
     copied:"📋 Copied",pasted:"📋 Pasted",
     confirm_restore:"Restore?",
-    confirm_delete_map:"Delete this map?",
+    confirm_delete_map:"Delete this map?",confirm_delete_map_desc:"The map will be permanently deleted.",
     confirm_delete_proj:"All maps and project data will be permanently deleted.",
     // ProfileModal messages
     profile_saved:"Profile updated ✓",
@@ -1003,7 +1003,7 @@ const LANGS={
     deadline:"Muddat",tags_label:"Teglar",comments_label:"Izohlar",
     history_label:"O'zgarishlar tarixi",color_label:"Rang",
     step_deleted:"o'chirildi",undo_action:"↩ Bekor qilish",
-    saved:"Saqlandi ✓",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",
+    saved:"Saqlandi ✓",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",retry:"Qayta urinish",
     connect_select_source:"⇒ manba tanlang",connect_select_target:"→ maqsad tanlang",
     ai_title:"AI Maslahatchi",clear_chat:"Chatni tozalash",
     ask_placeholder:"Strategiya haqida so'rang…",analyzing:"tahlil qilinmoqda…",
@@ -1122,7 +1122,7 @@ const LANGS={
     history_empty2:"O'zgartirish tarixi bo'sh.",
     metric_label:"Muvaffaqiyat mezoni",
     observer:"Kuzatuvchi",
-    click_new_project:"Boshlash uchun «+ Loyiha» tugmasini bosing",
+    click_new_project:"Boshlash uchun «+ Loyiha» tugmasini bosing",continue_last:"Davom etish",
     project_name:"Loyiha nomi",
     start_free:"Bepul boshlash",
     start_free_arrow:"Bepul boshlash →",
@@ -1262,7 +1262,7 @@ const LANGS={
     links_optimal:"Bog'liqliklar allaqachon optimal — qo'shish uchun hech narsa yo'q",
     copied:"📋 Nusxalandi",pasted:"📋 Qo'yildi",
     confirm_restore:"Tiklashni xohlaysizmi?",
-    confirm_delete_map:"Xaritani o'chirishni xohlaysizmi?",
+    confirm_delete_map:"Xaritani o'chirishni xohlaysizmi?",confirm_delete_map_desc:"Xarita butunlay o'chiriladi.",
     confirm_delete_proj:"Loyihaning barcha xaritalari va ma'lumotlari butunlay o'chiriladi.",
     // ProfileModal messages
     profile_saved:"Profil yangilandi ✓",
@@ -1858,6 +1858,24 @@ const TEMPLATES=[
     ]
   },
 ];
+
+// ── OfflineBanner ──
+function OfflineBanner(){
+  const[online,setOnline]=useState(typeof navigator!=="undefined"?navigator.onLine:true);
+  useEffect(()=>{
+    const on=()=>setOnline(true);
+    const off=()=>setOnline(false);
+    window.addEventListener("online",on);
+    window.addEventListener("offline",off);
+    return()=>{window.removeEventListener("online",on);window.removeEventListener("offline",off);};
+  },[]);
+  if(online)return null;
+  return(
+    <div style={{position:"fixed",top:0,left:0,right:0,zIndex:10000,background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"#fff",padding:"10px 20px",fontSize:13,fontWeight:700,textAlign:"center",boxShadow:"0 4px 20px rgba(239,68,68,.4)",animation:"slideDown .2s ease"}}>
+      📴 {typeof navigator!=="undefined"&&navigator.language?.startsWith("ru")?"Нет соединения. Проверьте интернет.":"No connection. Check your internet."}
+    </div>
+  );
+}
 
 // ── Toast ──
 function Toast({msg,type="info",onClose,action,onAction}){
@@ -3699,22 +3717,21 @@ function DeadlineReminders({nodes,onGoToNode}:{nodes:any[],onGoToNode:(id:string
 }
 
 // ── VersionHistoryModal ──
-function VersionHistoryModal({mapId,projectId,onRestore,onClose,theme="dark"}:{mapId:string,projectId:string,onRestore:(v:any)=>void,onClose:()=>void,theme?:string}){
+function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="dark"}:{mapId:string,projectId:string,onRestore:(v:any)=>void,onClose:()=>void,onError?:(msg:string)=>void,theme?:string}){
   const{t}=useLang();
-  const[versions,setVersions]=useState<any[]>([]);const[loading,setLoading]=useState(false);const[restoring,setRestoring]=useState<string|null>(null);
+  const[versions,setVersions]=useState<any[]>([]);const[loading,setLoading]=useState(false);const[restoring,setRestoring]=useState<string|null>(null);const[restoreConfirm,setRestoreConfirm]=useState<any>(null);
   useEffect(()=>{
     if(!API_BASE)return;
     setLoading(true);
     apiFetch(`/api/projects/${projectId}/maps/${mapId}/versions`).then(d=>setVersions(d.versions||[])).catch(()=>{}).finally(()=>setLoading(false));
   },[mapId]);
-  async function restore(v:any){
-    if(!confirm(t("restore_confirm","Восстановить эту версию? Текущие данные будут заменены.")))return;
+  async function doRestore(v:any){
     setRestoring(v.id);
     if(API_BASE){
       try{await apiFetch(`/api/projects/${projectId}/maps/${mapId}/versions/${v.id}/restore`,{method:"POST"});}
-      catch(e:any){alert(e.message);setRestoring(null);return;}
+      catch(e:any){onError?.(e?.message||t("save_error","Ошибка сохранения"));setRestoring(null);return;}
     }
-    onRestore(v);setRestoring(null);onClose();
+    onRestore(v);setRestoring(null);setRestoreConfirm(null);onClose();
   }
   return(
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(8px)"}}>
@@ -3733,13 +3750,14 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,theme="dark"}:{m
                 <div style={{fontSize:11,color:"var(--text3)"}}>{new Date(v.created_at).toLocaleString()} · {v.user_email}</div>
                 <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{Array.isArray(v.nodes)?v.nodes.length:0} {t("steps_label","шагов")}</div>
               </div>
-              <button onClick={()=>restore(v)} disabled={restoring===v.id} style={{padding:"7px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",opacity:restoring===v.id?.6:1}}>
+              <button onClick={()=>setRestoreConfirm(v)} disabled={restoring===v.id} style={{padding:"7px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",opacity:restoring===v.id?.6:1}}>
                 {restoring===v.id?"…":t("restore_version","Восстановить")}
               </button>
             </div>
           ))}
         </div>
       </div>
+      {restoreConfirm&&<ConfirmDialog title={t("restore_version","Восстановить")} message={t("restore_confirm","Восстановить эту версию? Текущие данные будут заменены.")} confirmLabel={t("restore_version","Восстановить")} danger={false} onConfirm={()=>doRestore(restoreConfirm)} onCancel={()=>setRestoreConfirm(null)}/>}
     </div>
   );
 }
@@ -4232,6 +4250,13 @@ ${ctx}
     return()=>clearTimeout(tid);
   },[nodes,edges,user?.autoSave]);
 
+  // beforeunload — предупреждение при уходе с несохранёнными изменениями
+  useEffect(()=>{
+    if(readOnly)return;
+    const h=(e:BeforeUnloadEvent)=>{if(saveState==="saving"||saveState==="error"){e.preventDefault();}};
+    window.addEventListener("beforeunload",h);return()=>window.removeEventListener("beforeunload",h);
+  },[saveState,readOnly]);
+
   // keyboard
   useEffect(()=>{
     function onKey(e){
@@ -4405,8 +4430,8 @@ ${ctx}
               style={{width:32,height:32,borderRadius:"50%",border:`2px solid ${tier.color}55`,background:`linear-gradient(135deg,${tier.color}cc,${tier.color}44)`,color:"#fff",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               {(user?.name||user?.email||"U")[0].toUpperCase()}
             </button>
-            <div style={{display:"flex",alignItems:"center",gap:4,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981"}}>
-              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")}</>:<><span>✓</span> {t("saved","Сохранено")}</>}
+            <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981"}}>
+              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button onClick={async()=>{setSaveState("saving");try{await saveMap(project.id,{...mapData,nodes,edges,updatedAt:Date.now()});setSaveState("saved");}catch{setSaveState("error");}} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span>✓</span> {t("saved","Сохранено")}</>}
             </div>
               </>
             )}
@@ -4620,6 +4645,7 @@ ${ctx}
           <VersionHistoryModal
             mapId={mapData.id} projectId={project?.id||""} theme={theme}
             onRestore={(v:any)=>{pushUndo(nodes,edges);setNodes(v.nodes||[]);setEdges(v.edges||[]);addToast(t("version_restored","Версия восстановлена"),"success");}}
+            onError={(msg)=>addToast(msg,"error")}
             onClose={()=>setShowVersions(false)}
           />
         )}
@@ -4663,7 +4689,7 @@ ${ctx}
 }
 
 // ── ProjectsPage ──
-function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,theme,onToggleTheme}){
+function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onProfile,theme,onToggleTheme}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
   const ROLES=getROLES(t);
@@ -4697,13 +4723,17 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
     setNewName("");setCreating(false);
   }
   async function deleteProj(id){
-    await deleteProject(id);setProjects(ps=>ps.filter(p=>p.id!==id));
-    const nm={...maps};delete nm[id];setMaps(nm);setDelId(null);
+    try{
+      await deleteProject(id);setProjects(ps=>ps.filter(p=>p.id!==id));
+      const nm={...maps};delete nm[id];setMaps(nm);setDelId(null);
+    }catch(e:any){setDelId(null);/* toast would need to be added to ProjectsPage */console.warn("Delete project failed:",e?.message);}
   }
 
   const filtered=projects.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
   const myCount=projects.filter(p=>p.owner===user.email).length;
   const atLimit=myCount>=tier.projects;
+  const lastProj=(()=>{try{const s=localStorage.getItem("sa_last_project");if(!s)return null;const j=JSON.parse(s);return projects.find(p=>p.id===j.id||p.name===j.name)||null;}catch{return null;}})();
+  const lastMapData=(()=>{if(!lastProj)return null;try{const s=localStorage.getItem("sa_last_map");if(!s)return null;const j=JSON.parse(s);const ms=maps[lastProj.id]||[];return ms.find((m:any)=>m.id===j.id||m.name===j.name)||null;}catch{return null;}})();
 
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
@@ -4737,6 +4767,14 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
             </div>
           </div>
           {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
+          {lastProj&&!loading&&onOpenMap&&(
+            <div style={{marginBottom:16,padding:"14px 18px",borderRadius:14,border:"1px solid rgba(99,102,241,.25)",background:"rgba(99,102,241,.06)",display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:13,color:"var(--text3)"}}>{t("continue_last","Продолжить с")}</span>
+              <button onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"8px 16px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>
+                {lastMapData?`${lastProj.name} → ${lastMapData.name}`:lastProj.name}
+              </button>
+            </div>
+          )}
           {creating&&(
             <div style={{padding:"16px 18px",borderRadius:14,background:"var(--surface)",border:"1px solid var(--border2)",marginBottom:16,display:"flex",gap:10,alignItems:"center",animation:"slideUp .2s ease"}}>
               <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")createProject();if(e.key==="Escape"){setCreating(false);setNewName("");}}} placeholder="Название проекта…" style={{flex:1,padding:"9px 13px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
@@ -4827,6 +4865,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   const[showScTmpls,setShowScTmpls]=useState(false);
   const[projCtx,setProjCtx]=useState("");
   const[toast,setToast]=useState(null);
+  const[delMapId,setDelMapId]=useState<string|null>(null);
+  const[delProjConfirm,setDelProjConfirm]=useState(false);
   const creatingRef=useRef(false);
 
   const tier=TIERS[user.tier]||TIERS.free;
@@ -4885,10 +4925,12 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     setShowScChoice(true);
   }
 
-  async function delMap(id){
-    if(!confirm(t("confirm_delete_map","Удалить карту?")))return;
-    await deleteMap(proj.id,id);
+  async function delMap(id){setDelMapId(id);}
+  async function doDelMap(){
+    if(!delMapId)return;
+    await deleteMap(proj.id,delMapId);
     await load();
+    setDelMapId(null);
   }
 
   async function addMember(){
@@ -4944,7 +4986,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
             <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name||"Без названия"}</div>
             <div style={{fontSize:13.5,color:"var(--text5)"}}>{ns.length} {t("steps_label","шагов")} • {t("updated_label","обновлено")} {m.updatedAt?new Date(m.updatedAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short"}):"—"}</div>
           </div>
-          {canEdit&&<button onClick={e=>{e.stopPropagation();delMap(m.id);}} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}}
+          {canEdit&&<button onClick={e=>{e.stopPropagation();delMap(m.id);}} aria-label={t("confirm_delete_map","Удалить карту?")} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}}
             onMouseOver={e=>{e.currentTarget.style.opacity="1";}} onMouseOut={e=>{e.currentTarget.style.opacity="0";}}>🗑</button>}
         </div>
         {ns.length>0&&(
@@ -5122,7 +5164,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               </div>
             </div>
             {isOwner&&(
-              <button onClick={async()=>{if(!confirm(t("confirm_delete_proj","Все карты и данные проекта будут удалены безвозвратно.")))return;await deleteProject(proj.id);onBack();}} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10}}>🗑 {t("delete_project","Удалить проект")}</button>
+              <button onClick={()=>setDelProjConfirm(true)} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10}}>🗑 {t("delete_project","Удалить проект")}</button>
             )}
           </div>
         )}
@@ -5131,6 +5173,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       {/* Modals */}
       {showTmpls&&<TemplateModal tier={user.tier} onSelect={(t)=>{setShowTmpls(false);if(t)createMap(t);}} onClose={()=>setShowTmpls(false)} theme={theme}/>}
       {showScTmpls&&<ScenarioTemplatesModal onSelect={createScenarioFromTemplate} onClose={()=>{setShowScTmpls(false);setShowScChoice(false);}} mapCtx={projCtx} theme={theme}/>}
+      {delMapId&&<ConfirmDialog title={t("confirm_delete_map","Удалить карту?")} message={t("confirm_delete_map_desc","Карта будет удалена без возможности восстановления.")} confirmLabel={t("delete","Удалить")} onConfirm={doDelMap} onCancel={()=>setDelMapId(null)} danger={true}/>}
+      {delProjConfirm&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message={t("confirm_delete_proj","Все карты и данные проекта будут удалены безвозвратно.")} confirmLabel={t("delete","Удалить")} onConfirm={async()=>{await deleteProject(proj.id);setDelProjConfirm(false);onBack();}} onCancel={()=>setDelProjConfirm(false)} danger={true}/>}
 
       {/* Scenario choice modal */}
       {showScChoice&&(
@@ -5909,8 +5953,9 @@ function InMapOnboarding({project,tier,theme="dark",onDone,onSkip}){
 }
 
 // ── ImportJSON (helper) ──
-function useImportJSON(onImport){
+function useImportJSON(onImport,onError?:(msg:string)=>void){
   const fileRef=useRef(null);
+  const{t}=useLang();
   function trigger(){fileRef.current?.click();}
   function renderInput(){
     return(
@@ -5921,7 +5966,7 @@ function useImportJSON(onImport){
           try{
             const d=JSON.parse(ev.target.result);
             if(d.nodes||d.edges){onImport({nodes:d.nodes||[],edges:d.edges||[],name:d.name||f.name.replace(".json","")});}
-          }catch{alert(t("json_invalid","Некорректный JSON файл"));}
+          }catch{onError?.(t("json_invalid","Некорректный формат JSON"))||console.warn("Invalid JSON");}
           e.target.value="";
         };
         r.readAsText(f);
@@ -5933,16 +5978,19 @@ function useImportJSON(onImport){
 
 
 // ── SplashScreen ──
-function SplashScreen({onDone,theme}){
+function SplashScreen({onDone,theme,authReady=false}){
   const{t}=useLang();
   const[pct,setPct]=useState(0);
+  const readyRef=useRef(false);
+  useEffect(()=>{
+    if(pct>=100&&authReady&&!readyRef.current){readyRef.current=true;setTimeout(onDone,150);}
+  },[pct,authReady]);
   useEffect(()=>{
     const tid=setTimeout(()=>{
       let p=0;
       const iv=setInterval(()=>{
         p+=Math.random()*18+8;
         setPct(Math.min(100,Math.round(p)));
-        if(p>=100){clearInterval(iv);setTimeout(onDone,200);}
       },100);
       return()=>clearInterval(iv);
     },300);
@@ -6612,6 +6660,7 @@ export default function App(){
   const[showTiers,setShowTiers]=useState(false);
   const[verifiedToast,setVerifiedToast]=useState(false);
   const[paymentToast,setPaymentToast]=useState(false);
+  const[authChecked,setAuthChecked]=useState(false);
   const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
   // Синхронизация темы и палитры из профиля пользователя (при загрузке с API и после сохранения)
@@ -6665,7 +6714,7 @@ export default function App(){
           } else {
             data=await store.get("sa_share_"+shareId);
           }
-          if(data&&data.map){setSharedMapData(data);setScreen("sharedMap");return;}
+          if(data&&data.map){setSharedMapData(data);setScreen("sharedMap");setAuthChecked(true);return;}
         }catch{}
       }
       await seedDefault();
@@ -6681,7 +6730,7 @@ export default function App(){
                 setPaymentToast(true);
                 setTimeout(()=>setPaymentToast(false),4000);
               }
-              setScreen("projects");return;
+              setScreen("projects");setAuthChecked(true);return;
             }
           }catch(e:any){
             if(e.message==="session_expired"){clearJWT();clearRefreshToken();}
@@ -6692,10 +6741,10 @@ export default function App(){
         if(sess?.email){
           const accs=await store.get("sa_acc")||[];
           const u=(accs as any[]).find((a:any)=>a.email===sess.email);
-          if(u){setUser(u);setScreen("projects");return;}
+          if(u){setUser(u);setScreen("projects");setAuthChecked(true);return;}
         }
       }
-      setScreen("landing");
+      setScreen("landing");setAuthChecked(true);
     })();
   },[]);
 
@@ -6730,6 +6779,7 @@ export default function App(){
 
   function onSelectProject(p){
     setProject(p);setScreen("project");
+    try{localStorage.setItem("sa_last_project",JSON.stringify({id:p.id,name:p.name}));localStorage.removeItem("sa_last_map");}catch{}
   }
 
   async function onOpenMap(map,proj,isNew,readOnlyMap=false){
@@ -6737,6 +6787,7 @@ export default function App(){
     const fresh=await getMaps(proj.id);
     const m=fresh.find(x=>x.id===map.id)||map;
     setMapData(m);setMapIsNew(isNew||false);setMapReadOnly(readOnlyMap);setScreen("map");
+    try{localStorage.setItem("sa_last_project",JSON.stringify({id:proj.id,name:proj.name}));localStorage.setItem("sa_last_map",JSON.stringify({id:m.id,name:m.name}));}catch{}
   }
 
   function toggleTheme(){const next=t=>t==="dark"?"light":"dark";setTheme(t=>{const n=next(t);try{localStorage.setItem("sa_theme",n);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{theme:n}).catch(()=>{});return n;});}
@@ -6768,13 +6819,29 @@ export default function App(){
     document.title=titles[screen]||"Strategy AI";
   },[screen]);
 
+  // Кнопка «Назад» в браузере
+  useEffect(()=>{
+    if(screen==="splash"||screen==="landing"||screen==="welcome"||screen==="sharedMap")return;
+    const h=()=>{
+      if(screen==="map"&&project){setMapData(null);setScreen("project");}
+      else if(screen==="project"&&project){setProject(null);setScreen("projects");}
+    };
+    window.addEventListener("popstate",h);
+    return()=>window.removeEventListener("popstate",h);
+  },[screen,project]);
+  useEffect(()=>{
+    if(screen==="project"&&project&&history.state?.screen!=="project")history.pushState({screen:"project",projectId:project.id},"","");
+    else if(screen==="map"&&mapData&&history.state?.screen!=="map")history.pushState({screen:"map",mapId:mapData.id},"","");
+  },[screen,project?.id,mapData?.id]);
+
   const appPalette=screen==="landing"?undefined:palette;
   return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
       <div data-theme={theme} data-palette={appPalette} style={{minHeight:"100vh",background:"var(--bg)",transition:"background .25s ease, color .25s ease"}}>
       <style>{CSS}</style>
+      <OfflineBanner/>
       <>
-        {screen==="splash"&&<SplashScreen onDone={()=>setScreen("landing")} theme={theme}/>}
+        {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>prev==="projects"?prev:"landing")} theme={theme} authReady={authChecked}/>}
         {screen==="landing"&&<LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onGetStarted={()=>setScreen("welcome")}/>}
         {screen==="sharedMap"&&sharedMapData&&(
           <MapEditor
@@ -6798,6 +6865,7 @@ export default function App(){
             <ProjectsPage
               user={user} theme={theme}
               onSelectProject={onSelectProject}
+              onOpenMap={onOpenMap}
               onLogout={onLogout}
               onChangeTier={(t:string)=>onChangeTier(t)}
               onProfile={()=>setShowProfile(true)}
