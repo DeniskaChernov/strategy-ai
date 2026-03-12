@@ -69,7 +69,7 @@ router.get('/:projectId', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// PATCH /api/projects/:projectId — переименовать
+// PATCH /api/projects/:projectId — переименовать или обновить members
 router.patch('/:projectId', requireAuth, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
@@ -78,11 +78,25 @@ router.patch('/:projectId', requireAuth, async (req, res, next) => {
     );
     if (!rows[0]) return res.status(403).json({ error: 'Только владелец может редактировать проект' });
 
-    const { name } = req.body;
+    const { name, members } = req.body;
+    const updates = [];
+    const values = [];
+    let i = 1;
+    if (name !== undefined) {
+      updates.push(`name = $${i++}`);
+      values.push(name);
+    }
+    if (members !== undefined && Array.isArray(members)) {
+      updates.push(`members = $${i++}`);
+      values.push(JSON.stringify(members));
+    }
+    if (updates.length === 0) return res.status(400).json({ error: 'Укажите name или members' });
+
+    values.push(req.params.projectId);
     const { rows: updated } = await pool.query(
-      `UPDATE projects SET name = COALESCE($1, name), updated_at = now()
-       WHERE id = $2 RETURNING *`,
-      [name, req.params.projectId]
+      `UPDATE projects SET ${updates.join(', ')}, updated_at = now()
+       WHERE id = $${i} RETURNING *`,
+      values
     );
     res.json({ project: updated[0] });
   } catch (err) { next(err); }

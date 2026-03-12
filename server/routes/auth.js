@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { pool } = require('../db');
 const { signToken, signRefreshToken, requireAuth } = require('../middleware/auth');
-const { sendEmail, welcomeEmail, resetPasswordEmail } = require('./email');
+const { sendEmail, welcomeEmail, resetPasswordEmail, verifyEmailTemplate } = require('./email');
 
 // Вспомогательная функция: пользователь без пароля и чувствительных полей
 function safeUser(row) {
@@ -11,6 +11,7 @@ function safeUser(row) {
     password_hash,
     reset_token,
     reset_token_expires,
+    email_verify_token,
     stripe_customer_id,
     stripe_subscription_id,
     ...rest
@@ -33,6 +34,7 @@ router.post('/register', async (req, res, next) => {
 
     const displayName = (name?.trim() || emailLower.split('@')[0]).substring(0, 100);
     const hash = await bcrypt.hash(password, 12);
+    const verifyToken = crypto.randomBytes(32).toString('hex');
 
     await client.query('BEGIN');
 
@@ -43,11 +45,11 @@ router.post('/register', async (req, res, next) => {
       const trialEndsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
 
       const { rows } = await client.query(
-        `INSERT INTO users (email, password_hash, name, tier, trial_ends_at)
-         VALUES ($1, $2, $3, 'starter', $4)
+        `INSERT INTO users (email, password_hash, name, tier, trial_ends_at, email_verified, email_verify_token)
+         VALUES ($1, $2, $3, 'starter', $4, false, $5)
          RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push,
-                   auto_save, compact_mode, default_view, trial_ends_at, created_at`,
-        [emailLower, hash, displayName, trialEndsAt.toISOString()]
+                   auto_save, compact_mode, default_view, trial_ends_at, created_at, email_verified`,
+        [emailLower, hash, displayName, trialEndsAt.toISOString(), verifyToken]
       );
       user = rows[0];
     } catch (insertErr) {
@@ -70,9 +72,11 @@ router.post('/register', async (req, res, next) => {
     const token = signToken({ email: user.email, id: user.id });
     const refreshToken = signRefreshToken({ email: user.email, id: user.id });
 
-    // Welcome email асинхронно — не блокируем ответ
-    const { subject, html } = welcomeEmail(displayName);
-    sendEmail({ to: emailLower, subject, html }).catch(() => {});
+    // Приветственное письмо + верификация асинхронно
+    const { subject: ws, html: wh } = welcomeEmail(displayName);
+    sendEmail({ to: emailLower, subject: ws, html: wh }).catch(() => {});
+    const { subject: vs, html: vh } = verifyEmailTemplate(displayName, verifyToken);
+    sendEmail({ to: emailLower, subject: vs, html: vh }).catch(() => {});
 
     res.status(201).json({ token, refreshToken, user: safeUser(user), isNew: true });
   } catch (err) {
@@ -110,13 +114,60 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.user });
 });
 
+// GET /api/auth/verify-email?token=xxx — подтверждение email
+router.get('/verify-email', async (req, res, next) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).json({ error: 'Токен обязателен' });
+
+    const { rows } = await pool.query(
+      `UPDATE users SET email_verified = true, email_verify_token = NULL, updated_at = now()
+       WHERE email_verify_token = $1
+       RETURNING id, email, name`,
+      [token]
+    );
+
+    if (!rows[0]) {
+      return res.status(400).json({ error: 'Ссылка недействительна или уже использована' });
+    }
+
+    // Редирект на приложение с флагом verified
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    res.redirect(`${appUrl}?verified=1`);
+  } catch (err) { next(err); }
+});
+
+// POST /api/auth/resend-verification — повторная отправка письма верификации
+router.post('/resend-verification', requireAuth, async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT email_verified, name FROM users WHERE email = $1`,
+      [req.user.email]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Пользователь не найден' });
+    if (rows[0].email_verified) return res.json({ ok: true, message: 'Email уже подтверждён' });
+
+    const newToken = crypto.randomBytes(32).toString('hex');
+    await pool.query(
+      `UPDATE users SET email_verify_token = $1, updated_at = now() WHERE email = $2`,
+      [newToken, req.user.email]
+    );
+
+    const { subject, html } = verifyEmailTemplate(rows[0].name, newToken);
+    sendEmail({ to: req.user.email, subject, html }).catch(() => {});
+
+    res.json({ ok: true, message: 'Письмо отправлено' });
+  } catch (err) { next(err); }
+});
+
 // PATCH /api/auth/profile — обновить профиль
 router.patch('/profile', requireAuth, async (req, res, next) => {
   try {
-    const { name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view } = req.body;
+    const { name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, tier } = req.body;
 
     // Валидация входных данных
     const ALLOWED_VIEWS = ['canvas', 'list', 'gantt'];
+    const ALLOWED_TIERS = ['free', 'starter', 'pro', 'team', 'enterprise'];
     if (default_view && !ALLOWED_VIEWS.includes(default_view)) {
       return res.status(400).json({ error: 'Недопустимое значение default_view' });
     }
@@ -126,6 +177,11 @@ router.patch('/profile', requireAuth, async (req, res, next) => {
     if (bio && typeof bio === 'string' && bio.length > 500) {
       return res.status(400).json({ error: 'Bio не может быть длиннее 500 символов' });
     }
+
+    // Смена тарифа через profile разрешена только dev-аккаунту (обычные пользователи платят через Stripe)
+    const DEV_EMAILS = (process.env.DEV_EMAILS || 'denisblackman2@gmail.com').split(',').map(e => e.trim());
+    const newTier = tier && ALLOWED_TIERS.includes(tier) && DEV_EMAILS.includes(req.user.email) ? tier : null;
+
     const { rows } = await pool.query(
       `UPDATE users SET
         name         = COALESCE($1, name),
@@ -136,10 +192,11 @@ router.patch('/profile', requireAuth, async (req, res, next) => {
         auto_save    = COALESCE($6, auto_save),
         compact_mode = COALESCE($7, compact_mode),
         default_view = COALESCE($8, default_view),
+        tier         = COALESCE($10, tier),
         updated_at   = now()
        WHERE email = $9
-       RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, created_at`,
-      [name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, req.user.email]
+       RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, trial_ends_at, created_at, email_verified`,
+      [name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, req.user.email, newTier]
     );
     res.json({ user: rows[0] });
   } catch (err) {

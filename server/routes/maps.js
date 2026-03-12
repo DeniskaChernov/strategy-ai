@@ -48,10 +48,11 @@ router.post('/:projectId/maps', requireAuth, async (req, res, next) => {
     const limit = MAP_LIMITS[tier] ?? 1;
 
     const { rows: existing } = await pool.query(
-      `SELECT count(*) FROM maps WHERE project_id IN
-         (SELECT id FROM projects WHERE owner_email = $1)
-       AND is_scenario = false`,
-      [req.user.email]
+      `SELECT count(*) FROM maps m
+       JOIN projects p ON m.project_id = p.id
+       WHERE m.is_scenario = false
+         AND (p.owner_email = $1 OR p.members @> $2::jsonb)`,
+      [req.user.email, JSON.stringify([{ email: req.user.email }])]
     );
     if (parseInt(existing[0].count) >= limit) {
       return res.status(403).json({

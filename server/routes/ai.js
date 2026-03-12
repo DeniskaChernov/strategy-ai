@@ -11,7 +11,7 @@ const AI_LIMITS = {
   enterprise: 999999,
 };
 
-// Максимум токенов по тарифу (защита от abuse)
+// Максимум токенов по тарифу
 const MAX_TOKENS_BY_TIER = {
   free:       0,
   starter:    1200,
@@ -20,7 +20,16 @@ const MAX_TOKENS_BY_TIER = {
   enterprise: 4000,
 };
 
-// POST /api/ai/chat — проксирование запроса к Anthropic с проверкой лимита
+// Модели по тарифу (starter/pro — mini, team/enterprise — полный GPT-4o)
+const MODEL_BY_TIER = {
+  free:       'gpt-4o-mini',
+  starter:    'gpt-4o-mini',
+  pro:        'gpt-4o-mini',
+  team:       'gpt-4o',
+  enterprise: 'gpt-4o',
+};
+
+// POST /api/ai/chat — проксирование запроса к OpenAI с проверкой лимита
 router.post('/chat', requireAuth, async (req, res, next) => {
   try {
     const email = req.user.email;
@@ -47,7 +56,6 @@ router.post('/chat', requireAuth, async (req, res, next) => {
     const newCount = usageRows[0].count;
 
     if (newCount > limit) {
-      // Откатываем инкремент, если лимит превышен
       await pool.query(
         `UPDATE ai_usage SET count = count - 1 WHERE user_email = $1 AND month_key = $2`,
         [email, monthKey]
@@ -60,7 +68,7 @@ router.post('/chat', requireAuth, async (req, res, next) => {
       });
     }
 
-    const { messages } = req.body;
+    const { messages, system, maxTokens: clientMaxTokens } = req.body;
     if (!messages || !Array.isArray(messages)) {
       await pool.query(
         `UPDATE ai_usage SET count = count - 1 WHERE user_email = $1 AND month_key = $2`,
@@ -69,7 +77,7 @@ router.post('/chat', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'messages обязателен (массив)' });
     }
 
-    const apiKey = process.env.ANTHROPIC_KEY;
+    const apiKey = process.env.OPENAI_KEY;
     if (!apiKey) {
       await pool.query(
         `UPDATE ai_usage SET count = count - 1 WHERE user_email = $1 AND month_key = $2`,
@@ -78,22 +86,24 @@ router.post('/chat', requireAuth, async (req, res, next) => {
       return res.status(503).json({ error: 'AI временно недоступен (не настроен API ключ)' });
     }
 
-    // Системный промпт — только с сервера, клиент не контролирует
-    const serverSystem = `Ты — AI-консультант по стратегическому планированию уровня McKinsey. 
-Помогаешь пользователю разрабатывать, анализировать и улучшать бизнес-стратегии. 
-Отвечай конкретно, структурированно, без лишней воды. 
-Тариф пользователя: ${tier}.`;
-
-    // maxTokens — серверное ограничение, клиент не контролирует
     const maxTokens = Math.min(
-      MAX_TOKENS_BY_TIER[tier] ?? 1200,
+      clientMaxTokens || MAX_TOKENS_BY_TIER[tier] || 1200,
+      MAX_TOKENS_BY_TIER[tier] || 1200,
       4000
     );
+
+    const model = MODEL_BY_TIER[tier] || 'gpt-4o-mini';
+
+    // Системный промпт: принимаем от клиента (задаёт контекст задачи),
+    // дополняем серверной подписью с уровнем тарифа
+    const baseSystem = system
+      ? String(system).substring(0, 4000)
+      : 'Ты — AI-консультант по стратегическому планированию уровня McKinsey. Отвечай конкретно, без воды.';
 
     // Валидируем и обрезаем messages
     const safeMessages = messages
       .filter(m => m && typeof m.role === 'string' && typeof m.content === 'string')
-      .slice(-20) // последние 20 сообщений
+      .slice(-20)
       .map(m => ({
         role: m.role === 'assistant' ? 'assistant' : 'user',
         content: String(m.content).substring(0, 8000),
@@ -103,36 +113,48 @@ router.post('/chat', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'Нет валидных сообщений' });
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // OpenAI Chat Completions API
+    const openaiMessages = [
+      { role: 'system', content: baseSystem },
+      ...safeMessages,
+    ];
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022',
+        model,
         max_tokens: maxTokens,
-        system: serverSystem,
-        messages: safeMessages,
+        messages: openaiMessages,
+        temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('Anthropic error:', response.status, errText);
-      // Откатываем счётчик при ошибке Anthropic
+      console.error('OpenAI error:', response.status, errText);
       await pool.query(
         `UPDATE ai_usage SET count = count - 1 WHERE user_email = $1 AND month_key = $2`,
         [email, monthKey]
       );
+      if (response.status === 401) {
+        return res.status(502).json({ error: 'Неверный OpenAI API ключ.' });
+      }
+      if (response.status === 429) {
+        return res.status(502).json({ error: 'Превышен лимит OpenAI. Попробуйте позже.' });
+      }
       return res.status(502).json({ error: 'Ошибка AI сервиса. Попробуйте позже.' });
     }
 
     const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || '';
 
+    // Возвращаем в формате совместимом с фронтом (content[0].text)
     res.json({
-      content: data.content,
+      content: [{ type: 'text', text }],
       usage: { used: newCount, limit, remaining: Math.max(0, limit - newCount) },
     });
   } catch (err) { next(err); }

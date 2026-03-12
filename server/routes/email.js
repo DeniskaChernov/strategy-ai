@@ -133,4 +133,17 @@ function deadlineReminderEmail(name, steps) {
   };
 }
 
-module.exports = { sendEmail, welcomeEmail, resetPasswordEmail, paymentSuccessEmail, weeklyBriefingEmail, deadlineReminderEmail };
+function verifyEmailTemplate(name, token) {
+  const link = `${APP_URL}/api/auth/verify-email?token=${token}`;
+  return {
+    subject: '✉️ Подтвердите ваш email — Strategy AI',
+    html: baseLayout(`
+      <p>Привет, <strong style="color:#e2e8f0;">${name}</strong>!</p>
+      <p>Нажмите кнопку ниже чтобы подтвердить ваш email и разблокировать все возможности:</p>
+      <a href="${link}" class="btn">Подтвердить email →</a>
+      <div class="info">Ссылка действует 24 часа. Если вы не регистрировались — просто проигнорируйте это письмо.</div>
+    `),
+  };
+}
+
+module.exports = { sendEmail, welcomeEmail, resetPasswordEmail, paymentSuccessEmail, weeklyBriefingEmail, deadlineReminderEmail, verifyEmailTemplate };

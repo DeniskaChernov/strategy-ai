@@ -3346,8 +3346,9 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
           setMsgs(m=>[...m,{role:"sys",text:"✅ Шаг добавлен на карту: "+nodeData.title}]);
         }catch{}
       }
-    }catch{
-      setMsgs(m=>[...m,{role:"ai",text:"Ошибка подключения. Проверьте сеть."}]);
+    }catch(e:any){
+      const msg=e?.message||"Ошибка подключения. Проверьте сеть.";
+      setMsgs(m=>[...m,{role:"ai",text:msg}]);
     }
     setLoad(false);
   }

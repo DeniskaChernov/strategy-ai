@@ -202,7 +202,12 @@ app.use('/api/notifications', notifRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', version: '1.1.0', time: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    version: '1.1.0',
+    time: new Date().toISOString(),
+    aiReady: !!process.env.OPENAI_KEY,
+  });
 });
 
 // ── Global error handler ──────────────────────────────────────────────────────
