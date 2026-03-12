@@ -1941,7 +1941,9 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
         </div>
         <div style={{padding:"20px 24px 24px"}}>
           <div style={{textAlign:"center",marginBottom:22}}>
-            <div style={{width:44,height:44,borderRadius:13,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,margin:"0 auto 12px"}}>✦</div>
+            <div style={{width:44,height:44,borderRadius:13,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}}>
+              <img src="/symbol.svg" alt="" style={{width:28,height:28,objectFit:"contain"}}/>
+            </div>
             <div style={{fontSize:18,fontWeight:700,color:"var(--text)"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
             {subtitle&&<div style={{fontSize:13,color:"var(--text4)",marginTop:6,lineHeight:1.5}}>{subtitle}</div>}
           </div>
@@ -5931,7 +5933,9 @@ function SplashScreen({onDone,theme}){
       <style>{CSS}</style>
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{animation:"float 3s ease infinite",marginBottom:32}}>
-        <div style={{width:72,height:72,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,boxShadow:"0 16px 60px rgba(99,102,241,.6)"}}>✦</div>
+        <div style={{width:72,height:72,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 16px 60px rgba(99,102,241,.6)"}}>
+          <img src="/symbol.svg" alt="" style={{width:48,height:48,objectFit:"contain"}}/>
+        </div>
       </div>
       <div style={{fontSize:36,fontWeight:900,color:"var(--text,#e2e8f0)",letterSpacing:-1.5,marginBottom:6,animation:"slideUp .5s ease"}}>Strategy AI</div>
       
@@ -6500,8 +6504,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       {/* ── FOOTER ── */}
       <footer style={{borderTop:"1px solid rgba(255,255,255,.05)",padding:"38px 60px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:2}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,boxShadow:"0 4px 14px rgba(99,102,241,.4)"}}>✦</div>
-          <span style={{fontSize:15,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
+          <img src="/logo.svg" alt="Strategy AI" style={{height:26,width:"auto",objectFit:"contain"}}/>
         </div>
         <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.2)",letterSpacing:2.5,textTransform:"uppercase"}}>© 2026 STRATEGY AI</span>
       </footer>
@@ -6524,7 +6527,9 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
       <div style={{width:"min(96vw,440px)",padding:isMobile?16:0,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:32}}>
-          <div style={{width:64,height:64,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 16px",boxShadow:"0 16px 48px rgba(99,102,241,.6)",animation:"float 3s ease infinite"}}>✦</div>
+          <div style={{width:64,height:64,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",boxShadow:"0 16px 48px rgba(99,102,241,.6)",animation:"float 3s ease infinite"}}>
+            <img src="/symbol.svg" alt="" style={{width:40,height:40,objectFit:"contain"}}/>
+          </div>
           <div style={{fontSize:28,fontWeight:900,color:"var(--text)",letterSpacing:-1,marginBottom:6}}>Strategy AI</div>
           <div style={{fontSize:14,color:"var(--text3)"}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
         </div>
