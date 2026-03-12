@@ -29,7 +29,7 @@ const getTierPrice=(k,t)=>{const prices={free:t("free_plan","Бесплатно"
 const CSS=`
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;}
+body{font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;}
 input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 :root{
   /* ── Spacing scale ── */
@@ -1517,7 +1517,7 @@ async function patchUser(email:string,patch:any){
 // ── projects ──
 function normalizeProject(p:any){
   if(!p)return p;
-  return{...p,owner:p.owner??p.owner_email};
+  return{...p,owner:p.owner??p.owner_email,createdAt:p.createdAt??p.created_at};
 }
 async function getProjects(email:string){
   if(API_BASE){
@@ -1563,22 +1563,23 @@ async function deleteProject(id:string){
   await store.set("sa_proj",a.filter((p:any)=>p.id!==id));
   await store.del(`sa_maps_${id}`);
 }
+function normalizeMap(m:any){if(!m)return m;return{...m,isScenario:m.isScenario??m.is_scenario??false};}
 async function getMaps(pid:string){
   if(API_BASE){
-    try{const d=await apiFetch(`/api/projects/${pid}/maps`);return d.maps||[];}
+    try{const d=await apiFetch(`/api/projects/${pid}/maps`);return (d.maps||[]).map(normalizeMap);}
     catch{return[];}
   }
-  return(await store.get(`sa_maps_${pid}`))||[];
+  return((await store.get(`sa_maps_${pid}`))||[]).map(normalizeMap);
 }
 async function saveMap(pid:string,map:any){
   if(API_BASE){
     try{
       if(map._new){
         const d=await apiFetch(`/api/projects/${pid}/maps`,{method:"POST",body:JSON.stringify({name:map.name,nodes:map.nodes,edges:map.edges,ctx:map.ctx,is_scenario:map.isScenario})});
-        return d.map;
+        return normalizeMap(d.map)||map;
       } else {
-        const d=await apiFetch(`/api/projects/${pid}/maps/${map.id}`,{method:"PUT",body:JSON.stringify({name:map.name,nodes:map.nodes,edges:map.edges,ctx:map.ctx})});
-        return d.map;
+        const d=await apiFetch(`/api/projects/${pid}/maps/${map.id}`,{method:"PUT",body:JSON.stringify({name:map.name,nodes:map.nodes,edges:map.edges,ctx:map.ctx,is_scenario:map.isScenario})});
+        return normalizeMap(d.map)||map;
       }
     }catch(e:any){
       if(e.message?.includes("MAP_LIMIT")||e.message?.includes("Лимит карт"))throw e;
@@ -1644,7 +1645,7 @@ async function callAI(messages:any[],system:string,maxTokens=1200):Promise<strin
 function defaultNodes(){return[{id:"n1",x:200,y:270,title:"Анализ рынка",reason:"Понять ЦА",metric:"100 интервью",status:"completed",priority:"high",progress:100},{id:"n2",x:480,y:155,title:"MVP продукт",reason:"Проверить гипотезу",metric:"50 платящих",status:"active",priority:"critical",progress:60},{id:"n3",x:480,y:395,title:"Маркетинг",reason:"Первые клиенты",metric:"CAC < $100",status:"active",priority:"high",progress:25},{id:"n4",x:760,y:270,title:"Рост",reason:"Масштаб",metric:"$50k MRR",status:"planning",priority:"critical",progress:0}];}
 function topSort(nodes,edges){
   const ind=Object.fromEntries(nodes.map(n=>[n.id,0])),adj=Object.fromEntries(nodes.map(n=>[n.id,[]]));
-  edges.forEach(e=>{if(adj[e.from]!==undefined&&ind[e.to]!==undefined){adj[e.from].push(e.to);ind[e.to]++;}});
+  edges.forEach(e=>{const from=e.from||e.source,to=e.to||e.target;if(adj[from]!==undefined&&ind[to]!==undefined){adj[from].push(to);ind[to]++;}});
   const q=nodes.filter(n=>ind[n.id]===0).map(n=>n.id),out=[];
   while(q.length){const id=q.shift();const n=nodes.find(x=>x.id===id);if(n)out.push(n);(adj[id]||[]).forEach(nid=>{if(--ind[nid]===0)q.push(nid);});}
   nodes.forEach(n=>{if(!out.find(x=>x.id===n.id))out.push(n);});return out;
@@ -1890,8 +1891,8 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
   },[]);
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(8px)",animation:"fadeIn .15s ease"}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
-      <div style={{width:360,background:"var(--surface,#0f1729)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--accent-1)"}`,boxShadow:"var(--shadow,0 32px 80px rgba(0,0,0,.9))",overflow:"hidden",animation:"slideUp .2s cubic-bezier(.34,1.56,.64,1)"}}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(8px)",animation:"fadeIn .15s ease",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
+      <div style={{width:"min(95vw,360px)",background:"var(--surface,#0f1729)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--accent-1)"}`,boxShadow:"var(--shadow,0 32px 80px rgba(0,0,0,.9))",overflow:"hidden",animation:"slideUp .2s cubic-bezier(.34,1.56,.64,1)"}}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"rgba(99,102,241,.15)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"rgba(99,102,241,.4)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -1915,8 +1916,8 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
   async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
   const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)",animation:"fadeIn .2s ease"}}>
-      <div style={{width:400,background:"var(--bg3)",border:"1px solid var(--accent-1)",borderRadius:20,overflow:"hidden",boxShadow:"0 40px 80px rgba(0,0,0,.8)",animation:"slideUp .3s ease"}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)",animation:"fadeIn .2s ease",padding:16}}>
+      <div style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg3)",border:"1px solid var(--accent-1)",borderRadius:20,boxShadow:"0 40px 80px rgba(0,0,0,.8)",animation:"slideUp .3s ease"}}>
         <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>
             {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
@@ -2073,8 +2074,8 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
   async function doReplace(){if(!replaceId)return;setLoading(true);await onReplace(replaceId);}
   const mapsAllowed=tierMapsCount!=null?tierMapsCount:1;
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(10px)"}}>
-      <div style={{width:480,background:"var(--bg2)",border:"1px solid rgba(239,68,68,.3)",borderRadius:22,overflow:"hidden",boxShadow:"0 40px 80px rgba(0,0,0,.85)"}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(10px)",padding:16}}>
+      <div style={{width:"min(95vw,480px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg2)",border:"1px solid rgba(239,68,68,.3)",borderRadius:22,boxShadow:"0 40px 80px rgba(0,0,0,.85)"}}>
         <div style={{padding:"22px 24px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:16,fontWeight:700,color:"var(--text)"}}>{t("map_limit","Лимит карт исчерпан")}</div>
           <div style={{fontSize:13,color:"var(--text3)",marginTop:4}}>На тарифе {tierLabel} разрешено карт: {mapsAllowed}</div>
@@ -2226,7 +2227,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   async function saveSettings(){
     setLoading(true);setMsg(null);
     try{
-      const u=await patchUser(user.email,{notifEmail,notifPush,autoSave,compactMode,defaultView,aiLang});
+      const u=await patchUser(user.email,{notifEmail,notifPush,autoSave,compactMode,defaultView,aiLang,theme,palette});
       if(u)onUpdate(u);
       if(uiLang!==lang)setLang(uiLang);
       setSettingsSaved(true);
@@ -2298,7 +2299,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   return(
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)onClose();}}>
       <style>{CSS}</style>
-      <div style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",maxHeight:isMobile?"90vh":"94vh",background:"var(--bg2)",borderRadius:isMobile?20:28,borderTopLeftRadius:20,borderTopRightRadius:20,border:"1px solid var(--border2)",boxShadow:"0 50px 120px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",animation:isMobile?"slideUp .25s ease":"none",overflow:"hidden"}}>
+      <div style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,background:"var(--bg2)",borderRadius:isMobile?20:28,borderTopLeftRadius:20,borderTopRightRadius:20,border:"1px solid var(--border2)",boxShadow:"0 50px 120px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",animation:isMobile?"slideUp .25s ease":"none",overflow:"hidden"}}>
 
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--bg3)"}}>
@@ -2328,13 +2329,13 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
           </button>
         </div>
 
-        {/* Content */}
-        <div style={{flex:1,overflow:"hidden",display:"flex"}}>
+        {/* Content — фиксированная высота для всех вкладок */}
+        <div style={{flex:1,minHeight:380,overflow:"hidden",display:"flex"}}>
 
           {/* ── PROFILE TAB ── */}
           {tab==="profile"&&(
-            <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:28,maxWidth:680}}>
+            <div style={{flex:1,overflowY:"auto",padding:isMobile?"20px 16px":"28px 32px",minHeight:380}}>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?24:28,maxWidth:680}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:10}}>{t("display_name","Отображаемое имя")}</div>
                   <input style={fi} placeholder={t("display_name","Ваше имя")} value={name} onChange={e=>setName(e.target.value)} onFocus={e=>e.target.style.borderColor="var(--accent-1)"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
@@ -2372,7 +2373,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── SECURITY TAB ── */}
           {tab==="security"&&(
-            <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
+            <div style={{flex:1,overflowY:"auto",padding:"28px 32px",minHeight:380}}>
               <div style={{maxWidth:420}}>
                 <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:4}}>{t("change_password","Изменить пароль")}</div>
                 <div style={{fontSize:13.5,color:"var(--text4)",marginBottom:20}}>{t("pw_hint","Пароль должен быть не менее 6 символов")}</div>
@@ -2423,8 +2424,8 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── SETTINGS TAB ── */}
           {tab==="settings"&&(
-            <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,maxWidth:720}}>
+            <div style={{flex:1,overflowY:"auto",padding:isMobile?"20px 16px":"28px 32px",minHeight:380}}>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?24:32,maxWidth:720}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🎨</span> {t("appearance","Внешний вид")}</div>
                   <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -2513,7 +2514,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── STATS TAB ── */}
           {tab==="stats"&&(
-            <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
+            <div style={{flex:1,overflowY:"auto",padding:"28px 32px",minHeight:380}}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:20}}>{t("stats_tab","Статистика аккаунта")}</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24,maxWidth:620}}>
                 {[
@@ -2558,7 +2559,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── TIER TAB ── */}
           {tab==="tier"&&(
-            <div style={{display:"flex",width:"100%",overflow:"hidden"}}>
+            <div style={{display:"flex",width:"100%",overflow:"hidden",minHeight:380}}>
               <div style={{width:190,flexShrink:0,borderRight:"1px solid var(--border)",padding:"12px 8px",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
                 {TIER_ORDER.map(k=>{
                   const tierItem=TIERS[k];
@@ -2609,6 +2610,28 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                           <div style={{fontSize:13,color:"var(--text4)"}}>{lbl}</div>
                         </div>
                       ))}
+                    </div>
+                    <div style={{marginBottom:16,padding:"12px 14px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)",overflowX:"auto"}}>
+                      <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:10}}>{t("tier_comparison","Сравнение тарифов")}</div>
+                      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:0,fontSize:12,minWidth:"min(100%,520px)"}}>
+                        <div style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--text4)"}}>{t("feature","Функция")}</div>
+                        {TIER_ORDER.map(k=>(
+                          <div key={k} style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",textAlign:"center",fontWeight:k===user.tier?700:500,color:k===user.tier?TIERS[k].color:"var(--text4)"}}>{TIERS[k].label}</div>
+                        ))}
+                        {ALL_FEATURES.slice(0,10).map(f=>(
+                          <React.Fragment key={f.key}>
+                            <div style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",color:"var(--text3)"}}>{f.label}</div>
+                            {TIER_ORDER.map(k=>{
+                              const v=f[TIER_FEAT_KEY[k]];
+                              return(
+                                <div key={k} style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",textAlign:"center"}}>
+                                  {v===false?<span style={{color:"var(--text6)"}}>—</span>:v===true?<span style={{color:"#10b981",fontWeight:700}}>✓</span>:<span style={{color:"var(--text2)"}}>{String(v)}</span>}
+                                </div>
+                              );
+                            })}
+                          </React.Fragment>
+                        ))}
+                      </div>
                     </div>
                     {isUpgrade&&user.email!=="denisblackman2@gmail.com"&&(
                       <div style={{marginBottom:16,padding:"14px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)"}}>
@@ -3431,7 +3454,7 @@ function EdgeLine({edge,nodes,selected,onClick}){
   );
 }
 
-// ── NodeCard ──
+// ── NodeCard ── (единая сетка 8px, выравнивание, поддержка светлой/тёмной темы)
 function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,theme}){
   const{t}=useLang();
   const STATUS=getSTATUS(t);
@@ -3440,12 +3463,14 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,th
   const pr=PRIORITY[node.priority]||PRIORITY.medium;
   const isLight=theme==="light";
   const bg=node.color?node.color+(isLight?"22":"18"):(isLight?"#ffffff":"var(--node-bg)");
-  const titleColor=selected?"#6366f1":isLight?"#0f172a":"#e2e8f0";
-  const reasonColor=isLight?"#475569":"#64748b";
-  const statusColor=isLight?"#334155":"#475569";
-  const progressTrack=isLight?"rgba(0,0,0,.07)":"rgba(255,255,255,.06)";
-  const tagBg=isLight?"rgba(99,102,241,.1)":"rgba(99,102,241,.1)";
-  const tagColor=isLight?"#4338ca":"#818cf8";
+  const titleColor=selected?"var(--accent-1)":(isLight?"#0f172a":"#e2e8f0");
+  const reasonColor=isLight?"#64748b":"#94a3b8";
+  const statusColor=isLight?"#475569":"#94a3b8";
+  const metricColor=isLight?"#6366f1":"#818cf8";
+  const progressTrack=isLight?"rgba(0,0,0,.08)":"rgba(255,255,255,.08)";
+  const tagBg=isLight?"rgba(99,102,241,.12)":"rgba(99,102,241,.15)";
+  const tagColor=isLight?"#4f46e5":"#a5b4fc";
+  const dateColor=isLight?"#64748b":"#94a3b8";
   const isOverdue=node.deadline&&new Date(node.deadline)<new Date()&&node.status!=="completed";
   const isConnSrc=connecting&&connectSource?.id===node.id;
   const commentCount=(node.comments||[]).length;
@@ -3453,63 +3478,66 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,th
   const progressW=Math.max(0,progress/100*204);
   const title=(node.title||"Новый шаг").slice(0,26);
   const hasMeta=node.reason||node.metric;
-  const reasonY=hasMeta?40:null;
-  const metricY=node.reason&&node.metric?55:node.metric?40:null;
-  const progressY=hasMeta?70:40;
-  const statusY=progressY+16;
-  const tagsY=statusY+16;
+  // Единая сетка 8px: header 16, reason 30, metric 44, progress 58, status 74, tags 92
+  const headerY=16;
+  const reasonY=30;
+  const metricY=44;
+  const progressY=hasMeta?58:36;
+  const progressBarH=6;
+  const progressCenterY=progressY+progressBarH/2;
+  const statusY=progressY+progressBarH+12;
+  const tagsY=statusY+18;
   return(
-    <g className="node-card" transform={`translate(${node.x},${node.y})`} onClick={e=>{e.stopPropagation();onClick(node);}} onMouseDown={e=>onMouseDown(e,node)} style={{cursor:connecting?"crosshair":"grab"}}>
-      {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill={`rgba(99,102,241,${isLight?.1:.18})`} style={{filter:"blur(8px)"}}/>}
+    <g className="node-card" transform={`translate(${node.x},${node.y})`} onClick={e=>{e.stopPropagation();onClick(node);}} onPointerDown={e=>onMouseDown(e,node)} style={{cursor:connecting?"crosshair":"grab"}}>
+      {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill={`rgba(99,102,241,${isLight?0.1:0.18})`} style={{filter:"blur(8px)"}}/>}
       <rect width={240} height={128} rx={12} fill={bg}
-        stroke={selected?"#6366f1":isConnSrc?"#10b981":isOverdue?"#ef4444":isLight?(node.color||"rgba(0,0,0,.15)"):(node.color||"rgba(255,255,255,.1)")}
+        stroke={selected?"var(--accent-1)":isConnSrc?"#10b981":isOverdue?"#ef4444":isLight?(node.color||"rgba(0,0,0,.12)"):(node.color||"rgba(255,255,255,.12)")}
         strokeWidth={selected||isConnSrc||isOverdue?2:1}
         filter={selected?"url(#glow)":"none"}/>
       {selected&&<rect width={240} height={128} rx={12} fill="rgba(99,102,241,.04)"/>}
       <rect x={0} y={0} width={4} height={128} rx={2} fill={st.c}/>
-      <rect x={160} y={7} width={74} height={16} rx={8} fill={`${pr.c}18`} stroke={`${pr.c}40`} strokeWidth={1}/>
-      <circle cx={171} cy={15} r={3} fill={pr.c}/>
-      <text x={177} y={15} fontSize={9} fontWeight={700} fill={pr.c} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{pr.label}</text>
-      <text x={14} y={23} fontSize={12} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+      {/* Заголовок и приоритет — одна линия, выровнены по центру */}
+      <rect x={156} y={9} width={70} height={14} rx={7} fill={`${pr.c}20`} stroke={`${pr.c}50`} strokeWidth={1}/>
+      <circle cx={167} cy={headerY} r={2.5} fill={pr.c}/>
+      <text x={173} y={headerY} fontSize={8.5} fontWeight={700} fill={pr.c} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{pr.label}</text>
+      <text x={14} y={headerY} fontSize={12} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
         {title}{(node.title||"").length>26?"…":""}
       </text>
       {node.reason&&(
-        <text x={14} y={reasonY} fontSize={9.5} fill={reasonColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
-          {node.reason.slice(0,34)}{node.reason.length>34?"…":""}
+        <text x={14} y={reasonY} fontSize={9} fill={reasonColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+          {node.reason.slice(0,36)}{node.reason.length>36?"…":""}
         </text>
       )}
       {node.metric&&(
-        <text x={14} y={metricY} fontSize={9.5} fill={isLight?"#6366f1":"#818cf8"} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
-          ◈ {node.metric.slice(0,28)}{node.metric.length>28?"…":""}
+        <text x={14} y={metricY} fontSize={9} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+          ◈ {node.metric.slice(0,30)}{node.metric.length>30?"…":""}
         </text>
       )}
-      <rect x={14} y={progressY} width={212} height={5} rx={2.5} fill={progressTrack}/>
-      {progress>0&&<rect x={14} y={progressY} width={Math.min(212,progressW)} height={5} rx={2.5} fill={node.status==="completed"?"#10b981":st.c} opacity={.85}/>}
-      {progress>0&&(
-        <text x={228} y={progressY+2.5} fontSize={8} fontWeight={700} fill={st.c} textAnchor="end" style={{fontFamily:"'JetBrains Mono',monospace",dominantBaseline:"middle"}}>{progress}%</text>
-      )}
-      <circle cx={14} cy={statusY} r={3.5} fill={st.c}/>
-      <text x={23} y={statusY} fontSize={9} fill={statusColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{st.label}</text>
+      <rect x={14} y={progressY} width={212} height={progressBarH} rx={3} fill={progressTrack}/>
+      {progress>0&&<rect x={14} y={progressY} width={Math.min(212,progressW)} height={progressBarH} rx={3} fill={node.status==="completed"?"#10b981":st.c} opacity={.9}/>}
+      <text x={228} y={progressCenterY} fontSize={8} fontWeight={700} fill={st.c} textAnchor="end" style={{fontFamily:"'JetBrains Mono',monospace",dominantBaseline:"middle"}}>{progress}%</text>
+      <circle cx={14} cy={statusY} r={3} fill={st.c}/>
+      <text x={22} y={statusY} fontSize={8.5} fill={statusColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{st.label}</text>
       {isOverdue&&(
         <>
-          <rect x={110} y={statusY-7} width={60} height={14} rx={4} fill="rgba(239,68,68,.15)"/>
-          <text x={140} y={statusY} textAnchor="middle" fontSize={8.5} fontWeight={700} fill="#ef4444" style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>⚠ просрочено</text>
+          <rect x={98} y={statusY-6} width={64} height={12} rx={4} fill="rgba(239,68,68,.15)"/>
+          <text x={130} y={statusY} textAnchor="middle" fontSize={8} fontWeight={700} fill="#ef4444" style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>⚠ {t("overdue","просрочено")}</text>
         </>
       )}
       {node.deadline&&!isOverdue&&(
-        <text x={236} y={statusY} fontSize={8} fill={isLight?"#64748b":"#334155"} textAnchor="end" style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>📅 {node.deadline}</text>
+        <text x={236} y={statusY} fontSize={8} fill={dateColor} textAnchor="end" style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>📅 {node.deadline}</text>
       )}
       <g transform={`translate(14,${tagsY})`}>
         {(node.tags||[]).slice(0,2).map((tag,i)=>(
-          <g key={i} transform={`translate(${i*76},0)`}>
-            <rect width={70} height={13} rx={6} fill={tagBg}/>
-            <text x={6} y={6.5} fontSize={8} fill={tagColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{tag.slice(0,9)}</text>
+          <g key={i} transform={`translate(${i*74},0)`}>
+            <rect width={68} height={12} rx={6} fill={tagBg}/>
+            <text x={6} y={6} fontSize={7.5} fill={tagColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{tag.slice(0,10)}</text>
           </g>
         ))}
         {commentCount>0&&(
-          <g transform="translate(194,0)">
-            <rect width={32} height={13} rx={6} fill={tagBg}/>
-            <text x={5} y={6.5} fontSize={8} fill={tagColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>💬 {commentCount}</text>
+          <g transform={`translate(${(node.tags||[]).length*74+6},0)`}>
+            <rect width={28} height={12} rx={6} fill={tagBg}/>
+            <text x={5} y={6} fontSize={7.5} fill={tagColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>💬 {commentCount}</text>
           </g>
         )}
       </g>
@@ -4172,6 +4200,7 @@ ${ctx}
   // save
   useEffect(()=>{
     if(readOnly)return;
+    if(user?.autoSave===false)return; // Учёт настройки автосохранения
     // Если изменение пришло от коллеги — не запускаем autosave, сбрасываем флаг
     if(remoteUpdateRef.current){remoteUpdateRef.current=false;return;}
     setSaveState("saving");
@@ -4188,7 +4217,7 @@ ${ctx}
       }
     },900);
     return()=>clearTimeout(tid);
-  },[nodes,edges]);
+  },[nodes,edges,user?.autoSave]);
 
   // keyboard
   useEffect(()=>{
@@ -4216,11 +4245,13 @@ ${ctx}
   },[selNode,selEdge,clipboard,connecting,undoStack,redoStack,nodes,edges]);
 
   function onSvgMouseDown(e){
-    if(e.button===1||(e.button===0&&e.altKey)){
+    const isTouch=e.pointerType==="touch";
+    const wantPan=isTouch||e.button===1||(e.button===0&&e.altKey);
+    if(wantPan&&(e.target===svgRef.current||e.target?.tagName==="svg")){
       panning.current={startX:e.clientX-viewRef.current.x,startY:e.clientY-viewRef.current.y};
       e.preventDefault();return;
     }
-    if(e.target===svgRef.current||e.target.tagName==="svg"){
+    if(e.target===svgRef.current||e.target?.tagName==="svg"){
       setSelNode(null);setSelEdge(null);
       if(connecting){setConnecting(false);setConnectSrc(null);}
     }
@@ -4228,7 +4259,7 @@ ${ctx}
   function onSvgMouseMove(e){
     if(panning.current){
       const x=e.clientX-panning.current.startX,y=e.clientY-panning.current.startY;
-      viewRef.current={...viewRef.current,x,y};setView(v=>({...v,x,y}));return;
+      viewRef.current={...viewRef.current,x,y};setView(v=>({...v,x,y}));e.preventDefault();return;
     }
     if(dragging.current){
       const{node,startMX,startMY,startNX,startNY}=dragging.current;
@@ -4249,7 +4280,7 @@ ${ctx}
   }
   function onNodeMouseDown(e,node){
     if(readOnly)return;
-    if(e.button!==0)return;
+    if(e.pointerType!=="touch"&&e.button!==0)return;
     if(connecting){
       if(connectSrc&&connectSrc.id!==node.id){
         if(!edges.find(ex=>ex.source===connectSrc.id&&ex.target===node.id)){
@@ -4260,6 +4291,7 @@ ${ctx}
       return;
     }
     e.stopPropagation();
+    (e.target as HTMLElement)?.setPointerCapture?.(e.pointerId);
     dragging.current={node,startMX:e.clientX,startMY:e.clientY,startNX:node.x,startNY:node.y};
   }
   function onNodeClick(node){
@@ -4493,8 +4525,8 @@ ${ctx}
           </div>
         )}
         <svg ref={svgRef} width="100%" height="100%"
-          onMouseDown={onSvgMouseDown} onMouseMove={onSvgMouseMove} onMouseUp={onSvgMouseUp}
-          onWheel={onWheel} style={{cursor:panning.current?"grabbing":"default",display:"block"}}
+          onPointerDown={onSvgMouseDown} onPointerMove={onSvgMouseMove} onPointerUp={onSvgMouseUp} onPointerLeave={onSvgMouseUp}
+          onWheel={onWheel} style={{cursor:panning.current?"grabbing":"default",display:"block",touchAction:"none"}}
           onClick={e=>{if(e.target===svgRef.current||e.target.tagName==="svg"){setSelNode(null);setSelEdge(null);}}}>
           <defs>
             <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -4617,6 +4649,7 @@ ${ctx}
 // ── ProjectsPage ──
 function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,theme,onToggleTheme}){
   const{t,lang}=useLang();
+  const isMobile=useIsMobile();
   const ROLES=getROLES(t);
   const[projects,setProjects]=useState([]);
   const[maps,setMaps]=useState({});
@@ -4658,29 +4691,32 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{CSS}</style>
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(99,102,241,.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
-      <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:9,flex:1}}>
-          <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>✦</div>
-          <span style={{fontSize:15,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
+      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
+        <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:0}}>
+          <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>✦</div>
+          <span style={{fontSize:15,fontWeight:800,color:"var(--text)",letterSpacing:-.3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>Strategy AI</span>
         </div>
-        <button onClick={onToggleTheme} style={{padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{theme==="dark"?"☀️":"🌙"}</button>
-        <button onClick={onProfile} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
-          <div style={{width:24,height:24,borderRadius:"50%",background:`linear-gradient(135deg,${tier.color}cc,${tier.color}55)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:"#fff"}}>{(user.name||user.email)[0].toUpperCase()}</div>
-          <span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span>
-          <span style={{fontSize:13.5,color:tier.color,fontWeight:700}}>{tier.badge} {tier.label}</span>
-        </button>
-        <button onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
+        <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0}}>
+          <button onClick={onToggleTheme} style={{padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{theme==="dark"?"☀️":"🌙"}</button>
+          <button onClick={onProfile} style={{display:"flex",alignItems:"center",gap:isMobile?4:8,padding:"6px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
+            <div style={{width:24,height:24,borderRadius:"50%",background:`linear-gradient(135deg,${tier.color}cc,${tier.color}55)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</div>
+            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:13.5,color:tier.color,fontWeight:700}}>{tier.badge} {tier.label}</span></>}
+          </button>
+          <button onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
+        </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"24px",position:"relative",zIndex:5}}>
+      <div style={{flex:1,overflowY:"auto",padding:16,position:"relative",zIndex:5}}>
         <div style={{maxWidth:900,margin:"0 auto"}}>
-          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:24}}>
+          <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:14,marginBottom:24}}>
             <div>
-              <h1 style={{fontSize:22,fontWeight:900,color:"var(--text)",letterSpacing:-.5,marginBottom:2}}>{t("your_projects","Мои проекты")}</h1>
+              <h1 style={{fontSize:isMobile?18:22,fontWeight:900,color:"var(--text)",letterSpacing:-.5,marginBottom:2}}>{t("your_projects","Мои проекты")}</h1>
               <div style={{fontSize:13.5,color:"var(--text3)"}}>{myCount} из {tier.projects==="∞"?"∞":tier.projects} проектов</div>
             </div>
-            <div style={{flex:1}}/>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} style={{padding:"7px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",width:200,fontFamily:"inherit"}}/>
-            <button onClick={()=>{if(atLimit){return;}setCreating(true);}} style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"linear-gradient(135deg,#6366f1,#8b5cf6)",color:atLimit?"var(--text4)":"#fff",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,transition:"all .2s"}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
+            {!isMobile&&<div style={{flex:1}}/>}
+            <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} style={{padding:"7px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",width:isMobile?"100%":200,minWidth:isMobile?undefined:120,fontFamily:"inherit",flex:isMobile?1:undefined}}/>
+              <button onClick={()=>{if(atLimit){return;}setCreating(true);}} style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"linear-gradient(135deg,#6366f1,#8b5cf6)",color:atLimit?"var(--text4)":"#fff",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,transition:"all .2s",flexShrink:0}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
+            </div>
           </div>
           {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
           {creating&&(
@@ -4709,7 +4745,7 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
                       <div style={{width:40,height:40,borderRadius:11,background:`linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08))`,border:"1px solid rgba(99,102,241,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div className="icard-title" style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:2}}>{p.name}</div>
-                        <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {new Date(p.createdAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"})}</div>
+                        <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {(p.createdAt||p.created_at)?new Date(p.createdAt||p.created_at).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"}):"—"}</div>
                       </div>
                       {p.owner===user.email&&(
                         <button onClick={e=>{e.stopPropagation();setDelId(p.id);}} style={{width:24,height:24,borderRadius:6,border:"none",background:"transparent",color:"var(--text4)",cursor:"pointer",fontSize:14,opacity:.4,display:"flex",alignItems:"center",justifyContent:"center"}} onMouseOver={e=>{e.stopPropagation();e.currentTarget.style.opacity="1";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.opacity=".4";e.currentTarget.style.color="var(--text4)";}}>🗑</button>
@@ -6169,6 +6205,35 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
     .lbadgedot{animation:lblink 2s ease infinite;}
     /* section delay classes */
     .ld1{animation-delay:.1s!important}.ld2{animation-delay:.2s!important}.ld3{animation-delay:.3s!important}
+    /* ── Mobile responsive ── */
+    @media (max-width:768px){
+      .lpage section{padding-left:20px!important;padding-right:20px!important;}
+      .lhero-h1{font-size:clamp(36px,10vw,52px)!important;margin-bottom:24px!important;}
+      .lhero-p{font-size:15px!important;margin-bottom:36px!important;}
+      .lhero-btns{flex-direction:column;align-items:stretch!important;}
+      .lbtn-prim,.lbtn-sec{width:100%;text-align:center;padding:14px!important;}
+    }
+    @media (max-width:640px){
+      .lmc{padding:32px 20px!important;border-right:none!important;border-bottom:1px solid rgba(255,255,255,.06)!important;}
+      .lmc:last-child{border-bottom:none!important;}
+      .lmc-val{font-size:48px!important;}
+    }
+    @media (max-width:900px){
+      .lgc,.ltc,.lpc{grid-column:span 1!important;}
+    }
+    @media (max-width:768px){
+      .lmetrics-grid{grid-template-columns:1fr!important;}
+      .lfeat-grid{grid-template-columns:1fr!important;}
+      .lproc-grid{grid-template-columns:1fr!important;}
+      .ltesti-grid{grid-template-columns:1fr!important;}
+      .lpricing-grid{grid-template-columns:1fr!important;}
+      .lfeat-header,.lproc-header,.lpricing-header{grid-template-columns:1fr!important;gap:32px!important;}
+    }
+    @media (max-width:480px){
+      .lprc{padding:28px 20px!important;}
+      .lpc{padding:36px 24px!important;}
+      .ltc{padding:36px 24px!important;}
+    }
   `;
 
   return(
@@ -6235,7 +6300,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"100px 60px 90px",overflow:"hidden",zIndex:1}}>
+      <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:isMobile?"60px 20px 70px":"100px 60px 90px",overflow:"hidden",zIndex:1}}>
         {/* glow */}
         <div style={{position:"absolute",top:"-10%",left:"50%",transform:"translateX(-50%)",width:1000,height:650,background:"radial-gradient(ellipse 65% 60% at 50% 40%,rgba(99,102,241,.1) 0%,transparent 68%)",filter:"blur(56px)",zIndex:2,pointerEvents:"none"}}/>
         {/* mask */}
@@ -6284,7 +6349,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
 
       {/* ── METRICS ── */}
       <div style={{position:"relative",zIndex:2,borderBottom:"1px solid rgba(255,255,255,.06)"}}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",maxWidth:1280,margin:"0 auto"}}>
+        <div className="lmetrics-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",maxWidth:1280,margin:"0 auto"}}>
           {[{to:2,sfx:t("lm1_sfx","мин"),lbl:t("lm1_lbl","от вопроса до первой стратегической карты")},{to:94,sfx:"%",lbl:t("lm2_lbl","точность AI-анализа на тестовых кейсах McKinsey")},{to:5,sfx:"",lbl:t("lm3_lbl","уровней экспертной глубины — от Free до Enterprise")},{to:null,sfx:"∞",lbl:t("lm4_lbl","сценариев для анализа альтернативных исходов")}].map((m,i)=>(
             <div key={i} className="lmc" style={{padding:"58px 44px",borderRight:i<3?"1px solid rgba(255,255,255,.06)":undefined,transition:"background .38s"}} onMouseOver={e=>e.currentTarget.style.background="rgba(99,102,241,.05)"} onMouseOut={e=>e.currentTarget.style.background=""}>
               <div className="lmc-val" style={{fontSize:70,fontWeight:900,letterSpacing:-3.5,lineHeight:.88,color:"#f0eeff",marginBottom:14,display:"flex",alignItems:"flex-end",gap:3}}>
@@ -6298,16 +6363,16 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       </div>
 
       {/* ── FEATURES ── */}
-      <section id="lfeatures" style={{padding:"130px 0",position:"relative",zIndex:2}}>
-        <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
+      <section id="lfeatures" style={{padding:isMobile?"60px 0":"130px 0",position:"relative",zIndex:2}}>
+        <div style={{maxWidth:1280,margin:"0 auto",padding:isMobile?"0 20px":"0 60px"}}>
+          <div className="lfeat-header" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
             <div className="lrv-l">
               {tag(t("tag_features","Возможности"))}
               <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("tools_label","Инструментарий")}<br/>{t("strategic_word","стратегического")}<br/><span className="lgrad">{t("feat_leader_word","лидера")}</span></h2>
             </div>
             <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("feat_sub","Каждый инструмент создан для людей, которые принимают решения с последствиями. Не для экспериментов — для результата.")}</p>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
+          <div className="lfeat-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
             {FEATS.map((f,i)=>(
               <div key={i} className="lgc" style={{background:"#03030a",padding:"46px 42px",cursor:"default",transition:"background .35s"}} onMouseOver={e=>e.currentTarget.style.background="#07060f"} onMouseOut={e=>e.currentTarget.style.background="#03030a"}>
                 <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.2)",letterSpacing:2,display:"block",marginBottom:28}}>{f.n}</span>
@@ -6320,16 +6385,16 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       </section>
 
       {/* ── PROCESS ── */}
-      <section id="lprocess" style={{padding:"0 0 130px",position:"relative",zIndex:2}}>
-        <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
+      <section id="lprocess" style={{padding:isMobile?"0 0 60px":"0 0 130px",position:"relative",zIndex:2}}>
+        <div style={{maxWidth:1280,margin:"0 auto",padding:isMobile?"0 20px":"0 60px"}}>
+          <div className="lproc-header" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
             <div className="lrv-l">
               {tag(t("tag_process","Процесс"))}
               <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("three_steps","Три шага")}<br/>{t("to_working","до рабочей")}<br/><span className="lgrad">{t("proc_heading_end","стратегии")}</span></h2>
             </div>
             <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("proc_sub","Никаких шаблонов. AI строит карту с нуля, опираясь исключительно на контекст вашего бизнеса.")}</p>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
+          <div className="lproc-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
             {STEPS.map((s,i)=>(
               <div key={i} className="lpc" style={{background:"#03030a",padding:"58px 46px",cursor:"default",transition:"background .35s"}} onMouseOver={e=>e.currentTarget.style.background="#07060f"} onMouseOut={e=>e.currentTarget.style.background="#03030a"}>
                 <div style={{position:"absolute",top:16,right:26,fontSize:116,fontWeight:900,color:"rgba(99,102,241,.055)",lineHeight:1,letterSpacing:-5,pointerEvents:"none",userSelect:"none"}}>{s.n}</div>
@@ -6343,13 +6408,13 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section style={{padding:"0 0 130px",position:"relative",zIndex:2}}>
-        <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
+      <section style={{padding:isMobile?"0 0 60px":"0 0 130px",position:"relative",zIndex:2}}>
+        <div style={{maxWidth:1280,margin:"0 auto",padding:isMobile?"0 20px":"0 60px"}}>
           <div className="lrv" style={{marginBottom:72}}>
             {tag(t("tag_testimonials","Отзывы"))}
             <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("speaks_word","Говорят те,")}<br/>{t("who_word","кто")} <span className="lgrad">{t("testi_checked","проверил")}</span></h2>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
+          <div className="ltesti-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
             {TESTI.map((tc,i)=>(
               <div key={i} className="ltc" style={{background:"#03030a",padding:"54px 44px",cursor:"default",transition:"background .35s"}} onMouseOver={e=>e.currentTarget.style.background="#07060f"} onMouseOut={e=>e.currentTarget.style.background="#03030a"}>
                 <div className="ltc-quote" style={{fontSize:21,fontWeight:300,fontStyle:"italic",lineHeight:1.6,marginBottom:36,letterSpacing:-.12}}>{`«${tc.q}»`}</div>
@@ -6363,16 +6428,16 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       </section>
 
       {/* ── PRICING ── */}
-      <section id="lpricing" style={{padding:"0 0 130px",position:"relative",zIndex:2}}>
-        <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
+      <section id="lpricing" style={{padding:isMobile?"0 0 60px":"0 0 130px",position:"relative",zIndex:2}}>
+        <div style={{maxWidth:1280,margin:"0 auto",padding:isMobile?"0 20px":"0 60px"}}>
+          <div className="lpricing-header" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,marginBottom:72,alignItems:"end"}}>
             <div className="lrv-l">
               {tag(t("tag_pricing_label","Тарифы"))}
               <h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}}>{t("pricing_start_word","Начните")}<br/>{t("for_free","бесплатно.")}<br/><span className="lgrad">{t("no_limits","Без лимитов.")}</span></h2>
             </div>
             <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("pricing_sub","Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.")}</p>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(255,255,255,.06)",alignItems:"start"}}>
+          <div className="lpricing-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(255,255,255,.06)",alignItems:"start"}}>
             {PRICING.map((p,i)=>(
               <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"44px 36px",position:"relative",cursor:"default",transition:"background .35s"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
                 {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#6366f1,#8b5cf6)"}}/>}
@@ -6517,12 +6582,12 @@ export default function App(){
   const[paymentToast,setPaymentToast]=useState(false);
   const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
-  // Синхронизация темы и палитры из профиля пользователя (при загрузке с API)
+  // Синхронизация темы и палитры из профиля пользователя (при загрузке с API и после сохранения)
   useEffect(()=>{
     if(!user?.theme&&!user?.palette)return;
     if(user.theme){setTheme(user.theme);try{localStorage.setItem("sa_theme",user.theme);}catch{}}
     if(user.palette){setPalette(user.palette);try{localStorage.setItem("sa_palette",user.palette);}catch{}}
-  },[user?.email]);
+  },[user?.email,user?.theme,user?.palette]);
   // t функция для LangCtx.Provider (App является корневым провайдером)
   const t=(k:string,fb?:string)=>{
     try{const L=(LANGS as any);return(L[lang]||L.ru)?.[k]||fb||k;}catch{return fb||k;}

@@ -103,20 +103,22 @@ router.put('/:projectId/maps/:mapId', requireAuth, async (req, res, next) => {
     if (!project) return res.status(404).json({ error: 'Проект не найден' });
     if (!role || role === 'viewer') return res.status(403).json({ error: 'Нет прав для сохранения' });
 
-    const { name, nodes, edges, ctx } = req.body;
+    const { name, nodes, edges, ctx, is_scenario } = req.body;
     const { rows } = await pool.query(
       `UPDATE maps SET
-         name       = COALESCE($1, name),
-         nodes      = COALESCE($2, nodes),
-         edges      = COALESCE($3, edges),
-         ctx        = COALESCE($4, ctx),
-         updated_at = now()
-       WHERE id = $5 AND project_id = $6 RETURNING *`,
+         name        = COALESCE($1, name),
+         nodes       = COALESCE($2, nodes),
+         edges       = COALESCE($3, edges),
+         ctx         = COALESCE($4, ctx),
+         is_scenario = COALESCE($5, is_scenario),
+         updated_at  = now()
+       WHERE id = $6 AND project_id = $7 RETURNING *`,
       [
         name,
         nodes !== undefined ? JSON.stringify(nodes) : undefined,
         edges !== undefined ? JSON.stringify(edges) : undefined,
         ctx,
+        is_scenario,
         req.params.mapId,
         req.params.projectId,
       ]
