@@ -3818,6 +3818,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:an
 // ── MapEditor ──
 function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false}){
   const{t,lang}=useLang();
+  const isMobile=useIsMobile();
   const STATUS=getSTATUS(t);
   const ETYPE=getETYPE(t);
   const[nodes,setNodes]=useState(mapData?.nodes||defaultNodes());
@@ -4340,18 +4341,18 @@ ${ctx}
       <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--border)",background:"var(--bg2)"}}>
 
         {/* ROW 1 — primary actions + search */}
-        <div style={{height:46,display:"flex",alignItems:"center",gap:4,padding:"0 12px",borderBottom:"1px solid var(--border)"}}>
+        <div style={{minHeight:46,display:"flex",alignItems:"center",gap:isMobile?8:4,padding:isMobile?"8px 10px":"0 12px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
 
           {/* LEFT: nav + edit */}
-          <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:isMobile?6:4,flexShrink:0}}>
             {tb(false,onBack,<>{t("back_btn","← Назад")}</>)}
             {!readOnly&&<>{sep}
-            <button onClick={addNode} style={{height:32,padding:"0 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:5,boxShadow:"0 4px 14px rgba(99,102,241,.4)"}}>
+            <button onClick={addNode} style={{height:32,padding:isMobile?"0 10px":"0 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:5,boxShadow:"0 4px 14px rgba(99,102,241,.4)"}}>
               <span style={{fontSize:16,lineHeight:1}}>+</span> Шаг
             </button>
             <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}}
-              style={{height:32,padding:"0 12px",borderRadius:8,border:`1px solid ${connecting?"rgba(99,102,241,.5)":"var(--border)"}`,background:connecting?"rgba(99,102,241,.15)":"transparent",color:connecting?"#818cf8":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
-              {connecting?<><span style={{color:"#ef4444"}}>✕</span> Отмена</>:<>{t("link_btn","⇒ Связать")}</>}
+              style={{height:32,padding:isMobile?"0 8px":"0 12px",borderRadius:8,border:`1px solid ${connecting?"rgba(99,102,241,.5)":"var(--border)"}`,background:connecting?"rgba(99,102,241,.15)":"transparent",color:connecting?"#818cf8":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
+              {connecting?<><span style={{color:"#ef4444"}}>✕</span> {isMobile?t("cancel_short","Отм."):t("cancel","Отмена")}</>:<>{isMobile?"⇒":t("link_btn","⇒ Связать")}</>}
             </button>
             {sep}
             {ib(!undoStack.length,"Отменить (Ctrl+Z)",undo,<>↩</>,{opacity:undoStack.length?.9:.35})}
@@ -4362,16 +4363,18 @@ ${ctx}
           {sep}
 
           {/* CENTER: search + filter */}
-          <div style={{flex:1,display:"flex",alignItems:"center",gap:6,justifyContent:"center",minWidth:0}}>
-            <div style={{position:"relative",flexShrink:0}}>
+          <div style={{flex:isMobile?undefined:1,display:"flex",alignItems:"center",gap:isMobile?4:6,justifyContent:"center",minWidth:0,flexShrink:isMobile?0:undefined}}>
+            {!isMobile&&<div style={{position:"relative",flexShrink:0}}>
               <span style={{position:"absolute",left:8,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"var(--text4)",pointerEvents:"none"}}>🔍</span>
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск по шагам…"
                 style={{padding:"5px 10px 5px 28px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",width:180,fontFamily:"inherit"}}/>
-            </div>
+            </div>}
+            {isMobile&&<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍" style={{padding:"6px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",width:60,fontFamily:"inherit"}}/>}
             <CustomSelect value={statusFilter} onChange={v=>setStatusFilter(v)}
-              options={[{value:"all",label:"Все статусы"},...Object.entries(STATUS).map(([k,s])=>({value:k,label:s.label,dot:s.c}))]}/>
+              options={[{value:"all",label:isMobile?t("all_statuses_short","Статусы"):t("all_statuses","Все статусы")},...Object.entries(STATUS).map(([k,s])=>({value:k,label:s.label,dot:s.c}))]}
+              style={{minWidth:isMobile?72:100}}/>
             <div style={{fontSize:13,color:"var(--text4)",fontWeight:600,padding:"4px 9px",borderRadius:7,background:"var(--surface)",border:"1px solid var(--border)",whiteSpace:"nowrap",flexShrink:0}}>
-              {filteredNodes.length}{search||statusFilter!=="all"?`/${nodes.length}`:""} шагов
+              {filteredNodes.length}{search||statusFilter!=="all"?`/${nodes.length}`:""}{isMobile?"":" шагов"}
             </div>
           </div>
 
@@ -4397,14 +4400,14 @@ ${ctx}
         </div>
 
         {/* ROW 2 — view tools + panels + export */}
-        <div style={{height:38,display:"flex",alignItems:"center",gap:4,padding:"0 12px"}}>
+        <div style={{minHeight:38,display:"flex",alignItems:"center",gap:isMobile?2:4,padding:isMobile?"6px 10px":"0 12px",flexWrap:isMobile?"wrap":undefined}}>
 
           {/* View tools */}
-          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-            <span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>Вид</span>
-            {tb(false,fitView,<>⊡ Вписать</>)}
-            {!readOnly&&tb(false,autoLayout,<>{t("auto_layout","⌥ Расклад")}</>)}
-            {!readOnly&&tb(false,autoConnect,<>{t("ai_links","🔗 AI-связи")}</>)}
+          <div style={{display:"flex",alignItems:"center",gap:isMobile?2:3,flexShrink:0}}>
+            {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>Вид</span>}
+            {tb(false,fitView,<>{isMobile?"⊡":<>⊡ Вписать</>}</>)}
+            {!readOnly&&tb(false,autoLayout,<>{isMobile?"⌥":t("auto_layout","⌥ Расклад")}</>)}
+            {!readOnly&&tb(false,autoConnect,<>{isMobile?"🔗":t("ai_links","🔗 AI-связи")}</>)}
           </div>
 
           {sep}
@@ -6206,9 +6209,14 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
     @media (max-width:768px){
       .lpage section{padding-left:20px!important;padding-right:20px!important;}
       .lhero-h1{font-size:clamp(36px,10vw,52px)!important;margin-bottom:24px!important;}
-      .lhero-p{font-size:15px!important;margin-bottom:36px!important;}
-      .lhero-btns{flex-direction:column;align-items:stretch!important;}
+      .lhero-p{font-size:15px!important;margin-bottom:36px!important;color:rgba(240,238,255,.72)!important;}
+      .lhero-btns{flex-direction:column;align-items:stretch!important;gap:14px!important;}
       .lbtn-prim,.lbtn-sec{width:100%;text-align:center;padding:14px!important;}
+      .lcta-wrap{padding:60px 20px!important;}
+      .lcta-wrap h2{font-size:clamp(32px,8vw,48px)!important;}
+      .lcta-wrap p{color:rgba(240,238,255,.7)!important;}
+      .lcta-wrap .lcta-trust{gap:16px!important;flex-wrap:wrap;justify-content:center;}
+      .lshimmer{height:4px!important;margin:2px 0 28px!important;}
     }
     @media (max-width:640px){
       .lmc{padding:32px 20px!important;border-right:none!important;border-bottom:1px solid rgba(255,255,255,.06)!important;}
@@ -6278,7 +6286,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
               {menuOpen?"×":"☰"}
             </button>
             {menuOpen&&(
-              <div style={{position:"fixed",top:66,left:0,right:0,bottom:0,zIndex:299,background:"rgba(3,3,10,.95)",backdropFilter:"blur(20px)",padding:"24px 20px",display:"flex",flexDirection:"column",gap:8,animation:"slideDown .2s ease"}}>
+              <div style={{position:"fixed",top:66,left:0,right:0,bottom:0,zIndex:299,background:"#03030a",backdropFilter:"blur(24px)",padding:"24px 20px",display:"flex",flexDirection:"column",gap:12,animation:"slideDown .2s ease",overflowY:"auto"}}>
                 {NAV_LINKS.map(([label,href])=>(
                   <button key={href} onClick={()=>{const el=document.querySelector(href);if(el)el.scrollIntoView({behavior:'smooth'});setMenuOpen(false);}} style={{padding:"14px 0",fontSize:16,color:"#f0eeff",background:"none",border:"none",cursor:"pointer",fontFamily:"inherit",textAlign:"left",borderBottom:"1px solid rgba(255,255,255,.08)"}}>{label}</button>
                 ))}
@@ -6287,8 +6295,10 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
                     <button key={code} onClick={()=>onChangeLang&&onChangeLang(code)} style={{padding:"8px 14px",borderRadius:8,border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:12,fontWeight:700,cursor:"pointer",background:lang===code?"rgba(99,102,241,.3)":"rgba(255,255,255,.08)",color:lang===code?"#a5b4fc":"#f0eeff"}}>{label}</button>
                   ))}
                 </div>
-                <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{padding:"14px",borderRadius:10,border:"1px solid rgba(255,255,255,.2)",background:"transparent",color:"#f0eeff",fontSize:15,cursor:"pointer",fontFamily:"inherit",marginTop:"auto"}}>{t("sign_in","Войти")}</button>
-                <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{padding:"14px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("start_free","Начать бесплатно")}</button>
+                <div style={{display:"flex",flexDirection:"column",gap:12,marginTop:"auto",paddingTop:24}}>
+                  <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{width:"100%",padding:"14px",borderRadius:10,border:"1px solid rgba(255,255,255,.2)",background:"transparent",color:"#f0eeff",fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>{t("sign_in","Войти")}</button>
+                  <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{width:"100%",padding:"14px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("start_free","Начать бесплатно")}</button>
+                </div>
               </div>
             )}
           </>
@@ -6296,13 +6306,13 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:isMobile?"60px 20px 70px":"100px 60px 90px",overflow:"hidden",zIndex:1}}>
+      <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:isMobile?"60px 20px 70px":"100px 60px 90px",overflow:"hidden",zIndex:1,width:"100%",boxSizing:"border-box"}}>
         {/* glow */}
         <div style={{position:"absolute",top:"-10%",left:"50%",transform:"translateX(-50%)",width:1000,height:650,background:"radial-gradient(ellipse 65% 60% at 50% 40%,rgba(99,102,241,.1) 0%,transparent 68%)",filter:"blur(56px)",zIndex:2,pointerEvents:"none"}}/>
         {/* mask */}
         <div style={{position:"absolute",inset:0,zIndex:3,background:"radial-gradient(ellipse 72% 65% at 50% 50%,rgba(3,3,10,.8) 0%,rgba(3,3,10,.18) 70%,transparent 100%)",pointerEvents:"none"}}/>
 
-        <div style={{position:"relative",zIndex:4,display:"flex",flexDirection:"column",alignItems:"center",maxWidth:880}}>
+        <div style={{position:"relative",zIndex:4,display:"flex",flexDirection:"column",alignItems:"center",width:"100%",maxWidth:880,padding:isMobile?"0 8px":0}}>
           {/* badge */}
           {/* headline */}
           <h1 className="lhero-h1" style={{fontSize:"clamp(60px,10vw,122px)",fontWeight:900,letterSpacing:-4,lineHeight:.92,marginBottom:36,color:"#f0eeff"}}>
@@ -6310,16 +6320,15 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
             <span className="lgrad" style={{display:"block",animation:"slideUp .9s .35s both, lGradFlow 3.5s ease infinite"}}>{t("which_word","которая")}</span>
             <span className="lgrad" style={{display:"block",animation:"slideUp .9s .5s both, lGradFlow 3.5s ease infinite"}}>{t("wins_word","побеждает")}</span>
           </h1>
-          {/* shimmer lines */}
-          <div className="lshimmer" style={{position:"relative",width:600,maxWidth:"92vw",height:8,margin:"2px 0 38px",animation:"slideUp .8s .72s both"}}>
+          {/* shimmer lines — тёмный овал убран везде */}
+          <div className="lshimmer" style={{position:"relative",width:600,maxWidth:"min(600px,92vw)",height:8,margin:"2px auto 38px",animation:"slideUp .8s .72s both"}}>
             <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:0,width:"76%",height:2,filter:"blur(2.5px)",background:"linear-gradient(90deg,transparent,#6366f1,transparent)"}}/>
             <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:2,width:"76%",height:1,background:"linear-gradient(90deg,transparent,#6366f1,transparent)"}}/>
             <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:0,width:"32%",height:5,filter:"blur(3px)",background:"linear-gradient(90deg,transparent,#67e8f9,transparent)"}}/>
             <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:2,width:"32%",height:1,background:"linear-gradient(90deg,transparent,#67e8f9,transparent)"}}/>
-            <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:-6,width:"100%",height:20,background:"radial-gradient(ellipse 50% 100% at 50% 50%,transparent 20%,#03030a 85%)"}}/>
           </div>
           {/* subtext */}
-          <p className="lhero-p" style={{fontSize:18,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.8,maxWidth:540,marginBottom:54,animation:"slideUp .8s .72s both"}}>
+          <p className="lhero-p" style={{fontSize:18,fontWeight:300,color:"rgba(240,238,255,.65)",lineHeight:1.8,maxWidth:540,margin:"0 auto 54px",animation:"slideUp .8s .72s both"}}>
             {t("hero_sub","AI анализирует ваш бизнес, строит стратегическую карту и даёт консультацию уровня McKinsey. Для тех, кто принимает решения с последствиями.")}
           </p>
           {/* buttons */}
@@ -6459,9 +6468,9 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       </section>
 
       {/* ── CTA ── */}
-      <section style={{padding:"0 0 130px",position:"relative",zIndex:2}}>
-        <div style={{maxWidth:1280,margin:"0 auto",padding:"0 60px"}}>
-          <div className="lrv-sc" style={{border:"1px solid rgba(255,255,255,.07)",padding:"120px 80px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+      <section style={{padding:isMobile?"0 0 70px":"0 0 130px",position:"relative",zIndex:2}}>
+        <div style={{maxWidth:1280,margin:"0 auto",padding:isMobile?"0 20px":"0 60px"}}>
+          <div className="lrv-sc lcta-wrap" style={{border:"1px solid rgba(255,255,255,.07)",padding:isMobile?"50px 24px":"120px 80px",textAlign:"center",position:"relative",overflow:"hidden"}}>
             <div style={{position:"absolute",top:0,left:"15%",right:"15%",height:1.5,background:"linear-gradient(90deg,transparent,rgba(99,102,241,.6),transparent)"}}/>
             {/* sparkles inside CTA */}
             <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
@@ -6476,7 +6485,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
                 {t("cta_sub","Создайте первую стратегическую карту прямо сейчас. Без кредитной карты. Без шаблонов — только ваш бизнес и AI.")}
               </p>
               <button className="lbtn-prim" onClick={onGetStarted} style={{fontSize:17,padding:"18px 54px"}}>{t("start_work","Начать работу →")}</button>
-              <div style={{display:"flex",gap:32,justifyContent:"center",marginTop:30,flexWrap:"wrap"}}>
+              <div className="lcta-trust" style={{display:"flex",gap:32,justifyContent:"center",marginTop:30,flexWrap:"wrap"}}>
                 {[t("cta_trust1","Бесплатно навсегда"),t("cta_trust2","Без кредитной карты"),t("cta_trust3","Данные только ваши")].map(lbl=>(
                   <div key={lbl} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.25)",letterSpacing:1,display:"flex",alignItems:"center",gap:9}}>
                     <span style={{color:"#10b981",fontWeight:700}}>—</span>{lbl}
