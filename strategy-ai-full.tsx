@@ -1941,9 +1941,7 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
         </div>
         <div style={{padding:"20px 24px 24px"}}>
           <div style={{textAlign:"center",marginBottom:22}}>
-            <div style={{width:44,height:44,borderRadius:13,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}}>
-              <img src="/logo.png" alt="" style={{width:28,height:28,objectFit:"contain"}}/>
-            </div>
+            <img src="/logo-icon.svg" alt="" style={{width:48,height:48,objectFit:"contain",margin:"0 auto 12px",display:"block"}}/>
             <div style={{fontSize:18,fontWeight:700,color:"var(--text)"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
             {subtitle&&<div style={{fontSize:13,color:"var(--text4)",marginTop:6,lineHeight:1.5}}>{subtitle}</div>}
           </div>
@@ -2708,7 +2706,8 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px)",backgroundSize:"auto,60px 60px,60px 60px",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",padding:"14px 28px",position:"relative",zIndex:10}}>
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
-          <img src="/logo.png" alt="Strategy AI" style={{height:26,width:"auto",objectFit:"contain"}}/>
+          <img src="/logo-icon.svg" alt="" style={{height:32,width:32,objectFit:"contain"}}/>
+          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         <div style={{display:"flex",gap:10}}>
           <button onClick={onToggleTheme} style={{padding:"7px 12px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,cursor:"pointer"}}>{theme==="dark"?"☀️":"🌙"}</button>
@@ -2783,7 +2782,8 @@ function LandingFooter(){
       <div style={{maxWidth:1100,margin:"0 auto",display:"flex",flexWrap:"wrap",gap:24,justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <img src="/logo.png" alt="Strategy AI" style={{height:22,width:"auto",objectFit:"contain"}}/>
+            <img src="/logo-icon.svg" alt="" style={{height:28,width:28,objectFit:"contain"}}/>
+            <span style={{fontSize:15,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
           </div>
           <p style={{fontSize:12,color:"#64748b",maxWidth:200,lineHeight:1.6,margin:0}}>{t("footer_tagline","Визуальное стратегическое планирование с AI-советником уровня McKinsey.")}</p>
         </div>
@@ -4696,7 +4696,8 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(99,102,241,.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:0}}>
-          <img src="/logo.png" alt="Strategy AI" style={{height:26,width:"auto",objectFit:"contain",flexShrink:0}}/>
+          <img src="/logo-icon.svg" alt="" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
+          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0}}>
           <button onClick={onToggleTheme} style={{padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{theme==="dark"?"☀️":"🌙"}</button>
@@ -5933,9 +5934,7 @@ function SplashScreen({onDone,theme}){
       <style>{CSS}</style>
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{animation:"float 3s ease infinite",marginBottom:32}}>
-        <div style={{width:72,height:72,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 16px 60px rgba(99,102,241,.6)"}}>
-          <img src="/logo.png" alt="" style={{width:48,height:48,objectFit:"contain"}}/>
-        </div>
+        <img src="/logo-icon.svg" alt="" style={{width:96,height:96,objectFit:"contain"}}/>
       </div>
       <div style={{fontSize:36,fontWeight:900,color:"var(--text,#e2e8f0)",letterSpacing:-1.5,marginBottom:6,animation:"slideUp .5s ease"}}>Strategy AI</div>
       
@@ -6261,8 +6260,9 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         backdropFilter:navSolid?"blur(32px)":"none",
         borderBottom:navSolid?"1px solid rgba(255,255,255,.06)":"none",
         transition:"background .5s,border-color .5s"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
-          <img src="/logo.png" alt="Strategy AI" style={{height:28,width:"auto",objectFit:"contain",cursor:"pointer"}} onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}/>
+        <div style={{display:"flex",alignItems:"center",gap:10,flex:1,cursor:"pointer"}} onClick={()=>window.scrollTo({top:0,behavior:"smooth"})}>
+          <img src="/logo-icon.svg" alt="" style={{height:36,width:36,objectFit:"contain"}}/>
+          <span style={{fontSize:16,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         {!isMobile&&(
           <>
@@ -6504,7 +6504,8 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       {/* ── FOOTER ── */}
       <footer style={{borderTop:"1px solid rgba(255,255,255,.05)",padding:"38px 60px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative",zIndex:2}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <img src="/logo.png" alt="Strategy AI" style={{height:26,width:"auto",objectFit:"contain"}}/>
+          <img src="/logo-icon.svg" alt="" style={{height:32,width:32,objectFit:"contain"}}/>
+          <span style={{fontSize:15,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.2)",letterSpacing:2.5,textTransform:"uppercase"}}>© 2026 STRATEGY AI</span>
       </footer>
@@ -6527,9 +6528,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
       <div style={{width:"min(96vw,440px)",padding:isMobile?16:0,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:32}}>
-          <div style={{width:64,height:64,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",boxShadow:"0 16px 48px rgba(99,102,241,.6)",animation:"float 3s ease infinite"}}>
-            <img src="/logo.png" alt="" style={{width:40,height:40,objectFit:"contain"}}/>
-          </div>
+          <img src="/logo-icon.svg" alt="" style={{width:80,height:80,objectFit:"contain",margin:"0 auto 16px",display:"block",animation:"float 3s ease infinite"}}/>
           <div style={{fontSize:28,fontWeight:900,color:"var(--text)",letterSpacing:-1,marginBottom:6}}>Strategy AI</div>
           <div style={{fontSize:14,color:"var(--text3)"}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
         </div>

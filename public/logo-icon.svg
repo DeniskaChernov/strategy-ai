@@ -1,0 +1,11 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#4DE3FF"/>
+<stop offset="100%" stop-color="#8B5CF6"/>
+</linearGradient>
+</defs>
+<circle cx="12" cy="95" r="5" fill="url(#g)"/>
+<path d="M12 95 Q50 70 95 40" stroke="url(#g)" stroke-width="4" fill="none" stroke-linecap="round"/>
+<polygon points="95,40 85,32 92,28 100,36" fill="url(#g)"/>
+</svg>
