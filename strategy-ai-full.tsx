@@ -31,17 +31,32 @@ const CSS=`
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;}
 input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
+:root{
+  /* ── Spacing scale ── */
+  --sp-xs:4px;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:24px;--sp-2xl:32px;--sp-3xl:48px;
+  /* ── Border radius scale ── */
+  --r-xs:4px;--r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:18px;--r-2xl:24px;--r-full:9999px;
+  /* ── Brand palette ── */
+  --brand:#6366f1;--brand2:#8b5cf6;--brand3:#06b6d4;
+  --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#0ea5e9;
+  /* ── Font sizes ── */
+  --fz-xs:11px;--fz-sm:12px;--fz-md:13px;--fz-lg:15px;--fz-xl:18px;
+  /* ── Transitions ── */
+  --tr-fast:all .1s ease;--tr:all .2s ease;--tr-slow:all .35s ease;
+}
+/* ── Accent variables (override by data-palette) ── */
 [data-theme="dark"]{
   --bg:#070b14;--bg2:#0b1120;--bg3:#0f1729;
   --surface:rgba(255,255,255,.035);--surface2:rgba(255,255,255,.06);
   --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
   --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;
   --input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);
-  --card:rgba(255,255,255,.035);--card-hover:rgba(99,102,241,.07);
-  --grid:rgba(99,102,241,.04);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;
-  --divider:rgba(255,255,255,.08);--tag-bg:rgba(99,102,241,.1);--tag-color:#818cf8;
-  --shadow:0 4px 24px rgba(0,0,0,.4);--node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);
-  --modal-bg:#0b1120;
+  --card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);
+  --grid:var(--accent-grid);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;
+  --divider:rgba(255,255,255,.08);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);
+  --shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);
+  --node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;
+  --accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);
 }
 [data-theme="light"]{
   --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eef1f8;
@@ -49,12 +64,24 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
   --border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.2);
   --text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;
   --input-bg:#ffffff;--input-border:rgba(0,0,0,.18);
-  --card:rgba(255,255,255,.9);--card-hover:rgba(99,102,241,.06);
-  --grid:rgba(99,102,241,.1);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;
-  --divider:rgba(0,0,0,.1);--tag-bg:rgba(99,102,241,.1);--tag-color:#4338ca;
-  --shadow:0 4px 24px rgba(0,0,0,.12);--node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);
-  --modal-bg:#ffffff;
+  --card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);
+  --grid:var(--accent-grid);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;
+  --divider:rgba(0,0,0,.1);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);
+  --shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);
+  --node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;
+  --accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);
 }
+/* ── Palettes: спокойные приглушённые цвета (только Strategy AI app, не лендинг) ── */
+[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);}
+[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);}
+[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);}
+[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);}
+[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);}
+[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);}
+[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);}
+[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);}
+[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);}
+[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);}
 [data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{
   background:var(--input-bg) !important;border-color:var(--input-border) !important;
   color:var(--text) !important;color-scheme:light;
@@ -62,7 +89,7 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 [data-theme="light"] input::placeholder,[data-theme="light"] textarea::placeholder{color:var(--text5);}
 [data-theme="light"] option{background:#fff;color:#0f172a;}
 /* Light theme specific overrides */
-[data-theme="light"] body{background:#f4f6fb;}
+[data-theme="light"] body{background:var(--bg);}
 [data-theme="dark"] select{color-scheme:dark;background:#0d1829;color:#e2e8f0;border-color:rgba(255,255,255,.1);}
 [data-theme="dark"] option{background:#0d1829;color:#e2e8f0;}
 select{appearance:none;-webkit-appearance:none;}
@@ -86,15 +113,15 @@ select{appearance:none;-webkit-appearance:none;}
 }
 .icard:hover{
   transform:translateY(-2px);
-  box-shadow:0 8px 28px rgba(99,102,241,.18);
-  border-color:rgba(99,102,241,.35) !important;
-  background:rgba(99,102,241,.07) !important;
+  box-shadow:0 8px 28px var(--accent-glow);
+  border-color:var(--accent-1) !important;
+  background:var(--accent-soft) !important;
 }
 .icard .icard-title{
   transition:background-size .3s ease, opacity .2s;
 }
 .icard:hover .icard-title{
-  background:linear-gradient(90deg,#6366f1,#a78bfa,#38bdf8,#6366f1);
+  background:linear-gradient(90deg,var(--accent-1),var(--accent-2),var(--accent-1));
   background-size:300% 100%;
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
@@ -111,12 +138,12 @@ select{appearance:none;-webkit-appearance:none;}
 }
 /* Colored variant - uses tier/accent color */
 .icard-accent:hover{
-  box-shadow:0 8px 28px var(--icard-glow,rgba(99,102,241,.2));
-  border-color:var(--icard-color,rgba(99,102,241,.35)) !important;
-  background:var(--icard-bg,rgba(99,102,241,.07)) !important;
+  box-shadow:0 8px 28px var(--icard-glow,var(--accent-glow));
+  border-color:var(--icard-color,var(--accent-1)) !important;
+  background:var(--icard-bg,var(--accent-soft)) !important;
 }
 .icard-accent:hover .icard-title{
-  background:linear-gradient(90deg,var(--icard-color,#6366f1),#a78bfa,var(--icard-color,#6366f1));
+  background:linear-gradient(90deg,var(--icard-color,var(--accent-1)),var(--accent-2),var(--icard-color,var(--accent-1)));
   background-size:300% 100%;
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
@@ -138,21 +165,21 @@ select{appearance:none;-webkit-appearance:none;}
   padding:5px 8px;
 }
 .feat-row:hover{
-  background:rgba(99,102,241,.07);
+  background:var(--accent-soft);
   padding-left:12px;
 }
 .feat-row:hover .feat-icon{
   filter:brightness(1.3);
 }
 [data-theme="light"] .icard:hover{
-  box-shadow:0 8px 28px rgba(99,102,241,.14);
-  background:rgba(99,102,241,.05) !important;
+  box-shadow:0 8px 28px var(--accent-glow);
+  background:var(--accent-soft) !important;
 }
 [data-theme="light"] .icard:hover .icard-desc{
   color:var(--text) !important;
 }
 .node-card:hover{filter:brightness(1.12);cursor:pointer;}
-@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(99,102,241,.35)}50%{box-shadow:0 0 40px rgba(99,102,241,.65)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px var(--accent-glow)}50%{box-shadow:0 0 40px var(--accent-glow)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes nodeBlink{0%,100%{opacity:1}50%{opacity:.45}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -213,18 +240,18 @@ function CustomSelect({value,onChange,options,style={},disabled=false}){
         <span style={{fontSize:12,color:"rgba(255,255,255,.4)",marginLeft:4,transform:open?"rotate(180deg)":"none",transition:"transform .15s"}}>▼</span>
       </button>
       {open&&(
-        <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,minWidth:"100%",background:"#0d1829",border:"1px solid rgba(99,102,241,.3)",borderRadius:11,boxShadow:"0 16px 48px rgba(0,0,0,.8)",zIndex:9999,overflow:"hidden",animation:"slideDown .12s ease"}}>
+        <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,minWidth:"100%",background:"var(--surface,#0d1829)",border:"1px solid var(--accent-1)",borderRadius:11,boxShadow:"var(--shadow,0 16px 48px rgba(0,0,0,.8))",zIndex:9999,overflow:"hidden",animation:"slideDown .12s ease"}}>
           {options.map(o=>{
             const isSel=o.value===value;
             return(
               <div key={o.value} onClick={e=>{e.stopPropagation();onChange(o.value);setOpen(false);}}
-                style={{display:"flex",alignItems:"center",gap:8,padding:"9px 13px",cursor:"pointer",background:isSel?"rgba(99,102,241,.18)":"transparent",color:isSel?"#a5b4fc":"#e2e8f0",fontSize:13,fontWeight:isSel?700:500,fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"background .1s",whiteSpace:"nowrap"}}
+                style={{display:"flex",alignItems:"center",gap:8,padding:"9px 13px",cursor:"pointer",background:isSel?"var(--accent-soft)":"transparent",color:isSel?"var(--accent-1)":"var(--text)",fontSize:13,fontWeight:isSel?700:500,fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"background .1s",whiteSpace:"nowrap"}}
                 onMouseOver={e=>{if(!isSel)e.currentTarget.style.background="rgba(255,255,255,.06)";}}
                 onMouseOut={e=>{if(!isSel)e.currentTarget.style.background="transparent";}}>
                 {o.dot&&<span style={{width:9,height:9,borderRadius:"50%",background:o.dot,flexShrink:0}}/>}
                 {o.icon&&<span style={{fontSize:14}}>{o.icon}</span>}
                 <span>{o.label}</span>
-                {isSel&&<span style={{marginLeft:"auto",color:"#818cf8",fontSize:13}}>✓</span>}
+                {isSel&&<span style={{marginLeft:"auto",color:"var(--accent-1)",fontSize:13}}>✓</span>}
               </div>
             );
           })}
@@ -450,6 +477,7 @@ const LANGS={
     tag_pricing_label:"Тарифы",pricing_start_word:"Начните",pricing_sub:"Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.",
     pricing_hot_badge:"★ ТОП",
     lpr1_desc:"Для знакомства с инструментом",lpr1_f1:"1 проект и 1 стратегическая карта",lpr1_f2:"AI-интервью и генерация карты",lpr1_f3:"Gantt-таймлайн",lpr1_f4:"PNG / JSON экспорт",start_free_cta:"Начать бесплатно",
+    lpr_starter_desc:"Мягкий вход в стратегическое планирование",lpr_starter_f1:"3 проекта, 3 карты каждый",lpr_starter_f2:"2 сценария + AI анализ рисков",lpr_starter_f3:"Полный Gantt + приоритеты",lpr_starter_f4:"1 500 AI-сообщений / мес",lpr_starter_cta:"Начать за $9 →",
     lpr2_desc:"Для профессионалов и команд",lpr2_f1:"10 проектов, 5 карт каждая",lpr2_f2:"SWOT, OKR, BCG, Porter AI-анализ",lpr2_f3:"5 сценариев + симуляция последствий",lpr2_f4:"Клонирование и версионирование карт",lpr2_f5:"Командная работа до 3 человек",lpr2_cta:"Перейти на Pro →",
     lpr3_desc:"Для организаций с системным подходом",lpr3_f1:"Без ограничений: проекты, карты, сценарии",lpr3_f2:"C-level AI коллегиум (5 экспертных ролей)",lpr3_f3:"PPTX-отчёты для совета директоров",lpr3_f4:"White-label и API-интеграции",lpr3_f5:"Выделенный менеджер поддержки",lpr3_cta:"Связаться",
     // Landing CTA section
@@ -483,6 +511,7 @@ const LANGS={
     // VersionHistoryModal
     trial_active:"Пробный период активен",trial_days_left:"дней осталось",
     deadline_reminder:"Напоминания о дедлайнах",
+    notif_email_desc:"Важные обновления на почту",notif_push_desc:"Уведомления в браузере",
     restore_confirm:"Восстановить эту версию? Текущие данные будут заменены.",
     versions_empty:"Нет сохранённых версий",restore_version:"Восстановить",
     version_restored:"Версия восстановлена ✓",
@@ -493,6 +522,9 @@ const LANGS={
     weekly_briefing_err:"Не удалось получить AI-анализ.",
     // AI/export
     ai_error:"Ошибка AI-анализа",
+    ai_comment_error:"Ошибка AI. Попробуйте ещё раз.",
+    ai_generation_error:"Ошибка генерации. Попробуйте ещё раз.",
+    ai_sim_error:"Ошибка AI-консультанта",
     export_pdf:"Скачать PDF",export_pptx:"Скачать PPTX",
     // MapEditor toasts & misc
     imported_steps:"✅ Импортировано: {n} шагов",
@@ -523,6 +555,7 @@ const LANGS={
     settings_saved:"Настройки сохранены ✓",
     appearance:"Внешний вид",
     light_theme_label:"☀️ Светлая",dark_theme_label:"🌙 Тёмная",
+    palette_label:"Цветовая палитра",
     compact_desc:"Уменьшенные карточки узлов",
     autosave_desc:"Сохранять карту при каждом изменении",
     canvas_view:"🗺 Канвас",gantt_view:"📅 Gantt",list_view:"📋 Список",
@@ -545,7 +578,9 @@ const LANGS={
     scenario_created:"Сценарий создан ✓",
     scenario_limit:"Лимит сценариев для тарифа",
     members_limit:"Лимит участников: {n}",
+    member_added:"Участник добавлен",
     member_added_already:"Участник уже добавлен",
+    member_add_err:"Ошибка добавления участника",
     payment_success:"✅ Оплата прошла успешно! Тариф обновлён.",
     // GanttView
     steps_with_deadlines:"{n} шагов с дедлайнами",
@@ -571,9 +606,16 @@ const LANGS={
     card_expiry_ph:"ММ/ГГ",card_cvv_ph:"CVV",
     card_data_title:"💳 Данные карты",
     downgrade_warning:"После смены тарифа часть данных может быть ограничена.",
+    downgrade_limit_maps:"Карт на новом тарифе",
+    downgrade_limit_projects:"Проектов на новом тарифе",
+    downgrade_excess:"Данные сверх лимита станут доступны только для чтения.",
     current_tier_badge:"✓ Текущий тариф",
     alt_strategies:"Альтернативные стратегии сценария",
-    done:"Выполнено"},
+    done:"Выполнено",
+    verify_email_banner:"Подтвердите ваш email для полного доступа.",
+    verify_email_resend:"Отправить письмо повторно",
+    verify_email_sent:"Письмо отправлено! Проверьте почту.",
+    verify_email_done:"✓ Email подтверждён"},
   en:{
     save:'Save',cancel:'Cancel',delete:'Delete',add:'Add',
     edit:'Edit',close:'Close',confirm:'Confirm',back:'Back',
@@ -789,6 +831,7 @@ const LANGS={
     tag_pricing_label:"Pricing",pricing_start_word:"Start",pricing_sub:"Your first map and first AI analysis are free. Pay only when you're convinced of the tool's value.",
     pricing_hot_badge:"★ TOP",
     lpr1_desc:"To get acquainted with the tool",lpr1_f1:"1 project and 1 strategy map",lpr1_f2:"AI interview and map generation",lpr1_f3:"Gantt timeline",lpr1_f4:"PNG / JSON export",start_free_cta:"Start free",
+    lpr_starter_desc:"A gentle entry into strategic planning",lpr_starter_f1:"3 projects, 3 maps each",lpr_starter_f2:"2 scenarios + AI risk analysis",lpr_starter_f3:"Full Gantt + priorities",lpr_starter_f4:"1,500 AI messages / month",lpr_starter_cta:"Start for $9 →",
     lpr2_desc:"For professionals and teams",lpr2_f1:"10 projects, 5 maps each",lpr2_f2:"SWOT, OKR, BCG, Porter AI-analysis",lpr2_f3:"5 scenarios + consequence simulation",lpr2_f4:"Map cloning and versioning",lpr2_f5:"Team collaboration up to 3 people",lpr2_cta:"Go Pro →",
     lpr3_desc:"For organizations with a systematic approach",lpr3_f1:"Unlimited: projects, maps, scenarios",lpr3_f2:"C-level AI collegium (5 expert roles)",lpr3_f3:"PPTX reports for board of directors",lpr3_f4:"White-label and API integrations",lpr3_f5:"Dedicated support manager",lpr3_cta:"Contact us",
     // Landing CTA section
@@ -822,6 +865,7 @@ const LANGS={
     // VersionHistoryModal
     trial_active:"Trial period active",trial_days_left:"days left",
     deadline_reminder:"Deadline reminders",
+    notif_email_desc:"Important updates by email",notif_push_desc:"Browser notifications",
     restore_confirm:"Restore this version? Current data will be replaced.",
     versions_empty:"No saved versions",restore_version:"Restore",
     version_restored:"Version restored ✓",
@@ -832,6 +876,9 @@ const LANGS={
     weekly_briefing_err:"Failed to get AI analysis.",
     // AI/export
     ai_error:"AI analysis error",
+    ai_comment_error:"AI error. Please try again.",
+    ai_generation_error:"Generation error. Please try again.",
+    ai_sim_error:"AI consultant error",
     export_pdf:"Download PDF",export_pptx:"Download PPTX",
     // MapEditor toasts & misc
     imported_steps:"✅ Imported: {n} steps",
@@ -862,6 +909,7 @@ const LANGS={
     settings_saved:"Settings saved ✓",
     appearance:"Appearance",
     light_theme_label:"☀️ Light",dark_theme_label:"🌙 Dark",
+    palette_label:"Color palette",
     compact_desc:"Smaller node cards",
     autosave_desc:"Save map on every change",
     canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 List",
@@ -884,7 +932,9 @@ const LANGS={
     scenario_created:"Scenario created ✓",
     scenario_limit:"Scenario limit for plan",
     members_limit:"Member limit: {n}",
+    member_added:"Member added",
     member_added_already:"Member already added",
+    member_add_err:"Failed to add member",
     payment_success:"✅ Payment successful! Plan updated.",
     // GanttView
     steps_with_deadlines:"{n} steps with deadlines",
@@ -910,9 +960,16 @@ const LANGS={
     card_expiry_ph:"MM/YY",card_cvv_ph:"CVV",
     card_data_title:"💳 Card details",
     downgrade_warning:"After downgrading, some data may be restricted.",
+    downgrade_limit_maps:"Maps on new plan",
+    downgrade_limit_projects:"Projects on new plan",
+    downgrade_excess:"Data exceeding limits will become read-only.",
     current_tier_badge:"✓ Current plan",
     alt_strategies:"Alternative scenario strategies",
-    done:"Completed"},
+    done:"Completed",
+    verify_email_banner:"Please verify your email for full access.",
+    verify_email_resend:"Resend verification email",
+    verify_email_sent:"Email sent! Check your inbox.",
+    verify_email_done:"✓ Email verified"},
   uz:{
     save:"Saqlash",cancel:"Bekor",delete:"O'chirish",add:"Qo'shish",
     edit:"Tahrirlash",close:"Yopish",confirm:"Tasdiqlash",back:"Orqaga",
@@ -1010,6 +1067,8 @@ const LANGS={
     confirm_password:"Parolni tasdiqlash",save_password:"Saqlash",
     danger_zone:"Xavfli zona",delete_account:"Hisobni o'chirish",
     theme_label:"Mavzu",dark_theme:"Qorong'u",light_theme:"Yorug'",
+    light_theme_label:"☀️ Yorug'",dark_theme_label:"🌙 Qorong'u",
+    palette_label:"Rang palitrasi",
     compact_mode:"Ixcham rejim",default_view:"Standart ko'rinish",
     auto_save:"Avtomatik saqlash",ai_language:"AI tili",
     email_notifications:"Email bildirishnomalar",push_notifications:"Push bildirishnomalar",
@@ -1130,6 +1189,7 @@ const LANGS={
     tag_pricing_label:"Narxlar",pricing_start_word:"Boshlang",pricing_sub:"Birinchi xarita va birinchi AI tahlil bepul. Faqat vosita qiymatiga ishonch hosil qilganingizdan keyin to'lang.",
     pricing_hot_badge:"★ TOP",
     lpr1_desc:"Vosita bilan tanishish uchun",lpr1_f1:"1 loyiha va 1 strategiya xaritasi",lpr1_f2:"AI suhbat va xarita generatsiyasi",lpr1_f3:"Gantt taymlayn",lpr1_f4:"PNG / JSON eksport",start_free_cta:"Bepul boshlash",
+    lpr_starter_desc:"Strategik rejalashtishga yumshoq kirish",lpr_starter_f1:"3 loyiha, har birida 3 xarita",lpr_starter_f2:"2 stsenariy + AI xavf tahlili",lpr_starter_f3:"To'liq Gantt + ustuvorliklar",lpr_starter_f4:"1 500 AI xabarlari / oy",lpr_starter_cta:"$9 dan boshlash →",
     lpr2_desc:"Mutaxassislar va jamoalar uchun",lpr2_f1:"10 loyiha, har birida 5 xarita",lpr2_f2:"SWOT, OKR, BCG, Porter AI tahlili",lpr2_f3:"5 stsenariy + oqibatlar simulyatsiyasi",lpr2_f4:"Xaritani klonlash va versiyalash",lpr2_f5:"3 kishigacha jamoa hamkorligi",lpr2_cta:"Pro ga o'tish →",
     lpr3_desc:"Tizimli yondashuvga ega tashkilotlar uchun",lpr3_f1:"Cheksiz: loyihalar, xaritalar, stsenariylar",lpr3_f2:"C-level AI kollegium (5 ekspert rol)",lpr3_f3:"Direktorlar kengashi uchun PPTX hisobotlar",lpr3_f4:"White-label va API integratsiyalar",lpr3_f5:"Maxsus qo'llab-quvvatlash menejeri",lpr3_cta:"Bog'lanish",
     // Landing CTA section
@@ -1163,6 +1223,7 @@ const LANGS={
     // VersionHistoryModal
     trial_active:"Sinov davri faol",trial_days_left:"kun qoldi",
     deadline_reminder:"Muddat eslatmalari",
+    notif_email_desc:"Muhim yangilanishlar email orqali",notif_push_desc:"Brauzer bildirishnomalari",
     restore_confirm:"Bu versiyani tiklashni xohlaysizmi? Joriy ma'lumotlar almashtiriladi.",
     versions_empty:"Saqlangan versiyalar yo'q",restore_version:"Tiklash",
     version_restored:"Versiya tiklandi ✓",
@@ -1173,6 +1234,9 @@ const LANGS={
     weekly_briefing_err:"AI tahlilini olib bo'lmadi.",
     // AI/export
     ai_error:"AI tahlil xatosi",
+    ai_comment_error:"AI xatosi. Qayta urining.",
+    ai_generation_error:"Generatsiya xatosi. Qayta urining.",
+    ai_sim_error:"AI maslahatchi xatosi",
     export_pdf:"PDF yuklab olish",export_pptx:"PPTX yuklab olish",
     // MapEditor toasts & misc
     imported_steps:"✅ Yuklandi: {n} qadam",
@@ -1225,7 +1289,9 @@ const LANGS={
     scenario_created:"Stsenariy yaratildi ✓",
     scenario_limit:"Tarif uchun stsenariy limiti",
     members_limit:"A'zo limiti: {n}",
+    member_added:"A'zo qo'shildi",
     member_added_already:"A'zo allaqachon qo'shilgan",
+    member_add_err:"A'zo qo'shishda xato",
     payment_success:"✅ To'lov muvaffaqiyatli! Tarif yangilandi.",
     // GanttView
     steps_with_deadlines:"{n} qadam muddatlari bilan",
@@ -1251,9 +1317,16 @@ const LANGS={
     card_expiry_ph:"OY/YIL",card_cvv_ph:"CVV",
     card_data_title:"💳 Karta ma'lumotlari",
     downgrade_warning:"Tarifni pasaytirgandan so'ng ba'zi ma'lumotlar cheklanishi mumkin.",
+    downgrade_limit_maps:"Yangi tarifda xaritalar",
+    downgrade_limit_projects:"Yangi tarifda loyihalar",
+    downgrade_excess:"Limitdan ortiq ma'lumotlar faqat o'qish uchun bo'ladi.",
     current_tier_badge:"✓ Joriy tarif",
     alt_strategies:"Stsenariyning muqobil strategiyalari",
-    done:"Bajarildi"
+    done:"Bajarildi",
+    verify_email_banner:"To'liq kirish uchun emailingizni tasdiqlang.",
+    verify_email_resend:"Tasdiqlash xatini qayta yuborish",
+    verify_email_sent:"Xat yuborildi! Pochtangizni tekshiring.",
+    verify_email_done:"✓ Email tasdiqlandi"
   },
 };
 
@@ -1327,7 +1400,8 @@ async function apiFetch(path:string,opts:RequestInit={},retry=true):Promise<any>
     throw new Error("session_expired");
   }
 
-  const data=await r.json();
+  let data:any;
+  try{data=await r.json();}catch{data={};}
   if(!r.ok)throw new Error(data?.error||`HTTP ${r.status}`);
   return data;
 }
@@ -1354,7 +1428,7 @@ async function getSession(){
     const jwt=getJWT();
     if(!jwt)return null;
     try{const d=await apiFetch("/api/auth/me");return d.user?{email:d.user.email}:null;}
-    catch{clearJWT();return null;}
+    catch(e:any){if(e?.message==="session_expired"){clearJWT();clearRefreshToken();}return null;}
   }
   return store.get("sa_sess");
 }
@@ -1370,12 +1444,28 @@ async function seedDefault(){
   const a=await store.get("sa_acc")||[],e="denisblackman2@gmail.com";
   if(!a.find((x:any)=>x.email===e))await store.set("sa_acc",[...a,{email:e,pwHash:hashPw(e,"Denis123"),name:"Denis",tier:"team",createdAt:Date.now()}]);
 }
+function normalizeUser(raw:any){
+  if(!raw)return raw;
+  return{
+    ...raw,
+    notifEmail:raw.notifEmail??raw.notif_email,
+    notifPush:raw.notifPush??raw.notif_push,
+    autoSave:raw.autoSave??raw.auto_save,
+    compactMode:raw.compactMode??raw.compact_mode,
+    defaultView:raw.defaultView??raw.default_view,
+    aiLang:raw.aiLang??raw.ai_lang,
+    createdAt:raw.createdAt??raw.created_at,
+    trialEndsAt:raw.trialEndsAt??raw.trial_ends_at,
+    emailVerified:raw.emailVerified??raw.email_verified??true,
+  };
+}
+
 async function register(email:string,pw:string,name:string){
   if(API_BASE){
     try{
       const d=await apiFetch("/api/auth/register",{method:"POST",body:JSON.stringify({email,password:pw,name})});
       saveTokens(d.token,d.refreshToken);
-      return{user:d.user,isNew:true};
+      return{user:normalizeUser(d.user),isNew:true};
     }catch(e:any){return{error:e.message};}
   }
   const e2=email.trim().toLowerCase();
@@ -1391,7 +1481,7 @@ async function login(email:string,pw:string){
     try{
       const d=await apiFetch("/api/auth/login",{method:"POST",body:JSON.stringify({email,password:pw})});
       saveTokens(d.token,d.refreshToken);
-      return{user:d.user,isNew:false};
+      return{user:normalizeUser(d.user),isNew:false};
     }catch(e:any){return{error:e.message};}
   }
   const e=email.trim().toLowerCase();
@@ -1402,8 +1492,18 @@ async function login(email:string,pw:string){
 async function patchUser(email:string,patch:any){
   if(API_BASE){
     try{
-      const d=await apiFetch("/api/auth/profile",{method:"PATCH",body:JSON.stringify(patch)});
-      return d.user;
+      const body:any={};
+      if(patch.name!==undefined)body.name=patch.name;
+      if(patch.bio!==undefined)body.bio=patch.bio;
+      if(patch.aiLang!==undefined)body.ai_lang=patch.aiLang;
+      if(patch.notifEmail!==undefined)body.notif_email=patch.notifEmail;
+      if(patch.notifPush!==undefined)body.notif_push=patch.notifPush;
+      if(patch.autoSave!==undefined)body.auto_save=patch.autoSave;
+      if(patch.compactMode!==undefined)body.compact_mode=patch.compactMode;
+      if(patch.defaultView!==undefined)body.default_view=patch.defaultView;
+      if(patch.tier!==undefined)body.tier=patch.tier;
+      const d=await apiFetch("/api/auth/profile",{method:"PATCH",body:JSON.stringify(body)});
+      return normalizeUser(d.user);
     }catch{return null;}
   }
   const a=await store.get("sa_acc")||[],upd=a.map((x:any)=>x.email===email?{...x,...patch}:x);
@@ -1411,9 +1511,13 @@ async function patchUser(email:string,patch:any){
 }
 
 // ── projects ──
+function normalizeProject(p:any){
+  if(!p)return p;
+  return{...p,owner:p.owner??p.owner_email};
+}
 async function getProjects(email:string){
   if(API_BASE){
-    try{const d=await apiFetch("/api/projects");return d.projects||[];}
+    try{const d=await apiFetch("/api/projects");return (d.projects||[]).map(normalizeProject);}
     catch{return[];}
   }
   const a=await store.get("sa_proj")||[];
@@ -1422,14 +1526,28 @@ async function getProjects(email:string){
 async function saveProject(p:any){
   if(API_BASE){
     try{
-      if(p._new){const d=await apiFetch("/api/projects",{method:"POST",body:JSON.stringify({name:p.name})});return d.project;}
-      else{const d=await apiFetch(`/api/projects/${p.id}`,{method:"PATCH",body:JSON.stringify({name:p.name})});return d.project;}
+      if(p._new){const d=await apiFetch("/api/projects",{method:"POST",body:JSON.stringify({name:p.name})});return normalizeProject(d.project);}
+      else{const body:any={name:p.name};if(p.members!==undefined)body.members=p.members;const d=await apiFetch(`/api/projects/${p.id}`,{method:"PATCH",body:JSON.stringify(body)});return normalizeProject(d.project);}
     }catch{return p;}
   }
   const a=await store.get("sa_proj")||[],i=a.findIndex((x:any)=>x.id===p.id);
   const pp={...p,updatedAt:Date.now()};
   await store.set("sa_proj",i>=0?a.map((x:any)=>x.id===p.id?pp:x):[...a,pp]);
   return pp;
+}
+async function addProjectMember(projectId:string,email:string,role:string){
+  if(API_BASE){
+    try{const d=await apiFetch(`/api/projects/${projectId}/members`,{method:"POST",body:JSON.stringify({email,role})});return normalizeProject(d.project);}
+    catch{return null;}
+  }
+  return null;
+}
+async function removeProjectMember(projectId:string,email:string):Promise<any>{
+  if(API_BASE){
+    try{const d=await apiFetch(`/api/projects/${projectId}/members/${encodeURIComponent(email)}`,{method:"DELETE"});return normalizeProject(d?.project);}
+    catch{return null;}
+  }
+  return null;
 }
 async function deleteProject(id:string){
   if(API_BASE){
@@ -1480,7 +1598,7 @@ async function deleteMap(pid:string,mid:string){
 // ── utils ──
 function edgePt(cx,cy,tx,ty){const dx=tx-cx,dy=ty-cy;if(!dx&&!dy)return{x:cx,y:cy};const hw=NW/2+8,hh=NH/2+8,t=Math.abs(dy)*hw<Math.abs(dx)*hh?hw/Math.abs(dx):hh/Math.abs(dy);return{x:cx+dx*t,y:cy+dy*t};}
 async function callAI(messages:any[],system:string,maxTokens=1200):Promise<string>{
-  // Если бэкенд настроен — вызываем через него (там ключ и лимиты)
+  // Если бэкенд настроен — вызываем через него (там ключ, лимиты, модель)
   if(API_BASE){
     try{
       const d=await apiFetch("/api/ai/chat",{
@@ -1492,22 +1610,27 @@ async function callAI(messages:any[],system:string,maxTokens=1200):Promise<strin
       throw new Error(e.message||"Ошибка AI сервиса");
     }
   }
-  // Fallback: прямой вызов Anthropic (для локальной разработки)
+  // Fallback: прямой вызов OpenAI (только для локальной разработки без бэкенда)
   const controller=new AbortController();
   const timeout=setTimeout(()=>controller.abort(),45000);
-  const apiKey=(typeof window!=="undefined"&&(window as any).__STRATEGY_AI_ANTHROPIC_KEY__)||"";
-  const headers:Record<string,string>={"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01"};
+  const apiKey=(typeof window!=="undefined"&&(window as any).__STRATEGY_AI_OPENAI_KEY__)||"";
   try{
-    if(!apiKey)throw new Error("Не настроен API-ключ. Установите window.__STRATEGY_AI_API_URL__ для бэкенда или window.__STRATEGY_AI_ANTHROPIC_KEY__ для прямого вызова.");
-    const r=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers,signal:controller.signal,
-      body:JSON.stringify({model:"claude-3-5-haiku-20241022",max_tokens:maxTokens,system:system||"Отвечай по-русски.",messages})
+    if(!apiKey)throw new Error("Не настроен API-ключ. Установите переменную OPENAI_KEY на сервере (Railway Variables) или window.__STRATEGY_AI_OPENAI_KEY__ для локальной разработки.");
+    const openaiMessages=[
+      {role:"system",content:system||"Отвечай по-русски."},
+      ...messages.map((m:any)=>({role:m.role==="assistant"?"assistant":"user",content:String(m.content)})),
+    ];
+    const r=await fetch("https://api.openai.com/v1/chat/completions",{
+      method:"POST",signal:controller.signal,
+      headers:{"Content-Type":"application/json","Authorization":`Bearer ${apiKey}`},
+      body:JSON.stringify({model:"gpt-4o-mini",max_tokens:maxTokens,messages:openaiMessages,temperature:0.7})
     });
     clearTimeout(timeout);
-    if(r.status===401)throw new Error("Неверный API-ключ Anthropic.");
+    if(r.status===401)throw new Error("Неверный OpenAI API-ключ.");
+    if(r.status===429)throw new Error("Превышен лимит OpenAI. Попробуйте позже.");
     if(!r.ok){const errBody=await r.json().catch(()=>({}));throw new Error(errBody?.error?.message||`API error ${r.status}`);}
     const d=await r.json();
-    return d.content?.[0]?.text||"";
+    return d.choices?.[0]?.message?.content||"";
   }catch(e:any){
     clearTimeout(timeout);
     if(e.name==="AbortError")throw new Error("Превышено время ожидания — попробуйте ещё раз");
@@ -1764,7 +1887,7 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
   },[]);
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(8px)",animation:"fadeIn .15s ease"}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
-      <div style={{width:360,background:"#0f1729",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"rgba(99,102,241,.35)"}`,boxShadow:"0 32px 80px rgba(0,0,0,.9)",overflow:"hidden",animation:"slideUp .2s cubic-bezier(.34,1.56,.64,1)"}}>
+      <div style={{width:360,background:"var(--surface,#0f1729)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--accent-1)"}`,boxShadow:"var(--shadow,0 32px 80px rgba(0,0,0,.9))",overflow:"hidden",animation:"slideUp .2s cubic-bezier(.34,1.56,.64,1)"}}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"rgba(99,102,241,.15)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"rgba(99,102,241,.4)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -1774,7 +1897,7 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
         </div>
         <div style={{display:"flex",gap:10,padding:"0 24px 24px"}}>
           <button onClick={onCancel} style={{flex:1,padding:"12px",borderRadius:11,border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.06)",color:"#cbd5e1",fontSize:13,fontWeight:600,cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(255,255,255,.1)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.06)";}}>{t("cancel","Отмена")}</button>
-          <button onClick={onConfirm} style={{flex:1,padding:"12px",borderRadius:11,border:"none",background:danger?"linear-gradient(135deg,#dc2626,#ef4444)":"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{confirmLabel}</button>
+          <button onClick={onConfirm} style={{flex:1,padding:"12px",borderRadius:11,border:"none",background:danger?"linear-gradient(135deg,#dc2626,#ef4444)":"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{confirmLabel}</button>
         </div>
       </div>
     </div>
@@ -1789,11 +1912,11 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
   const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   return(
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)",animation:"fadeIn .2s ease"}}>
-      <div style={{width:400,background:"var(--bg3)",border:"1px solid rgba(99,102,241,.25)",borderRadius:20,overflow:"hidden",boxShadow:"0 40px 80px rgba(0,0,0,.8)",animation:"slideUp .3s ease"}}>
+      <div style={{width:400,background:"var(--bg3)",border:"1px solid var(--accent-1)",borderRadius:20,overflow:"hidden",boxShadow:"0 40px 80px rgba(0,0,0,.8)",animation:"slideUp .3s ease"}}>
         <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>
             {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
-              <button key={t2} onClick={()=>{setTab(t2);setErr("");}} style={{padding:"7px 18px",borderRadius:9,border:"none",background:tab===t2?"rgba(99,102,241,.18)":"transparent",color:tab===t2?"#a5b4fc":"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{l}</button>
+              <button key={t2} onClick={()=>{setTab(t2);setErr("");}} style={{padding:"7px 18px",borderRadius:9,border:"none",background:tab===t2?"var(--accent-soft)":"transparent",color:tab===t2?"var(--accent-1)":"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{l}</button>
             ))}
           </div>
           <div style={{display:"flex",alignItems:"center",gap:6}}>
@@ -1802,8 +1925,8 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
               {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
                 <button key={code} onClick={()=>setLang(code)}
                   style={{padding:"3px 8px",borderRadius:6,border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,letterSpacing:.8,cursor:"pointer",transition:"all .18s",
-                    background:lang===code?"rgba(99,102,241,.25)":"transparent",
-                    color:lang===code?"#a5b4fc":"var(--text4)"}}>
+                    background:lang===code?"var(--accent-soft)":"transparent",
+                    color:lang===code?"var(--accent-1)":"var(--text4)"}}>
                   {label}
                 </button>
               ))}
@@ -1813,7 +1936,7 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
         </div>
         <div style={{padding:"20px 24px 24px"}}>
           <div style={{textAlign:"center",marginBottom:22}}>
-            <div style={{width:44,height:44,borderRadius:13,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,margin:"0 auto 12px"}}>✦</div>
+            <div style={{width:44,height:44,borderRadius:13,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,margin:"0 auto 12px"}}>✦</div>
             <div style={{fontSize:18,fontWeight:700,color:"var(--text)"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
             {subtitle&&<div style={{fontSize:13,color:"var(--text4)",marginTop:6,lineHeight:1.5}}>{subtitle}</div>}
           </div>
@@ -1821,7 +1944,7 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
           <input type="email" placeholder={t("email","Email")} value={email} onChange={e=>setEmail(e.target.value)} style={inp} onKeyDown={e=>e.key==="Enter"&&submit()}/>
           <input type="password" placeholder={t("password","Пароль")} value={pw} onChange={e=>setPw(e.target.value)} style={{...inp,marginBottom:0}} onKeyDown={e=>e.key==="Enter"&&submit()}/>
           {err&&<div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#f87171",fontSize:13}}>{err}</div>}
-          <button onClick={submit} disabled={loading} style={{width:"100%",marginTop:16,padding:"13px",borderRadius:11,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",opacity:loading?.7:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          <button onClick={submit} disabled={loading} style={{width:"100%",marginTop:16,padding:"13px",borderRadius:11,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",opacity:loading?.7:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             {loading&&<div style={{width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTop:"2px solid #fff",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>}
             {tab==="login"?t("sign_in","Войти"):t("sign_up","Зарегистрироваться")}
           </button>
@@ -1873,7 +1996,7 @@ function FeatureValue({val}){
   return <span style={{color:"var(--text2)",fontSize:13,fontWeight:500}}>{val}</span>;
 }
 
-function TierSelectionScreen({isNew,currentUser,theme="dark",onSelect,onBack}){
+function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",onSelect,onBack}){
   const{t}=useLang();
   const curTier=currentUser?.tier||"free";
   const[selected,setSelected]=useState(()=>{const idx=TIER_ORDER.indexOf(curTier);return TIER_ORDER[Math.min(idx+1,TIER_ORDER.length-1)]||"pro";});
@@ -1884,13 +2007,13 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",onSelect,onBack}){
   const sel=TIERS[selected]||TIERS.pro;
   const selMkt=TIER_MKT[selected]||TIER_MKT.pro;
   return(
-    <div data-theme={theme} style={{width:"100vw",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
+    <div data-theme={theme} data-palette={palette} style={{width:"100vw",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
       <style>{CSS}</style>
-      <div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(rgba(99,102,241,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.035) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
+      <div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(var(--accent-grid) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
       <div style={{position:"fixed",width:800,height:800,borderRadius:"50%",background:`radial-gradient(circle,${selMkt.glow}18 0%,transparent 65%)`,top:"-20%",right:"-15%",filter:"blur(100px)",pointerEvents:"none",transition:"background 1.4s ease"}}/>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 32px",position:"relative",flexShrink:0,borderBottom:"1px solid var(--border)"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 6px 24px rgba(99,102,241,.45)"}}>✦</div>
+          <div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 6px 24px var(--accent-glow)"}}>✦</div>
           <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
         </div>
         {!isNew&&onBack&&<button onClick={onBack} style={{padding:"7px 16px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,cursor:"pointer",fontWeight:500}}>{t("back_btn","← Назад")}</button>}
@@ -1899,7 +2022,7 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",onSelect,onBack}){
         <div style={{textAlign:"center",padding:"40px 0 44px"}}>
           <h1 style={{fontSize:52,fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.05,marginBottom:10,animation:"slideUp .4s .1s both"}}>
             Выберите<br/>
-            <span style={{background:`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}99,#6366f1)`,backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite"}}>свой тариф</span>
+            <span style={{background:`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}99,var(--accent-1))`,backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite"}}>свой тариф</span>
           </h1>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:14,marginBottom:36,alignItems:"stretch"}}>
@@ -1909,7 +2032,7 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",onSelect,onBack}){
             return(
               <div key={k} onClick={()=>setSelected(k)} onMouseEnter={()=>setHovered(k)} onMouseLeave={()=>setHovered(null)}
                 style={{borderRadius:22,border:`2px solid ${isSel?v.color+"ee":m.highlight&&!isSel?"rgba(245,158,11,.3)":isHov?v.color+"55":"var(--border)"}`,background:isSel?`${v.color}12`:m.highlight?`${v.color}06`:"var(--surface)",cursor:"pointer",transition:"all .25s cubic-bezier(.34,1.56,.64,1)",transform:isSel?"translateY(-10px) scale(1.02)":m.highlight&&!isSel?"translateY(-3px)":isHov?"translateY(-5px)":"translateY(0)",boxShadow:isSel?`0 28px 70px ${v.color}35,0 0 0 1px ${v.color}22`:isHov?`0 16px 44px ${v.color}20`:"none",position:"relative",opacity:isLower?.45:1,display:"flex",flexDirection:"column",overflow:"hidden",animation:`slideUp .45s ${cardIdx*.07}s both`}}>
-                {(isCurr||m.badge)&&<div style={{position:"absolute",top:-1,left:"50%",transform:"translateX(-50%)",padding:"4px 14px",borderRadius:"0 0 12px 12px",fontSize:13.5,fontWeight:800,color:"#fff",whiteSpace:"nowrap",background:isCurr?v.color:"linear-gradient(90deg,#7c3aed,#8b5cf6)",boxShadow:`0 4px 14px ${v.color}55`}}>{isCurr?t("your_plan","● Ваш тариф"):m.badge}</div>}
+                {(isCurr||m.badge)&&<div style={{position:"absolute",top:-1,left:"50%",transform:"translateX(-50%)",padding:"4px 14px",borderRadius:"0 0 12px 12px",fontSize:13.5,fontWeight:800,color:"#fff",whiteSpace:"nowrap",background:isCurr?v.color:"linear-gradient(90deg,var(--accent-1),var(--accent-2))",boxShadow:`0 4px 14px ${v.color}55`}}>{isCurr?t("your_plan","● Ваш тариф"):m.badge}</div>}
                 <div style={{padding:"28px 22px 20px",paddingTop:(isCurr||m.badge)?"36px":"28px"}}>
                   <div style={{width:56,height:56,borderRadius:16,background:isSel?`linear-gradient(135deg,${v.color}33,${v.color}18)`:`${v.color}12`,border:`1.5px solid ${isSel?v.color+"66":v.color+"25"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,marginBottom:16}}>{m.icon}</div>
                   <div style={{fontSize:22,fontWeight:900,color:isSel?v.color:"var(--text)",letterSpacing:-.5,marginBottom:3}}>{v.label}</div>
@@ -1961,7 +2084,7 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
           ))}
           <div style={{display:"flex",gap:10,marginTop:16}}>
             <button onClick={doReplace} disabled={!replaceId||loading} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:replaceId&&!loading?"linear-gradient(135deg,#dc2626,#ef4444)":"var(--surface2)",color:replaceId&&!loading?"#fff":"var(--text4)",fontSize:13,fontWeight:700,cursor:replaceId&&!loading?"pointer":"not-allowed"}}>{loading?t("replacing",t("replacing","Заменяю…")):t("replace_btn","🗑 Заменить")}</button>
-            <button onClick={onUpgrade} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("upgrade_tier","✦ Расширить тариф")}</button>
+            <button onClick={onUpgrade} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("upgrade_tier","✦ Расширить тариф")}</button>
           </div>
         </div>
       </div>
@@ -1974,7 +2097,7 @@ function SavingScreen({theme='dark'}){
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:18}}>
       <style>{CSS}</style>
-      <div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite"}}>✦</div>
+      <div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite"}}>✦</div>
       <div style={{fontSize:16,fontWeight:600,color:"var(--text)"}}>Сохраняю карту…</div>
     </div>
   );
@@ -2031,7 +2154,7 @@ function Toggle({val,onChange,label,desc}){
         <div className="icard-title" style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{label}</div>
         {desc&&<div className="icard-desc" style={{fontSize:13,marginTop:2}}>{desc}</div>}
       </div>
-      <div style={{width:42,height:24,borderRadius:12,background:val?"#6366f1":"var(--surface2)",border:`1px solid ${val?"#6366f1":"var(--border2)"}`,position:"relative",transition:"all .2s",flexShrink:0,marginLeft:16}}>
+      <div style={{width:42,height:24,borderRadius:12,background:val?"var(--accent-1)":"var(--surface2)",border:`1px solid ${val?"var(--accent-1)":"var(--border2)"}`,position:"relative",transition:"all .2s",flexShrink:0,marginLeft:16}}>
         <div style={{position:"absolute",top:2,left:val?18:2,width:18,height:18,borderRadius:"50%",background:val?"#fff":"var(--text4)",transition:"left .2s",boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}/>
       </div>
     </div>
@@ -2039,8 +2162,8 @@ function Toggle({val,onChange,label,desc}){
 }
 
 // ── ProfileModal ──
-function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",onToggleTheme}){
-  const{t,lang}=useLang();
+function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",onToggleTheme,palette="indigo",onPaletteChange}){
+  const{t,lang,setLang}=useLang();
   const tier=TIERS[user.tier]||TIERS.free;
   const isMobile=useIsMobile();
   const[tab,setTab]=useState("profile");
@@ -2059,6 +2182,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   const[compactMode,setCompactMode]=useState(user.compactMode||false);
   const[defaultView,setDefaultView]=useState(user.defaultView||"canvas");
   const[aiLang,setAiLang]=useState(user.aiLang||"ru");
+  const[uiLang,setUiLang]=useState(lang);
   const[settingsSaved,setSettingsSaved]=useState(false);
 
   const selTier=TIERS[selected]||TIERS.free;
@@ -2068,7 +2192,14 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   const fi={width:"100%",padding:"10px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:9,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   function formatCardNum(v){return v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();}
   function formatExp(v){const d=v.replace(/\D/g,"").slice(0,4);return d.length>2?d.slice(0,2)+"/"+d.slice(2):d;}
-  async function saveName(){if(!name.trim())return;setLoading(true);const u=await patchUser(user.email,{name:name.trim(),bio:bio.trim()});onUpdate(u);setMsg({t:t("profile_saved","Профиль обновлён ✓"),ok:true});setLoading(false);}
+  async function saveName(){
+    if(!name.trim())return;
+    setLoading(true);
+    const u=await patchUser(user.email,{name:name.trim(),bio:bio.trim()});
+    if(u)onUpdate(u);
+    setMsg({t:t("profile_saved","Профиль обновлён ✓"),ok:true});
+    setLoading(false);
+  }
   async function changePw(){
     if(!cp||!np){setMsg({t:t("fill_all_fields","Заполните все поля"),ok:false});return;}
     if(np.length<6){setMsg({t:t("min_6_chars","Минимум 6 символов"),ok:false});return;}
@@ -2089,7 +2220,9 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   async function saveSettings(){
     setLoading(true);
     const u=await patchUser(user.email,{notifEmail,notifPush,autoSave,compactMode,defaultView,aiLang});
-    onUpdate(u);setSettingsSaved(true);setLoading(false);
+    if(u)onUpdate(u);
+    if(uiLang!==lang)setLang(uiLang);
+    setSettingsSaved(true);setLoading(false);
     setTimeout(()=>setSettingsSaved(false),2200);
   }
   async function executeBuy(){
@@ -2097,7 +2230,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
     if(user.email==="denisblackman2@gmail.com"){
       setCardError(null);setBuyPhase("processing");
       await new Promise(r=>setTimeout(r,600));
-      const u=await patchUser(user.email,{tier:selected});onUpdate(u);setBuyPhase("success");
+      const u=await patchUser(user.email,{tier:selected});if(u)onUpdate(u);setBuyPhase("success");
       await new Promise(r=>setTimeout(r,1800));onClose();return;
     }
     // Через бэкенд — Stripe Checkout
@@ -2106,19 +2239,19 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
       try{
         const d=await apiFetch("/api/payments/checkout",{method:"POST",body:JSON.stringify({tierKey:selected})});
         if(d.checkoutUrl){window.location.href=d.checkoutUrl;return;}
-      }catch(e:any){setCardError(e.message||"Ошибка оплаты");setBuyPhase(null);return;}
+      }catch(e:any){setCardError(e.message||t("save_error","Ошибка оплаты"));setBuyPhase(null);return;}
     }
     // Fallback-имитация (если бэкенд не подключён — для тестирования)
     if(isUpgrade){
       const rawNum=cardNum.replace(/\s/g,"");
-      if(rawNum.length<16){setCardError("Введите полный номер карты (16 цифр)");return;}
-      if(!cardName.trim()){setCardError("Введите имя держателя");return;}
-      if(cardExp.length<5){setCardError("Введите срок действия (ММ/ГГ)");return;}
-      if(cardCvv.length<3){setCardError("Введите CVV");return;}
+      if(rawNum.length<16){setCardError(t("card_number_ph","Введите полный номер карты (16 цифр)"));return;}
+      if(!cardName.trim()){setCardError(t("card_holder_ph","Введите имя держателя"));return;}
+      if(cardExp.length<5){setCardError(t("card_expiry_ph","Введите срок действия ММ/ГГ"));return;}
+      if(cardCvv.length<3){setCardError(t("card_cvv_ph","Введите CVV"));return;}
     }
     setCardError(null);
     setBuyPhase("processing");await new Promise(r=>setTimeout(r,1800));
-    const u=await patchUser(user.email,{tier:selected});onUpdate(u);setBuyPhase("success");
+    const u=await patchUser(user.email,{tier:selected});if(u)onUpdate(u);setBuyPhase("success");
     await new Promise(r=>setTimeout(r,2400));onClose();
   }
   async function handleDeleteAccount(){
@@ -2182,7 +2315,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
           ))}
           <div style={{flex:1}}/>
           <button onClick={onLogout} style={{padding:"11px 14px",border:"none",background:"transparent",color:"#ef4444",fontSize:13,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",gap:5}} onMouseOver={e=>e.currentTarget.style.opacity=".7"} onMouseOut={e=>e.currentTarget.style.opacity="1"}>
-            <span>⎋</span> Выйти
+            <span>⎋</span> {t("logout","Выйти")}
           </button>
         </div>
 
@@ -2195,10 +2328,10 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:28,maxWidth:680}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:10}}>{t("display_name","Отображаемое имя")}</div>
-                  <input style={fi} placeholder={t("display_name","Ваше имя")} value={name} onChange={e=>setName(e.target.value)} onFocus={e=>e.target.style.borderColor="#6366f1"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                  <input style={fi} placeholder={t("display_name","Ваше имя")} value={name} onChange={e=>setName(e.target.value)} onFocus={e=>e.target.style.borderColor="var(--accent-1)"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                   <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:10}}>{t("bio_label","О себе")}</div>
-                  <textarea style={{...fi,height:72,resize:"vertical",lineHeight:1.5}} placeholder={t("bio_label","Краткое описание (должность, компания…)")} value={bio} onChange={e=>setBio(e.target.value)} onFocus={e=>e.target.style.borderColor="#6366f1"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
-                  <button onClick={saveName} disabled={loading||!name.trim()} style={{padding:"11px 22px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .2s"}}>
+                  <textarea style={{...fi,height:72,resize:"vertical",lineHeight:1.5}} placeholder={t("bio_label","Краткое описание (должность, компания…)")} value={bio} onChange={e=>setBio(e.target.value)} onFocus={e=>e.target.style.borderColor="var(--accent-1)"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                  <button onClick={saveName} disabled={loading||!name.trim()} style={{padding:"11px 22px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .2s"}}>
                     {loading?t("saving","Сохраняю…"):t("save","Сохранить профиль")}
                   </button>
                 </div>
@@ -2218,7 +2351,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                       <span style={{fontSize:18}}>{tier.badge}</span>
                       <div>
                         <div style={{fontSize:14,fontWeight:800,color:tier.color}}>{tier.label}</div>
-                        <div style={{fontSize:13,color:"var(--text4)"}}>{tier.price}</div>
+                        <div style={{fontSize:13,color:"var(--text4)"}}>{getTierPrice(user.tier||"free",t)}</div>
                       </div>
                     </div>
                   </div>
@@ -2235,10 +2368,10 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:4}}>{t("change_password","Изменить пароль")}</div>
                 <div style={{fontSize:13.5,color:"var(--text4)",marginBottom:20}}>{t("pw_hint","Пароль должен быть не менее 6 символов")}</div>
                 <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:8}}>{t("current_password","Текущий пароль")}</div>
-                <input style={fi} type="password" placeholder="Введите текущий пароль" value={cp} onChange={e=>setCp(e.target.value)} onFocus={e=>e.target.style.borderColor="#6366f1"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                <input style={fi} type="password" placeholder={t("current_password","Текущий пароль")} value={cp} onChange={e=>setCp(e.target.value)} onFocus={e=>e.target.style.borderColor="var(--accent-1)"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                 <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:8}}>{t("new_password_label","Новый пароль")}</div>
-                <input style={fi} type="password" placeholder="Мин. 6 символов" value={np} onChange={e=>setNp(e.target.value)} onFocus={e=>e.target.style.borderColor="#6366f1"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
-                <input style={fi} type="password" placeholder="Повторите новый пароль" value={cf} onChange={e=>setCf(e.target.value)} onFocus={e=>e.target.style.borderColor="#6366f1"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                <input style={fi} type="password" placeholder={t("pw_hint","Мин. 6 символов")} value={np} onChange={e=>setNp(e.target.value)} onFocus={e=>e.target.style.borderColor="var(--accent-1)"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                <input style={fi} type="password" placeholder={t("confirm_password","Повторите новый пароль")} value={cf} onChange={e=>setCf(e.target.value)} onFocus={e=>e.target.style.borderColor="var(--accent-1)"} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                 {np&&(
                   <div style={{marginBottom:12,padding:"10px 14px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)"}}>
                     <div style={{fontSize:13,color:"var(--text4)",marginBottom:6}}>{t("pw_strength","Надёжность пароля")}</div>
@@ -2247,10 +2380,10 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                         <div key={i} style={{flex:1,height:4,borderRadius:2,background:ok?"#10b981":"var(--border2)",transition:"background .3s"}}/>
                       ))}
                     </div>
-                    <div style={{fontSize:13,color:"var(--text5)",marginTop:4}}>{[np.length>=6&&t("chars_6plus","6+ символов"),/[A-Z]/.test(np)&&t("uppercase_chars","Заглавные"),/[0-9]/.test(np)&&"Цифры",/[^a-zA-Z0-9]/.test(np)&&"Спец.символы"].filter(Boolean).join(" · ")}</div>
+                    <div style={{fontSize:13,color:"var(--text5)",marginTop:4}}>{[np.length>=6&&t("chars_6plus","6+"),/[A-Z]/.test(np)&&t("uppercase_chars","A-Z"),/[0-9]/.test(np)&&"0-9",/[^a-zA-Z0-9]/.test(np)&&"!@#"].filter(Boolean).join(" · ")}</div>
                   </div>
                 )}
-                <button onClick={changePw} disabled={loading} style={{padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",marginBottom:12}}>
+                <button onClick={changePw} disabled={loading} style={{padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",marginBottom:12}}>
                   {loading?t("saving","Сохраняю…"):t("change_pw_btn","Изменить пароль")}
                 </button>
                 {msg&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#10b981":"#ef4444",fontSize:13.5}}>{msg.t}</div>}
@@ -2284,56 +2417,86 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
             <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,maxWidth:720}}>
                 <div>
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🎨</span> Внешний вид</div>
+                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🎨</span> {t("appearance","Внешний вид")}</div>
                   <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                     <div>
-                      <div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{t("theme_label","Тема оформления")}</div>
-                      <div style={{fontSize:13,color:"var(--text4)",marginTop:2}}>{theme==="dark"?t("dark_theme","Тёмная"):t("light_theme","Светлая")}</div>
+                      <div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{t("theme_label","Тема")}</div>
+                      <div style={{fontSize:13,color:"var(--text4)",marginTop:2}}>{theme==="dark"?t("dark_theme_label","🌙 Тёмная"):t("light_theme_label","☀️ Светлая")}</div>
                     </div>
                     <button onClick={onToggleTheme} style={{padding:"6px 14px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text)",cursor:"pointer",fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:6}}>
-                      {theme==="dark"?<>☀️ Светлая</>:<>🌙 Тёмная</>}
+                      {theme==="dark"?t("light_theme_label","☀️ Светлая"):t("dark_theme_label","🌙 Тёмная")}
                     </button>
                   </div>
-                  <Toggle val={compactMode} onChange={setCompactMode} label="Компактный вид" desc="Уменьшенные карточки узлов на канвасе"/>
+                  {onPaletteChange&&(
+                    <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginTop:8,marginBottom:8}}>
+                      <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("palette_label","Цветовая палитра")}</div>
+                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                        {[
+                          {id:"indigo",label:"◆ Indigo",c1:"#5b6bc0",c2:"#7c8dd9"},
+                          {id:"ocean",label:"◇ Ocean",c1:"#5b8fb9",c2:"#7ab8d4"},
+                          {id:"forest",label:"◇ Forest",c1:"#5a8c7b",c2:"#6ba881"},
+                          {id:"sunset",label:"◇ Sunset",c1:"#b88a6a",c2:"#c9a088"},
+                          {id:"mono",label:"◇ Mono",c1:"#6b7a8a",c2:"#8a9baa"},
+                        ].map(({id,label,c1,c2})=>(
+                          <button key={id} onClick={()=>onPaletteChange(id)} style={{padding:"7px 12px",borderRadius:8,border:`2px solid ${palette===id?"var(--accent-1)":"var(--border)"}`,background:palette===id?"var(--accent-soft)":"transparent",color:"var(--text)",cursor:"pointer",fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:6}}>
+                            <span style={{width:12,height:12,borderRadius:4,background:`linear-gradient(135deg,${c1},${c2})`}}/>
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <Toggle val={compactMode} onChange={setCompactMode} label={t("compact_mode","Компактный режим")} desc={t("compact_desc","Уменьшенные карточки узлов")}/>
 
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginTop:18,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🗺</span> Карты</div>
-                  <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8}}>
-                    <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("default_view","Вид по умолчанию")}</div>
+                  <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginTop:8,marginBottom:8}}>
+                    <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("select_language","Язык интерфейса")}</div>
                     <div style={{display:"flex",gap:6}}>
-                      {[["canvas","🗺 Канвас"],["gantt","📅 Gantt"],["list","📋 Список"]].map(([v,label])=>(
-                        <button key={v} onClick={()=>setDefaultView(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${defaultView===v?"rgba(99,102,241,.5)":"var(--border)"}`,background:defaultView===v?"rgba(99,102,241,.12)":"transparent",color:defaultView===v?"#818cf8":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
+                      {[["ru","🇷🇺 RU"],["en","🇬🇧 EN"],["uz","🇺🇿 UZ"]].map(([v,label])=>(
+                        <button key={v} onClick={()=>setUiLang(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${uiLang===v?"var(--accent-1)":"var(--border)"}`,background:uiLang===v?"var(--accent-soft)":"transparent",color:uiLang===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
                           {label}
                         </button>
                       ))}
                     </div>
                   </div>
-                  <Toggle val={autoSave} onChange={setAutoSave} label={t("auto_save","Автосохранение")} desc="Сохранять карту при каждом изменении"/>
+
+                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginTop:18,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🗺</span> {t("strategy_maps","Карты")}</div>
+                  <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8}}>
+                    <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("default_view","Вид по умолчанию")}</div>
+                    <div style={{display:"flex",gap:6}}>
+                      {[["canvas",t("canvas_view","🗺 Канвас")],["gantt",t("gantt_view","📅 Gantt")],["list",t("list_view","📋 Список")]].map(([v,label])=>(
+                        <button key={v} onClick={()=>setDefaultView(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${defaultView===v?"var(--accent-1)":"var(--border)"}`,background:defaultView===v?"var(--accent-soft)":"transparent",color:defaultView===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <Toggle val={autoSave} onChange={setAutoSave} label={t("auto_save","Автосохранение")} desc={t("autosave_desc","Сохранять карту при каждом изменении")}/>
                 </div>
 
                 <div>
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🤖</span> AI-ассистент</div>
+                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}>{t("ai_assistant_title","🤖 AI-ассистент")}</div>
                   <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8}}>
                     <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("ai_language","Язык ответов AI")}</div>
                     <div style={{display:"flex",gap:6}}>
                       {[["ru","🇷🇺 Русский"],["en","🇬🇧 English"],["uz","🇺🇿 O'zbekcha"]].map(([v,label])=>(
-                        <button key={v} onClick={()=>setAiLang(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${aiLang===v?"rgba(99,102,241,.5)":"var(--border)"}`,background:aiLang===v?"rgba(99,102,241,.12)":"transparent",color:aiLang===v?"#818cf8":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
+                        <button key={v} onClick={()=>setAiLang(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${aiLang===v?"var(--accent-1)":"var(--border)"}`,background:aiLang===v?"var(--accent-soft)":"transparent",color:aiLang===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
                           {label}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginTop:18,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🔔</span> Уведомления</div>
-                  <Toggle val={notifEmail} onChange={setNotifEmail} label="Email-уведомления" desc="Важные обновления на почту"/>
-                  <Toggle val={notifPush} onChange={setNotifPush} label="Push-уведомления" desc="Уведомления в браузере"/>
+                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginTop:18,marginBottom:14,display:"flex",alignItems:"center",gap:8}}>{t("notifications_title","🔔 Уведомления")}</div>
+                  <Toggle val={notifEmail} onChange={setNotifEmail} label={t("email_notifications","Email уведомления")} desc={t("notif_email_desc","Важные обновления на почту")}/>
+                  <Toggle val={notifPush} onChange={setNotifPush} label={t("push_notifications","Push уведомления")} desc={t("notif_push_desc","Уведомления в браузере")}/>
                 </div>
               </div>
 
               <div style={{marginTop:24,maxWidth:720,display:"flex",alignItems:"center",gap:12}}>
-                <button onClick={saveSettings} disabled={loading} style={{padding:"12px 28px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
-                  {loading?t("saving","Сохраняю…"):"Сохранить настройки"}
+                <button onClick={saveSettings} disabled={loading} style={{padding:"12px 28px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
+                  {loading?t("saving","Сохраняю…"):t("save_settings","Сохранить настройки")}
                 </button>
-                {settingsSaved&&<div style={{fontSize:13.5,color:"#10b981",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> Настройки сохранены</div>}
+                {settingsSaved&&<div style={{fontSize:13.5,color:"#10b981",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> {t("settings_saved","Настройки сохранены ✓")}</div>}
               </div>
             </div>
           )}
@@ -2345,11 +2508,11 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24,maxWidth:620}}>
                 {[
                   {icon:"📁",label:t("billing_title","Тариф"),val:tier.label,color:tier.color},
-                  {icon:"🗺",label:"Карт доступно",val:fmt(tier.maps),color:"#6366f1"},
-                  {icon:"👥",label:"Участников",val:fmt(tier.users),color:"#8b5cf6"},
-                  {icon:"⎇",label:"Сценариев",val:fmt(tier.scenarios),color:"#0ea5e9"},
-                  {icon:"📁",label:"Проектов",val:fmt(tier.projects),color:"#10b981"},
-                  {icon:"🤖",label:"AI уровень",val:tier.ai,color:"#f59e0b"},
+                  {icon:"🗺",label:t("maps_available","Карт доступно"),val:fmt(tier.maps),color:"var(--accent-1)"},
+                  {icon:"👥",label:t("members","Участников"),val:fmt(tier.users),color:"var(--accent-2)"},
+                  {icon:"⎇",label:t("scenarios_available","Сценариев"),val:fmt(tier.scenarios),color:"#0ea5e9"},
+                  {icon:"📁",label:t("projects_available","Проектов"),val:fmt(tier.projects),color:"#10b981"},
+                  {icon:"🤖",label:t("ai_level","AI уровень"),val:tier.ai,color:"#f59e0b"},
                 ].map(s=>(
                   <div key={s.label} className="icard icard-stat" style={{"--icard-color":s.color,"--icard-glow":s.color+"33","--icard-bg":s.color+"09",padding:"16px",borderRadius:14,background:"var(--surface)",border:"1px solid var(--border)"}}>
                     <div style={{fontSize:22,marginBottom:6}}>{s.icon}</div>
@@ -2360,24 +2523,24 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
               </div>
 
               <div style={{maxWidth:620}}>
-                <div style={{fontSize:13,fontWeight:700,color:"var(--text)",marginBottom:12}}>{t("billing_title","Возможности тарифа")}</div>
+                <div style={{fontSize:13,fontWeight:700,color:"var(--text)",marginBottom:12}}>{t("current_plan","Возможности тарифа")}</div>
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   {[
-                    {label:"Клонирование карт",ok:tier.clone},
-                    {label:"Шаблоны стратегий",ok:tier.templates},
+                    {label:t("lpr2_f4","Клонирование карт"),ok:tier.clone},
+                    {label:t("templates","Шаблоны стратегий"),ok:tier.templates},
                     {label:"White-label",ok:tier.wl},
-                    {label:"API-интеграции",ok:tier.api},
-                    {label:"Отчёты",ok:tier.report},
-                    {label:"PowerPoint экспорт",ok:tier.pptx},
+                    {label:"API",ok:tier.api},
+                    {label:t("export_pdf","Отчёты"),ok:tier.report},
+                    {label:t("export_pptx","PowerPoint экспорт"),ok:tier.pptx},
                   ].map(f=>(
                     <div key={f.label} className="icard feat-row" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)"}}>
                       <span className="icard-title" style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>{f.label}</span>
-                      <span style={{fontSize:13,fontWeight:700,color:f.ok?"#10b981":"var(--text5)"}}>{f.ok?"✓ Включено":"✗ Недоступно"}</span>
+                      <span style={{fontSize:13,fontWeight:700,color:f.ok?"#10b981":"var(--text5)"}}>{f.ok?"✓ "+t("done","Включено"):"✗ —"}</span>
                     </div>
                   ))}
                 </div>
-                <button onClick={()=>setTab("tier")} style={{marginTop:16,padding:"11px 22px",borderRadius:10,border:"1px solid rgba(99,102,241,.35)",background:"rgba(99,102,241,.08)",color:"#818cf8",fontSize:13,fontWeight:700,cursor:"pointer"}}>
-                  ↑ Улучшить тариф
+                <button onClick={()=>setTab("tier")} style={{marginTop:16,padding:"11px 22px",borderRadius:10,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+                  ↑ {t("upgrade_tier_arrow","Улучшить тариф →")}
                 </button>
               </div>
             </div>
@@ -2413,7 +2576,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 {buyPhase==="success"&&(
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100%",gap:12}}>
                     <div style={{width:56,height:56,borderRadius:"50%",background:`${selTier.color}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>✓</div>
-                    <div style={{fontSize:15,fontWeight:800,color:selTier.color}}>Тариф {selTier.label} активирован!</div>
+                    <div style={{fontSize:15,fontWeight:800,color:selTier.color}}>{t("tier_activated","Тариф {tier} активирован ✓").replace("{tier}",selTier.label)}</div>
                   </div>
                 )}
                 {!buyPhase&&(
@@ -2429,7 +2592,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                       </div>
                     </div>
                     <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:16}}>
-                      {[["📁",fmt(selTier.projects),"проектов"],["🗺",fmt(selTier.maps),"карт"],["👥",fmt(selTier.users),"участников"]].map(([ic,val,lbl])=>(
+                      {[["📁",fmt(selTier.projects),t("projects","проектов")],["🗺",fmt(selTier.maps),t("maps","карт")],["👥",fmt(selTier.users),t("members","участников")]].map(([ic,val,lbl])=>(
                         <div key={lbl} style={{borderRadius:10,padding:"10px 12px",background:"var(--surface)",border:"1px solid var(--border)",textAlign:"center"}}>
                           <div style={{fontSize:16,marginBottom:4}}>{ic}</div>
                           <div style={{fontSize:16,fontWeight:800,color:selTier.color}}>{val}</div>
@@ -2439,12 +2602,12 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                     </div>
                     {isUpgrade&&user.email!=="denisblackman2@gmail.com"&&(
                       <div style={{marginBottom:16,padding:"14px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)"}}>
-                        <div style={{fontSize:13,fontWeight:700,color:"var(--text)",marginBottom:12}}>💳 Данные карты</div>
-                        <input style={fi} placeholder="Номер карты (1234 5678 9012 3456)" value={cardNum} onChange={e=>setCardNum(formatCardNum(e.target.value))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
-                        <input style={fi} placeholder="Имя держателя карты" value={cardName} onChange={e=>setCardName(e.target.value)} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                        <div style={{fontSize:13,fontWeight:700,color:"var(--text)",marginBottom:12}}>{t("card_data_title","💳 Данные карты")}</div>
+                        <input style={fi} placeholder={t("card_number_ph","Номер карты…")} value={cardNum} onChange={e=>setCardNum(formatCardNum(e.target.value))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                        <input style={fi} placeholder={t("card_holder_ph","Имя держателя…")} value={cardName} onChange={e=>setCardName(e.target.value)} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-                          <input style={{...fi,marginBottom:0}} placeholder="ММ/ГГ" value={cardExp} onChange={e=>setCardExp(formatExp(e.target.value))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
-                          <input style={{...fi,marginBottom:0}} placeholder="CVV" value={cardCvv} onChange={e=>setCardCvv(e.target.value.replace(/\D/g,"").slice(0,4))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                          <input style={{...fi,marginBottom:0}} placeholder={t("card_expiry_ph","ММ/ГГ")} value={cardExp} onChange={e=>setCardExp(formatExp(e.target.value))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
+                          <input style={{...fi,marginBottom:0}} placeholder={t("card_cvv_ph","CVV")} value={cardCvv} onChange={e=>setCardCvv(e.target.value.replace(/\D/g,"").slice(0,4))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                         </div>
                         {cardError&&<div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#ef4444",fontSize:13}}>⚠️ {cardError}</div>}
                         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,paddingTop:12,marginTop:12,borderTop:"1px solid var(--border)"}}>
@@ -2454,15 +2617,24 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                     )}
                     {!isCurrentTier&&!isUpgrade&&(
                       <div style={{marginBottom:12,padding:"12px 14px",borderRadius:10,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.25)",fontSize:13,color:"#f59e0b"}}>
-                        При понижении тарифа часть возможностей будет ограничена (лимит карт, сценариев, участников).
+                        <div style={{fontWeight:700,marginBottom:6}}>⚠️ {t("downgrade_warning","После смены тарифа часть данных может быть ограничена.")}</div>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
+                          <div style={{background:"rgba(245,158,11,.08)",borderRadius:7,padding:"6px 10px",fontSize:12}}>
+                            <span style={{opacity:.7}}>{t("downgrade_limit_maps","Карт")}:</span> <strong>{selTier.maps===999?"∞":selTier.maps}</strong>
+                          </div>
+                          <div style={{background:"rgba(245,158,11,.08)",borderRadius:7,padding:"6px 10px",fontSize:12}}>
+                            <span style={{opacity:.7}}>{t("downgrade_limit_projects","Проектов")}:</span> <strong>{selTier.projects===999?"∞":selTier.projects}</strong>
+                          </div>
+                        </div>
+                        <div style={{fontSize:12,opacity:.8}}>{t("downgrade_excess","Данные сверх лимита станут доступны только для чтения.")}</div>
                       </div>
                     )}
                     {isCurrentTier?(
-                      <div style={{padding:"13px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)",textAlign:"center",fontSize:13,color:"var(--text3)",fontWeight:600}}>✓ Текущий тариф</div>
+                      <div style={{padding:"13px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)",textAlign:"center",fontSize:13,color:"var(--text3)",fontWeight:600}}>{t("current_tier_badge","✓ Текущий тариф")}</div>
                     ):(
                       <button onClick={executeBuy} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${selTier.color},${selTier.color}cc)`,color:"#fff",fontSize:13.5,fontWeight:800,cursor:"pointer",boxShadow:`0 8px 24px ${selTier.color}40`,transition:"all .2s"}}
                         onMouseOver={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseOut={e=>e.currentTarget.style.transform="none"}>
-                        {isUpgrade?(user.email==="denisblackman2@gmail.com"?"⚡ Активировать "+selTier.label:"🔒 Оплатить "+selTier.price+" и активировать"):"↓ Перейти на "+selTier.label}
+                        {isUpgrade?(user.email==="denisblackman2@gmail.com"?t("activate_btn","⚡ Активировать")+" "+selTier.label:"🔒 "+t("go_to_plan","Перейти на {plan} — {price}").replace("{plan}",selTier.label).replace("{price}",getTierPrice(selected,t))):t("downgrade_to","↓ Перейти на ")+selTier.label}
                       </button>
                     )}
                     {isUpgrade&&user.email==="denisblackman2@gmail.com"&&<div style={{textAlign:"center",marginTop:8,fontSize:13.5,color:"var(--text4)"}}>{t("demo_payment_skipped","Демо — оплата пропущена")}</div>}
@@ -2907,7 +3079,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
       try{
         const answer=await callAI([{role:"user",content:`Вопрос по узлу "${node.title||""}": ${q}\nКонтекст: ${ctx||"стартап"}. Ответь кратко, 2–3 предложения.`}]);
         onUpdate({comments:[...base,{...aiPlaceholder,text:answer}]});
-      }catch{onUpdate({comments:[...base,{...aiPlaceholder,text:"Ошибка AI."}]});}
+      }catch{onUpdate({comments:[...base,{...aiPlaceholder,text:t("ai_comment_error","Ошибка AI. Попробуйте ещё раз.")}]});}
       setAiCommentLoading(false);
     }else{
       const c={id:uid(),author:userName,text,at:Date.now()};
@@ -3391,8 +3563,9 @@ function GanttView({nodes,onClose}){
 // ── TrialBanner ──
 function TrialBanner({user,onUpgrade}:{user:any,onUpgrade:()=>void}){
   const{t}=useLang();
-  if(!user?.trial_ends_at)return null;
-  const trialEnd=new Date(user.trial_ends_at);
+  const trialVal=user?.trialEndsAt??user?.trial_ends_at;
+  if(!trialVal)return null;
+  const trialEnd=new Date(trialVal);
   const now=new Date();
   if(trialEnd<=now)return null;
   const daysLeft=Math.ceil((trialEnd.getTime()-now.getTime())/(1000*60*60*24));
@@ -3400,6 +3573,36 @@ function TrialBanner({user,onUpgrade}:{user:any,onUpgrade:()=>void}){
     <div style={{background:"linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.15))",borderBottom:"1px solid rgba(99,102,241,.25)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13}}>
       <span style={{color:"#818cf8",fontWeight:600}}>⚡ {t("trial_active","Пробный период активен")} — {daysLeft} {t("trial_days_left","дней осталось")}</span>
       <button onClick={onUpgrade} style={{padding:"4px 14px",borderRadius:7,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>{t("upgrade","Улучшить →")}</button>
+    </div>
+  );
+}
+
+// ── EmailVerifyBanner ──
+function EmailVerifyBanner({user,onVerified}:{user:any,onVerified?:()=>void}){
+  const{t}=useLang();
+  const[sent,setSent]=useState(false);
+  const[loading,setLoading]=useState(false);
+  // Если email уже подтверждён или нет API — не показываем
+  if(!API_BASE||user?.emailVerified!==false)return null;
+  async function resend(){
+    if(loading||sent)return;
+    setLoading(true);
+    try{
+      await apiFetch("/api/auth/resend-verification",{method:"POST"});
+      setSent(true);
+    }catch{}
+    setLoading(false);
+  }
+  return(
+    <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08))",borderBottom:"1px solid rgba(245,158,11,.3)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13}}>
+      <span style={{color:"#f59e0b",fontWeight:600}}>✉️ {t("verify_email_banner","Подтвердите ваш email для полного доступа.")}</span>
+      {sent?(
+        <span style={{color:"#10b981",fontWeight:600,fontSize:12}}>{t("verify_email_sent","Письмо отправлено! Проверьте почту.")}</span>
+      ):(
+        <button onClick={resend} disabled={loading} style={{padding:"4px 14px",borderRadius:7,border:"1px solid rgba(245,158,11,.4)",background:"rgba(245,158,11,.1)",color:"#fbbf24",fontSize:12,fontWeight:700,cursor:loading?"wait":"pointer"}}>
+          {loading?"…":t("verify_email_resend","Отправить письмо")}
+        </button>
+      )}
     </div>
   );
 }
@@ -3721,7 +3924,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
       const svg=svgRef.current;
       const svgClone=svg.cloneNode(true);
       const isDark=theme!=="light";
-      const bg=isDark?"#070b14":"#f1f5f9";
+      const bg=isDark?"#070b14":"#f4f6fb";
       const bgRect=document.createElementNS("http://www.w3.org/2000/svg","rect");
       bgRect.setAttribute("width","100%");bgRect.setAttribute("height","100%");bgRect.setAttribute("fill",bg);
       svgClone.insertBefore(bgRect,svgClone.firstChild);
@@ -4305,7 +4508,7 @@ ${ctx}
         </svg>
         {/* edge label editor */}
         {selEdge&&!selNode&&!readOnly&&(
-          <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"#0d1829",border:"1px solid rgba(99,102,241,.25)",borderRadius:12,boxShadow:"0 16px 40px rgba(0,0,0,.7)",zIndex:40,animation:"slideUp .2s ease"}}>
+          <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"var(--surface,#0d1829)",border:"1px solid rgba(99,102,241,.25)",borderRadius:12,boxShadow:"var(--shadow,0 16px 40px rgba(0,0,0,.7))",zIndex:40,animation:"slideUp .2s ease"}}>
             <span style={{fontSize:13,color:"#64748b",fontWeight:600}}>{t("edge_type","Тип связи:")}</span>
             <CustomSelect
               value={selEdge.type||"requires"}
@@ -4468,7 +4671,7 @@ function ProjectsPage({user,onSelectProject,onLogout,onChangeTier,onProfile,them
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} style={{padding:"7px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",width:200,fontFamily:"inherit"}}/>
             <button onClick={()=>{if(atLimit){return;}setCreating(true);}} style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"linear-gradient(135deg,#6366f1,#8b5cf6)",color:atLimit?"var(--text4)":"#fff",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,transition:"all .2s"}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
           </div>
-          {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"#6366f1",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
+          {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
           {creating&&(
             <div style={{padding:"16px 18px",borderRadius:14,background:"var(--surface)",border:"1px solid var(--border2)",marginBottom:16,display:"flex",gap:10,alignItems:"center",animation:"slideUp .2s ease"}}>
               <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")createProject();if(e.key==="Escape"){setCreating(false);setNewName("");}}} placeholder="Название проекта…" style={{flex:1,padding:"9px 13px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
@@ -4627,14 +4830,25 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     if(!newMember.trim())return;
     if((proj.members||[]).length>=tier.users){setToast({msg:t("members_limit","Лимит участников: {n}").replace("{n}",String(tier.users)),type:"warn"});return;}
     if(proj.members?.find(m=>m.email===newMember.trim())){setToast({msg:t("member_added_already","Участник уже добавлен"),type:"info"});return;}
-    const updated={...proj,members:[...(proj.members||[]),{email:newMember.trim(),role:nmRole}]};
-    await saveProject(updated);setProj(updated);setNewMember("");
+    if(API_BASE){
+      const updated=await addProjectMember(proj.id,newMember.trim(),nmRole);
+      if(updated){setProj(updated);setNewMember("");setToast({msg:t("member_added","Участник добавлен"),type:"success"});}
+      else setToast({msg:t("member_add_err","Ошибка добавления"),type:"error"});
+    }else{
+      const updated={...proj,members:[...(proj.members||[]),{email:newMember.trim(),role:nmRole}]};
+      await saveProject(updated);setProj(updated);setNewMember("");
+    }
   }
 
   async function removeMember(email){
     if(email===proj.owner)return;
-    const updated={...proj,members:(proj.members||[]).filter(m=>m.email!==email)};
-    await saveProject(updated);setProj(updated);
+    if(API_BASE){
+      const updated=await removeProjectMember(proj.id,email);
+      if(updated)setProj(updated);
+    }else{
+      const updated={...proj,members:(proj.members||[]).filter(m=>m.email!==email)};
+      await saveProject(updated);setProj(updated);
+    }
   }
 
   const regularMaps=maps.filter(m=>!m.isScenario);
@@ -4818,7 +5032,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 <button onClick={addMember} style={{padding:"8px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add","Добавить")}</button>
               </div>
             )}
-            {(proj.members||[]).length>=tier.users&&<div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",padding:"8px",borderRadius:8,border:"1px dashed var(--border2)"}}>{t("member_limit","Лимит участников для {plan}: {n}.").replace("{plan}",tier.label).replace("{n}",String(tier.users))} <span onClick={onChangeTier} style={{color:"#8b5cf6",cursor:"pointer",fontWeight:700}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</span></div>}
+            {(proj.members||[]).length>=tier.users&&<div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",padding:"8px",borderRadius:8,border:"1px dashed var(--border2)"}}>{t("member_limit","Лимит участников для {plan}: {n}.").replace("{plan}",tier.label).replace("{n}",String(tier.users))} <span onClick={onChangeTier} style={{color:"var(--accent-2)",cursor:"pointer",fontWeight:700}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</span></div>}
           </div>
         )}
 
@@ -5069,7 +5283,7 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
         const edges=(parsed.edges||[]).map(e=>({...e,id:uid(),from:idMap[e.from]||e.from,to:idMap[e.to]||e.to}));
         onSelect({nodes,edges,scenarioName:selected.name,scenarioIcon:selected.icon});
       }else throw new Error("bad json");
-    }catch{setError("Ошибка генерации. Попробуйте ещё раз.");}
+    }catch{setError(t("ai_generation_error","Ошибка генерации. Попробуйте ещё раз."));}
     setGenerating(false);
   }
 
@@ -5238,7 +5452,7 @@ function MapTour({onDone}){
           </button>
           <button onClick={e=>{e.stopPropagation();onDone();}} style={{padding:"9px 14px",borderRadius:10,border:"1px solid rgba(255,255,255,.08)",background:"transparent",color:"#475569",cursor:"pointer",fontSize:13}}>{t("skip","Пропустить")}</button>
         </div>
-        <div style={{textAlign:"center",marginTop:12,fontSize:13.5,color:"#334155"}}>← → или пробел для навигации • Esc — закрыть</div>
+        <div style={{textAlign:"center",marginTop:12,fontSize:13.5,color:"var(--text4)"}}>← → или пробел для навигации • Esc — закрыть</div>
       </div>
     </div>
   );
@@ -5355,7 +5569,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
     const q=aiInp;setAiInp("");addLog(`👤 ${q}`,"user");setAiLoad(true);
     const ctx=final?`Симуляция: итог ${final.avg}%, план ${final.planAchievement}.`:"";
     try{const r=await callAI([{role:"user",content:`${ctx} Вопрос: ${q}`}]);addLog(`✦ ${r}`,"ai");}
-    catch{addLog("✦ Ошибка AI","ai");}
+    catch{addLog(`✦ ${t("ai_sim_error","Ошибка AI-консультанта")}`,"ai");}
     setAiLoad(false);
   }
 
@@ -5666,18 +5880,18 @@ function SplashScreen({onDone,theme}){
     return()=>clearTimeout(tid);
   },[]);
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"#070b14",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg,#070b14)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{CSS}</style>
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{animation:"float 3s ease infinite",marginBottom:32}}>
         <div style={{width:72,height:72,borderRadius:20,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,boxShadow:"0 16px 60px rgba(99,102,241,.6)"}}>✦</div>
       </div>
-      <div style={{fontSize:36,fontWeight:900,color:"#e2e8f0",letterSpacing:-1.5,marginBottom:6,animation:"slideUp .5s ease"}}>Strategy AI</div>
+      <div style={{fontSize:36,fontWeight:900,color:"var(--text,#e2e8f0)",letterSpacing:-1.5,marginBottom:6,animation:"slideUp .5s ease"}}>Strategy AI</div>
       
       <div style={{width:240,height:3,borderRadius:2,background:"rgba(99,102,241,.15)",overflow:"hidden"}}>
         <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#6366f1,#8b5cf6)",borderRadius:2,transition:"width .1s linear"}}/>
       </div>
-      <div style={{marginTop:10,fontSize:13,color:"#334155",fontWeight:600}}>{pct < 100 ? t("loading",t("loading_short","Загрузка…")) : "Готово ✓"}</div>
+      <div style={{marginTop:10,fontSize:13,color:"var(--text4)",fontWeight:600}}>{pct < 100 ? t("loading",t("loading_short","Загрузка…")) : "Готово ✓"}</div>
     </div>
   );
 }
@@ -5806,6 +6020,9 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
     {tier:"Free",   price:"0",  mo:t("per_month","/мес"),desc:t("lpr1_desc","Для знакомства с инструментом"),hot:false,
      feats:[t("lpr1_f1","1 проект и 1 стратегическая карта"),t("lpr1_f2","AI-интервью и генерация карты"),t("lpr1_f3","Gantt-таймлайн"),t("lpr1_f4","PNG / JSON экспорт")],
      cta:t("start_free_cta","Начать бесплатно"),btnCls:"lp-ghost"},
+    {tier:"Starter",price:"9",  mo:t("per_month","/мес"),desc:t("lpr_starter_desc","Мягкий вход в стратегическое планирование"),hot:false,
+     feats:[t("lpr_starter_f1","3 проекта, 3 карты каждый"),t("lpr_starter_f2","2 сценария + AI анализ рисков"),t("lpr_starter_f3","Полный Gantt + приоритеты"),t("lpr_starter_f4","1 500 AI-сообщений / мес")],
+     cta:t("lpr_starter_cta","Начать за $9 →"),btnCls:"lp-ghost"},
     {tier:"Pro",    price:"29", mo:t("per_month","/мес"),desc:t("lpr2_desc","Для профессионалов и команд"),hot:true,
      feats:[t("lpr2_f1","10 проектов, 5 карт каждая"),t("lpr2_f2","SWOT, OKR, BCG, Porter AI-анализ"),t("lpr2_f3","5 сценариев + симуляция последствий"),t("lpr2_f4","Клонирование и версионирование карт"),t("lpr2_f5","Командная работа до 3 человек")],
      cta:t("lpr2_cta","Перейти на Pro →"),btnCls:"lp-fill"},
@@ -6144,14 +6361,14 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
             </div>
             <p className="lrv-r" style={{fontSize:15,fontWeight:300,color:"rgba(240,238,255,.55)",lineHeight:1.85,maxWidth:440,alignSelf:"end"}}>{t("pricing_sub","Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.")}</p>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)",alignItems:"start"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(255,255,255,.06)",alignItems:"start"}}>
             {PRICING.map((p,i)=>(
-              <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"50px 42px",position:"relative",cursor:"default",transition:"background .35s"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
+              <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"44px 36px",position:"relative",cursor:"default",transition:"background .35s"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
                 {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#6366f1,#8b5cf6)"}}/>}
                 {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(99,102,241,.18)",border:"1px solid rgba(99,102,241,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#818cf8",letterSpacing:2,textTransform:"uppercase"}}>{t("pricing_hot_badge","★ ТОП")}</div>}
                 <span className="lprc-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:p.hot?"#818cf8":"rgba(240,238,255,.3)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:26}}>{p.tier}</span>
                 <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
-                  <span style={{fontSize:p.tier==="Enterprise"?54:76,fontWeight:900,letterSpacing:p.tier==="Enterprise"?-2:-4.5,lineHeight:.88,color:"#f0eeff",...(p.hot?{background:"linear-gradient(135deg,#818cf8,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}:{})}}>{p.price}</span>
+                  <span style={{fontSize:p.tier==="Enterprise"?48:64,fontWeight:900,letterSpacing:p.tier==="Enterprise"?-1:-3,lineHeight:.88,color:"#f0eeff",...(p.hot?{background:"linear-gradient(135deg,#818cf8,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}:{})}}>{p.price}</span>
                   <span style={{fontSize:17,fontWeight:300,color:"rgba(240,238,255,.25)",marginBottom:10}}>{p.mo}</span>
                 </div>
                 <div className="lprc-desc" style={{fontSize:13,marginBottom:32,paddingBottom:32,borderBottom:"1px solid rgba(255,255,255,.06)",lineHeight:1.6}}>{p.desc}</div>
@@ -6214,7 +6431,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
 function WelcomeScreen({onLogin,onRegister,onBack,theme}){
   const{t}=useLang();
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"#070b14",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
+    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg,#070b14)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
       <style>{CSS}</style>
       {/* Backgrounds */}
       <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(rgba(99,102,241,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.04) 1px,transparent 1px)",backgroundSize:"50px 50px",pointerEvents:"none"}}/>
@@ -6249,7 +6466,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
           {/* Divider */}
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:24}}>
             <div style={{flex:1,height:1,background:"rgba(255,255,255,.08)"}}/>
-            <span style={{fontSize:13,color:"#334155",fontWeight:600,letterSpacing:.5}}>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span>
+            <span style={{fontSize:13,color:"var(--text4)",fontWeight:600,letterSpacing:.5}}>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span>
             <div style={{flex:1,height:1,background:"rgba(255,255,255,.08)"}}/>
           </div>
           {/* Features grid */}
@@ -6262,7 +6479,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
             ))}
           </div>
         </div>
-        <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"#334155"}}>
+        <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"var(--text4)"}}>
           {t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
         </div>
       </div>
@@ -6274,7 +6491,8 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
 export default function App(){
   const[screen,setScreen]=useState("splash");
   const[user,setUser]=useState<any>(null);
-  const[theme,setTheme]=useState("dark");
+  const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("sa_theme")||"dark";}catch{return"dark";}});
+  const[palette,setPalette]=useState(()=>{try{return localStorage.getItem("sa_palette")||"indigo";}catch{return"indigo";}});
   const[project,setProject]=useState(null);
   const[mapData,setMapData]=useState(null);
   const[mapIsNew,setMapIsNew]=useState(false);
@@ -6284,6 +6502,8 @@ export default function App(){
   const[authTab,setAuthTab]=useState("login");
   const[showProfile,setShowProfile]=useState(false);
   const[showTiers,setShowTiers]=useState(false);
+  const[verifiedToast,setVerifiedToast]=useState(false);
+  const[paymentToast,setPaymentToast]=useState(false);
   const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
   // t функция для LangCtx.Provider (App является корневым провайдером)
@@ -6307,6 +6527,21 @@ export default function App(){
         window.history.replaceState({},"",window.location.pathname);
       }
 
+      // Обработка подтверждения email через ссылку
+      const verifiedParam=searchParams.get("verified");
+      if(verifiedParam==="1"){
+        window.history.replaceState({},"",window.location.pathname);
+        // Перечитываем пользователя чтобы получить обновлённый email_verified
+        if(API_BASE){
+          try{
+            const d=await apiFetch("/api/auth/me");
+            if(d.user)setUser(normalizeUser(d.user));
+          }catch{}
+        }
+        setVerifiedToast(true);
+        setTimeout(()=>setVerifiedToast(false),4000);
+      }
+
       if(shareId){
         try{
           let data:any=null;
@@ -6327,9 +6562,10 @@ export default function App(){
           try{
             const d=await apiFetch("/api/auth/me");
             if(d.user){
-              setUser(d.user);
+              setUser(normalizeUser(d.user));
               if(paymentStatus==="success"){
-                addToast(t("payment_success","✅ Оплата прошла успешно! Тариф обновлён."),"success");
+                setPaymentToast(true);
+                setTimeout(()=>setPaymentToast(false),4000);
               }
               setScreen("projects");return;
             }
@@ -6367,7 +6603,7 @@ export default function App(){
   async function onChangeTier(t){
     if(!user)return;
     const updated=await patchUser(user.email,{tier:t});
-    setUser(updated);
+    if(updated)setUser(updated);
     setShowTiers(false);
     if(screen!=="projects"&&screen!=="project"&&screen!=="map")setScreen("projects");
   }
@@ -6389,21 +6625,27 @@ export default function App(){
     setMapData(m);setMapIsNew(isNew||false);setMapReadOnly(readOnlyMap);setScreen("map");
   }
 
-  function toggleTheme(){setTheme(t=>t==="dark"?"light":"dark");}
+  function toggleTheme(){const next=t=>t==="dark"?"light":"dark";setTheme(t=>{const n=next(t);try{localStorage.setItem("sa_theme",n);}catch{};return n;});}
+  function changePalette(p:string){setPalette(p);try{localStorage.setItem("sa_palette",p);}catch{};}
 
   if(showTiers){
     return(
       <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
-        <TierSelectionScreen isNew={true} currentUser={user} theme={theme}
-          onSelect={onChangeTier}
-          onBack={()=>{setShowTiers(false);setScreen("projects");}}
-        />
+        <div data-theme={theme} data-palette={palette} style={{minHeight:"100vh",background:"var(--bg)"}}>
+          <TierSelectionScreen isNew={true} currentUser={user} theme={theme} palette={palette}
+            onSelect={onChangeTier}
+            onBack={()=>{setShowTiers(false);setScreen("projects");}}
+          />
+        </div>
       </LangCtx.Provider>
     );
   }
 
+  const appPalette=screen==="landing"?undefined:palette;
   return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
+      <div data-theme={theme} data-palette={appPalette} style={{minHeight:"100vh",background:"var(--bg)",transition:"background .25s ease, color .25s ease"}}>
+      <style>{CSS}</style>
       <>
         {screen==="splash"&&<SplashScreen onDone={()=>setScreen("landing")} theme={theme}/>}
         {screen==="landing"&&<LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onGetStarted={()=>setScreen("welcome")}/>}
@@ -6425,6 +6667,7 @@ export default function App(){
         {screen==="projects"&&user&&(
           <>
             <TrialBanner user={user} onUpgrade={()=>setShowProfile(true)}/>
+            <EmailVerifyBanner user={user}/>
             <ProjectsPage
               user={user} theme={theme}
               onSelectProject={onSelectProject}
@@ -6433,7 +6676,7 @@ export default function App(){
               onProfile={()=>setShowProfile(true)}
               onToggleTheme={toggleTheme}
             />
-            {showProfile&&<ProfileModal user={user} theme={theme} onClose={()=>setShowProfile(false)} onUpdate={(u:any)=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
+            {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={(u:any)=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
           </>
         )}
         {screen==="project"&&user&&project&&(
@@ -6446,7 +6689,7 @@ export default function App(){
               onToggleTheme={toggleTheme}
               onChangeTier={onChangeTier}
             />
-            {showProfile&&<ProfileModal user={user} theme={theme} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
+            {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
           </>
         )}
         {screen==="map"&&user&&mapData&&project&&(
@@ -6458,10 +6701,21 @@ export default function App(){
               onProfile={()=>setShowProfile(true)}
               onToggleTheme={toggleTheme}
             />
-            {showProfile&&<ProfileModal user={user} theme={theme} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
+            {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
           </>
         )}
+      {verifiedToast&&(
+        <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"12px 22px",borderRadius:12,background:"rgba(16,185,129,.15)",border:"1px solid rgba(16,185,129,.4)",color:"#34d399",fontSize:14,fontWeight:700,boxShadow:"0 8px 32px rgba(0,0,0,.4)",animation:"slideUp .3s ease",backdropFilter:"blur(12px)"}}>
+          ✓ {t("verify_email_done","Email подтверждён")}
+        </div>
+      )}
+      {paymentToast&&(
+        <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"12px 22px",borderRadius:12,background:"rgba(16,185,129,.15)",border:"1px solid rgba(16,185,129,.4)",color:"#34d399",fontSize:14,fontWeight:700,boxShadow:"0 8px 32px rgba(0,0,0,.4)",animation:"slideUp .3s ease",backdropFilter:"blur(12px)"}}>
+          ✓ {t("payment_success","Оплата прошла успешно! Тариф обновлён.")}
+        </div>
+      )}
       </>
+      </div>
     </LangCtx.Provider>
   );
 }

@@ -5,7 +5,7 @@ const { Server: SocketIO } = require('socket.io');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const { initDB, seedDB } = require('./db');
+const { pool, initDB, seedDB } = require('./db');
 
 // ── Sentry (опционально, если SENTRY_DSN задан) ──────────────────────────────
 let Sentry = null;
@@ -24,6 +24,8 @@ if (process.env.SENTRY_DSN) {
 }
 
 const app = express();
+// Trust proxy (Railway, Nginx, etc.) — иначе express-rate-limit падает с X-Forwarded-For
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const PORT = process.env.PORT || 4000;
 
@@ -230,6 +232,72 @@ app.get('*', (req, res) => {
   });
 });
 
+// ── Deadline reminder cron (запускается раз в день в 08:00 UTC) ──────────────
+const { sendEmail, deadlineReminderEmail } = require('./routes/email');
+
+async function runDeadlineReminders() {
+  try {
+    // Находим всех пользователей с notif_email = true
+    const { rows: users } = await pool.query(
+      `SELECT email, name FROM users WHERE notif_email = true AND email_verified = true`
+    );
+
+    const today = new Date();
+    const in3days = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
+    const todayStr = today.toISOString().slice(0, 10);
+    const in3daysStr = in3days.toISOString().slice(0, 10);
+
+    for (const user of users) {
+      try {
+        // Находим все карты пользователя (как owner или member)
+        const { rows: projects } = await pool.query(
+          `SELECT id FROM projects WHERE owner_email = $1 OR members @> $2::jsonb`,
+          [user.email, JSON.stringify([{ email: user.email }])]
+        );
+        if (!projects.length) continue;
+
+        const projectIds = projects.map(p => p.id);
+        const { rows: maps } = await pool.query(
+          `SELECT nodes FROM maps WHERE project_id = ANY($1) AND is_scenario = false`,
+          [projectIds]
+        );
+
+        // Собираем шаги с дедлайнами в ближайшие 3 дня
+        const urgentSteps = [];
+        for (const map of maps) {
+          const nodes = map.nodes || [];
+          for (const node of nodes) {
+            if (node.deadline && node.status !== 'completed' && node.deadline >= todayStr && node.deadline <= in3daysStr) {
+              urgentSteps.push({ title: node.title, deadline: node.deadline });
+            }
+          }
+        }
+
+        if (urgentSteps.length > 0) {
+          const { subject, html } = deadlineReminderEmail(user.name, urgentSteps);
+          await sendEmail({ to: user.email, subject, html });
+        }
+      } catch (e) {
+        console.warn(`Deadline reminder failed for ${user.email}:`, e.message);
+      }
+    }
+    console.log(`✅ Deadline reminders sent (checked ${users.length} users)`);
+  } catch (e) {
+    console.error('Deadline cron error:', e.message);
+  }
+}
+
+function startCron() {
+  // Проверяем раз в час, запускаем письма только в 08:00 UTC
+  setInterval(() => {
+    const hour = new Date().getUTCHours();
+    const minute = new Date().getUTCMinutes();
+    if (hour === 8 && minute < 60) {
+      runDeadlineReminders();
+    }
+  }, 60 * 60 * 1000); // каждый час
+}
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 async function start() {
   // Проверяем обязательные переменные окружения
@@ -250,6 +318,8 @@ async function start() {
     console.log(`   ENV: ${process.env.NODE_ENV || 'development'}`);
     console.log(`   DB:  connected`);
     console.log(`   WS:  enabled`);
+    startCron();
+    console.log(`   CRON: deadline reminders scheduled`);
   });
 }
 
