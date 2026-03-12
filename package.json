@@ -7,7 +7,9 @@
     "build": "mkdir -p public && esbuild strategy-ai-full.tsx --bundle --outfile=public/app.js --jsx=transform --define:process.env.NODE_ENV='\"production\"' --minify",
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
-    "seed": "node server/seed.js"
+    "seed": "node server/seed.js",
+    "prepare": "husky",
+    "deploy": "git add -A && git status --short && (git diff --cached --quiet || (git commit -m \"chore: auto-deploy\" && git push))"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -26,6 +28,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "nodemon": "^3.1.0"
   },
   "engines": {
