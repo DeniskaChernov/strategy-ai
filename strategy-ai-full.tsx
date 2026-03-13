@@ -109,8 +109,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes nodeHover{from{filter:brightness(1)}to{filter:brightness(1.15)}}
 @keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.node-card{transition:filter .15s ease;}
-.zoom-ctrl-btn{transition:background .15s,color .15s;}
+.node-card{transition:filter .2s ease,transform .25s cubic-bezier(.25,.46,.45,.94);}
+.zoom-ctrl-btn{transition:background .2s ease,color .2s ease,transform .15s ease;}
 .zoom-ctrl-btn:hover{background:var(--surface2) !important;color:var(--text) !important;}
 
 /* ── Info card hover system ── */
@@ -197,9 +197,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes borderGlow{0%,100%{opacity:.6}50%{opacity:1}}
 @keyframes priceCount{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes scrollPulse{0%,100%{opacity:.4}50%{opacity:1}}
-@keyframes slideRight{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
+@keyframes slideRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
 @keyframes slideLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.panel-slide{animation:slideRight .35s cubic-bezier(.25,.46,.45,.94) forwards;}
+.panel-slide-fast{animation:slideRight .25s cubic-bezier(.25,.46,.45,.94) forwards;}
+.modal-scale{animation:scaleIn .28s cubic-bezier(.25,.46,.45,.94) forwards;}
 @keyframes ripple{from{transform:scale(0);opacity:.4}to{transform:scale(2.5);opacity:0}}
 @keyframes checkmark{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
 @keyframes successPop{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
@@ -3236,6 +3239,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const PRIORITY=getPRIORITY(t);
   const ETYPE=getETYPE(t);
   const[tab,setTab]=useState("info");
+  const[showMore,setShowMore]=useState(false);
   const[newComment,setNewComment]=useState("");
   const[aiRephrLoading,setAiRephrLoading]=useState(false);
   const[aiCommentLoading,setAiCommentLoading]=useState(false);
@@ -3327,10 +3331,10 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
   const tabs=[["info","◈ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
 
-  const panelRight=aiPanelOpen?380:0;
+  const panelRight=aiPanelOpen?360:0;
   const panelWidth=aiPanelOpen?320:340;
   return(
-    <div style={{position:"absolute",right:panelRight,top:0,bottom:0,width:panelWidth,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease",borderRadius:"16px 0 0 0"}}>
+    <div className="panel-slide" style={{position:"absolute",right:panelRight,top:0,bottom:0,width:panelWidth,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"}}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:12,height:12,borderRadius:4,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
         <div style={{flex:1,fontSize:15,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
@@ -3344,75 +3348,60 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
           return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"14px 16px",border:"none",background:isActive?"var(--surface)":"transparent",color:isActive?"var(--text)":"var(--text4)",fontSize:13,fontWeight:isActive?700:500,cursor:"pointer",borderBottom:isActive?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
         })}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"22px"}}>
+      <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
         {tab==="info"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 Название
-                {!readOnly&&<button onClick={aiRephrase} disabled={aiRephrLoading} style={{fontSize:12.5,padding:"1px 6px",borderRadius:4,border:"1px solid var(--border)",background:"var(--surface)",color:aiRephrLoading?"var(--text4)":"var(--accent-2)",cursor:aiRephrLoading?"wait":"pointer"}}>{aiRephrLoading?"✦…":"✨ AI"}</button>}
+                {!readOnly&&<button onClick={aiRephrase} disabled={aiRephrLoading} style={{fontSize:11,padding:"2px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:aiRephrLoading?"var(--text4)":"var(--accent-2)",cursor:aiRephrLoading?"wait":"pointer",transition:"all .2s"}}>{aiRephrLoading?"…":"✨ AI"}</button>}
               </div>
-              <textarea value={node.title||""} onChange={e=>!readOnly&&onUpdate({title:e.target.value})} rows={2} style={iS} readOnly={readOnly}/>
+              <textarea value={node.title||""} onChange={e=>!readOnly&&onUpdate({title:e.target.value})} rows={1} style={{...iS,minHeight:44}} readOnly={readOnly}/>
             </div>
             <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("why_label","Зачем?")}</div>
-              <textarea value={node.reason||""} onChange={e=>!readOnly&&onUpdate({reason:e.target.value})} rows={2} style={iS} readOnly={readOnly}/>
+              <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6}}>{t("why_label","Зачем?")}</div>
+              <textarea value={node.reason||""} onChange={e=>!readOnly&&onUpdate({reason:e.target.value})} rows={2} style={{...iS,minHeight:56}} readOnly={readOnly}/>
             </div>
             <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("metric_label","Метрика успеха")}</div>
+              <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6}}>{t("metric_label","Метрика")}</div>
               <input value={node.metric||""} onChange={e=>!readOnly&&onUpdate({metric:e.target.value})} style={{...iS,resize:undefined}} readOnly={readOnly}/>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("status","Статус")}</div>
-                <CustomSelect
-                  value={node.status||"planning"}
-                  onChange={v=>!readOnly&&onUpdate({status:v})}
-                  disabled={readOnly}
-                  style={{width:"100%"}}
-                  options={Object.entries(STATUS).map(([k,s])=>({value:k,label:s.label,dot:s.c}))}
-                />
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>{t("status","Статус")}</div>
+                <CustomSelect value={node.status||"planning"} onChange={v=>!readOnly&&onUpdate({status:v})} disabled={readOnly} style={{width:"100%"}} options={Object.entries(STATUS).map(([k,s])=>({value:k,label:s.label,dot:s.c}))}/>
               </div>
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("priority","Приоритет")}</div>
-                <CustomSelect
-                  value={node.priority||"medium"}
-                  onChange={v=>!readOnly&&onUpdate({priority:v})}
-                  disabled={readOnly}
-                  style={{width:"100%"}}
-                  options={Object.entries(PRIORITY).map(([k,p])=>({value:k,label:p.label,dot:p.c}))}
-                />
+              <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>{t("priority","Приоритет")}</div>
+                <CustomSelect value={node.priority||"medium"} onChange={v=>!readOnly&&onUpdate({priority:v})} disabled={readOnly} style={{width:"100%"}} options={Object.entries(PRIORITY).map(([k,p])=>({value:k,label:p.label,dot:p.c}))}/>
               </div>
             </div>
-            <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4,display:"flex",justifyContent:"space-between"}}>
-                Прогресс <span style={{color:"var(--accent-1)",fontWeight:800}}>{node.progress||0}%</span>
-              </div>
+            <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>Прогресс <span style={{color:"var(--accent-1)",fontWeight:700}}>{node.progress||0}%</span></div>
               <input type="range" min={0} max={100} value={node.progress||0} onChange={e=>!readOnly&&onUpdate({progress:+e.target.value})} style={{width:"100%",accentColor:"var(--accent-1)"}} disabled={readOnly}/>
             </div>
-            <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("node_deadline","Дедлайн")}</div>
-              <input type="date" value={node.deadline||""} onChange={e=>!readOnly&&onUpdate({deadline:e.target.value})} style={{...iS,resize:undefined}} readOnly={readOnly}/>
-            </div>
-            <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("tags_label","Теги")}</div>
-              <input value={(node.tags||[]).join(", ")} onChange={e=>!readOnly&&onUpdate({tags:e.target.value.split(",").map(tc=>tc.trim()).filter(Boolean)})} placeholder="тег1, тег2…" style={{...iS,resize:undefined}} readOnly={readOnly}/>
-            </div>
-            <div>
-              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:5}}>{t("node_color_label","Цвет узла")}</div>
-              <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-                {COLORS.map((c,i)=>(
-                  <div key={i} onClick={()=>!readOnly&&onUpdate({color:c})} style={{width:18,height:18,borderRadius:4,background:c||"var(--surface2)",border:(node.color||"")===(c)?"2px solid var(--text)":"1px solid var(--border)",cursor:readOnly?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"var(--text5)"}}>
-                    {!c&&"∅"}
+            {showMore&&(
+              <div style={{display:"flex",flexDirection:"column",gap:12,paddingTop:8,borderTop:"1px solid var(--border)",animation:"slideDown .25s ease"}}>
+                <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>{t("node_deadline","Дедлайн")}</div>
+                  <input type="date" value={node.deadline||""} onChange={e=>!readOnly&&onUpdate({deadline:e.target.value})} style={{...iS,resize:undefined}} readOnly={readOnly}/>
+                </div>
+                <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>{t("tags_label","Теги")}</div>
+                  <input value={(node.tags||[]).join(", ")} onChange={e=>!readOnly&&onUpdate({tags:e.target.value.split(",").map(tc=>tc.trim()).filter(Boolean)})} placeholder="тег1, тег2" style={{...iS,resize:undefined}} readOnly={readOnly}/>
+                </div>
+                <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:6}}>{t("node_color_label","Цвет")}</div>
+                  <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                    {COLORS.map((c,i)=>(
+                      <div key={i} onClick={()=>!readOnly&&onUpdate({color:c})} style={{width:20,height:20,borderRadius:6,background:c||"var(--surface2)",border:(node.color||"")===(c)?"2px solid var(--text)":"1px solid var(--border)",cursor:readOnly?"default":"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"var(--text5)",transition:"all .15s"}}>{!c&&"∅"}</div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            )}
+            <button onClick={()=>setShowMore(s=>!s)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text4)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s"}}>
+              {showMore?"▲ Свернуть":"▼ Детали"}
+            </button>
             {!readOnly&&(
               <div style={{display:"flex",gap:6,paddingTop:4}}>
-                {onConnect&&<button onClick={()=>onConnect({startNode:node})} style={{flex:1,padding:"7px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("link_btn","⇒ Связать")}</button>}
-                <button onClick={doAutoConnect} disabled={autoConnLoading} style={{flex:1,padding:"7px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:autoConnLoading?"var(--text4)":"var(--accent-2)",cursor:autoConnLoading?"wait":"pointer",fontSize:13,fontWeight:600}}>{autoConnLoading?"✦…":"✦ AI-связи"}</button>
-                <button onClick={()=>onDelete(node.id)} style={{padding:"7px 9px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13}}>🗑</button>
+                {onConnect&&<button onClick={()=>onConnect({startNode:node})} style={{flex:1,padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>⇒ {t("link_btn","Связать")}</button>}
+                <button onClick={doAutoConnect} disabled={autoConnLoading} style={{flex:1,padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:autoConnLoading?"var(--text4)":"var(--accent-2)",cursor:autoConnLoading?"wait":"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>{autoConnLoading?"…":"✦ AI"}</button>
+                <button onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"#ef4444",cursor:"pointer",fontSize:12,transition:"all .2s"}}>🗑</button>
               </div>
             )}
           </div>
@@ -3546,7 +3535,10 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     team:["Стратегический аудит","Unit economics","GTM рекомендации","Конкурентный анализ","Точки масштабирования","Blue Ocean","С чего начать?","Non-obvious совет","Strategic blind spots"],
     enterprise:["Executive audit","BCG анализ","OKR для карты","Blue Ocean","Due diligence","CMO/CRO угол","С чего начать?","Strategic blind spots","Non-obvious move"],
   };
-  const quick=quickByTier[tier]||quickByTier.free;
+  const allQuick=quickByTier[tier]||quickByTier.free;
+  const QUICK_SHOW=4;
+  const[showMoreQuick,setShowMoreQuick]=useState(false);
+  const quick=showMoreQuick?allQuick:allQuick.slice(0,QUICK_SHOW);
 
   async function send(text){
     const q=text||inp.trim();
@@ -3593,7 +3585,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   }
 
   return(
-    <div style={{position:"absolute",right:0,top:0,bottom:0,width:380,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease",borderRadius:"16px 0 0 0"}}>
+    <div className="panel-slide" style={{position:"absolute",right:0,top:0,bottom:0,width:360,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"}}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:36,height:36,borderRadius:12,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0}}>✦</div>
         <div style={{flex:1,minWidth:0}}>
@@ -3603,17 +3595,24 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"8px 12px",borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>✕</button>
         <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
       </div>
-      <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",display:"flex",gap:10,flexWrap:"wrap",flexShrink:0}}>
-        {quick.map(q=>(
-          <button key={q} onClick={()=>send(q)} style={{padding:"10px 16px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,transition:"all .15s"}}
-            onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)";}}>{q}</button>
-        ))}
+      <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {quick.map(q=>(
+            <button key={q} onClick={()=>send(q)} style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}
+              onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)";}}>{q}</button>
+          ))}
+          {allQuick.length>QUICK_SHOW&&(
+            <button onClick={()=>setShowMoreQuick(s=>!s)} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text4)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s"}}>
+              {showMoreQuick?"▲":"+ ещё"}
+            </button>
+          )}
+        </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"20px 22px",display:"flex",flexDirection:"column",gap:18}}>
+      <div style={{flex:1,overflowY:"auto",padding:"16px 18px",display:"flex",flexDirection:"column",gap:14}}>
         {msgs.map((m,i)=>(
-          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start"}}>
+          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start",animation:"slideDown .2s ease"}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
-            <div style={{maxWidth:"85%",padding:"12px 16px",borderRadius:m.role==="user"?"16px 16px 4px 16px":m.role==="sys"?"12px":"4px 16px 16px 16px",background:m.role==="user"?"var(--accent-soft)":m.role==="sys"?"rgba(16,185,129,.1)":"var(--surface)",border:"none",fontSize:14,lineHeight:1.65,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 8px var(--accent-glow)":m.role==="sys"?"none":"0 1px 4px rgba(0,0,0,.08)"}}>{m.text}</div>
+            <div style={{maxWidth:"85%",padding:"12px 16px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--accent-soft)":m.role==="sys"?"rgba(16,185,129,.1)":"var(--surface)",border:"none",fontSize:14,lineHeight:1.6,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 8px var(--accent-glow)":m.role==="sys"?"none":"0 1px 4px rgba(0,0,0,.08)",transition:"opacity .2s"}}>{m.text}</div>
           </div>
         ))}
         {load&&<div style={{display:"flex",gap:8,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",borderRadius:"4px 14px 14px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
@@ -4865,7 +4864,7 @@ ${ctx}
           </div>
         )}
         {ctxMenu&&(
-          <div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,zIndex:400,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:18,boxShadow:"0 20px 56px rgba(0,0,0,.35)",padding:"12px 0",minWidth:240,animation:"scaleIn .15s ease",backdropFilter:"blur(16px)"}}>
+          <div className="modal-scale" style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,zIndex:400,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:18,boxShadow:"0 20px 56px rgba(0,0,0,.35)",padding:"12px 0",minWidth:240,backdropFilter:"blur(16px)"}}>
             {ctxMenu.node?(
               <>
                 <div style={{padding:"12px 20px",fontSize:12,color:"var(--text4)",borderBottom:"1px solid var(--border)"}}>{ctxMenu.node.title?.slice(0,24)}{(ctxMenu.node.title||"").length>24?"…":""}</div>
