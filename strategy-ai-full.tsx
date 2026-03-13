@@ -46,9 +46,9 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 }
 /* ── Accent variables (override by data-palette) ── */
 [data-theme="dark"]{
-  --bg:#070b14;--bg2:#0b1120;--bg3:#0f1729;
-  --surface:rgba(255,255,255,.035);--surface2:rgba(255,255,255,.06);
-  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
+  --bg:#060a12;--bg2:#0a0f1a;--bg3:#0e1422;
+  --surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);
   --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;
   --input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);
   --card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);
@@ -57,11 +57,12 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
   --shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);
   --node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;
   --accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);
+  --gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;
 }
 [data-theme="light"]{
-  --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eef1f8;
-  --surface:rgba(0,0,0,.05);--surface2:rgba(0,0,0,.09);
-  --border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.2);
+  --bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;
+  --surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);
   --text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;
   --input-bg:#ffffff;--input-border:rgba(0,0,0,.18);
   --card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);
@@ -70,6 +71,7 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
   --shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);
   --node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;
   --accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);
+  --gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;
 }
 /* ── Palettes: спокойные приглушённые цвета (только Strategy AI app, не лендинг) ── */
 [data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);}
@@ -89,13 +91,16 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 [data-theme="light"] input::placeholder,[data-theme="light"] textarea::placeholder{color:var(--text5);}
 [data-theme="light"] option{background:#fff;color:#0f172a;}
 /* Light theme specific overrides */
-[data-theme="light"] body{background:var(--bg);}
+[data-theme="light"] body{background:var(--bg);color:var(--text);}
+[data-theme="light"] .icard{box-shadow:0 1px 3px rgba(0,0,0,.06);}
 [data-theme="dark"] select{color-scheme:dark;background:#0d1829;color:#e2e8f0;border-color:rgba(255,255,255,.1);}
 [data-theme="dark"] option{background:#0d1829;color:#e2e8f0;}
 select{appearance:none;-webkit-appearance:none;}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:var(--scrollbar-track,#0a1020)}
-::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb,#1e335a);border-radius:3px}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--scrollbar-track)}
+::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text4)}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:2px solid var(--accent-1);outline-offset:2px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
@@ -105,6 +110,8 @@ select{appearance:none;-webkit-appearance:none;}
 @keyframes nodeHover{from{filter:brightness(1)}to{filter:brightness(1.15)}}
 @keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .node-card{transition:filter .15s ease;}
+.zoom-ctrl-btn{transition:background .15s,color .15s;}
+.zoom-ctrl-btn:hover{background:var(--surface2) !important;color:var(--text) !important;}
 
 /* ── Info card hover system ── */
 .icard{
@@ -229,15 +236,15 @@ function CustomSelect({value,onChange,options,style={},disabled=false}){
       <button
         disabled={disabled}
         onClick={e=>{e.stopPropagation();setOpen(o=>!o);}}
-        style={{display:"flex",alignItems:"center",gap:7,padding:"6px 10px",borderRadius:8,border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.06)",color:"#e2e8f0",cursor:disabled?"not-allowed":"pointer",fontSize:13.5,fontWeight:600,fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap",width:"100%",minWidth:100,justifyContent:"space-between",transition:"all .15s",opacity:disabled?.5:1}}
-        onMouseOver={e=>{if(!disabled)e.currentTarget.style.background="rgba(255,255,255,.1)";}}
-        onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.06)";}}>
+        style={{display:"flex",alignItems:"center",gap:7,padding:"6px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:disabled?"not-allowed":"pointer",fontSize:13.5,fontWeight:600,fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap",width:"100%",minWidth:100,justifyContent:"space-between",transition:"all .15s",opacity:disabled?.5:1}}
+        onMouseOver={e=>{if(!disabled)e.currentTarget.style.background="var(--surface2)";}}
+        onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>
         <span style={{display:"flex",alignItems:"center",gap:6}}>
           {sel?.dot&&<span style={{width:8,height:8,borderRadius:"50%",background:sel.dot,flexShrink:0,display:"inline-block"}}/>}
           {sel?.icon&&<span style={{fontSize:13}}>{sel.icon}</span>}
           {sel?.label||value}
         </span>
-        <span style={{fontSize:12,color:"rgba(255,255,255,.4)",marginLeft:4,transform:open?"rotate(180deg)":"none",transition:"transform .15s"}}>▼</span>
+        <span style={{fontSize:12,color:"var(--text4)",marginLeft:4,transform:open?"rotate(180deg)":"none",transition:"transform .15s"}}>▼</span>
       </button>
       {open&&(
         <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,minWidth:"100%",background:"var(--surface,#0d1829)",border:"1px solid var(--accent-1)",borderRadius:11,boxShadow:"var(--shadow,0 16px 48px rgba(0,0,0,.8))",zIndex:9999,overflow:"hidden",animation:"slideDown .12s ease"}}>
@@ -246,7 +253,7 @@ function CustomSelect({value,onChange,options,style={},disabled=false}){
             return(
               <div key={o.value} onClick={e=>{e.stopPropagation();onChange(o.value);setOpen(false);}}
                 style={{display:"flex",alignItems:"center",gap:8,padding:"9px 13px",cursor:"pointer",background:isSel?"var(--accent-soft)":"transparent",color:isSel?"var(--accent-1)":"var(--text)",fontSize:13,fontWeight:isSel?700:500,fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"background .1s",whiteSpace:"nowrap"}}
-                onMouseOver={e=>{if(!isSel)e.currentTarget.style.background="rgba(255,255,255,.06)";}}
+                onMouseOver={e=>{if(!isSel)e.currentTarget.style.background="var(--surface)";}}
                 onMouseOut={e=>{if(!isSel)e.currentTarget.style.background="transparent";}}>
                 {o.dot&&<span style={{width:9,height:9,borderRadius:"50%",background:o.dot,flexShrink:0}}/>}
                 {o.icon&&<span style={{fontSize:14}}>{o.icon}</span>}
@@ -288,7 +295,7 @@ const LANGS={
     deadline:'Дедлайн',tags_label:'Теги',comments_label:'Комментарии',
     history_label:'История изменений',color_label:'Цвет',
     step_deleted:'удалён',undo_action:'↩ Отменить',
-    saved:'Сохранено ✓',saving:'Сохраняю…',save_error:'Ошибка сохранения',retry:'Повторить',connect_select_source:'⇒ выберите источник',
+    saved:'Сохранено ✓',saving:'Сохраняю…',save_error:'Ошибка сохранения',retry:'Повторить',use_template:'Использовать шаблон',connect_select_source:'⇒ выберите источник',
     connect_select_target:'→ выберите цель',
     ai_title:'AI Советник',clear_chat:'Очистить чат',
     ask_placeholder:'Спросите о стратегии…',analyzing:'анализирую…',
@@ -339,6 +346,14 @@ const LANGS={
     no_comments:'Нет комментариев',no_history:'Нет истории',
     // StatsPopup
     map_health:'Здоровье карты',health_score:'Health Score',
+    stats_empty:'Добавьте шаги на карту, чтобы увидеть аналитику.',
+    add_step_hint:'Добавить шаг (клик на пустое место)',link_mode_hint:'Режим связи: клик на источник, затем на цель',
+    ai_consultant_hint:'AI-консультант (Ctrl+Shift+A)',minimap_hint:'Миникарта',
+    simulation_hint:'Симуляция выполнения стратегии',templates_hint:'Шаблоны карт',gantt_hint:'Диаграмма Ганта',
+    dismiss:'Скрыть',map_empty_title:'Карта пуста',map_empty_hint:'Нажмите + Шаг, дважды кликните на фон или кликните на пустое место.',
+    search_no_results:'Ничего не найдено',search_no_results_hint:'Сбросьте поиск или фильтр статусов.',
+    zoom_in:'Увеличить',zoom_out:'Уменьшить',
+    center_on:'К узлу',center_on_node:'Центрировать',add_step_here:'Добавить шаг здесь',duplicate:'Дублировать',copy_short:'Копировать',delete_selected:'Удалить выбранные',
     completed:'Выполнено',in_progress:'В работе',planning:'Планирование',
     blocked:'Заблокировано',critical:'Критических',avg_prog:'Средний прогресс',
     total_connections:'Связей',
@@ -645,7 +660,7 @@ const LANGS={
     deadline:'Deadline',tags_label:'Tags',comments_label:'Comments',
     history_label:'Change history',color_label:'Color',
     step_deleted:'deleted',undo_action:'↩ Undo',
-    saved:'Saved ✓',saving:'Saving…',save_error:'Save failed',retry:'Retry',connect_select_source:'⇒ select source',
+    saved:'Saved ✓',saving:'Saving…',save_error:'Save failed',retry:'Retry',use_template:'Use template',connect_select_source:'⇒ select source',
     connect_select_target:'→ select target',
     ai_title:'AI Advisor',clear_chat:'Clear chat',
     ask_placeholder:'Ask about strategy…',analyzing:'analyzing…',
@@ -696,6 +711,14 @@ const LANGS={
     no_comments:'No comments',no_history:'No history',
     // StatsPopup
     map_health:'Map Health',health_score:'Health Score',
+    stats_empty:'Add steps to the map to see analytics.',
+    add_step_hint:'Add step (click on empty area)',link_mode_hint:'Link mode: click source, then target',
+    ai_consultant_hint:'AI advisor (Ctrl+Shift+A)',minimap_hint:'Minimap',
+    simulation_hint:'Strategy execution simulation',templates_hint:'Map templates',gantt_hint:'Gantt chart',
+    dismiss:'Dismiss',map_empty_title:'Map is empty',map_empty_hint:'Click + Step, double-click on canvas, or click on empty area.',
+    search_no_results:'No results found',search_no_results_hint:'Clear search or status filter.',
+    zoom_in:'Zoom in',zoom_out:'Zoom out',
+    center_on:'To node',center_on_node:'Center',add_step_here:'Add step here',duplicate:'Duplicate',copy_short:'Copy',delete_selected:'Delete selected',
     completed:'Completed',in_progress:'In Progress',planning:'Planning',
     blocked:'Blocked',critical:'Critical',avg_prog:'Avg progress',
     total_connections:'Connections',
@@ -1003,7 +1026,7 @@ const LANGS={
     deadline:"Muddat",tags_label:"Teglar",comments_label:"Izohlar",
     history_label:"O'zgarishlar tarixi",color_label:"Rang",
     step_deleted:"o'chirildi",undo_action:"↩ Bekor qilish",
-    saved:"Saqlandi ✓",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",retry:"Qayta urinish",
+    saved:"Saqlandi ✓",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",retry:"Qayta urinish",use_template:"Shablonni ishlatish",
     connect_select_source:"⇒ manba tanlang",connect_select_target:"→ maqsad tanlang",
     ai_title:"AI Maslahatchi",clear_chat:"Chatni tozalash",
     ask_placeholder:"Strategiya haqida so'rang…",analyzing:"tahlil qilinmoqda…",
@@ -1054,6 +1077,14 @@ const LANGS={
     no_comments:"Izoh yo'q",no_history:"Tarix yo'q",
     // StatsPopup
     map_health:"Xarita salomatligi",health_score:"Salomatlik bali",
+    stats_empty:"Analitikani ko'rish uchun xaritaga qadamlar qo'shing.",
+    add_step_hint:"Qadam qo'shish (bo'sh joyga bosing)",link_mode_hint:"Bog'lash rejimi: manba, keyin maqsad",
+    ai_consultant_hint:"AI maslahatchi (Ctrl+Shift+A)",minimap_hint:"Minixarita",
+    simulation_hint:"Strategiya bajarilishi simulyatsiyasi",templates_hint:"Xarita shablonlari",gantt_hint:"Gantt diagrammasi",
+    dismiss:"Yashirish",map_empty_title:"Xarita bo'sh",map_empty_hint:"+ Qadam, fonni ikki marta bosing yoki bo'sh joyni bosing.",
+    search_no_results:"Hech narsa topilmadi",search_no_results_hint:"Qidiruv yoki status filtriini tozalang.",
+    zoom_in:"Kattalashtirish",zoom_out:"Kichiklashtirish",
+    center_on:"Tugunga",center_on_node:"Markazlashtirish",add_step_here:"Qadam qo'shish",duplicate:"Nusxalash",copy_short:"Nusxalash",delete_selected:"Tanlanganlarni o'chirish",
     completed:"Bajarildi",in_progress:"Jarayonda",planning:"Rejalashtirish",
     blocked:"Bloklangan",critical:"Kritik",avg_prog:"O'rtacha jarayon",
     total_connections:"Bog'liqliklar",
@@ -1684,96 +1715,144 @@ function simNode(node,params,depResults,incomingEdges){
 }
 
 
-// ── AI tier configs ──
+// ── База знаний AI (МАКСИМАЛЬНАЯ глубина: фреймворки, методологии, паттерны, психология) ──
+const AI_KNOWLEDGE=`ОТРАСЛИ И МЕТРИКИ (глубоко):
+• B2B/SaaS: ACV, MRR/ARR, churn, NRR, LTV:CAC>3, sales cycle, ICP, product-led vs sales-led, PLG, expansion revenue, land-and-expand, product-qualified lead, expansion revenue, logo retention, net revenue retention
+• E-commerce: AOV, conversion rate, CAC, LTV, cart abandonment, retention by cohort, CAC payback, unit economics, fulfillment, inventory turnover, GMV, repeat purchase rate
+• Услуги: utilization rate, billable hours, pipeline velocity, win rate, project margin, retainer vs project, scope creep, delivery quality, client satisfaction
+• Маркетплейсы: GMV, take rate, supply/demand balance, liquidity, network effects, cold start, two-sided growth
+• Производство: COGS, lead time, OEE, quality yield, supplier risk, capacity planning, throughput
+• Стартапы: PMF signals, runway, burn rate, growth loops, activation/retention, pivot triggers, founder-market fit
+
+ЭТАПЫ БИЗНЕСА: pre-seed (валидация, интервью), seed (MVP, первые платящие), Series A (масштаб, процессы), growth (оптимизация, команда), scale (системы, культура)
+
+МАРКЕТИНГ: AIDA, воронка TOFU/MOFU/BOFU, каналы paid/organic, attribution, CRO, A/B тесты, content pillars, email sequences, landing conversion, UTM, cohort analysis, brand awareness vs demand gen, CAC by channel
+ПРОДАЖИ: BANT, MEDDIC, SPIN, Challenger Sale, discovery, qualification, demo, proposal, objection handling, champion building, multi-threading, POC, pilot, closing techniques, sales cycle stages
+СТРАТЕГИЯ: SWOT, PESTEL, Porter 5 Forces, BCG matrix, Ansoff, Blue Ocean, OKR, JTBD, value proposition, competitive moat, positioning, scenario planning, first principles, Jobs-to-be-Done
+
+ДОПОЛНИТЕЛЬНЫЕ ФРЕЙМВОРКИ:
+• Lean/Agile: MVP, build-measure-learn, pivot, validated learning, innovation accounting
+• Design Thinking: empathize, define, ideate, prototype, test
+• RAPID/RACI: кто решает, кто исполняет, кто согласовывает
+• Eisenhower: срочно/важно матрица
+• MoSCoW: Must/Should/Could/Won't
+• ICE/RICE: приоритизация идей (Impact, Confidence, Ease / Reach, Impact, Confidence, Effort)
+• North Star Metric: одна метрика, которая ведёт к успеху
+
+РИСКИ: технологический, рыночный, операционный, финансовый, регуляторный, ключевой человек, конкурентный, execution risk, reputational, supply chain
+
+ПСИХОЛОГИЯ И ПРИНЯТИЕ РЕШЕНИЙ:
+• Когнитивные искажения: analysis paralysis, confirmation bias, sunk cost, overconfidence, anchoring, availability heuristic, planning fallacy
+• Эмоциональные сигналы: "не знаю с чего начать" = overwhelm; короткие ответы = недоверие/спешка; много деталей = перфекционизм; "всё плохо" = ищи корень
+• Читай между строк: страхи, ограничения, скрытые цели, stakeholder dynamics, неозвученные риски
+• Strategic blind spots: что очевидно эксперту, но пользователь не видит
+
+ТИПИЧНЫЕ ОШИБКИ: пропуск валидации, масштаб до PMF, игнор unit economics, размытый ICP, отсутствие retention до growth, feature creep, premature scaling, wrong metrics
+
+«ПОГОДА» — УЧИТЫВАЙ ВСЁ:
+• Внутреннее: прогресс, блокировки, дедлайны, приоритеты, связи, ресурсы, бюджет, команда, мотивация
+• Внешнее: сезонность, тренды, конкуренты, регуляторика, макро, таланты, поставщики, рынок
+• Контекст: отрасль, этап, модель, ЦА, узкие места, что сделано, что заблокировано, просрочено
+
+СВЯЗИ: requires (A нужен для B), affects (A влияет), blocks (A блокирует), follows (B после A). Не предлагай шаг, если его блокирует незавершённый.
+
+ФОРМАТ: Действие (глагол+объект) + обоснование + метрика (число, %, срок). Actionable, конкретно.`;
+
+// ── AI tier configs (МАКСИМАЛЬНАЯ глубина: chain-of-thought, распознавание намерений, структура) ──
 const AI_TIER={
   free:{label:"Free",badge:"⬡",color:"#64748b",
-    system:(ctx,map)=>`Ты — AI-помощник по стратегии. Контекст бизнеса: ${ctx||"стартап"}.
-Текущая карта шагов: ${map||"пустая карта"}.
+    system:(ctx,map,meta,fullCtx)=>`Ты — AI-помощник по стратегии. Глубоко понимай контекст и намерение.
 
-Правила ответа:
-- Отвечай по-русски, конкретно, 2–4 предложения
-- Давай один чёткий совет или следующий шаг
-- Если пользователь не знает с чего начать — предложи добавить первый шаг
-- Не используй профессиональный жаргон без объяснения
+КОНТЕКСТ: ${meta?.projectName?"Проект: "+meta.projectName+". ":""}${meta?.mapName?"Карта: "+meta.mapName+". ":""}Бизнес: ${ctx||"стартап"}
+ШАГИ: ${map||"пустая"}
+${fullCtx?.edgesSummary?"СВЯЗИ: "+fullCtx.edgesSummary:""}
+${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
-Если уместно добавить шаг на карту:
-<ADD>{"title":"Конкретное действие","reason":"Почему это важно","metric":"Измеримый результат","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
+РАСПОЗНАЙ НАМЕРЕНИЕ: анализ, риск, следующий шаг, приоритет, добавить шаг, "с чего начать"/"помоги"/"не знаю"/"застрял"/"что не так"/"что упускаю". "Не знаю" = overwhelm — дай ОДИН чёткий первый шаг.
+Читай между строк: короткий вопрос — структура; "всё плохо" — ищи корень; "помоги" — конкретное действие.
+Правила: по-русски, 2–4 предложения. КОНКРЕТНОЕ действие. Не предлагай шаг, если его блокирует незавершённый.
+<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
   },
   starter:{label:"Starter",badge:"◈",color:"#10b981",
-    system:(ctx,map)=>`Ты — стратегический помощник уровня бизнес-консультанта. Контекст: ${ctx||"стартап"}.
-Карта: ${map||"пустая"}.
+    system:(ctx,map,meta,fullCtx)=>`Ты — бизнес-консультант. Глубоко понимай пользователя и контекст.
 
-Подход к анализу:
-- Выявляй узкие места и пробелы в логике карты
-- Указывай риски, которые пользователь мог не заметить
-- Предлагай альтернативные пути
-- Задавай уточняющие вопросы для точного совета
-- Анализ рисков: технологические, рыночные, операционные
+КОНТЕКСТ: ${meta?.projectName?"Проект: "+meta.projectName+". ":""}${meta?.mapName?"Карта: "+meta.mapName+". ":""}Бизнес: ${ctx||"стартап"}
+ШАГИ: ${map||"пустая"}
+${fullCtx?.edgesSummary?"СВЯЗИ: "+fullCtx.edgesSummary:""}
+${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
-Формат: проблема/инсайт → что делать → как измерить.
-По-русски, практично.
-Если добавить шаг: <ADD>{"title":"...","reason":"...","metric":"...","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
+РАСПОЗНАЙ: анализ/риск/приоритет/следующий шаг/добавить шаг/застрял/оптимизация/что не так. Читай между строк — что подразумевает.
+Учитывай связи, дедлайны, блокировки. Маркетинг (AIDA, CAC), продажи (pipeline, BANT), SWOT.
+Формат: краткий диагноз → 2-3 конкретных действия.
+<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
   },
   pro:{label:"Pro",badge:"◆",color:"#8b5cf6",
-    system:(ctx,map)=>`Ты — опытный стратегический советник с 15+ годами опыта. Контекст: ${ctx||"стартап"}.
-Текущая карта: ${map||"пустая"}.
+    system:(ctx,map,meta,fullCtx)=>`Ты — стратегический советник 15+ лет. МАКСИМАЛЬНАЯ ГЛУБИНА.
 
-Методологии в арсенале:
-- SWOT + PESTEL для контекста
-- OKR / Jobs-to-be-Done для приоритизации
-- First Principles мышление
-- Конкурентный анализ (positioning map, competitive moats)
-- Метрики: CAC, LTV, MRR, NPS, retention
+МЕТОД (chain-of-thought): 1) Проанализируй карту: связи, блокировки, health, паттерны. 2) Что пользователь НЕ сказал, но важно? 3) Ответь структурированно.
 
-Формат ответа:
-**Диагноз** — что происходит на самом деле
-**Рекомендация** — 2-3 конкретных шага с метриками
-**Риск** — главная угроза для этого шага
-**Быстрая победа** — что можно сделать прямо сейчас
+КОНТЕКСТ: ${meta?.projectName?"Проект: "+meta.projectName+". ":""}${meta?.mapName?"Карта: "+meta.mapName+". ":""}${meta?.userName?"Пользователь: "+meta.userName+". ":""}Бизнес: ${ctx||"стартап"}
+ШАГИ: ${map||"пустая"}
+${fullCtx?.edgesSummary?"СВЯЗИ: "+fullCtx.edgesSummary:""}
+${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
-Говори прямо. Указывай противоречия. Не льсти.
-Добавить шаг: <ADD>{"title":"...","reason":"...","metric":"...","status":"active","priority":"high","progress":0,"tags":[]}</ADD>`,
+БАЗА ЗНАНИЙ: ${AI_KNOWLEDGE}
+
+РАСПОЗНАЙ ГЛУБОКО: анализ/риск/приоритет/маркетинг/продажи/стратегия/добавить шаг/застрял/оптимизация/аудит/что не так/что упускаю. Учитывай историю чата.
+Читай между строк: эмоции, неявные ограничения, скрытые цели, strategic blind spots.
+Формат: **Диагноз** → **Рекомендация** (2-3 действия с KPI) → **Риск** → **Быстрая победа**.
+<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"active","priority":"high","progress":0,"tags":[]}</ADD>`,
   },
   team:{label:"Team",badge:"✦",color:"#f59e0b",
-    system:(ctx,map)=>`Ты — старший партнёр стратегической консалтинговой компании. Клиент: ${ctx||"компания"}.
-Текущая стратегическая карта: ${map||"пустая"}.
+    system:(ctx,map,meta,fullCtx)=>`Ты — партнёр McKinsey. МАКСИМАЛЬНАЯ ГЛУБИНА. Думай как senior partner.
 
-Уровень анализа McKinsey:
-① СТРАТЕГИЧЕСКИЙ СЛОЙ: конкурентное преимущество, positioning, market timing, sustainable moat
-② РЫНОЧНЫЙ СЛОЙ: TAM/SAM/SOM, сегменты, Job-to-be-Done, конкурентная динамика
-③ ОПЕРАЦИОННЫЙ СЛОЙ: unit economics, burn rate, команда, процессы, bottlenecks
-④ РИСКИ: регуляторные, технологические, конкурентные, операционные, рыночные
+МЕТОД (chain-of-thought): 1) Полный анализ: карта, связи, блокировки, health, просрочки. 2) Что подразумевает пользователь? Что критично, но не названо? 3) Executable рекомендации.
 
-Структура ответа:
-**Executive Insight** — главный инсайт в 1 предложении
-**Ситуация** — что реально происходит (без прикрас)
-**Топ-3 приоритета** — с метриками успеха и дедлайнами
-**Critical Risk** — что может убить стратегию
-**Следующий шаг** — одно действие на этой неделе
+КОНТЕКСТ: ${meta?.projectName?"Проект: "+meta.projectName+". ":""}${meta?.mapName?"Карта: "+meta.mapName+". ":""}${meta?.userName?"Клиент: "+meta.userName+". ":""}Бизнес: ${ctx||"компания"}
+ШАГИ: ${map||"пустая"}
+${fullCtx?.edgesSummary?"СВЯЗИ: "+fullCtx.edgesSummary:""}
+${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
-Говори как партнёр в зале заседаний. Конкретика важнее теории.
-Добавить шаг: <ADD>{"title":"...","reason":"...","metric":"...","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
+БАЗА ЗНАНИЙ: ${AI_KNOWLEDGE}
+
+РАСПОЗНАЙ: анализ/аудит/GTM/unit economics/риск/приоритет/добавить шаг/масштабирование/оптимизация/non-obvious. Учитывай историю.
+Читай между строк: политика, ресурсы, неозвученные риски. Strategic blind spots.
+Структура: **Executive Insight** → **Ситуация** → **Топ-3 приоритета** (кто, что, когда, KPI) → **Critical Risk** → **Следующий шаг**.
+<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
   },
   enterprise:{label:"Enterprise",badge:"💎",color:"#06b6d4",
-    system:(ctx,map)=>`Ты — коллегиум четырёх C-level экспертов. Клиент: ${ctx||"компания"}.
-Стратегическая карта: ${map||"пустая"}.
+    system:(ctx,map,meta,fullCtx)=>`Ты — коллегиум C-level (CSO, CMO, CRO, CFO). АБСОЛЮТНАЯ ГЛУБИНА.
 
-Команда экспертов:
-① **CHIEF STRATEGIST** (BCG·Porter·Blue Ocean): Где конкурентный ров? Голубой океан? Какие позиции атакуемы? Что защищено?
-② **CFO** (unit economics·LTV/CAC·runway·cash flow): Где деньги утекают? Какая юнит-экономика? Когда breakeven? Что влияет на маржу?
-③ **LEAD INVESTOR** (TAM·SAM·SOM·defensibility·VC-lens): Как выглядит для Series A? Масштабируемость? Exit options? Red flags?
-④ **COO** (процессы·bottleneck·автоматизация·team): Что тормозит скорость? Что автоматизировать первым? Где риск ключевого человека?
+МЕТОД (chain-of-thought): 1) Полный контекстный анализ: карта, связи, блокировки, просрочки, health. 2) Что не сказано? Системные риски? Non-obvious moves? 3) Думай на 2-3 шага вперёд. 4) Ответь.
 
-Формат ответа:
-**EXECUTIVE SUMMARY** — 2-3 предложения о состоянии стратегии
-**CRITICAL FINDINGS** — 2-3 критические находки (то, что нужно исправить немедленно)
-**TOP PRIORITIES** — 3 действия с дедлайнами и метриками, от каждого эксперта своё
-**STRATEGIC RISK** — самая серьёзная угроза, которую пользователь недооценивает
-**NON-OBVIOUS MOVE** — неочевидный ход, который может изменить игру
+КОНТЕКСТ: ${meta?.projectName?"Проект: "+meta.projectName+". ":""}${meta?.mapName?"Карта: "+meta.mapName+". ":""}${meta?.userName?"Клиент: "+meta.userName+". ":""}Бизнес: ${ctx||"компания"}
+ШАГИ: ${map||"пустая"}
+${fullCtx?.edgesSummary?"СВЯЗИ: "+fullCtx.edgesSummary:""}
+${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
-Говори как C-level на board meeting. Не щади. Не льсти. Факты и цифры важнее слов.
-Добавить шаг: <ADD>{"title":"...","reason":"...","metric":"...","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
+БАЗА ЗНАНИЙ: ${AI_KNOWLEDGE}
+
+РАСПОЗНАЙ: board meeting уровень. Аудит, стратегия, риск, приоритеты, масштаб, M&A, due diligence. Учитывай историю — полный контекст.
+Читай между строк: stakeholder dynamics, неозвученные ограничения, strategic blind spots.
+Формат: **EXECUTIVE SUMMARY** → **CRITICAL FINDINGS** → **TOP PRIORITIES** (кто, что, когда, KPI) → **STRATEGIC RISK** → **NON-OBVIOUS MOVE**.
+<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
   },
+};
+
+// ── Onboarding prompts по тарифам (интервью + генерация карты) ──
+const OB_TIER={
+  free:(proj)=>`Ты — стратегический консультант. Интервью для "${proj||""}". Один вопрос. Пойми уровень. Выявляй: продукт, ЦА, главный риск. Читай между строк — что не сказано. Вопросы ведут к actionable карте. READY после 6`,
+  starter:(proj)=>`Ты — бизнес-консультант. Интервью для "${proj||""}". Один вопрос. Маркетинг (воронка, CAC), продажи (pipeline), SWOT. Выявляй продукт, ЦА, узкое место, риск, ресурсы, этап бизнеса. READY после 6`,
+  pro:(proj)=>`Ты — опытный стратег. Интервью для "${proj||""}". Один вопрос. ГЛУБОКОЕ понимание: читай между строк, выявляй неявное. Маркетинг (attribution, CRO), продажи (MEDDIC, ACV), стратегия (Porter, OKR, JTBD). Сезонность, конкуренты, внешние факторы, психология (страхи, ограничения). READY после 6`,
+  team:(proj)=>`Ты — партнёр McKinsey. Интервью для "${proj||""}". Один вопрос. МАКСИМАЛЬНАЯ глубина. GTM, Blue Ocean, Ansoff, unit economics, competitive moat. «Погода»: тренды, регуляторика, макро. Выявляй stakeholder dynamics, неозвученные риски. READY после 6`,
+  enterprise:(proj)=>`Ты — C-level коллегиум. Интервью для "${proj||""}". Один вопрос. АБСОЛЮТНАЯ глубина. Full-funnel, enterprise sales, Porter, BCG, M&A. Всё: внутреннее, внешнее, политика, стратегические слепые зоны. READY после 6`,
+};
+const MAP_TIER={
+  free:`title — действие (глагол+объект), reason — зачем, metric — результат. 7–9 узлов. Связи — логичные зависимости.`,
+  starter:`title — КОНКРЕТНОЕ ДЕЙСТВИЕ (глагол+объект), reason — обоснование, metric — KPI. 7–9 узлов. Связи: requires/affects/blocks/follows по смыслу.`,
+  pro:`title — действие (глагол+объект), reason — обоснование (маркетинг/продажи/стратегия), metric — измеримый KPI. 7–9 узлов. Связи отражают реальные зависимости с учётом отрасли.`,
+  team:`title — действие, reason — обоснование (GTM/sales/strategy), metric — KPI. 7–9 узлов. Учитывай unit economics, competitive moat. Связи — причинно-следственные.`,
+  enterprise:`title — действие, reason — обоснование (C-level), metric — KPI. 7–9 узлов. Полная экспертиза. Связи — только логичные зависимости.`,
 };
 
 // ── Templates ──
@@ -1887,24 +1966,25 @@ function Toast({msg,type="info",onClose,action,onAction}){
     const raf=requestAnimationFrame(tick);
     return()=>cancelAnimationFrame(raf);
   },[]);
-  const C={info:"#6366f1",error:"#ef4444",success:"#10b981",warn:"#f59e0b"};
+  const C={info:"var(--accent-1)",error:"#ef4444",success:"#10b981",warn:"#f59e0b"};
   const icons={error:"⚠",success:"✓",warn:"⚡",info:"ℹ"};
+  const borderCol=type==="info"?"var(--accent-soft)":type==="error"?"rgba(239,68,68,.33)":type==="success"?"rgba(16,185,129,.33)":"rgba(245,158,11,.33)";
   return(
-    <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,borderRadius:12,background:"var(--bg3)",border:`1px solid ${C[type]}55`,color:"var(--text)",fontSize:13,fontWeight:500,boxShadow:"0 8px 32px rgba(0,0,0,.6)",animation:"slideUp .25s ease",maxWidth:480,backdropFilter:"blur(14px)",overflow:"hidden"}}
+    <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,borderRadius:12,background:"var(--bg3)",border:`1px solid ${borderCol}`,color:"var(--text)",fontSize:13,fontWeight:500,boxShadow:"var(--shadow-lg)",animation:"slideUp .25s ease",maxWidth:480,backdropFilter:"blur(14px)",overflow:"hidden"}}
       onClick={onClose}>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"11px 16px",cursor:"pointer"}}>
-        <span style={{color:C[type],fontSize:14,flexShrink:0}}>{icons[type]}</span>
+        <span style={{color:type==="info"?"var(--accent-1)":C[type],fontSize:14,flexShrink:0}}>{icons[type]}</span>
         <span style={{flex:1}}>{msg}</span>
         {action&&onAction&&(
           <button onClick={e=>{e.stopPropagation();onAction();onClose();}}
-            style={{padding:"3px 10px",borderRadius:6,border:`1px solid ${C[type]}55`,background:`${C[type]}15`,color:C[type],fontSize:13,cursor:"pointer",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>
+            style={{padding:"3px 10px",borderRadius:6,border:`1px solid ${borderCol}`,background:type==="info"?"var(--accent-soft)":`${C[type]}15`,color:type==="info"?"var(--accent-1)":C[type],fontSize:13,cursor:"pointer",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>
             {action}
           </button>
         )}
         <button onClick={e=>{e.stopPropagation();onClose();}} style={{color:"var(--text5)",background:"none",border:"none",cursor:"pointer",fontSize:16,lineHeight:1,flexShrink:0}}>×</button>
       </div>
-      <div style={{height:2,background:`${C[type]}20`}}>
-        <div style={{width:`${progress}%`,height:"100%",background:C[type],transition:"width .1s linear",opacity:.7}}/>
+      <div style={{height:2,background:type==="info"?"var(--accent-soft)":`${C[type]}20`}}>
+        <div style={{width:`${progress}%`,height:"100%",background:type==="info"?"var(--accent-1)":C[type],transition:"width .1s linear",opacity:.7}}/>
       </div>
     </div>
   );
@@ -1921,11 +2001,11 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(8px)",animation:"fadeIn .15s ease",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
       <div style={{width:"min(95vw,360px)",background:"var(--surface,#0f1729)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--accent-1)"}`,boxShadow:"var(--shadow,0 32px 80px rgba(0,0,0,.9))",overflow:"hidden",animation:"slideUp .2s cubic-bezier(.34,1.56,.64,1)"}}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
-          <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"rgba(99,102,241,.15)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"rgba(99,102,241,.4)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
+          <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"var(--accent-soft)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"var(--accent-1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
           </div>
-          <div style={{fontSize:17,fontWeight:800,color:"#e2e8f0",letterSpacing:-.3,marginBottom:10}}>{title}</div>
-          <div style={{fontSize:13,color:"#94a3b8",lineHeight:1.65,marginBottom:24}}>{message}</div>
+          <div style={{fontSize:17,fontWeight:800,color:"var(--text)",letterSpacing:-.3,marginBottom:10}}>{title}</div>
+          <div style={{fontSize:13,color:"var(--text3)",lineHeight:1.65,marginBottom:24}}>{message}</div>
         </div>
         <div style={{display:"flex",gap:10,padding:"0 24px 24px"}}>
           <button onClick={onCancel} style={{flex:1,padding:"12px",borderRadius:11,border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.06)",color:"#cbd5e1",fontSize:13,fontWeight:600,cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(255,255,255,.1)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.06)";}}>{t("cancel","Отмена")}</button>
@@ -2710,13 +2790,43 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 }
 
 // ── Landing ──
-const OB_SYS=`Ты — стратегический консультант, проводишь глубокое интервью для создания персонального стратегического плана.
-Правила: задавай ровно по одному вопросу, короткие и конкретные (1–2 предложения). Углубляйся в детали — что за продукт, кто платит, где узкое место роста, какой главный риск, следующий шаг.
-После 6-го ответа пользователя ответь ТОЛЬКО словом: READY`;
+const OB_SYS=`Ты — опытный стратегический консультант уровня McKinsey. ГЛУБОКОЕ интервью для персонального плана.
 
-const MAP_GEN_SYS=`Создай стратегическую карту на основе интервью. Верни ТОЛЬКО валидный JSON без markdown:
+ГЛУБИНА ПОНИМАНИЯ:
+- Распознавай уровень: новичок (термины), опытный (проф. язык), эксперт (нюансы, edge cases)
+- Читай между строк: неясный — уточни; короткий — углуби; выявляй НЕЯВНОЕ (конкуренты, ресурсы, страхи, сезонность, тренды, ограничения, скрытые цели)
+- Эмоции: стресс/overwhelm — поддерживай; уверен — бросай вызов; сомневается — структурируй; перфекционист — фокус на действии
+- Этап бизнеса: pre-seed/seed/growth — разные приоритеты
+
+БАЗА ЗНАНИЙ: ${AI_KNOWLEDGE}
+
+ПРАВИЛА:
+- Ровно ОДИН вопрос за раз. Коротко (1–2 предложения).
+- Выявляй: продукт, кто платит, ЦА, модель монетизации, узкое место, главный риск, ресурсы, дедлайны, сезонность, внешние факторы, типичные ошибки в отрасли.
+- Адаптируй под отрасль. Глубокие вопросы — не поверхностные. Вопросы должны вести к actionable карте.
+- Если ответ расплывчатый — задай уточняющий вопрос, но не более одного.
+После 6-го ответа: READY`;
+
+const MAP_GEN_SYS=`Создай стратегическую карту на основе интервью. МАКСИМАЛЬНАЯ ГЛУБИНА: учитывай ВСЁ из ответов.
+
+ГЛУБОКИЙ АНАЛИЗ ПЕРЕД ГЕНЕРАЦИЕЙ:
+- Отрасль, этап (pre-seed/seed/growth), ресурсы, риски, цели
+- Сезонность, внешние факторы, типичные ошибки в отрасли
+- Что пользователь подразумевал, но не сказал явно
+- Воронка (маркетинг/продажи) или pipeline — логичная последовательность
+
+БАЗА ЗНАНИЙ: ${AI_KNOWLEDGE}
+
+Формат узлов:
+- title: КОНКРЕТНОЕ ДЕЙСТВИЕ (глагол+объект). "Провести 15 интервью с ЦА", "Запустить лендинг и собрать 100 лидов" — НЕ "Анализ рынка"
+- reason: ОБОСНОВАНИЕ — почему шаг нужен, какую проблему решает
+- metric: ИЗМЕРИМЫЙ KPI — число, %, срок
+
+СВЯЗИ: requires (A нужен для B), affects, blocks, follows. Реалистичная последовательность для отрасли. Избегай типичных ошибок (пропуск валидации, масштаб до PMF).
+
+Верни ТОЛЬКО валидный JSON (без markdown):
 {"nodes":[{"id":"n1","x":200,"y":270,"title":"...","reason":"...","metric":"...","status":"active","priority":"high","progress":35,"tags":[]}],"edges":[{"id":"e1","source":"n1","target":"n2","type":"requires","label":""}]}
-Требования: 7–9 узлов, конкретные названия (не абстракции), X: 150–900, Y: 80–520, связи отражают зависимости.`;
+7–9 узлов, X:150–900, Y:80–520. Связи — логичные (воронка, pipeline, последовательность).`;
 
 function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
   const{t}=useLang();
@@ -2845,11 +2955,14 @@ function Onboarding({onDone,onBack,theme="dark"}){
   const[inp,setInp]=useState("");
   const[loading,setLoading]=useState(false);
   const[generating,setGenerating]=useState(false);
+  const[mapGenFailed,setMapGenFailed]=useState(false);
   const[history,setHistory]=useState([]);
   const[qCount,setQCount]=useState(0);
   const endRef=useRef(null);
+  const inputRef=useRef(null);
   useEffect(()=>{askNext([]);},[]);
   useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"});},[msgs,loading]);
+  useEffect(()=>{if(!loading&&!generating){const t=setTimeout(()=>inputRef.current?.focus(),80);return()=>clearTimeout(t);}},[loading,generating]);
 
   async function askNext(hist){
     setLoading(true);
@@ -2871,61 +2984,74 @@ function Onboarding({onDone,onBack,theme="dark"}){
     setHistory(newHist);
     if(qCount>=MAX_Q){await buildMap(newHist);}else{await askNext(newHist);}
   }
+  const defaultEdges=[{id:"e1",source:"n1",target:"n2",type:"requires",label:""},{id:"e2",source:"n2",target:"n4",type:"requires",label:""},{id:"e3",source:"n3",target:"n4",type:"affects",label:""}];
   async function buildMap(hist){
-    setGenerating(true);
+    setGenerating(true);setMapGenFailed(false);
     setMsgs(m=>[...m,{role:"ai",text:"Анализирую ваши ответы и строю персональную карту…"}]);
     const ctx=hist.filter(h=>h.content).map(h=>(h.role==="user"?"Пользователь: ":"AI: ")+h.content).join("\n");
     try{
       const raw=await callAI([{role:"user",content:"Интервью:\n"+ctx+"\n\nСоздай стратегическую карту."}],MAP_GEN_SYS,1500);
       const clean=raw.replace(/```json|```/g,"").trim();
-      const data=JSON.parse(clean);
+      const fallback=clean.match(/\{[\s\S]*\}/);
+      const data=JSON.parse(fallback?fallback[0]:clean);
       onDone({nodes:data.nodes||[],edges:data.edges||[],ctx});
     }catch{
-      setMsgs(m=>[...m,{role:"ai",text:t("ai_map_fallback","AI не удалось создать карту. Используем базовый шаблон — вы можете отредактировать его.")}]);
-      onDone({nodes:defaultNodes(),edges:[{id:"e1",source:"n1",target:"n2",type:"requires",label:""},{id:"e2",source:"n2",target:"n4",type:"requires",label:""},{id:"e3",source:"n3",target:"n4",type:"affects",label:""}],ctx});
+      setMapGenFailed(true);
+      setMsgs(m=>[...m,{role:"ai",text:t("ai_map_fallback","AI не удалось создать карту. Нажмите «Повторить» или «Использовать шаблон».")}]);
     }finally{setGenerating(false);}
+  }
+  function useFallbackTemplate(){
+    setMapGenFailed(false);
+    const ctxFromHist=history.filter(h=>h.content).map(h=>(h.role==="user"?"Пользователь: ":"AI: ")+h.content).join("\n");
+    onDone({nodes:defaultNodes(),edges:defaultEdges,ctx:ctxFromHist||""});
   }
   const progress=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative"}}>
       <style>{CSS}</style>
-      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 60% 40% at 50% 0%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 60% 40% at 50% 0%,var(--accent-glow) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",position:"relative",zIndex:10}}>
         <button onClick={onBack} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>
         <div style={{flex:1}}>
           <div style={{fontSize:13,fontWeight:700,color:"var(--text)",marginBottom:4}}>AI-интервью · {qCount}/{MAX_Q} вопросов</div>
           <div style={{height:4,borderRadius:2,background:"var(--surface2)",overflow:"hidden"}}>
-            <div style={{height:"100%",width:progress+"%",background:"linear-gradient(90deg,#6366f1,#8b5cf6)",borderRadius:2,transition:"width .4s ease"}}/>
+            <div style={{height:"100%",width:progress+"%",background:"var(--gradient-accent)",borderRadius:2,transition:"width .4s ease"}}/>
           </div>
         </div>
       </div>
       <div style={{flex:1,overflowY:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:12,maxWidth:720,margin:"0 auto",width:"100%"}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10}}>
-            {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
-            <div style={{maxWidth:"80%",padding:"11px 15px",borderRadius:m.role==="user"?"14px 14px 4px 14px":"4px 14px 14px 14px",background:m.role==="user"?"rgba(99,102,241,.18)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(99,102,241,.3)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>
+            {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
+            <div style={{maxWidth:"80%",padding:"11px 15px",borderRadius:m.role==="user"?"14px 14px 4px 14px":"4px 14px 14px 14px",background:m.role==="user"?"var(--accent-soft)":"var(--surface)",border:`1px solid ${m.role==="user"?"var(--accent-1)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>
               {m.text}
             </div>
           </div>
         ))}
         {(loading||generating)&&(
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
-            <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div>
+            <div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div>
             <div style={{display:"flex",gap:5,padding:"11px 15px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"4px 14px 14px 14px"}}>
-              {[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"#6366f1",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}
+              {[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}
             </div>
           </div>
         )}
         <div ref={endRef}/>
       </div>
-      {!generating&&(
+      {mapGenFailed&&(
+        <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,maxWidth:720,margin:"0 auto",width:"100%",flexWrap:"wrap"}}>
+          <button onClick={()=>{setMapGenFailed(false);buildMap(history);}} style={{padding:"10px 18px",borderRadius:10,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>
+          <button onClick={useFallbackTemplate} style={{padding:"10px 18px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("use_template","Использовать шаблон")}</button>
+        </div>
+      )}
+      {!generating&&!mapGenFailed&&(
         <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,maxWidth:720,margin:"0 auto",width:"100%"}}>
-          <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}
+          <input ref={inputRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}}
             placeholder={qCount>=MAX_Q?"Нажмите Enter для генерации карты…":"Ваш ответ…"}
             style={{flex:1,padding:"11px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}
             disabled={loading}/>
           <button onClick={submit} disabled={!inp.trim()||loading}
-            style={{padding:"11px 22px",borderRadius:12,border:"none",background:inp.trim()&&!loading?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface)",color:inp.trim()&&!loading?"#fff":"var(--text4)",fontSize:14,fontWeight:700,cursor:inp.trim()&&!loading?"pointer":"not-allowed",transition:"all .15s"}}>
+            style={{padding:"11px 22px",borderRadius:12,border:"none",background:inp.trim()&&!loading?"var(--gradient-accent)":"var(--surface)",color:inp.trim()&&!loading?"var(--accent-on-bg)":"var(--text4)",fontSize:14,fontWeight:700,cursor:inp.trim()&&!loading?"pointer":"not-allowed",transition:"all .15s"}}>
             {qCount>=MAX_Q?"Создать карту ✦":"Ответить →"}
           </button>
         </div>
@@ -2960,13 +3086,13 @@ function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme}){
         {edges.map(e=>{
           const s2=nodes.find(n=>n.id===e.source),t2=nodes.find(n=>n.id===e.target);
           if(!s2||!t2)return null;
-          return <line key={e.id} x1={tx(s2)+12} y1={ty(s2)+7} x2={tx(t2)+12} y2={ty(t2)+7} stroke="rgba(99,102,241,.35)" strokeWidth={1}/>;
+          return <line key={e.id} x1={tx(s2)+12} y1={ty(s2)+7} x2={tx(t2)+12} y2={ty(t2)+7} stroke="var(--accent-1)" strokeWidth={1} opacity={0.35}/>;
         })}
         {nodes.map(n=>{
           const st=STATUS[n.status];
-          return <rect key={n.id} x={tx(n)} y={ty(n)} width={24} height={14} rx={3} fill={st?st.c+"33":"#6366f133"} stroke={st?st.c:"#6366f1"} strokeWidth={.8}/>;
+          return <rect key={n.id} x={tx(n)} y={ty(n)} width={24} height={14} rx={3} fill={st?st.c+"33":"var(--accent-soft)"} stroke={st?st.c:"var(--accent-1)"} strokeWidth={.8}/>;
         })}
-        <rect x={Math.max(0,vpX)} y={Math.max(0,vpY)} width={Math.min(vpW,W)} height={Math.min(vpH,H)} fill="rgba(99,102,241,.06)" stroke="#6366f1" strokeWidth={1} strokeDasharray="3,2"/>
+        <rect x={Math.max(0,vpX)} y={Math.max(0,vpY)} width={Math.min(vpW,W)} height={Math.min(vpH,H)} fill="var(--accent-grid)" stroke="var(--accent-1)" strokeWidth={1} strokeDasharray="3,2"/>
       </svg>
     </div>
   );
@@ -2978,6 +3104,18 @@ function StatsPopup({nodes,edges,onClose}){
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const total=nodes.length;
+  if(total===0){
+    return(
+      <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(10px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+        <div style={{width:"min(96vw,420px)",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 50px 120px rgba(0,0,0,.7)",padding:"32px 28px",animation:"scaleIn .22s cubic-bezier(.34,1.56,.64,1)",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:16}}>📊</div>
+          <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:8}}>{t("stats_title","Статистика")}</div>
+          <div style={{fontSize:14,color:"var(--text4)",lineHeight:1.6}}>{t("stats_empty","Добавьте шаги на карту, чтобы увидеть аналитику.")}</div>
+          <button onClick={onClose} style={{marginTop:20,padding:"10px 24px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("close","Закрыть")}</button>
+        </div>
+      </div>
+    );
+  }
   const done=nodes.filter(n=>n.status==="completed").length;
   const active=nodes.filter(n=>n.status==="active").length;
   const blocked=nodes.filter(n=>n.status==="blocked").length;
@@ -3049,10 +3187,10 @@ function StatsPopup({nodes,edges,onClose}){
         <div style={{marginBottom:16}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
             <span style={{fontSize:13,color:"var(--text3)",fontWeight:600}}>{t("avg_prog","Средний прогресс")}</span>
-            <span style={{fontSize:13,fontWeight:900,color:"#6366f1"}}>{avgProg}%</span>
+            <span style={{fontSize:13,fontWeight:900,color:"var(--accent-1)"}}>{avgProg}%</span>
           </div>
           <div style={{height:10,borderRadius:5,background:"var(--surface2)",overflow:"hidden",position:"relative"}}>
-            <div style={{position:"absolute",inset:0,height:"100%",width:avgProg+"%",background:"linear-gradient(90deg,#6366f1,#8b5cf6)",borderRadius:5,transition:"width .7s cubic-bezier(.34,1.56,.64,1)"}}/>
+            <div style={{position:"absolute",inset:0,height:"100%",width:avgProg+"%",background:"var(--gradient-accent)",borderRadius:5,transition:"width .7s cubic-bezier(.34,1.56,.64,1)"}}/>
           </div>
         </div>
         {/* Status breakdown */}
@@ -3091,8 +3229,8 @@ function StatsPopup({nodes,edges,onClose}){
 }
 
 // ── RichEditorPanel ──
-function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect}){
-  const{t}=useLang();
+function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect,onError,onNotify}){
+  const{t,lang}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const ETYPE=getETYPE(t);
@@ -3108,21 +3246,26 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   async function aiRephrase(){
     if(aiRephrLoading)return;
     setAiRephrLoading(true);
+    const nodeEdges=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id);
+    const connStr=nodeEdges.length?nodeEdges.map(e=>{const s=allNodes.find(n=>n.id===(e.source||e.from)),t=allNodes.find(n=>n.id===(e.target||e.to));return `${s?.title||""} ${e.type||"→"} ${t?.title||""}`;}).join("; "):"нет";
     try{
-      const raw=await callAI([{role:"user",content:`Перефразируй шаг стратегической карты — сделай название конкретным и actionable.
-Название: ${node.title||""}
+      const raw=await callAI([{role:"user",content:`Перефразируй шаг стратегической карты. Сделай название КОНКРЕТНЫМ ДЕЙСТВИЕМ (глагол+объект).
+Текущее: ${node.title||""}
 Причина: ${node.reason||"нет"}
 Метрика: ${node.metric||"нет"}
 Контекст: ${ctx||"стартап"}
-Верни ТОЛЬКО JSON: {"title":"...","reason":"...","metric":"..."}`}]);
+Связи: ${connStr}
+
+Правила: title — действие (напр. "Провести 15 интервью с ЦА"), reason — зачем, metric — измеримый результат. Учитывай связи и отрасль. Формулировка — actionable, вписывается в логику карты.
+Верни ТОЛЬКО JSON: {"title":"...","reason":"...","metric":"..."}`}],"Ты редактор стратегических карт. Глубоко понимай контекст. Делай формулировки actionable, конкретные. Учитывай связи, отрасль, этап бизнеса. Сохраняй смысл, улучшай ясность.",400);
       let p;
       try{p=JSON.parse(raw.replace(/```json|```/g,"").trim());}
       catch{const m=raw.match(/\{[\s\S]*\}/);p=m?JSON.parse(m[0]):null;}
       if(p?.title){
         const hEntry={id:uid(),type:"ai_rephrase",at:Date.now(),by:"AI ✦",before:{title:node.title},after:{title:p.title}};
         onUpdate({...p,history:[...history,hEntry]});
-      }
-    }catch{}
+      }else{onError?.(t("ai_rephrase_no_result","AI не смог перефразировать. Попробуйте ещё раз."));}
+    }catch(e:any){onError?.(e?.message||t("ai_rephrase_error","Ошибка AI. Проверьте сеть и ключ API."));}
     setAiRephrLoading(false);
   }
 
@@ -3138,9 +3281,11 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
       setNewComment("");
       setAiCommentLoading(true);
       try{
-        const answer=await callAI([{role:"user",content:`Вопрос по узлу "${node.title||""}": ${q}\nКонтекст: ${ctx||"стартап"}. Ответь кратко, 2–3 предложения.`}]);
+        const nodeEdges=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id);
+        const connStr=nodeEdges.length?nodeEdges.map(e=>{const s=allNodes.find(n=>n.id===(e.source||e.from)),t=allNodes.find(n=>n.id===(e.target||e.to));return `${s?.title||""} ${e.type||"→"} ${t?.title||""}`;}).join("; "):"нет";
+        const answer=await callAI([{role:"user",content:`Вопрос по шагу "${node.title||""}" (причина: ${node.reason||"-"}, метрика: ${node.metric||"-"}): ${q}\nКонтекст: ${ctx||"стартап"}. Связи: ${connStr}\nОтветь кратко, 2–3 предложения. Дай КОНКРЕТНЫЙ совет — что сделать, зачем, как измерить. Учитывай связи, отрасль. Читай между строк — что пользователь подразумевает.`}],"Ты AI-советник. Глубоко понимай контекст. Отвечай конкретно, actionable. Учитывай связи, отрасль. Читай между строк. Формат: совет → действие → метрика (если уместно).",300);
         onUpdate({comments:[...base,{...aiPlaceholder,text:answer}]});
-      }catch{onUpdate({comments:[...base,{...aiPlaceholder,text:t("ai_comment_error","Ошибка AI. Попробуйте ещё раз.")}]});}
+      }catch(e:any){onUpdate({comments:[...base,{...aiPlaceholder,text:t("ai_comment_error","Ошибка AI. Попробуйте ещё раз.")}]});onError?.(e?.message||t("ai_comment_error","Ошибка AI. Попробуйте ещё раз."));}
       setAiCommentLoading(false);
     }else{
       const c={id:uid(),author:userName,text,at:Date.now()};
@@ -3152,50 +3297,56 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   async function doAutoConnect(){
     if(autoConnLoading||allNodes.length<2)return;
     setAutoConnLoading(true);
-    const others=allNodes.filter(n=>n.id!==node.id);
-    const prompt=`Узел: "${node.title}". Другие узлы: ${others.map(n=>`"${n.id}:${n.title}"`).join(", ")}.
-Верни JSON массив связей для этого узла: [{"from":"${node.id}","to":"id2","type":"requires|affects|blocks|follows"}]
-Максимум 3 связи, только логичные. ТОЛЬКО JSON.`;
+    const others=allNodes.filter(n=>n.id!==node.id).map(n=>`${n.id}:${n.title}${n.reason?" ("+n.reason+")":""}`);
+    const existingForNode=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id);
+    const prompt=`Узел: "${node.title}" (${node.reason||"-"}, метрика: ${node.metric||"-"}).
+Контекст: ${ctx||"стартап"}
+
+Другие узлы (id:title): ${others.join("; ")}
+
+Уже есть связей у этого узла: ${existingForNode.length}. ${existingForNode.length?existingForNode.map(e=>`${e.source||e.from}→${e.target||e.to}:${e.type}`).join(", "):""}
+
+Связи: [{"from":"${node.id}","to":"id_другого_узла","type":"requires|affects|blocks|follows"}]. Максимум 3, только логичные. requires: A нужен для B. affects: A влияет. blocks: A блокирует. follows: B после A. Используй ID из списка "Другие узлы".`;
     try{
-      const raw=await callAI([{role:"user",content:prompt}],"Верни только JSON массив.",400);
-      const arr=JSON.parse(raw.replace(/```json|```/g,"").trim());
+      const raw=await callAI([{role:"user",content:prompt}],"Ты стратег. Учитывай отрасль и бизнес-контекст. Определи логические зависимости. Верни ТОЛЬКО JSON массив [{from,to,type}]. Используй ID узлов из запроса.",400);
+      const clean=raw.replace(/```json|```/g,"").trim();
+      let arr;
+      try{const p=JSON.parse(clean);arr=Array.isArray(p)?p:(p.connections||p.edges||[]);}catch{arr=[];}
       const valid=arr.filter(e=>e.from&&e.to&&e.from!==e.to&&allNodes.find(n=>n.id===e.to||n.id===e.from));
       const toAdd=valid.filter(ne=>!allEdges.find(ex=>(ex.source===ne.from&&ex.target===ne.to)||(ex.from===ne.from&&ex.to===ne.to)));
       if(toAdd.length>0){
-        // Push edges up via callback - we signal it via onConnect with special flag
-        toAdd.forEach(e=>{
-          onConnect&&onConnect({source:e.from,target:e.to,type:e.type||"requires"});
-        });
-      }
-    }catch{}
+        toAdd.forEach(e=>{onConnect&&onConnect({source:e.from,target:e.to,type:e.type||"requires"});});
+        onNotify?.(t("links_added","🔗 Добавлено: {n} связей").replace("{n}",String(toAdd.length)),"success");
+      }else{onNotify?.(t("links_optimal","Связи уже оптимальны"),"info");}
+    }catch(e:any){onError?.(e?.message||t("ai_autoconnect_error","Ошибка AI. Попробуйте ещё раз."));}
     setAutoConnLoading(false);
   }
 
-  const iS={width:"100%",padding:"7px 10px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",resize:"none"};
+  const iS={width:"100%",padding:"9px 12px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",resize:"none",transition:"border-color .2s"};
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
   const tabs=[["info","◈ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
 
   return(
-    <div style={{position:"absolute",right:0,top:0,bottom:0,width:290,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-8px 0 30px rgba(0,0,0,.3)",animation:"slideRight .2s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"11px 12px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
-        <div style={{width:8,height:8,borderRadius:2,background:STATUS[node.status]?.c||"#6366f1",flexShrink:0}}/>
-        <div style={{flex:1,fontSize:13,fontWeight:700,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
-        {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:24,height:24,borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>↗</button>}
-        <button onClick={onClose} style={{width:24,height:24,borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>×</button>
+    <div style={{position:"absolute",right:0,top:0,bottom:0,width:300,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-12px 0 40px rgba(0,0,0,.25)",animation:"slideRight .2s ease"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 14px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
+        <div style={{width:10,height:10,borderRadius:3,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
+        <div style={{flex:1,fontSize:14,fontWeight:700,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
+        {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"background .15s"}}>↗</button>}
+        <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"background .15s"}}>×</button>
       </div>
       <div style={{display:"flex",borderBottom:"1px solid var(--border)",flexShrink:0,overflowX:"auto"}}>
         {tabs.map(item=>{
           const k=item[0],lbl=item[1];
-          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"8px 4px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13.5,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?"2px solid #6366f1":"2px solid transparent",whiteSpace:"nowrap",minWidth:0}}>{lbl}</button>;
+          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"10px 6px",border:"none",background:tab===k?"var(--surface)":"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?"2px solid var(--accent-1)":"2px solid transparent",whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
         })}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"12px"}}>
+      <div style={{flex:1,overflowY:"auto",padding:"14px"}}>
         {tab==="info"&&(
           <div style={{display:"flex",flexDirection:"column",gap:9}}>
             <div>
               <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 Название
-                {!readOnly&&<button onClick={aiRephrase} disabled={aiRephrLoading} style={{fontSize:12.5,padding:"1px 6px",borderRadius:4,border:"1px solid var(--border)",background:"var(--surface)",color:aiRephrLoading?"var(--text4)":"#818cf8",cursor:aiRephrLoading?"wait":"pointer"}}>{aiRephrLoading?"✦…":"✨ AI"}</button>}
+                {!readOnly&&<button onClick={aiRephrase} disabled={aiRephrLoading} style={{fontSize:12.5,padding:"1px 6px",borderRadius:4,border:"1px solid var(--border)",background:"var(--surface)",color:aiRephrLoading?"var(--text4)":"var(--accent-2)",cursor:aiRephrLoading?"wait":"pointer"}}>{aiRephrLoading?"✦…":"✨ AI"}</button>}
               </div>
               <textarea value={node.title||""} onChange={e=>!readOnly&&onUpdate({title:e.target.value})} rows={2} style={iS} readOnly={readOnly}/>
             </div>
@@ -3231,9 +3382,9 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             </div>
             <div>
               <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4,display:"flex",justifyContent:"space-between"}}>
-                Прогресс <span style={{color:"#6366f1",fontWeight:800}}>{node.progress||0}%</span>
+                Прогресс <span style={{color:"var(--accent-1)",fontWeight:800}}>{node.progress||0}%</span>
               </div>
-              <input type="range" min={0} max={100} value={node.progress||0} onChange={e=>!readOnly&&onUpdate({progress:+e.target.value})} style={{width:"100%",accentColor:"#6366f1"}} disabled={readOnly}/>
+              <input type="range" min={0} max={100} value={node.progress||0} onChange={e=>!readOnly&&onUpdate({progress:+e.target.value})} style={{width:"100%",accentColor:"var(--accent-1)"}} disabled={readOnly}/>
             </div>
             <div>
               <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3}}>{t("node_deadline","Дедлайн")}</div>
@@ -3255,8 +3406,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             </div>
             {!readOnly&&(
               <div style={{display:"flex",gap:6,paddingTop:4}}>
-                {onConnect&&<button onClick={()=>onConnect({startNode:node})} style={{flex:1,padding:"7px",borderRadius:8,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.06)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("link_btn","⇒ Связать")}</button>}
-                <button onClick={doAutoConnect} disabled={autoConnLoading} style={{flex:1,padding:"7px",borderRadius:8,border:"1px solid rgba(99,102,241,.25)",background:"rgba(99,102,241,.06)",color:autoConnLoading?"var(--text4)":"#818cf8",cursor:autoConnLoading?"wait":"pointer",fontSize:13,fontWeight:600}}>{autoConnLoading?"✦…":"✦ AI-связи"}</button>
+                {onConnect&&<button onClick={()=>onConnect({startNode:node})} style={{flex:1,padding:"7px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("link_btn","⇒ Связать")}</button>}
+                <button onClick={doAutoConnect} disabled={autoConnLoading} style={{flex:1,padding:"7px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:autoConnLoading?"var(--text4)":"var(--accent-2)",cursor:autoConnLoading?"wait":"pointer",fontSize:13,fontWeight:600}}>{autoConnLoading?"✦…":"✦ AI-связи"}</button>
                 <button onClick={()=>onDelete(node.id)} style={{padding:"7px 9px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13}}>🗑</button>
               </div>
             )}
@@ -3266,21 +3417,21 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {comments.length===0&&<div style={{padding:"20px",textAlign:"center",color:"var(--text5)",fontSize:13,border:"1px dashed var(--border2)",borderRadius:8}}>{t("no_comments2","Нет комментариев.")}<br/><span style={{fontSize:13}}>{t("use_ai_comment","Используйте @AI чтобы задать вопрос AI.")}</span></div>}
             {comments.map(c=>(
-              <div key={c.id} style={{padding:"9px 11px",borderRadius:9,background:c.isAI?"rgba(99,102,241,.06)":"var(--surface)",border:`1px solid ${c.isAI?"rgba(99,102,241,.2)":"var(--border)"}`,position:"relative"}}>
+              <div key={c.id} style={{padding:"9px 11px",borderRadius:9,background:c.isAI?"var(--accent-soft)":"var(--surface)",border:`1px solid ${c.isAI?"var(--accent-1)":"var(--border)"}`,position:"relative"}}>
                 <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
-                  <div style={{width:18,height:18,borderRadius:"50%",background:c.isAI?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:c.isAI?"#fff":"var(--text4)",fontWeight:700,flexShrink:0}}>{c.isAI?"✦":(c.author||"?")[0].toUpperCase()}</div>
-                  <div style={{fontSize:13.5,fontWeight:700,color:c.isAI?"#818cf8":"var(--text3)"}}>{c.author}</div>
+                  <div style={{width:18,height:18,borderRadius:"50%",background:c.isAI?"var(--gradient-accent)":"var(--surface2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:c.isAI?"var(--accent-on-bg)":"var(--text4)",fontWeight:700,flexShrink:0}}>{c.isAI?"✦":(c.author||"?")[0].toUpperCase()}</div>
+                  <div style={{fontSize:13.5,fontWeight:700,color:c.isAI?"var(--accent-2)":"var(--text3)"}}>{c.author}</div>
                   <div style={{fontSize:12,color:"var(--text5)",marginLeft:"auto"}}>{new Date(c.at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</div>
                   {!readOnly&&!c.isAI&&<button onClick={()=>onUpdate({comments:comments.filter(x=>x.id!==c.id)})} style={{width:16,height:16,borderRadius:4,border:"none",background:"transparent",color:"var(--text5)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
                 </div>
                 <div style={{fontSize:13,color:"var(--text2)",lineHeight:1.55,whiteSpace:"pre-wrap"}}>{c.text}</div>
-                {c.text==="…"&&aiCommentLoading&&<div style={{display:"flex",gap:3,marginTop:4}}>{[0,1,2].map(i=><div key={i} style={{width:4,height:4,borderRadius:"50%",background:"#6366f1",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>}
+                {c.text==="…"&&aiCommentLoading&&<div style={{display:"flex",gap:3,marginTop:4}}>{[0,1,2].map(i=><div key={i} style={{width:4,height:4,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>}
               </div>
             ))}
             {!readOnly&&(
               <div style={{marginTop:4,borderTop:"1px solid var(--border)",paddingTop:8,display:"flex",flexDirection:"column",gap:6}}>
                 <textarea value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder="Комментарий… или @AI вопрос (Ctrl+Enter)" rows={2} onKeyDown={e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();addComment();}}} style={{...iS,lineHeight:1.5}}/>
-                <button onClick={addComment} disabled={!newComment.trim()||aiCommentLoading} style={{padding:"7px",borderRadius:8,border:"none",background:newComment.trim()&&!aiCommentLoading?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface2)",color:newComment.trim()&&!aiCommentLoading?"#fff":"var(--text4)",fontSize:13,cursor:newComment.trim()&&!aiCommentLoading?"pointer":"not-allowed",fontWeight:600}}>{aiCommentLoading?"AI отвечает…":"Отправить"}</button>
+                <button onClick={addComment} disabled={!newComment.trim()||aiCommentLoading} style={{padding:"7px",borderRadius:8,border:"none",background:newComment.trim()&&!aiCommentLoading?"var(--gradient-accent)":"var(--surface2)",color:newComment.trim()&&!aiCommentLoading?"var(--accent-on-bg)":"var(--text4)",fontSize:13,cursor:newComment.trim()&&!aiCommentLoading?"pointer":"not-allowed",fontWeight:600}}>{aiCommentLoading?"AI отвечает…":"Отправить"}</button>
               </div>
             )}
           </div>
@@ -3328,7 +3479,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             {[...history].reverse().map(h=>(
               <div key={h.id} style={{padding:"9px 11px",borderRadius:9,background:"var(--surface)",border:"1px solid var(--border)"}}>
                 <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
-                  <span style={{fontSize:13.5,fontWeight:700,color:h.type==="ai_rephrase"?"#818cf8":"var(--text3)"}}>{h.type==="ai_rephrase"?"✦ AI переформулировал":"✏️ Изменено"}</span>
+                  <span style={{fontSize:13.5,fontWeight:700,color:h.type==="ai_rephrase"?"var(--accent-2)":"var(--text3)"}}>{h.type==="ai_rephrase"?"✦ AI переформулировал":"✏️ Изменено"}</span>
                   <span style={{fontSize:12,color:"var(--text5)",marginLeft:"auto"}}>{new Date(h.at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>
                 </div>
                 <div style={{fontSize:13,color:"var(--text4)",marginBottom:3}}>Автор: {h.by}</div>
@@ -3344,43 +3495,52 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
 }
 
 // ── AiPanel ──
-function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal}){
+function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal,projectName="",mapName="",userName="",msgs:msgsProp,onMsgsChange,onError}){
   const{t}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const tierCfg=AI_TIER[tier]||AI_TIER.free;
-  const[msgs,setMsgs]=useState([]);
+  const meta={projectName,mapName,userName};
+  const[localMsgs,setLocalMsgs]=useState([]);
+  const isControlled=onMsgsChange&&msgsProp;
+  const msgs=isControlled?msgsProp:localMsgs;
+  const setMsgs=isControlled?onMsgsChange:setLocalMsgs;
   const[inp,setInp]=useState("");
   const[load,setLoad]=useState(false);
   const endRef=useRef(null);
+  const inpRef=useRef<HTMLInputElement>(null);
+  const initRef=useRef(false);
+
+  // Только при первом открытии — приветствие, если чат пуст. Чат НЕ очищается при смене tier или закрытии панели.
+  useEffect(()=>{
+    if(msgs.length>0)return;
+    const greetings={
+      free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг. Быстрые подсказки ниже.",
+      starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",
+      pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",
+      team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",
+      enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves.",
+    };
+    if(!initRef.current){initRef.current=true;setMsgs([{role:"ai",text:greetings[tier]||greetings.free}]);}
+  },[tier]);
 
   // Inject external messages (e.g. from autoConnect)
   useEffect(()=>{
     if(externalMsgs&&externalMsgs.length>0){
-      setMsgs(m=>[...m,...externalMsgs.map(em=>({role:"ai",text:em.content}))]);
+      setMsgs((m:any[])=>[...m,...externalMsgs.map((em:any)=>({role:"ai",text:em.content}))]);
       onClearExternal&&onClearExternal();
     }
   },[externalMsgs]);
 
-  useEffect(()=>{
-    const greetings={
-      free:"Привет! Я базовый AI-советник. Могу ответить на простые вопросы по стратегии.",
-      starter:"Привет! Я ваш стратегический помощник. Анализирую карту и помогаю с первыми шагами.",
-      pro:"Привет! Я AI-советник (Pro). Анализирую карту системно: SWOT, OKR, риски, приоритеты.",
-      team:"Добрый день. Я ваш стратегический партнёр (Team). Готов провести глубокий анализ на уровне McKinsey.",
-      enterprise:"Добрый день. Я — коллегиум из четырёх экспертов (Enterprise). Провожу стратегический, финансовый, инвестиционный и операционный анализ одновременно.",
-    };
-    setMsgs([{role:"ai",text:greetings[tier]||greetings.free}]);
-  },[tier]);
-
   useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"});},[msgs]);
+  useEffect(()=>{if(!load)inpRef.current?.focus();},[load]);
 
   const quickByTier={
-    free:["Что добавить?","Главные риски?","Следующий шаг?"],
-    starter:["Проанализируй карту","Найди риски","Предложи шаги"],
-    pro:["Полный анализ","Найди узкие места","Риски и контрмеры","Приоритизируй"],
-    team:["Стратегический аудит","Конкурентный анализ","Unit economics","Точки масштабирования","Сценарии роста"],
-    enterprise:["Executive audit","BCG анализ","OKR для карты","Blue Ocean","Due diligence угол"],
+    free:["Что добавить?","Главные риски?","Следующий шаг?","Не знаю с чего начать","Застрял — что делать?","Что не так?"],
+    starter:["Проанализируй карту","Найди риски","Предложи шаги","Маркетинг-совет","Продажи-совет","С чего начать?","Что не так?","Что упускаю?"],
+    pro:["Полный анализ","Узкие места","Риски и контрмеры","Приоритизируй","CAC/LTV оптимизация","Sales pipeline","С чего начать?","Что я упускаю?","Что не так?"],
+    team:["Стратегический аудит","Unit economics","GTM рекомендации","Конкурентный анализ","Точки масштабирования","Blue Ocean","С чего начать?","Non-obvious совет","Strategic blind spots"],
+    enterprise:["Executive audit","BCG анализ","OKR для карты","Blue Ocean","Due diligence","CMO/CRO угол","С чего начать?","Strategic blind spots","Non-obvious move"],
   };
   const quick=quickByTier[tier]||quickByTier.free;
 
@@ -3391,58 +3551,73 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     const nM=[...msgs,{role:"user",text:q}];
     setMsgs(nM);
     setLoad(true);
-    const mapSummary=nodes.map(n=>`${n.title}(${STATUS[n.status]?.label||n.status},${n.progress||0}%,${PRIORITY[n.priority]?.label||n.priority})`).join("; ");
-    const sys=tierCfg.system(ctx||"",mapSummary);
+    const mapSummary=nodes.map(n=>`${n.title}|${n.reason||"-"}|${n.metric||"-"}|${STATUS[n.status]?.label||n.status}|${n.progress||0}%|${PRIORITY[n.priority]?.label||n.priority}${n.deadline?"|📅"+n.deadline:""}${n.tags?.length?"|"+n.tags.join(","):""}`).join("\n");
+    const edgesSummary=edges.length?edges.map(e=>{const s=nodes.find(n=>n.id===e.source),t=nodes.find(n=>n.id===e.target);return`${s?.title||e.source} → ${t?.title||e.target}: ${e.type||"requires"}`;}).join("\n"):"нет";
+    const done=nodes.filter(n=>n.status==="completed").length;
+    const blocked=nodes.filter(n=>n.status==="blocked").length;
+    const critical=nodes.filter(n=>n.priority==="critical"&&n.status!=="completed").length;
+    const overdue=nodes.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
+    const health=nodes.length?Math.round((done/nodes.length)*100):0;
+    const stats=`Health: ${health}% | Выполнено: ${done} | Заблокировано: ${blocked} | Критичных: ${critical} | Просрочено: ${overdue}`;
+    const fullCtx={mapSummary,edgesSummary,stats,nodes,edges};
+    const sys=tierCfg.system(ctx||"",mapSummary,meta,fullCtx);
     try{
-      const history=nM.slice(-10).map(m=>({role:m.role==="ai"?"assistant":"user",content:m.text}));
-      const reply=await callAI(history,sys,1200);
+      const maxHist=tier==="enterprise"?24:tier==="team"?20:16;
+      const history=nM.slice(-maxHist).map(m=>({role:m.role==="ai"?"assistant":"user",content:m.text}));
+      const reply=await callAI(history,sys,tier==="enterprise"||tier==="team"?1500:1200);
       // Parse <ADD> tags for new nodes
       const addMatch=reply.match(/<ADD>([\s\S]*?)<\/ADD>/);
       let displayReply=reply.replace(/<ADD>[\s\S]*?<\/ADD>/g,"").trim();
       setMsgs(m=>[...m,{role:"ai",text:displayReply}]);
       if(addMatch&&onAddNode){
         try{
-          const nodeData=JSON.parse(addMatch[1]);
-          onAddNode(nodeData);
-          setMsgs(m=>[...m,{role:"sys",text:"✅ Шаг добавлен на карту: "+nodeData.title}]);
-        }catch{}
+          const raw=addMatch[1].replace(/[\r\n]/g," ").trim();
+          const fallback=raw.match(/\{[\s\S]*\}/);
+          const nodeData=JSON.parse(fallback?fallback[0]:raw);
+          const n={title:nodeData.title||"Новый шаг",reason:nodeData.reason||"",metric:nodeData.metric||"",status:nodeData.status||"planning",priority:nodeData.priority||"medium",progress:nodeData.progress??0,tags:Array.isArray(nodeData.tags)?nodeData.tags:[],color:nodeData.color||""};
+          onAddNode(n);
+          setMsgs(m=>[...m,{role:"sys",text:"✅ Шаг добавлен на карту: "+n.title}]);
+        }catch{setMsgs(m=>[...m,{role:"sys",text:"⚠️ AI предложил шаг, но формат не распознан. Добавьте вручную."}]);}
       }
     }catch(e:any){
       const msg=e?.message||"Ошибка подключения. Проверьте сеть.";
       setMsgs(m=>[...m,{role:"ai",text:msg}]);
+      onError?.(msg);
     }
     setLoad(false);
+    inpRef.current?.focus();
   }
 
   return(
-    <div style={{position:"absolute",right:0,top:0,bottom:0,width:320,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-8px 0 30px rgba(0,0,0,.35)",animation:"slideRight .2s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:9,padding:"11px 13px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
-        <div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div>
+    <div style={{position:"absolute",right:0,top:0,bottom:0,width:340,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-12px 0 40px rgba(0,0,0,.25)",animation:"slideRight .2s ease"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 16px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
+        <div style={{width:32,height:32,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,boxShadow:"0 2px 12px var(--accent-glow)"}}>✦</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)"}}>{t("ai_consultant","AI Советник")}</div>
-          <div style={{fontSize:13,color:tierCfg.color||"#10b981",fontWeight:600}}>{tierCfg.badge} {tierCfg.label}</div>
+          <div style={{fontSize:14,fontWeight:800,color:"var(--text)"}}>{t("ai_consultant","AI Советник")}</div>
+          <div style={{fontSize:12,color:tierCfg.color||"#10b981",fontWeight:600}}>{tierCfg.badge} {tierCfg.label}</div>
         </div>
-        <button onClick={()=>setMsgs([{role:"ai",text:"Чат очищен."}])} style={{padding:"3px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>✕</button>
-        <button onClick={onClose} style={{width:26,height:26,borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>×</button>
+        <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"6px 10px",borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"background .15s"}}>✕</button>
+        <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"background .15s"}}>×</button>
       </div>
-      <div style={{padding:"8px 10px",borderBottom:"1px solid var(--border)",display:"flex",gap:5,flexWrap:"wrap",flexShrink:0}}>
+      <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:6,flexWrap:"wrap",flexShrink:0}}>
         {quick.map(q=>(
-          <button key={q} onClick={()=>send(q)} style={{padding:"4px 9px",borderRadius:16,border:"1px solid rgba(99,102,241,.25)",background:"rgba(99,102,241,.06)",color:"#818cf8",cursor:"pointer",fontSize:13.5,fontWeight:600}}>{q}</button>
+          <button key={q} onClick={()=>send(q)} style={{padding:"6px 12px",borderRadius:20,border:"none",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:600,transition:"all .15s"}}
+            onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--accent-soft)";}}>{q}</button>
         ))}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"12px 11px",display:"flex",flexDirection:"column",gap:9}}>
+      <div style={{flex:1,overflowY:"auto",padding:"14px 12px",display:"flex",flexDirection:"column",gap:12}}>
         {msgs.map((m,i)=>(
-          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:7,alignItems:"flex-start"}}>
-            {m.role==="ai"&&<div style={{width:20,height:20,borderRadius:6,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,marginTop:2}}>✦</div>}
-            <div style={{maxWidth:"88%",padding:"8px 11px",borderRadius:m.role==="user"?"11px 11px 3px 11px":m.role==="sys"?"8px":"3px 11px 11px 11px",background:m.role==="user"?"rgba(99,102,241,.15)":m.role==="sys"?"rgba(16,185,129,.08)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(99,102,241,.25)":m.role==="sys"?"rgba(16,185,129,.2)":"var(--border)"}`,fontSize:13,lineHeight:1.65,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap"}}>{m.text}</div>
+          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start"}}>
+            {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
+            <div style={{maxWidth:"85%",padding:"10px 14px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--accent-soft)":m.role==="sys"?"rgba(16,185,129,.1)":"var(--surface)",border:"none",fontSize:13.5,lineHeight:1.6,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 8px var(--accent-glow)":m.role==="sys"?"none":"0 1px 4px rgba(0,0,0,.08)"}}>{m.text}</div>
           </div>
         ))}
-        {load&&<div style={{display:"flex",gap:7,alignItems:"center"}}><div style={{width:20,height:20,borderRadius:6,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>✦</div><div style={{display:"flex",gap:4,padding:"8px 11px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 11px 11px 11px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"#6366f1",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
+        {load&&<div style={{display:"flex",gap:8,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",borderRadius:"4px 14px 14px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
-      <div style={{padding:"9px 11px",borderTop:"1px solid var(--border)",display:"flex",gap:7,flexShrink:0}}>
-        <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={t("ask_placeholder","Спросите о стратегии…")} style={{flex:1,padding:"8px 11px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:9,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}/>
-        <button onClick={()=>send()} disabled={!inp.trim()||load} style={{width:34,height:34,borderRadius:9,border:"none",background:inp.trim()&&!load?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface)",color:inp.trim()&&!load?"#fff":"var(--text4)",cursor:inp.trim()&&!load?"pointer":"not-allowed",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>↑</button>
+      <div style={{padding:"12px 14px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0,background:"var(--surface)"}}>
+        <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={t("ask_placeholder","Спросите о стратегии…")} style={{flex:1,padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"}}/>
+        <button onClick={()=>send()} disabled={!inp.trim()||load} style={{width:40,height:40,borderRadius:10,border:"none",background:inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:inp.trim()&&!load?"pointer":"not-allowed",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none",transition:"all .15s"}}>↑</button>
       </div>
     </div>
   );
@@ -3475,15 +3650,15 @@ function EdgeLine({edge,nodes,selected,onClick}){
   return(
     <g onClick={e=>{e.stopPropagation();onClick(edge);}}>
       <path d={d} fill="none" stroke="transparent" strokeWidth={12} style={{cursor:"pointer"}}/>
-      <path d={d} fill="none" stroke={selected?"#6366f1":et.c} strokeWidth={selected?2.5:1.5} strokeDasharray={et.d==="none"?"none":et.d} opacity={selected?1:.65} style={{transition:"stroke .15s,opacity .15s"}}/>
-      <polygon points="-5,-3 5,0 -5,3" fill={selected?"#6366f1":et.c} transform={`translate(${ep.x},${ep.y}) rotate(${ang})`} opacity={selected?1:.7}/>
+      <path d={d} fill="none" stroke={selected?"var(--accent-1)":et.c} strokeWidth={selected?2.5:1.5} strokeDasharray={et.d==="none"?"none":et.d} opacity={selected?1:.65} style={{transition:"stroke .15s,opacity .15s"}}/>
+      <polygon points="-5,-3 5,0 -5,3" fill={selected?"var(--accent-1)":et.c} transform={`translate(${ep.x},${ep.y}) rotate(${ang})`} opacity={selected?1:.7}/>
       {edge.label&&<text x={bmx} y={bmy-6} textAnchor="middle" fontSize={9.5} fill="var(--text3)" style={{pointerEvents:"none",userSelect:"none"}}>{edge.label}</text>}
     </g>
   );
 }
 
 // ── NodeCard ── (единая сетка 8px, выравнивание, поддержка светлой/тёмной темы)
-function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,theme}){
+function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,onContextMenu,theme}){
   const{t}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
@@ -3494,10 +3669,10 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,th
   const titleColor=selected?"var(--accent-1)":(isLight?"#0f172a":"#e2e8f0");
   const reasonColor=isLight?"#64748b":"#94a3b8";
   const statusColor=isLight?"#475569":"#94a3b8";
-  const metricColor=isLight?"#6366f1":"#818cf8";
+  const metricColor="var(--accent-1)";
   const progressTrack=isLight?"rgba(0,0,0,.08)":"rgba(255,255,255,.08)";
-  const tagBg=isLight?"rgba(99,102,241,.12)":"rgba(99,102,241,.15)";
-  const tagColor=isLight?"#4f46e5":"#a5b4fc";
+  const tagBg="var(--accent-soft)";
+  const tagColor="var(--accent-2)";
   const dateColor=isLight?"#64748b":"#94a3b8";
   const isOverdue=node.deadline&&new Date(node.deadline)<new Date()&&node.status!=="completed";
   const isConnSrc=connecting&&connectSource?.id===node.id;
@@ -3516,13 +3691,13 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,th
   const statusY=progressY+progressBarH+12;
   const tagsY=statusY+18;
   return(
-    <g className="node-card" transform={`translate(${node.x},${node.y})`} onClick={e=>{e.stopPropagation();onClick(node);}} onPointerDown={e=>onMouseDown(e,node)} style={{cursor:connecting?"crosshair":"grab"}}>
-      {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill={`rgba(99,102,241,${isLight?0.1:0.18})`} style={{filter:"blur(8px)"}}/>}
+    <g className="node-card" transform={`translate(${node.x},${node.y})`} onClick={e=>{e.stopPropagation();onClick(node,{shiftKey:e.shiftKey});}} onPointerDown={e=>onMouseDown(e,node)} onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContextMenu?.(e.clientX,e.clientY,node);}} style={{cursor:connecting?"crosshair":"grab"}}>
+      {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill="var(--accent-soft)" style={{filter:"blur(8px)"}}/>}
       <rect width={240} height={128} rx={12} fill={bg}
         stroke={selected?"var(--accent-1)":isConnSrc?"#10b981":isOverdue?"#ef4444":isLight?(node.color||"rgba(0,0,0,.12)"):(node.color||"rgba(255,255,255,.12)")}
         strokeWidth={selected||isConnSrc||isOverdue?2:1}
         filter={selected?"url(#glow)":"none"}/>
-      {selected&&<rect width={240} height={128} rx={12} fill="rgba(99,102,241,.04)"/>}
+      {selected&&<rect width={240} height={128} rx={12} fill="var(--accent-soft)"/>}
       <rect x={0} y={0} width={4} height={128} rx={2} fill={st.c}/>
       {/* Заголовок и приоритет — одна линия, выровнены по центру */}
       <rect x={156} y={9} width={70} height={14} rx={7} fill={`${pr.c}20`} stroke={`${pr.c}50`} strokeWidth={1}/>
@@ -3637,9 +3812,9 @@ function TrialBanner({user,onUpgrade}:{user:any,onUpgrade:()=>void}){
   if(trialEnd<=now)return null;
   const daysLeft=Math.ceil((trialEnd.getTime()-now.getTime())/(1000*60*60*24));
   return(
-    <div style={{background:"linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.15))",borderBottom:"1px solid rgba(99,102,241,.25)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13}}>
-      <span style={{color:"#818cf8",fontWeight:600}}>⚡ {t("trial_active","Пробный период активен")} — {daysLeft} {t("trial_days_left","дней осталось")}</span>
-      <button onClick={onUpgrade} style={{padding:"4px 14px",borderRadius:7,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>{t("upgrade","Улучшить →")}</button>
+    <div style={{background:"var(--accent-soft)",borderBottom:"1px solid var(--accent-1)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13}}>
+      <span style={{color:"var(--accent-2)",fontWeight:600}}>⚡ {t("trial_active","Пробный период активен")} — {daysLeft} {t("trial_days_left","дней осталось")}</span>
+      <button onClick={onUpgrade} style={{padding:"4px 14px",borderRadius:7,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:12,fontWeight:700,cursor:"pointer"}}>{t("upgrade","Улучшить →")}</button>
     </div>
   );
 }
@@ -3675,9 +3850,8 @@ function EmailVerifyBanner({user,onVerified}:{user:any,onVerified?:()=>void}){
 }
 
 // ── DeadlineReminders ── (показывается если есть шаги с дедлайном в ближайшие 3 дня)
-function DeadlineReminders({nodes,onGoToNode}:{nodes:any[],onGoToNode:(id:string)=>void}){
+function DeadlineReminders({nodes,onGoToNode,onDismiss}:{nodes:any[],onGoToNode:(id:string)=>void,onDismiss?:()=>void}){
   const{t}=useLang();
-  const[show,setShow]=useState(true);
   const now=new Date();
   const soon=nodes.filter(n=>{
     if(!n.deadline||n.status==="completed")return false;
@@ -3690,12 +3864,12 @@ function DeadlineReminders({nodes,onGoToNode}:{nodes:any[],onGoToNode:(id:string
     return new Date(n.deadline)<now;
   });
   const all=[...overdue,...soon];
-  if(!show||all.length===0)return null;
+  if(all.length===0)return null;
   return(
-    <div style={{position:"fixed",bottom:80,right:20,zIndex:350,width:280,background:"var(--surface)",border:"1px solid rgba(245,158,11,.35)",borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,.3)",overflow:"hidden"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid var(--border)",background:"rgba(245,158,11,.08)"}}>
-        <span style={{fontSize:13,fontWeight:700,color:"#f59e0b"}}>⏰ {t("deadline_reminder","Напоминания")}</span>
-        <button onClick={()=>setShow(false)} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:16}}>✕</button>
+    <div style={{position:"fixed",bottom:80,right:20,zIndex:350,width:280,background:"var(--surface)",border:`1px solid ${overdue.length?"rgba(239,68,68,.4)":"rgba(245,158,11,.35)"}`,borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,.3)",overflow:"hidden"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid var(--border)",background:overdue.length?"rgba(239,68,68,.08)":"rgba(245,158,11,.08)"}}>
+        <span style={{fontSize:13,fontWeight:700,color:overdue.length?"#ef4444":"#f59e0b"}}>⏰ {t("deadline_reminder","Напоминания")}{all.length>1?` · ${all.length}`:""}</span>
+        <button onClick={()=>onDismiss?.()} title={t("dismiss","Скрыть")} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:16}}>✕</button>
       </div>
       {all.slice(0,4).map(n=>{
         const d=new Date(n.deadline);
@@ -3750,7 +3924,7 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="d
                 <div style={{fontSize:11,color:"var(--text3)"}}>{new Date(v.created_at).toLocaleString()} · {v.user_email}</div>
                 <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}>{Array.isArray(v.nodes)?v.nodes.length:0} {t("steps_label","шагов")}</div>
               </div>
-              <button onClick={()=>setRestoreConfirm(v)} disabled={restoring===v.id} style={{padding:"7px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",opacity:restoring===v.id?.6:1}}>
+              <button onClick={()=>setRestoreConfirm(v)} disabled={restoring===v.id} style={{padding:"7px 14px",borderRadius:8,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:12,fontWeight:700,cursor:"pointer",opacity:restoring===v.id?0.6:1}}>
                 {restoring===v.id?"…":t("restore_version","Восстановить")}
               </button>
             </div>
@@ -3769,7 +3943,7 @@ function sanitize(str:string|undefined|null):string{
 }
 
 // ── WeeklyBriefingModal ──
-function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:any[],mapName:string,user:any,onClose:()=>void,theme?:string}){
+function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{nodes:any[],mapName:string,user:any,onClose:()=>void,theme?:string,onError?:(msg:string)=>void}){
   const{t,lang}=useLang();
   const[loading,setLoading]=useState(false);
   const[summary,setSummary]=useState("");
@@ -3777,19 +3951,27 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:an
   const blocked=nodes.filter((n:any)=>n.status==="blocked");
   const critical=nodes.filter((n:any)=>n.priority==="critical"&&n.status!=="completed");
   const health=nodes.length>0?Math.round((done.length/nodes.length)*100):0;
+  const errMsg=t("weekly_briefing_err","Не удалось получить AI-анализ.");
 
-  useEffect(()=>{
-    setLoading(true);
+  async function fetchBriefing(){
+    setLoading(true);setSummary("");
     const ctx=`Карта: ${mapName}. Всего шагов: ${nodes.length}. Выполнено: ${done.length}. Заблокировано: ${blocked.length}. Критичных незавершённых: ${critical.length}. Health score: ${health}%. Шаги: ${nodes.slice(0,10).map((n:any)=>`${n.title}(${n.status})`).join(", ")}`;
-    callAI([{role:"user",content:`Дай краткий еженедельный брифинг по стратегии (3-4 предложения). ${ctx}`}],
-      `Ты AI-советник. Дай краткий профессиональный еженедельный брифинг: что сделано, что заблокировано, главная рекомендация на следующую неделю. Без списков, только текст.`,200)
-      .then(r=>setSummary(r)).catch(()=>setSummary(t("weekly_briefing_err","Не удалось получить AI-анализ."))).finally(()=>setLoading(false));
-  },[]);
+    try{
+      const r=await callAI([{role:"user",content:`Дай еженедельный брифинг по стратегии. ${ctx}`}],
+        `Ты AI-советник. ГЛУБОКИЙ анализ: шаги, статусы, блокировки, дедлайны, health, связи — как «погоду». Читай между строк — что критично, но не очевидно. Брифинг: 1) что сделано 2) что заблокировано 3) главная рекомендация (КОНКРЕТНОЕ действие: что, зачем, как измерить). Учитывай зависимости. Non-obvious insight — что пользователь упускает? Без списков, 3-4 предложения.`,250);
+      setSummary(r);
+    }catch(e:any){
+      setSummary(errMsg);
+      onError?.(e?.message||errMsg);
+    }
+    setLoading(false);
+  }
+  useEffect(()=>{fetchBriefing();},[]);
 
   return(
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(8px)"}}>
       <div style={{background:"var(--surface)",borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.5)",overflow:"hidden"}}>
-        <div style={{background:"linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1))",padding:"22px 26px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{background:"var(--accent-soft)",padding:"22px 26px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
             <div style={{fontSize:12,color:"var(--text3)",marginTop:3}}>{mapName} · {new Date().toLocaleDateString(lang==="uz"?"uz-UZ":lang==="en"?"en-US":"ru-RU",{weekday:"long",day:"numeric",month:"long"})}</div>
@@ -3800,7 +3982,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:an
           {/* Метрики */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
             {[
-              {label:t("total_steps","Всего"),value:nodes.length,color:"#6366f1"},
+              {label:t("total_steps","Всего"),value:nodes.length,color:"var(--accent-1)"},
               {label:t("done","Выполнено"),value:done.length,color:"#10b981"},
               {label:t("blocked","Заблокировано"),value:blocked.length,color:"#ef4444"},
               {label:"Health",value:`${health}%`,color:health>=70?"#10b981":health>=40?"#f59e0b":"#ef4444"},
@@ -3812,15 +3994,18 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark"}:{nodes:an
             ))}
           </div>
           {/* AI-саммари */}
-          <div style={{padding:"16px 18px",borderRadius:12,background:"rgba(99,102,241,.07)",border:"1px solid rgba(99,102,241,.2)",minHeight:80}}>
-            <div style={{fontSize:12,fontWeight:700,color:"#818cf8",marginBottom:8}}>✦ AI-анализ</div>
+          <div style={{padding:"16px 18px",borderRadius:12,background:"var(--accent-soft)",border:"1px solid var(--accent-1)",minHeight:80}}>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--accent-2)",marginBottom:8}}>✦ AI-анализ</div>
             {loading?(
               <div style={{display:"flex",alignItems:"center",gap:8,color:"var(--text3)",fontSize:13}}>
-                <div style={{width:16,height:16,border:"2px solid #6366f1",borderTopColor:"transparent",borderRadius:"50%",animation:"spin 0.7s linear infinite"}}/>
+                <div style={{width:16,height:16,border:"2px solid var(--accent-1)",borderTopColor:"transparent",borderRadius:"50%",animation:"spin 0.7s linear infinite"}}/>
                 Анализирую карту…
               </div>
             ):(
-              <p style={{fontSize:13,color:"var(--text)",lineHeight:1.65,margin:0}}>{summary}</p>
+              <div>
+                <p style={{fontSize:13,color:"var(--text)",lineHeight:1.65,margin:0}}>{summary}</p>
+                {summary===errMsg&&<button onClick={fetchBriefing} style={{marginTop:10,padding:"6px 14px",borderRadius:8,border:"1px solid rgba(99,102,241,.4)",background:"rgba(99,102,241,.1)",color:"#818cf8",fontSize:12,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>}
+              </div>
             )}
           </div>
           {/* Критичные шаги */}
@@ -3855,6 +4040,8 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   const[edges,setEdges]=useState(mapData?.edges||[]);
   const[selNode,setSelNode]=useState(null);
   const[selEdge,setSelEdge]=useState(null);
+  const[ctxMenu,setCtxMenu]=useState<{x:number,y:number,node?:any}|null>(null);
+  const[selNodes,setSelNodes]=useState<Set<string>>(new Set());
   const[showAI,setShowAI]=useState(false);
   const[showStats,setShowStats]=useState(false);
   const[connecting,setConnecting]=useState(false);
@@ -3862,6 +4049,9 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   const[showMini,setShowMini]=useState(true);
   const[search,setSearch]=useState("");
   const[pendingAiMsgs,setPendingAiMsgs]=useState([]);
+  const[aiChatMsgs,setAiChatMsgs]=useState(()=>{
+    try{const k=`sa_ai_chat_${project?.id||"p"}_${mapData?.id||mapData?.name||"default"}`;const s=localStorage.getItem(k);if(s){const j=JSON.parse(s);return Array.isArray(j)?j:[];}}catch{}return [];
+  });
   const[statusFilter,setStatusFilter]=useState("all");
   const[toasts,setToasts]=useState([]);
   const[saveState,setSaveState]=useState("saved");
@@ -3944,6 +4134,11 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
 
   useEffect(()=>{document.title=`${mapData?.name||project?.name||"Карта"} — Strategy AI`;return()=>{document.title="Strategy AI";};},[mapData?.name,project?.name]);
 
+  // Сохранение чата AI в localStorage при уходе с карты
+  useEffect(()=>{
+    return()=>{try{const k=`sa_ai_chat_${project?.id||"p"}_${mapData?.id||mapData?.name||"default"}`;if(aiChatMsgs.length>0)localStorage.setItem(k,JSON.stringify(aiChatMsgs));}catch{}};
+  },[mapData?.id,mapData?.name,project?.id,aiChatMsgs]);
+
   // Трансляция перемещения узла через WebSocket
   function emitNodeMove(nodeId:string,x:number,y:number){
     socketRef.current?.emit("node-move",{mapId:mapData?.id,nodeId,x,y});
@@ -3981,9 +4176,20 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   }
 
   function addNode(){
-    const x=snap((-viewRef.current.x/viewRef.current.zoom)+W/viewRef.current.zoom/2-120);
-    const y=snap((-viewRef.current.y/viewRef.current.zoom)+H/viewRef.current.zoom/2-64);
-    const n={id:uid(),x,y,title:t("new_step_title","Новый шаг"),reason:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:""};
+    const v=viewRef.current;
+    const mapX=snap((W/2-v.x)/v.zoom-120);
+    const mapY=snap((H/2-v.y)/v.zoom-64);
+    const n={id:uid(),x:mapX,y:mapY,title:t("new_step_title","Новый шаг"),reason:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:"",comments:[],history:[]};
+    pushUndo(nodes,edges);setNodes(ns=>[...ns,n]);setSelNode(n);
+  }
+  function addNodeAt(clientX:number,clientY:number){
+    const rect=svgRef.current?.getBoundingClientRect();
+    if(!rect)return addNode();
+    const v=viewRef.current;
+    const cx=clientX-rect.left,cy=clientY-rect.top;
+    const mapX=snap((cx-v.x)/v.zoom-120);
+    const mapY=snap((cy-v.y)/v.zoom-64);
+    const n={id:uid(),x:mapX,y:mapY,title:t("new_step_title","Новый шаг"),reason:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:"",comments:[],history:[]};
     pushUndo(nodes,edges);setNodes(ns=>[...ns,n]);setSelNode(n);
   }
 
@@ -4155,31 +4361,32 @@ ${slides}
   async function autoConnect(){
     if(nodes.length<2){addToast(t("min_2_steps","Нужно минимум 2 шага"),"info");return;}
     addToast(t("ai_analyzing_links","🔗 AI анализирует логику карты…"),"info");
-    const ctx=nodes.map(n=>`ID: ${n.id}\nНазвание: ${n.title}${n.reason?`\nОписание: ${n.reason}`:""}${n.metric?`\nМетрика: ${n.metric}`:""}${n.status?`\nСтатус: ${n.status}`:""}${n.tags?.length?`\nТеги: ${n.tags.join(", ")}`:""}`)
+    const ctx=nodes.map(n=>`ID: ${n.id}\nНазвание: ${n.title}${n.reason?`\nОписание: ${n.reason}`:""}${n.metric?`\nМетрика: ${n.metric}`:""}${n.status?`\nСтатус: ${n.status}`:""}${n.deadline?`\nДедлайн: ${n.deadline}`:""}${n.tags?.length?`\nТеги: ${n.tags.join(", ")}`:""}`)
       .join("\n\n");
-    const existingEdges=edges.map(e=>`${e.source} → ${e.target}`).join(", ")||"нет";
+    const existingEdges=edges.map(e=>`${e.source} → ${e.target} (${e.type||"requires"})`).join(", ")||"нет";
     try{
       const r=await callAI([{role:"user",content:
-`Ты — стратегический аналитик. Проанализируй эти шаги стратегической карты и определи ТОЛЬКО логически обоснованные причинно-следственные связи.
+`Ты — стратегический аналитик. Определи ТОЛЬКО логически обоснованные причинно-следственные связи между шагами.
 
 ШАГИ:
 ${ctx}
 
 УЖЕ СУЩЕСТВУЮЩИЕ СВЯЗИ: ${existingEdges}
 
-ПРАВИЛА:
-- Добавляй связь ТОЛЬКО если есть реальная логическая зависимость (A должен быть завершён до B, A влияет на B, A блокирует B)
-- НЕ добавляй связи просто потому что шаги похожи по теме
-- НЕ добавляй связи которые уже существуют
-- Максимум 6 новых связей
-- Тип: requires (A нужен для B), affects (A влияет на B), blocks (A блокирует B), follows (B следует после A)
+БАЗА ЗНАНИЙ (учитывай при анализе): ${AI_KNOWLEDGE}
 
-Верни ТОЛЬКО валидный JSON:
+ПРАВИЛА:
+- requires: A нужен для B (без A нельзя B). affects: A влияет на B. blocks: A блокирует B. follows: B после A.
+- Учитывай отрасль: маркетинг (воронка TOFU/MOFU/BOFU), продажи (pipeline, BANT), стратегию (последовательность шагов)
+- НЕ добавляй связи "по теме" — только логические зависимости. Максимум 6 новых связей.
+- Если блокировка/зависимость — обоснуй в reason. Используй ID из шагов (id, не title).
+
+Верни ТОЛЬКО валидный JSON (без markdown):
 {
   "connections": [{"source":"id1","target":"id2","type":"requires","reason":"кратко почему эта связь логична"}],
-  "summary": "2-3 предложения: что ты обнаружил в логике карты и почему добавил именно эти связи"
+  "summary": "2-3 предложения: что обнаружил в логике карты и почему добавил именно эти связи"
 }`
-      }],"Верни ТОЛЬКО JSON без markdown. Думай как стратег.",900);
+      }],"Верни ТОЛЬКО JSON без markdown. Думай как стратег. Учитывай отрасль и бизнес-контекст.",900);
       const clean=r.replace(/```json|```/g,"").trim();
       const parsed=JSON.parse(clean);
       const newConns=parsed.connections||[];
@@ -4264,23 +4471,32 @@ ${ctx}
       if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
       if((e.ctrlKey||e.metaKey)&&e.key==="z"&&!e.shiftKey){e.preventDefault();undo();}
       else if((e.ctrlKey||e.metaKey)&&(e.key==="y"||(e.key==="z"&&e.shiftKey))){e.preventDefault();redo();}
+      else if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key==="A"){e.preventDefault();setShowAI(a=>!a);if(selNode)setSelNode(null);}
       else if((e.ctrlKey||e.metaKey)&&e.key==="c"&&selNode){setClipboard(selNode);addToast(t("copied","📋 Скопировано"),"info");}
       else if((e.ctrlKey||e.metaKey)&&e.key==="v"&&clipboard){const copy={...clipboard,id:uid(),x:clipboard.x+60,y:clipboard.y+60};pushUndo(nodes,edges);setNodes(ns=>[...ns,copy]);addToast(t("pasted","📋 Вставлено"),"info");}
-      else if(e.key==="Escape"){setConnecting(false);setConnectSrc(null);}
-      else if((e.key==="Delete"||e.key==="Backspace")&&selNode&&!connecting){deleteNode(selNode.id);}
+      else if(e.key==="Escape"){if(ctxMenu)setCtxMenu(null);else{setConnecting(false);setConnectSrc(null);setSelNode(null);setSelNodes(new Set());}}
+      else if((e.key==="Delete"||e.key==="Backspace")&&(selNode||selNodes.size)&&!connecting){
+        const toDel=selNodes.size?Array.from(selNodes):[selNode.id];
+        pushUndo(nodes,edges);
+        setNodes(ns=>ns.filter(n=>!toDel.includes(n.id)));
+        setEdges(es=>es.filter(e=>!toDel.includes(e.source)&&!toDel.includes(e.target)));
+        setSelNodes(new Set());setSelNode(null);
+      }
       else if((e.key==="Delete"||e.key==="Backspace")&&selEdge){pushUndo(nodes,edges);setEdges(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}
       else if(e.key==="?"||e.key==="/"){ setShowShortcuts(s=>!s);}
-      else if(selNode&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){
+      else if((e.ctrlKey||e.metaKey)&&e.key==="a"){e.preventDefault();if(nodes.length){setSelNodes(new Set(nodes.map(n=>n.id)));setSelNode(nodes[0]);}}
+      else if((selNode||selNodes.size)&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){
         e.preventDefault();
         const d=e.shiftKey?40:10;
         const dx=e.key==="ArrowLeft"?-d:e.key==="ArrowRight"?d:0;
         const dy=e.key==="ArrowUp"?-d:e.key==="ArrowDown"?d:0;
-        setNodes(ns=>ns.map(n=>n.id===selNode.id?{...n,x:n.x+dx,y:n.y+dy}:n));
+        const ids=selNodes.size?selNodes:new Set([selNode.id]);
+        setNodes(ns=>ns.map(n=>ids.has(n.id)?{...n,x:snap(n.x+dx),y:snap(n.y+dy)}:n));
       }
     }
     window.addEventListener("keydown",onKey);
     return()=>window.removeEventListener("keydown",onKey);
-  },[selNode,selEdge,clipboard,connecting,undoStack,redoStack,nodes,edges]);
+  },[selNode,selEdge,selNodes,clipboard,connecting,undoStack,redoStack,nodes,edges,ctxMenu]);
 
   function onSvgMouseDown(e){
     const isTouch=e.pointerType==="touch";
@@ -4300,9 +4516,10 @@ ${ctx}
       viewRef.current={...viewRef.current,x,y};setView(v=>({...v,x,y}));e.preventDefault();return;
     }
     if(dragging.current){
-      const{node,startMX,startMY,startNX,startNY}=dragging.current;
+      const{node,startMX,startMY,startNX,startNY,offsets}=dragging.current;
       const dx=(e.clientX-startMX)/viewRef.current.zoom,dy=(e.clientY-startMY)/viewRef.current.zoom;
-      setNodes(ns=>ns.map(n=>n.id===node.id?{...n,x:snap(startNX+dx),y:snap(startNY+dy)}:n));
+      if(offsets){setNodes(ns=>ns.map(n=>offsets[n.id]!==undefined?{...n,x:snap(offsets[n.id].x+dx),y:snap(offsets[n.id].y+dy)}:n));}
+      else{setNodes(ns=>ns.map(n=>n.id===node.id?{...n,x:snap(startNX+dx),y:snap(startNY+dy)}:n));}
     }
   }
   function onSvgMouseUp(){panning.current=null;if(dragging.current){dragging.current=null;}}
@@ -4330,11 +4547,20 @@ ${ctx}
     }
     e.stopPropagation();
     (e.target as HTMLElement)?.setPointerCapture?.(e.pointerId);
-    dragging.current={node,startMX:e.clientX,startMY:e.clientY,startNX:node.x,startNY:node.y};
+    const ids=selNodes.size?selNodes:new Set([node.id]);
+    const offsets=ids.size>1?Object.fromEntries(nodes.filter(n=>ids.has(n.id)).map(n=>[n.id,{x:n.x,y:n.y}])):undefined;
+    dragging.current={node,startMX:e.clientX,startMY:e.clientY,startNX:node.x,startNY:node.y,offsets};
   }
-  function onNodeClick(node){
+  function onNodeClick(node,ev?:{shiftKey?:boolean}){
     if(connecting){return;}
-    setSelNode(node);setSelEdge(null);
+    if(ev?.shiftKey){
+      const next=new Set(selNodes);
+      if(next.has(node.id))next.delete(node.id);else next.add(node.id);
+      setSelNodes(next);
+      setSelNode(next.size?(next.has(node.id)?node:nodes.find(n=>next.has(n.id))||null):null);
+    }else{
+      setSelNode(node);setSelEdge(null);setSelNodes(new Set([node.id]));
+    }
   }
   function startConnect(node){setConnecting(true);setConnectSrc(node);setSelNode(null);}
   function scrollToNode(node){
@@ -4355,42 +4581,42 @@ ${ctx}
   const rightPanelOpen=selNode||showAI;
   const[bgMode,setBgMode]=useState("grid"); // grid | stars | none
   const toolbarStyle={display:"flex",alignItems:"center",gap:5};
-  const btnStyle=(active)=>({padding:"5px 10px",borderRadius:8,border:`1px solid ${active?"rgba(99,102,241,.5)":"var(--border)"}`,background:active?"rgba(99,102,241,.12)":"var(--surface)",color:active?"#818cf8":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",transition:"all .15s"});
-  const sep=<div style={{width:1,height:22,background:"var(--border)",margin:"0 2px",flexShrink:0}}/>;
-  // icon-only button
+  const btnStyle=(active)=>({padding:"6px 12px",borderRadius:10,border:`1px solid ${active?"var(--accent-1)":"var(--border)"}`,background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",transition:"all .2s"});
+  const sep=<div style={{width:1,height:20,background:"var(--border)",margin:"0 4px",flexShrink:0,borderRadius:1}}/>;
   const ib=(active,title,onClick,children,extraStyle={})=>(
-    <button onClick={onClick} title={title} aria-label={title} style={{width:32,height:32,borderRadius:8,border:`1px solid ${active?"rgba(99,102,241,.5)":"var(--border)"}`,background:active?"rgba(99,102,241,.12)":"transparent",color:active?"#818cf8":"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s",...extraStyle}}
+    <button onClick={onClick} title={title} aria-label={title} style={{width:34,height:34,borderRadius:10,border:"none",background:active?"rgba(99,102,241,.15)":"transparent",color:active?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .2s",...extraStyle}}
       onMouseOver={e=>{if(!active)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
       {children}
     </button>
   );
-  // text button
   const tb=(active,onClick,children,extraStyle={})=>(
-    <button onClick={onClick} style={{height:32,padding:"0 12px",borderRadius:8,border:`1px solid ${active?"rgba(99,102,241,.45)":"var(--border)"}`,background:active?"rgba(99,102,241,.14)":"transparent",color:active?"#818cf8":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,transition:"all .15s",display:"flex",alignItems:"center",gap:5,...extraStyle}}
+    <button onClick={onClick} style={{height:34,padding:"0 14px",borderRadius:10,border:"none",background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,transition:"all .2s",display:"flex",alignItems:"center",gap:6,...extraStyle}}
       onMouseOver={e=>{if(!active)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
       {children}
     </button>
   );
+  const retrySave=async()=>{setSaveState("saving");try{await saveMap(project.id,{...mapData,nodes,edges,updatedAt:Date.now()});setSaveState("saved");}catch{setSaveState("error");}};
 
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
       <style>{CSS}</style>
 
       {/* ── TOOLBAR — 2 rows ── */}
-      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--border)",background:"var(--bg2)"}}>
+      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--border)",background:"var(--bg2)",backdropFilter:"blur(12px)"}}>
 
         {/* ROW 1 — primary actions + search */}
-        <div style={{minHeight:46,display:"flex",alignItems:"center",gap:isMobile?8:4,padding:isMobile?"8px 10px":"0 12px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
+        <div style={{minHeight:52,display:"flex",alignItems:"center",gap:isMobile?8:6,padding:isMobile?"10px 12px":"0 16px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
 
           {/* LEFT: nav + edit */}
           <div style={{display:"flex",alignItems:"center",gap:isMobile?6:4,flexShrink:0}}>
             {tb(false,onBack,<>{t("back_btn","← Назад")}</>)}
             {!readOnly&&<>{sep}
-            <button onClick={addNode} style={{height:32,padding:isMobile?"0 10px":"0 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:5,boxShadow:"0 4px 14px rgba(99,102,241,.4)"}}>
-              <span style={{fontSize:16,lineHeight:1}}>+</span> Шаг
+            <button onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:36,padding:isMobile?"0 12px":"0 16px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:6,boxShadow:"0 2px 12px var(--accent-glow)",transition:"transform .15s,box-shadow .15s"}}
+              onMouseOver={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 4px 20px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
+              <span style={{fontSize:17,lineHeight:1}}>+</span> Шаг
             </button>
-            <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}}
-              style={{height:32,padding:isMobile?"0 8px":"0 12px",borderRadius:8,border:`1px solid ${connecting?"rgba(99,102,241,.5)":"var(--border)"}`,background:connecting?"rgba(99,102,241,.15)":"transparent",color:connecting?"#818cf8":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
+            <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}} title={connecting?t("cancel","Отмена"):t("link_mode_hint","Режим связи: клик на источник, затем на цель")}
+              style={{height:36,padding:isMobile?"0 10px":"0 14px",borderRadius:10,border:"none",background:connecting?"var(--accent-soft)":"var(--surface)",color:connecting?"var(--accent-2)":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:5,transition:"all .2s"}}>
               {connecting?<><span style={{color:"#ef4444"}}>✕</span> {isMobile?t("cancel_short","Отм."):t("cancel","Отмена")}</>:<>{isMobile?"⇒":t("link_btn","⇒ Связать")}</>}
             </button>
             {sep}
@@ -4404,9 +4630,9 @@ ${ctx}
           {/* CENTER: search + filter */}
           <div style={{flex:isMobile?undefined:1,display:"flex",alignItems:"center",gap:isMobile?4:6,justifyContent:"center",minWidth:0,flexShrink:isMobile?0:undefined}}>
             {!isMobile&&<div style={{position:"relative",flexShrink:0}}>
-              <span style={{position:"absolute",left:8,top:"50%",transform:"translateY(-50%)",fontSize:13,color:"var(--text4)",pointerEvents:"none"}}>🔍</span>
+              <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,color:"var(--text4)",pointerEvents:"none"}}>🔍</span>
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск по шагам…"
-                style={{padding:"5px 10px 5px 28px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",width:180,fontFamily:"inherit"}}/>
+                style={{padding:"8px 12px 8px 34px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",width:200,fontFamily:"inherit",transition:"border-color .2s,box-shadow .2s"}}/>
             </div>}
             {isMobile&&<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍" style={{padding:"6px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",width:60,fontFamily:"inherit"}}/>}
             <CustomSelect value={statusFilter} onChange={v=>setStatusFilter(v)}
@@ -4431,7 +4657,7 @@ ${ctx}
               {(user?.name||user?.email||"U")[0].toUpperCase()}
             </button>
             <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981"}}>
-              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button onClick={async()=>{setSaveState("saving");try{await saveMap(project.id,{...mapData,nodes,edges,updatedAt:Date.now()});setSaveState("saved");}catch{setSaveState("error");}} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span>✓</span> {t("saved","Сохранено")}</>}
+              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span>✓</span> {t("saved","Сохранено")}</>}
             </div>
               </>
             )}
@@ -4439,12 +4665,13 @@ ${ctx}
         </div>
 
         {/* ROW 2 — view tools + panels + export */}
-        <div style={{minHeight:38,display:"flex",alignItems:"center",gap:isMobile?2:4,padding:isMobile?"6px 10px":"0 12px",flexWrap:isMobile?"wrap":undefined}}>
+        <div style={{minHeight:44,display:"flex",alignItems:"center",gap:isMobile?4:6,padding:isMobile?"8px 12px":"0 16px",flexWrap:isMobile?"wrap":undefined}}>
 
           {/* View tools */}
           <div style={{display:"flex",alignItems:"center",gap:isMobile?2:3,flexShrink:0}}>
             {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>Вид</span>}
             {tb(false,fitView,<>{isMobile?"⊡":<>⊡ Вписать</>}</>)}
+            {selNode&&tb(false,()=>scrollToNode(selNode),<>{isMobile?"◎":<>◎ {t("center_on","К узлу")}</>}</>)}
             {!readOnly&&tb(false,autoLayout,<>{isMobile?"⌥":t("auto_layout","⌥ Расклад")}</>)}
             {!readOnly&&tb(false,autoConnect,<>{isMobile?"🔗":t("ai_links","🔗 AI-связи")}</>)}
           </div>
@@ -4455,7 +4682,7 @@ ${ctx}
           <div style={{display:"flex",alignItems:"center",gap:2,flexShrink:0}}>
             {[["grid","⊞","Сетка"],["stars","✦","Звёзды"],["none","○","Чисто"]].map(([m,icon,label])=>(
               <button key={m} onClick={()=>setBgMode(m)} title={`Фон: ${label}`}
-                style={{height:26,padding:"0 9px",borderRadius:6,border:`1px solid ${bgMode===m?"rgba(99,102,241,.45)":"var(--border)"}`,background:bgMode===m?"rgba(99,102,241,.14)":"transparent",color:bgMode===m?"#818cf8":"var(--text4)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}>
+                style={{height:30,padding:"0 10px",borderRadius:8,border:"none",background:bgMode===m?"rgba(99,102,241,.15)":"transparent",color:bgMode===m?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:14,fontWeight:600,flexShrink:0,transition:"all .2s"}}>
                 {icon}
               </button>
             ))}
@@ -4465,11 +4692,11 @@ ${ctx}
 
           {/* Panels */}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-            {ib(showAI,"AI-консультант",()=>{setShowAI((a:boolean)=>!a);setSelNode(null);},<>✦ AI</>,{width:"auto",padding:"0 10px",fontSize:13,fontWeight:600,color:showAI?"#818cf8":"#a78bfa",borderColor:showAI?"rgba(99,102,241,.5)":"rgba(139,92,246,.25)",background:showAI?"rgba(99,102,241,.14)":"rgba(139,92,246,.06)"})}
-            {ib(showMini,"Миникарта",()=>setShowMini((m:boolean)=>!m),<>🗺</>)}
+            {ib(showAI,t("ai_consultant_hint","AI-консультант (Ctrl+Shift+A)"),()=>{setShowAI((a:boolean)=>!a);setSelNode(null);},<>✦ AI</>,{width:"auto",padding:"0 10px",fontSize:13,fontWeight:600,color:showAI?"#818cf8":"#a78bfa",borderColor:showAI?"rgba(99,102,241,.5)":"rgba(139,92,246,.25)",background:showAI?"rgba(99,102,241,.14)":"rgba(139,92,246,.06)"})}
+            {ib(showMini,t("minimap_hint","Миникарта"),()=>setShowMini((m:boolean)=>!m),<>🗺</>)}
             {ib(false,t("stats_title","Статистика"),()=>setShowStats(true),<>📊</>)}
             {ib(false,t("weekly_briefing","Еженедельный брифинг"),()=>setShowBriefing(true),<>📋</>)}
-            {ib(false,t("shortcuts_title","Горячие клавиши"),()=>setShowShortcuts(true),<>⌨️</>)}
+            {ib(false,t("shortcuts_title","Горячие клавиши")+" (?)",()=>setShowShortcuts(true),<>⌨️</>)}
             {!readOnly&&ib(showDeadlines,t("deadline_reminder","Напоминания о дедлайнах"),()=>setShowDeadlines((d:boolean)=>!d),<>⏰</>,{borderColor:showDeadlines?"rgba(245,158,11,.5)":"",background:showDeadlines?"rgba(245,158,11,.08)":"",color:showDeadlines?"#f59e0b":""})}
           </div>
 
@@ -4477,17 +4704,17 @@ ${ctx}
 
           {/* Panels: Simulation, Templates, Gantt */}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-            {!readOnly&&<button onClick={()=>setShowSim(true)}
+            {!readOnly&&<button onClick={()=>setShowSim(true)} title={t("simulation_hint","Симуляция выполнения стратегии")}
               style={{height:26,padding:"0 10px",borderRadius:6,border:"1px solid rgba(14,165,233,.3)",background:"rgba(14,165,233,.07)",color:"#38bdf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
               ⎇ Симуляция
             </button>}
             {!readOnly&&(TIERS[user?.tier||"free"]?.templates)&&(
-              <button onClick={()=>setShowTemplates(true)}
+              <button onClick={()=>setShowTemplates(true)} title={t("templates_hint","Шаблоны карт")}
                 style={{height:26,padding:"0 10px",borderRadius:6,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
                 📋 Шаблоны
               </button>
             )}
-            <button onClick={()=>setShowGantt(g=>!g)}
+            <button onClick={()=>setShowGantt(g=>!g)} title={t("gantt_hint","Диаграмма Ганта")}
               style={{height:26,padding:"0 10px",borderRadius:6,border:`1px solid ${showGantt?"rgba(16,185,129,.5)":"rgba(16,185,129,.2)"}`,background:showGantt?"rgba(16,185,129,.14)":"rgba(16,185,129,.06)",color:"#34d399",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
               📅 Gantt
             </button>
@@ -4567,7 +4794,9 @@ ${ctx}
         <svg ref={svgRef} width="100%" height="100%"
           onPointerDown={onSvgMouseDown} onPointerMove={onSvgMouseMove} onPointerUp={onSvgMouseUp} onPointerLeave={onSvgMouseUp}
           onWheel={onWheel} style={{cursor:panning.current?"grabbing":"default",display:"block",touchAction:"none"}}
-          onClick={e=>{if(e.target===svgRef.current||e.target.tagName==="svg"){setSelNode(null);setSelEdge(null);}}}>
+          onClick={e=>{if(e.target===svgRef.current||e.target.tagName==="svg"){setSelNode(null);setSelEdge(null);setCtxMenu(null);}}}
+          onDoubleClick={e=>{if(!readOnly&&(e.target===svgRef.current||e.target?.tagName==="svg")){e.preventDefault();addNodeAt(e.clientX,e.clientY);}}}
+          onContextMenu={e=>{if(e.target===svgRef.current||e.target?.tagName==="svg"){e.preventDefault();if(!readOnly)setCtxMenu({x:e.clientX,y:e.clientY});}}}>
           <defs>
             <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x%40},${view.y%40})`}>
@@ -4580,7 +4809,7 @@ ${ctx}
               <EdgeLine key={e.id} edge={e} nodes={nodes} selected={selEdge?.id===e.id} onClick={ed=>{setSelEdge(ed);setSelNode(null);}}/>
             ))}
             {filteredNodes.map(n=>(
-              <NodeCard key={n.id} node={n} selected={selNode?.id===n.id} connecting={connecting} connectSource={connectSrc} onClick={onNodeClick} onMouseDown={onNodeMouseDown} theme={theme}/>
+              <NodeCard key={n.id} node={n} selected={selNode?.id===n.id||selNodes.has(n.id)} connecting={connecting} connectSource={connectSrc} onClick={onNodeClick} onMouseDown={onNodeMouseDown} onContextMenu={(x,y,nd)=>{if(!readOnly)setCtxMenu({x,y,node:nd});}} theme={theme}/>
             ))}
           </g>
           {connecting&&(
@@ -4589,6 +4818,26 @@ ${ctx}
             </text>
           )}
         </svg>
+        {/* Empty state: no nodes at all */}
+        {nodes.length===0&&!showOnboarding&&(
+          <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:5}}>
+            <div style={{textAlign:"center",padding:32}}>
+              <div style={{fontSize:56,marginBottom:16,opacity:.6}}>🗺️</div>
+              <div style={{fontSize:16,fontWeight:700,color:"var(--text2)",marginBottom:8}}>{t("map_empty_title","Карта пуста")}</div>
+              <div style={{fontSize:14,color:"var(--text4)"}}>{t("map_empty_hint","Нажмите + Шаг, дважды кликните на фон или кликните на пустое место.")}</div>
+            </div>
+          </div>
+        )}
+        {/* Empty state: filter/search returned no results */}
+        {nodes.length>0&&filteredNodes.length===0&&(
+          <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:5}}>
+            <div style={{textAlign:"center",padding:32,background:"var(--surface)",borderRadius:16,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,.3)"}}>
+              <div style={{fontSize:40,marginBottom:12}}>🔍</div>
+              <div style={{fontSize:15,fontWeight:700,color:"var(--text2)",marginBottom:6}}>{t("search_no_results","Ничего не найдено")}</div>
+              <div style={{fontSize:13,color:"var(--text4)"}}>{t("search_no_results_hint","Сбросьте поиск или фильтр статусов.")}</div>
+            </div>
+          </div>
+        )}
         {/* edge label editor */}
         {selEdge&&!selNode&&!readOnly&&(
           <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"var(--surface,#0d1829)",border:"1px solid rgba(99,102,241,.25)",borderRadius:12,boxShadow:"var(--shadow,0 16px 40px rgba(0,0,0,.7))",zIndex:40,animation:"slideUp .2s ease"}}>
@@ -4602,6 +4851,25 @@ ${ctx}
             <button onClick={()=>{pushUndo(nodes,edges);setEdges(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>🗑 Удалить</button>
           </div>
         )}
+        {ctxMenu&&(
+          <div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,zIndex:400,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:14,boxShadow:"0 16px 48px rgba(0,0,0,.4)",padding:"8px 0",minWidth:200,animation:"scaleIn .15s ease",backdropFilter:"blur(12px)"}}>
+            {ctxMenu.node?(
+              <>
+                <div style={{padding:"8px 14px",fontSize:12,color:"var(--text4)",borderBottom:"1px solid var(--border)"}}>{ctxMenu.node.title?.slice(0,24)}{(ctxMenu.node.title||"").length>24?"…":""}</div>
+                <button onClick={()=>{scrollToNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>↗ {t("center_on_node","Центрировать")}</button>
+                {!readOnly&&<>
+                  <button onClick={()=>{duplicateNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>📋 {t("duplicate","Дублировать")}</button>
+                  <button onClick={()=>{setClipboard(ctxMenu.node);addToast(t("copied","📋 Скопировано"),"info");setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>📄 {t("copy_short","Копировать")}</button>
+                  <button onClick={()=>{startConnect(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>⇒ {t("link_btn","Связать")}</button>
+                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdges(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"#ef4444",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
+                </>}
+              </>
+            ):(
+              !readOnly&&<button onClick={()=>{addNodeAt(ctxMenu.x,ctxMenu.y);setCtxMenu(null);}} style={{width:"100%",padding:"10px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>+ {t("add_step_here","Добавить шаг здесь")}</button>
+            )}
+          </div>
+        )}
+        {ctxMenu&&<div style={{position:"fixed",inset:0,zIndex:399}} onClick={()=>setCtxMenu(null)}/>}
         {showMini&&<MiniMap nodes={nodes} edges={edges} viewX={view.x} viewY={view.y} zoom={view.zoom} canvasW={W} canvasH={H} onJump={(x,y)=>{viewRef.current={...viewRef.current,x,y};setView(v=>({...v,x,y}));}} theme={theme}/>}
         {toasts.map(toast=><Toast key={toast.id} msg={toast.msg} type={toast.type} onClose={()=>setToasts(ts=>ts.filter(x=>x.id!==toast.id))}/>)}
         {selNode&&!showAI&&(
@@ -4629,9 +4897,11 @@ ${ctx}
                 pushUndo(nodes,edges);setEdges(es=>[...es,ne]);
               }
             }}
+            onError={(msg)=>addToast(msg,"error")}
+            onNotify={(msg,type)=>addToast(msg,type||"info")}
           />
         )}
-        {showAI&&<AiPanel nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])}/>}
+        {showAI&&<AiPanel nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgs} onMsgsChange={setAiChatMsgs} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")}/>}
         {showStats&&<StatsPopup nodes={nodes} edges={edges} onClose={()=>setShowStats(false)}/>}
         {showTemplates&&<TemplateModal tier={user?.tier} onSelect={(tmpl:any)=>{setShowTemplates(false);if(tmpl){pushUndo(nodes,edges);setNodes(tmpl.nodes.map((n:any)=>({...n,comments:[],history:[]})));setEdges(tmpl.edges);setTimeout(fitView,100);}}} onClose={()=>setShowTemplates(false)} theme={theme}/>}
         {showGantt&&<GanttView nodes={nodes} onClose={()=>setShowGantt(false)}/>}
@@ -4639,7 +4909,7 @@ ${ctx}
         {showSim&&<SimulationModal mapData={{...mapData,nodes,edges}} allProjectMaps={allMaps} onClose={()=>setShowSim(false)} theme={theme}/>}
         {showOnboarding&&<InMapOnboarding project={project} tier={user?.tier} theme={theme} onDone={(mapObj:any)=>{setShowOnboarding(false);setNodes(mapObj.nodes||[]);setEdges(mapObj.edges||[]);setTimeout(fitView,200);}} onSkip={()=>{setShowOnboarding(false);setNodes(defaultNodes());}}/>}
         {showBriefing&&(
-          <WeeklyBriefingModal nodes={nodes} mapName={mapData?.name||"Карта"} user={user} onClose={()=>setShowBriefing(false)} theme={theme}/>
+          <WeeklyBriefingModal nodes={nodes} mapName={mapData?.name||"Карта"} user={user} onClose={()=>setShowBriefing(false)} theme={theme} onError={(msg)=>addToast(msg,"error")}/>
         )}
         {showVersions&&mapData?.id&&(
           <VersionHistoryModal
@@ -4651,7 +4921,7 @@ ${ctx}
         )}
         {/* Напоминания о дедлайнах */}
         {showDeadlines&&!readOnly&&(
-          <DeadlineReminders nodes={nodes} onGoToNode={(id:string)=>{
+          <DeadlineReminders nodes={nodes} onDismiss={()=>setShowDeadlines(false)} onGoToNode={(id:string)=>{
             const n=nodes.find((x:any)=>x.id===id);
             if(n){setView({x:-n.x+W/2,y:-n.y+H/2,zoom:1});viewRef.current={x:-n.x+W/2,y:-n.y+H/2,zoom:1};setSelNode(n);}
           }}/>
@@ -4668,7 +4938,7 @@ ${ctx}
             <div style={{background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",padding:"24px 28px",maxWidth:400,width:"90%",animation:"scaleIn .2s ease"}} onClick={e=>e.stopPropagation()}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:16}}>⌨️ Горячие клавиши</div>
               <p style={{fontSize:12,color:"var(--text4)",marginBottom:12}}>💡 Ctrl+C / Ctrl+V работают и в этой модалке — можно скопировать комбинацию.</p>
-              {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+F","Поиск шагов"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Escape","Выйти из режима связи"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Alt+Drag","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
+              {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+Shift+A","Открыть AI-советник"],["Ctrl+F","Поиск шагов"],["Ctrl+A","Выбрать все узлы"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Shift+клик","Мультивыбор узлов"],["Двойной клик на фон","Добавить шаг в точке"],["ПКМ на узле/фоне","Контекстное меню"],["Escape","Снять выбор / закрыть меню"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Alt+Drag","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
                 <div key={row[0]} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--border)"}}>
                   <code style={{fontSize:13,background:"var(--surface)",padding:"2px 7px",borderRadius:5,color:"#818cf8",fontFamily:"'JetBrains Mono',monospace"}}>{row[0]}</code>
                   <span style={{fontSize:13,color:"var(--text3)"}}>{row[1]}</span>
@@ -4678,10 +4948,10 @@ ${ctx}
             </div>
           </div>
         )}
-        <div style={{position:"absolute",bottom:16,left:16,display:"flex",gap:6,alignItems:"center",zIndex:30}}>
-          <button onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} style={{...btnStyle(false),padding:"4px 9px",fontSize:16}}>+</button>
-          <div style={{fontSize:13,color:"var(--text4)",fontWeight:600,minWidth:40,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
-          <button onClick={()=>{const nz=Math.max(.2,view.zoom*.83);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} style={{...btnStyle(false),padding:"4px 9px",fontSize:16}}>−</button>
+        <div className="zoom-ctrl" style={{position:"absolute",bottom:20,left:20,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"6px 10px",background:"var(--bg2)",borderRadius:12,border:"1px solid var(--border)",boxShadow:"0 4px 20px rgba(0,0,0,.15)"}}>
+          <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+          <div style={{fontSize:13,color:"var(--text3)",fontWeight:700,minWidth:44,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
+          <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.max(.2,view.zoom*.83);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_out","Уменьшить")} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
         </div>
       </div>
     </div>
@@ -4763,14 +5033,14 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             {!isMobile&&<div style={{flex:1}}/>}
             <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} style={{padding:"7px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",width:isMobile?"100%":200,minWidth:isMobile?undefined:120,fontFamily:"inherit",flex:isMobile?1:undefined}}/>
-              <button onClick={()=>{if(atLimit){return;}setCreating(true);}} style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"linear-gradient(135deg,#6366f1,#8b5cf6)",color:atLimit?"var(--text4)":"#fff",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,transition:"all .2s",flexShrink:0}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
+              <button onClick={()=>{if(atLimit){return;}setCreating(true);}} style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,transition:"all .2s",flexShrink:0}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
             </div>
           </div>
           {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
           {lastProj&&!loading&&onOpenMap&&(
             <div style={{marginBottom:16,padding:"14px 18px",borderRadius:14,border:"1px solid rgba(99,102,241,.25)",background:"rgba(99,102,241,.06)",display:"flex",alignItems:"center",gap:12}}>
               <span style={{fontSize:13,color:"var(--text3)"}}>{t("continue_last","Продолжить с")}</span>
-              <button onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"8px 16px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>
+              <button onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"8px 16px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>
                 {lastMapData?`${lastProj.name} → ${lastMapData.name}`:lastProj.name}
               </button>
             </div>
@@ -4778,7 +5048,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           {creating&&(
             <div style={{padding:"16px 18px",borderRadius:14,background:"var(--surface)",border:"1px solid var(--border2)",marginBottom:16,display:"flex",gap:10,alignItems:"center",animation:"slideUp .2s ease"}}>
               <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")createProject();if(e.key==="Escape"){setCreating(false);setNewName("");}}} placeholder="Название проекта…" style={{flex:1,padding:"9px 13px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
-              <button onClick={createProject} disabled={!newName.trim()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:newName.trim()?"pointer":"not-allowed",fontSize:13,fontWeight:700,opacity:newName.trim()?1:.5}}>{t("create_map_btn","Создать")}</button>
+              <button onClick={createProject} disabled={!newName.trim()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:newName.trim()?"pointer":"not-allowed",fontSize:13,fontWeight:700,opacity:newName.trim()?1:.5}}>{t("create_map_btn","Создать")}</button>
               <button onClick={()=>{setCreating(false);setNewName("");}} style={{padding:"9px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{t("cancel","Отмена")}</button>
             </div>
           )}
@@ -4796,7 +5066,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                 const icon=ICONS[p.id.charCodeAt(0)%ICONS.length];
                 return(
                   <div key={p.id} onClick={()=>onSelectProject(p)} className="icard"
-                    style={{padding:"18px 18px 14px",borderRadius:16,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column"}}>
+                    style={{padding:"18px 18px 14px",borderRadius:16,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(0,0,0,.04)"}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
                       <div style={{width:40,height:40,borderRadius:11,background:`linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08))`,border:"1px solid rgba(99,102,241,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
@@ -5359,14 +5629,17 @@ Runway: ${f.runway}
   },
 ];
 
-const SC_MAP_SYS=`Ты — эксперт по стратегическому планированию. Создай персональный сценарий на основе данных пользователя.
+const SC_MAP_SYS=`Ты — эксперт по стратегическому планированию. Создай персональный сценарий.
+
 ТРЕБОВАНИЯ:
-- Узлы — конкретные действия для ЭТОЙ ситуации, не абстракции
+- title — КОНКРЕТНОЕ ДЕЙСТВИЕ (глагол+объект), не абстракции
+- reason — обоснование шага, почему он нужен
+- metric — реалистичная измеримая цифра для контекста
 - Учитывай все введённые условия и ограничения пользователя
-- metric — реалистичная цифра для этого контекста
-- Расставь приоритеты: срочные узлы status:"active" priority:"critical"
+- Маркетинг, продажи, стратегия — адаптируй под контекст
+- Связи: requires (A нужен для B), affects, blocks, follows — логичные зависимости
 - 6–8 узлов, X:150–900, Y:80–520
-Верни ТОЛЬКО валидный JSON:
+Верни ТОЛЬКО валидный JSON (без markdown):
 {"nodes":[{"id":"n1","x":200,"y":270,"title":"...","reason":"...","metric":"...","status":"active","priority":"critical","progress":0}],"edges":[{"id":"e1","from":"n1","to":"n2","type":"requires"}]}`;
 
 // ── ScenarioTemplatesModal ──
@@ -5512,7 +5785,7 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
         </div>
         <div style={{padding:"14px 22px",borderTop:"1px solid var(--border)",display:"flex",gap:10,justifyContent:"flex-end"}}>
           <button onClick={onClose} style={{padding:"9px 18px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("cancel","Отмена")}</button>
-          <button onClick={()=>{if(selected){const tmpl=TEMPLATES.find(x=>x.id===selected);if(t)onSelect(t);}else{onSelect(null);}}} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>
+          <button onClick={()=>{if(selected){const tmpl=TEMPLATES.find(x=>x.id===selected);if(tmpl)onSelect(tmpl);}else{onSelect(null);}}} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>
             {selected?"Использовать шаблон":"Начать с нуля"}
           </button>
         </div>
@@ -5524,11 +5797,12 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
 
 // ── MapTour ──
 const TOUR_STEPS=[
-  {title:"Это ваша стратегическая карта",body:"Каждый узел — шаг к цели. Перетаскивайте их, соединяйте и отслеживайте прогресс. Двигайте фон мышью для навигации, колесо — для зума.",icon:"🗺️"},
-  {title:"Добавляйте шаги",body:'Нажмите + Шаг чтобы добавить новый стратегический шаг. У каждого шага есть статус, приоритет и метрика успеха.',icon:"⊕"},
-  {title:"Связывайте шаги",body:'Кнопка "Связать" переводит в режим соединения: кликните на один шаг, затем на другой — стрелка создастся автоматически.',icon:"→"},
-  {title:"AI-советник",body:'Нажмите кнопку "✦ AI" в тулбаре. AI знает контекст вашего бизнеса и может отвечать на вопросы, давать советы и добавлять шаги прямо на карту.',icon:"✦"},
-  {title:"Редактируйте детали",body:"Кликните на любой шаг — откроется панель с описанием, комментариями, дедлайном и историей изменений. Поддерживается @AI в комментариях.",icon:"✏️"},
+  {title:"Это ваша стратегическая карта",body:"Каждый узел — шаг к цели. Перетаскивайте их, соединяйте и отслеживайте прогресс. Двигайте фон Alt+Drag, колесо — зум.",icon:"🗺️"},
+  {title:"Добавляйте шаги",body:'Нажмите + Шаг или кликните на пустое место. У каждого шага — статус, приоритет, метрика, дедлайн. Ctrl+Z / Ctrl+Y — отмена и повтор.',icon:"⊕"},
+  {title:"Связывайте шаги",body:'Кнопка "⇒ Связать" или "🔗 AI-связи" — AI предложит логичные зависимости. Режим связи: клик на источник, затем на цель.',icon:"→"},
+  {title:"AI-советник",body:'Кнопка "✦ AI" или Ctrl+Shift+A. AI знает карту, связи, дедлайны. Быстрые подсказки: "С чего начать?", "Риски?", "Следующий шаг?".',icon:"✦"},
+  {title:"Редактируйте детали",body:"Клик на шаг — панель с описанием, комментариями (@AI для вопросов), дедлайном, историей. ✨ Перефразировать — AI улучшит формулировку.",icon:"✏️"},
+  {title:"Готовы к работе",body:"? — горячие клавиши. 📊 — аналитика. ⎇ — симуляция. Шаблоны и экспорт — в тулбаре. Удачи!",icon:"✓"},
 ];
 
 function MapTour({onDone}){
@@ -5664,7 +5938,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
 Итог: ${avg}%, план ${planAchievement}, выручка $${revenueAchieved.toLocaleString()}
 Провалы: ${failNodes.map(n=>n.title).join(", ")||"нет"}
 Шаги:\n${nodeDetails}
-Дай краткий конкретный анализ: почему такой результат и что изменить.`}]);
+Дай ГЛУБОКИЙ анализ: 1) почему такой результат (узкие места, зависимости, ресурсы) 2) КОНКРЕТНОЕ действие — что изменить (шаг, ресурс, приоритет), зачем, как измерить. Учитывай связи между шагами. Non-obvious insight — что упускают?`}],"Ты стратегический аналитик. Глубокий анализ: причина → конкретное действие → как измерить. Учитывай зависимости и «погоду». Non-obvious insights. Без общих фраз.",400);
         addLog(`✦ ${txt}`,"ai");
       }catch{
         addLog("✦ Проверьте узкие места и повысьте прогресс критических шагов.","ai");
@@ -5680,7 +5954,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
     if(!aiInp.trim()||aiLoad)return;
     const q=aiInp;setAiInp("");addLog(`👤 ${q}`,"user");setAiLoad(true);
     const ctx=final?`Симуляция: итог ${final.avg}%, план ${final.planAchievement}.`:"";
-    try{const r=await callAI([{role:"user",content:`${ctx} Вопрос: ${q}`}]);addLog(`✦ ${r}`,"ai");}
+    try{const r=await callAI([{role:"user",content:`${ctx} Вопрос: ${q}`}],"Ты AI-советник по симуляции стратегии. Отвечай конкретно: что сделать, зачем, как измерить. Учитывай зависимости между шагами и «погоду».",350);addLog(`✦ ${r}`,"ai");}
     catch{addLog(`✦ ${t("ai_sim_error","Ошибка AI-консультанта")}`,"ai");}
     setAiLoad(false);
   }
@@ -5859,16 +6133,24 @@ function InMapOnboarding({project,tier,theme="dark",onDone,onSkip}){
   const[history,setHistory]=useState([]);
   const[qCount,setQCount]=useState(0);
   const[showSkipConfirm,setShowSkipConfirm]=useState(false);
+  const[mapGenFailed,setMapGenFailed]=useState(false);
   const endRef=useRef(null);
-  const sysPrompt=`Ты — стратегический консультант. Проводишь краткое интервью для создания персональной стратегической карты проекта "${project?.name||""}".
-Правила: по одному вопросу, конкретно и кратко. Выявляй: продукт/сервис, ЦА, узкое место роста, главный риск, следующий шаг.
-После 6-го ответа ответь ТОЛЬКО: READY`;
-  const mapSys=`Создай стратегическую карту. Верни ТОЛЬКО JSON без markdown:
+  const inputRef=useRef(null);
+  const tKey=tier||"free";
+  const obFn=OB_TIER[tKey]||OB_TIER.free;
+  const mapHint=MAP_TIER[tKey]||MAP_TIER.free;
+  const sysPrompt=obFn(project?.name||"");
+  const mapSys=`Создай стратегическую карту на основе интервью. МАКСИМАЛЬНАЯ ГЛУБИНА: учитывай ВСЁ из ответов — отрасль, этап, ресурсы, цели, риски, неявное.
+${["pro","team","enterprise"].includes(tKey)?`БАЗА ЗНАНИЙ: ${AI_KNOWLEDGE}`:""}
+
+Связи: requires (A нужен для B), affects, blocks, follows. Логичные зависимости. Избегай типичных ошибок (пропуск валидации, масштаб до PMF).
+Верни ТОЛЬКО валидный JSON (без markdown):
 {"nodes":[{"id":"n1","x":200,"y":270,"title":"...","reason":"...","metric":"...","status":"active","priority":"high","progress":35,"tags":[]}],"edges":[{"id":"e1","source":"n1","target":"n2","type":"requires","label":""}]}
-7–9 узлов, конкретные названия, X:150–900, Y:80–520.`;
+${mapHint} X:150–900, Y:80–520.`;
 
   useEffect(()=>{askNext([]);},[]);
   useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"});},[msgs,loading]);
+  useEffect(()=>{if(!loading&&!generating){const t=setTimeout(()=>inputRef.current?.focus(),80);return()=>clearTimeout(t);}},[loading,generating]);
 
   async function askNext(hist){
     setLoading(true);
@@ -5891,17 +6173,24 @@ function InMapOnboarding({project,tier,theme="dark",onDone,onSkip}){
     if(qCount>=MAX_Q){await buildMap(newHist);}else{await askNext(newHist);}
   }
   async function buildMap(hist){
-    setGenerating(true);
+    setGenerating(true);setMapGenFailed(false);
     setMsgs(m=>[...m,{role:"ai",text:"Строю персональную карту…"}]);
     const ctx=hist.filter(h=>h.content).map(h=>(h.role==="user"?"Пользователь: ":"AI: ")+h.content).join("\n");
     try{
       const raw=await callAI([{role:"user",content:"Интервью:\n"+ctx+"\n\nСоздай карту."}],mapSys,1500);
-      const data=JSON.parse(raw.replace(/```json|```/g,"").trim());
+      const clean=raw.replace(/```json|```/g,"").trim();
+      const fallback=clean.match(/\{[\s\S]*\}/);
+      const data=JSON.parse(fallback?fallback[0]:clean);
       onDone({nodes:data.nodes||[],edges:data.edges||[],ctx});
     }catch{
-      setMsgs(m=>[...m,{role:"ai",text:t("ai_map_fallback","AI не удалось создать карту. Используем базовый шаблон.")}]);
-      onDone({nodes:defaultNodes(),edges:[],ctx});
+      setMapGenFailed(true);
+      setMsgs(m=>[...m,{role:"ai",text:t("ai_map_fallback","AI не удалось создать карту. Нажмите «Повторить» или «Использовать шаблон».")}]);
     }finally{setGenerating(false);}
+  }
+  function useFallbackTemplate(){
+    setMapGenFailed(false);
+    const ctxFromHist=history.filter(h=>h.content).map(h=>(h.role==="user"?"Пользователь: ":"AI: ")+h.content).join("\n");
+    onDone({nodes:defaultNodes(),edges:[],ctx:ctxFromHist||""});
   }
   const pct=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
@@ -5927,9 +6216,15 @@ function InMapOnboarding({project,tier,theme="dark",onDone,onSkip}){
         {(loading||generating)&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 12px 12px 12px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"#6366f1",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
-      {!generating&&(
+      {mapGenFailed&&(
+        <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,maxWidth:680,margin:"0 auto",width:"100%",flexWrap:"wrap"}}>
+          <button onClick={()=>{setMapGenFailed(false);buildMap(history);}} style={{padding:"10px 18px",borderRadius:10,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>
+          <button onClick={useFallbackTemplate} style={{padding:"10px 18px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("use_template","Использовать шаблон")}</button>
+        </div>
+      )}
+      {!generating&&!mapGenFailed&&(
         <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,maxWidth:680,margin:"0 auto",width:"100%"}}>
-          <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}} placeholder="Ваш ответ…" style={{flex:1,padding:"11px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"inherit"}} disabled={loading}/>
+          <input ref={inputRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}} placeholder="Ваш ответ…" style={{flex:1,padding:"11px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"inherit"}} disabled={loading}/>
           <button onClick={submit} disabled={!inp.trim()||loading} style={{padding:"11px 22px",borderRadius:12,border:"none",background:inp.trim()&&!loading?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface)",color:inp.trim()&&!loading?"#fff":"var(--text4)",fontSize:14,fontWeight:700,cursor:inp.trim()&&!loading?"pointer":"not-allowed"}}>
             {qCount>=MAX_Q?"Создать ✦":"Ответить →"}
           </button>
