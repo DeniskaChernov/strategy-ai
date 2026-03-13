@@ -32,10 +32,10 @@ const CSS=`
 body{font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;}
 input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 :root{
-  /* ── Spacing scale ── */
-  --sp-xs:4px;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:24px;--sp-2xl:32px;--sp-3xl:48px;
-  /* ── Border radius scale ── */
-  --r-xs:4px;--r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:18px;--r-2xl:24px;--r-full:9999px;
+  /* ── Spacing scale (больше воздуха) ── */
+  --sp-xs:6px;--sp-sm:10px;--sp-md:14px;--sp-lg:20px;--sp-xl:28px;--sp-2xl:40px;--sp-3xl:56px;
+  /* ── Border radius ── */
+  --r-xs:6px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-2xl:28px;--r-full:9999px;
   /* ── Brand palette ── */
   --brand:#6366f1;--brand2:#8b5cf6;--brand3:#06b6d4;
   --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#0ea5e9;
@@ -92,7 +92,7 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 [data-theme="light"] option{background:#fff;color:#0f172a;}
 /* Light theme specific overrides */
 [data-theme="light"] body{background:var(--bg);color:var(--text);}
-[data-theme="light"] .icard{box-shadow:0 1px 3px rgba(0,0,0,.06);}
+[data-theme="light"] .icard{box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);}
 [data-theme="dark"] select{color-scheme:dark;background:#0d1829;color:#e2e8f0;border-color:rgba(255,255,255,.1);}
 [data-theme="dark"] option{background:#0d1829;color:#e2e8f0;}
 select{appearance:none;-webkit-appearance:none;}
@@ -117,10 +117,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .icard{
   transition:transform .2s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;
   cursor:default;
+  border-radius:var(--r-lg);
 }
 .icard:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 28px var(--accent-glow);
+  transform:translateY(-3px);
+  box-shadow:0 12px 40px var(--accent-glow);
   border-color:var(--accent-1) !important;
   background:var(--accent-soft) !important;
 }
@@ -3322,13 +3323,13 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
     setAutoConnLoading(false);
   }
 
-  const iS={width:"100%",padding:"9px 12px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",resize:"none",transition:"border-color .2s"};
+  const iS={width:"100%",padding:"12px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",resize:"none",transition:"border-color .2s"};
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
   const tabs=[["info","◈ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
 
   return(
-    <div style={{position:"absolute",right:0,top:0,bottom:0,width:300,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-12px 0 40px rgba(0,0,0,.25)",animation:"slideRight .2s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 14px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
+    <div style={{position:"absolute",right:0,top:0,bottom:0,width:320,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,padding:"18px 20px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:10,height:10,borderRadius:3,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
         <div style={{flex:1,fontSize:14,fontWeight:700,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
         {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"background .15s"}}>↗</button>}
@@ -3337,12 +3338,12 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
       <div style={{display:"flex",borderBottom:"1px solid var(--border)",flexShrink:0,overflowX:"auto"}}>
         {tabs.map(item=>{
           const k=item[0],lbl=item[1];
-          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"10px 6px",border:"none",background:tab===k?"var(--surface)":"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?"2px solid var(--accent-1)":"2px solid transparent",whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
+          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"12px 10px",border:"none",background:tab===k?"var(--surface)":"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
         })}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"14px"}}>
+      <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
         {tab==="info"&&(
-          <div style={{display:"flex",flexDirection:"column",gap:9}}>
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
             <div>
               <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:3,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 Название
@@ -3589,8 +3590,8 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   }
 
   return(
-    <div style={{position:"absolute",right:0,top:0,bottom:0,width:340,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-12px 0 40px rgba(0,0,0,.25)",animation:"slideRight .2s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 16px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
+    <div style={{position:"absolute",right:0,top:0,bottom:0,width:360,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,padding:"18px 20px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:32,height:32,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,boxShadow:"0 2px 12px var(--accent-glow)"}}>✦</div>
         <div style={{flex:1}}>
           <div style={{fontSize:14,fontWeight:800,color:"var(--text)"}}>{t("ai_consultant","AI Советник")}</div>
@@ -3599,25 +3600,25 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"6px 10px",borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"background .15s"}}>✕</button>
         <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"background .15s"}}>×</button>
       </div>
-      <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:6,flexWrap:"wrap",flexShrink:0}}>
+      <div style={{padding:"14px 18px",borderBottom:"1px solid var(--border)",display:"flex",gap:8,flexWrap:"wrap",flexShrink:0}}>
         {quick.map(q=>(
-          <button key={q} onClick={()=>send(q)} style={{padding:"6px 12px",borderRadius:20,border:"none",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:600,transition:"all .15s"}}
+          <button key={q} onClick={()=>send(q)} style={{padding:"8px 14px",borderRadius:20,border:"none",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:600,transition:"all .15s"}}
             onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--accent-soft)";}}>{q}</button>
         ))}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"14px 12px",display:"flex",flexDirection:"column",gap:12}}>
+      <div style={{flex:1,overflowY:"auto",padding:"18px 20px",display:"flex",flexDirection:"column",gap:16}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start"}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
-            <div style={{maxWidth:"85%",padding:"10px 14px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--accent-soft)":m.role==="sys"?"rgba(16,185,129,.1)":"var(--surface)",border:"none",fontSize:13.5,lineHeight:1.6,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 8px var(--accent-glow)":m.role==="sys"?"none":"0 1px 4px rgba(0,0,0,.08)"}}>{m.text}</div>
+            <div style={{maxWidth:"85%",padding:"12px 16px",borderRadius:m.role==="user"?"16px 16px 4px 16px":m.role==="sys"?"12px":"4px 16px 16px 16px",background:m.role==="user"?"var(--accent-soft)":m.role==="sys"?"rgba(16,185,129,.1)":"var(--surface)",border:"none",fontSize:14,lineHeight:1.65,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 8px var(--accent-glow)":m.role==="sys"?"none":"0 1px 4px rgba(0,0,0,.08)"}}>{m.text}</div>
           </div>
         ))}
         {load&&<div style={{display:"flex",gap:8,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",borderRadius:"4px 14px 14px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
-      <div style={{padding:"12px 14px",borderTop:"1px solid var(--border)",display:"flex",gap:8,flexShrink:0,background:"var(--surface)"}}>
-        <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={t("ask_placeholder","Спросите о стратегии…")} style={{flex:1,padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"}}/>
-        <button onClick={()=>send()} disabled={!inp.trim()||load} style={{width:40,height:40,borderRadius:10,border:"none",background:inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:inp.trim()&&!load?"pointer":"not-allowed",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none",transition:"all .15s"}}>↑</button>
+      <div style={{padding:"16px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,flexShrink:0,background:"var(--surface)"}}>
+        <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={t("ask_placeholder","Спросите о стратегии…")} style={{flex:1,padding:"12px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"}}/>
+        <button onClick={()=>send()} disabled={!inp.trim()||load} style={{width:44,height:44,borderRadius:12,border:"none",background:inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:inp.trim()&&!load?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none",transition:"all .15s"}}>↑</button>
       </div>
     </div>
   );
@@ -4500,12 +4501,13 @@ ${ctx}
 
   function onSvgMouseDown(e){
     const isTouch=e.pointerType==="touch";
-    const wantPan=isTouch||e.button===1||(e.button===0&&e.altKey);
-    if(wantPan&&(e.target===svgRef.current||e.target?.tagName==="svg")){
+    const isEmptyBg=e.target===svgRef.current||e.target?.tagName==="svg"||e.target?.getAttribute?.("data-canvas-bg")==="1";
+    const wantPan=isTouch||e.button===1||(e.button===0&&(e.altKey||isEmptyBg));
+    if(wantPan&&isEmptyBg){
       panning.current={startX:e.clientX-viewRef.current.x,startY:e.clientY-viewRef.current.y};
       e.preventDefault();return;
     }
-    if(e.target===svgRef.current||e.target?.tagName==="svg"){
+    if(isEmptyBg){
       setSelNode(null);setSelEdge(null);
       if(connecting){setConnecting(false);setConnectSrc(null);}
     }
@@ -4582,15 +4584,15 @@ ${ctx}
   const[bgMode,setBgMode]=useState("grid"); // grid | stars | none
   const toolbarStyle={display:"flex",alignItems:"center",gap:5};
   const btnStyle=(active)=>({padding:"6px 12px",borderRadius:10,border:`1px solid ${active?"var(--accent-1)":"var(--border)"}`,background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",transition:"all .2s"});
-  const sep=<div style={{width:1,height:20,background:"var(--border)",margin:"0 4px",flexShrink:0,borderRadius:1}}/>;
+  const sep=<div style={{width:1,height:24,background:"var(--border)",margin:"0 6px",flexShrink:0,borderRadius:1}}/>;
   const ib=(active,title,onClick,children,extraStyle={})=>(
-    <button onClick={onClick} title={title} aria-label={title} style={{width:34,height:34,borderRadius:10,border:"none",background:active?"rgba(99,102,241,.15)":"transparent",color:active?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .2s",...extraStyle}}
+    <button onClick={onClick} title={title} aria-label={title} style={{width:38,height:38,borderRadius:12,border:"none",background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .2s",...extraStyle}}
       onMouseOver={e=>{if(!active)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
       {children}
     </button>
   );
   const tb=(active,onClick,children,extraStyle={})=>(
-    <button onClick={onClick} style={{height:34,padding:"0 14px",borderRadius:10,border:"none",background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,transition:"all .2s",display:"flex",alignItems:"center",gap:6,...extraStyle}}
+    <button onClick={onClick} style={{height:38,padding:"0 16px",borderRadius:12,border:"none",background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,transition:"all .2s",display:"flex",alignItems:"center",gap:8,...extraStyle}}
       onMouseOver={e=>{if(!active)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
       {children}
     </button>
@@ -4602,21 +4604,21 @@ ${ctx}
       <style>{CSS}</style>
 
       {/* ── TOOLBAR — 2 rows ── */}
-      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--border)",background:"var(--bg2)",backdropFilter:"blur(12px)"}}>
+      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--border)",background:"var(--bg2)",backdropFilter:"blur(16px)",boxShadow:"0 1px 0 var(--border)"}}>
 
         {/* ROW 1 — primary actions + search */}
-        <div style={{minHeight:52,display:"flex",alignItems:"center",gap:isMobile?8:6,padding:isMobile?"10px 12px":"0 16px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
+        <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
 
           {/* LEFT: nav + edit */}
-          <div style={{display:"flex",alignItems:"center",gap:isMobile?6:4,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:isMobile?8:8,flexShrink:0}}>
             {tb(false,onBack,<>{t("back_btn","← Назад")}</>)}
             {!readOnly&&<>{sep}
-            <button onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:36,padding:isMobile?"0 12px":"0 16px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:6,boxShadow:"0 2px 12px var(--accent-glow)",transition:"transform .15s,box-shadow .15s"}}
+            <button onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)",transition:"transform .15s,box-shadow .15s"}}
               onMouseOver={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 4px 20px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
               <span style={{fontSize:17,lineHeight:1}}>+</span> Шаг
             </button>
             <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}} title={connecting?t("cancel","Отмена"):t("link_mode_hint","Режим связи: клик на источник, затем на цель")}
-              style={{height:36,padding:isMobile?"0 10px":"0 14px",borderRadius:10,border:"none",background:connecting?"var(--accent-soft)":"var(--surface)",color:connecting?"var(--accent-2)":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:5,transition:"all .2s"}}>
+              style={{height:40,padding:isMobile?"0 12px":"0 16px",borderRadius:12,border:"none",background:connecting?"var(--accent-soft)":"var(--surface)",color:connecting?"var(--accent-2)":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:6,transition:"all .2s"}}>
               {connecting?<><span style={{color:"#ef4444"}}>✕</span> {isMobile?t("cancel_short","Отм."):t("cancel","Отмена")}</>:<>{isMobile?"⇒":t("link_btn","⇒ Связать")}</>}
             </button>
             {sep}
@@ -4630,15 +4632,15 @@ ${ctx}
           {/* CENTER: search + filter */}
           <div style={{flex:isMobile?undefined:1,display:"flex",alignItems:"center",gap:isMobile?4:6,justifyContent:"center",minWidth:0,flexShrink:isMobile?0:undefined}}>
             {!isMobile&&<div style={{position:"relative",flexShrink:0}}>
-              <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,color:"var(--text4)",pointerEvents:"none"}}>🔍</span>
+              <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",fontSize:15,color:"var(--text4)",pointerEvents:"none"}}>🔍</span>
               <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск по шагам…"
-                style={{padding:"8px 12px 8px 34px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",width:200,fontFamily:"inherit",transition:"border-color .2s,box-shadow .2s"}}/>
+                style={{padding:"10px 14px 10px 38px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:220,fontFamily:"inherit",transition:"border-color .2s,box-shadow .2s"}}/>
             </div>}
             {isMobile&&<input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍" style={{padding:"6px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",width:60,fontFamily:"inherit"}}/>}
             <CustomSelect value={statusFilter} onChange={v=>setStatusFilter(v)}
               options={[{value:"all",label:isMobile?t("all_statuses_short","Статусы"):t("all_statuses","Все статусы")},...Object.entries(STATUS).map(([k,s])=>({value:k,label:s.label,dot:s.c}))]}
               style={{minWidth:isMobile?72:100}}/>
-            <div style={{fontSize:13,color:"var(--text4)",fontWeight:600,padding:"4px 9px",borderRadius:7,background:"var(--surface)",border:"1px solid var(--border)",whiteSpace:"nowrap",flexShrink:0}}>
+            <div style={{fontSize:13,color:"var(--text4)",fontWeight:600,padding:"6px 12px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)",whiteSpace:"nowrap",flexShrink:0}}>
               {filteredNodes.length}{search||statusFilter!=="all"?`/${nodes.length}`:""}{isMobile?"":" шагов"}
             </div>
           </div>
@@ -4665,10 +4667,10 @@ ${ctx}
         </div>
 
         {/* ROW 2 — view tools + panels + export */}
-        <div style={{minHeight:44,display:"flex",alignItems:"center",gap:isMobile?4:6,padding:isMobile?"8px 12px":"0 16px",flexWrap:isMobile?"wrap":undefined}}>
+        <div style={{minHeight:52,display:"flex",alignItems:"center",gap:isMobile?6:10,padding:isMobile?"10px 16px":"0 24px",flexWrap:isMobile?"wrap":undefined}}>
 
           {/* View tools */}
-          <div style={{display:"flex",alignItems:"center",gap:isMobile?2:3,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:isMobile?4:6,flexShrink:0}}>
             {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>Вид</span>}
             {tb(false,fitView,<>{isMobile?"⊡":<>⊡ Вписать</>}</>)}
             {selNode&&tb(false,()=>scrollToNode(selNode),<>{isMobile?"◎":<>◎ {t("center_on","К узлу")}</>}</>)}
@@ -4696,6 +4698,7 @@ ${ctx}
             {ib(showMini,t("minimap_hint","Миникарта"),()=>setShowMini((m:boolean)=>!m),<>🗺</>)}
             {ib(false,t("stats_title","Статистика"),()=>setShowStats(true),<>📊</>)}
             {ib(false,t("weekly_briefing","Еженедельный брифинг"),()=>setShowBriefing(true),<>📋</>)}
+            {ib(showTour,t("map_tour","Тур по карте"),()=>setShowTour(true),<>🎯</>)}
             {ib(false,t("shortcuts_title","Горячие клавиши")+" (?)",()=>setShowShortcuts(true),<>⌨️</>)}
             {!readOnly&&ib(showDeadlines,t("deadline_reminder","Напоминания о дедлайнах"),()=>setShowDeadlines((d:boolean)=>!d),<>⏰</>,{borderColor:showDeadlines?"rgba(245,158,11,.5)":"",background:showDeadlines?"rgba(245,158,11,.08)":"",color:showDeadlines?"#f59e0b":""})}
           </div>
@@ -4793,17 +4796,17 @@ ${ctx}
         )}
         <svg ref={svgRef} width="100%" height="100%"
           onPointerDown={onSvgMouseDown} onPointerMove={onSvgMouseMove} onPointerUp={onSvgMouseUp} onPointerLeave={onSvgMouseUp}
-          onWheel={onWheel} style={{cursor:panning.current?"grabbing":"default",display:"block",touchAction:"none"}}
-          onClick={e=>{if(e.target===svgRef.current||e.target.tagName==="svg"){setSelNode(null);setSelEdge(null);setCtxMenu(null);}}}
-          onDoubleClick={e=>{if(!readOnly&&(e.target===svgRef.current||e.target?.tagName==="svg")){e.preventDefault();addNodeAt(e.clientX,e.clientY);}}}
-          onContextMenu={e=>{if(e.target===svgRef.current||e.target?.tagName==="svg"){e.preventDefault();if(!readOnly)setCtxMenu({x:e.clientX,y:e.clientY});}}}>
+          onWheel={onWheel} style={{cursor:panning.current?"grabbing":"grab",display:"block",touchAction:"none"}}
+          onClick={e=>{const t=e.target as Element;if(t===svgRef.current||t?.tagName==="svg"||t?.getAttribute?.("data-canvas-bg")==="1"){setSelNode(null);setSelEdge(null);setCtxMenu(null);}}}
+          onDoubleClick={e=>{const t=e.target as Element;if(!readOnly&&(t===svgRef.current||t?.tagName==="svg"||t?.getAttribute?.("data-canvas-bg")==="1")){e.preventDefault();addNodeAt(e.clientX,e.clientY);}}}
+          onContextMenu={e=>{const t=e.target as Element;if(t===svgRef.current||t?.tagName==="svg"||t?.getAttribute?.("data-canvas-bg")==="1"){e.preventDefault();if(!readOnly)setCtxMenu({x:e.clientX,y:e.clientY});}}}>
           <defs>
             <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x%40},${view.y%40})`}>
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--grid)" strokeWidth="1"/>
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill={bgMode==="grid"?"url(#grid)":"var(--bg)"}/>
+          <rect width="100%" height="100%" fill={bgMode==="grid"?"url(#grid)":"var(--bg)"} data-canvas-bg="1"/>
           <g transform={`translate(${view.x},${view.y}) scale(${view.zoom})`}>
             {edges.filter(e=>!hiddenIds.has(e.source)&&!hiddenIds.has(e.target)).map(e=>(
               <EdgeLine key={e.id} edge={e} nodes={nodes} selected={selEdge?.id===e.id} onClick={ed=>{setSelEdge(ed);setSelNode(null);}}/>
@@ -4824,7 +4827,7 @@ ${ctx}
             <div style={{textAlign:"center",padding:32}}>
               <div style={{fontSize:56,marginBottom:16,opacity:.6}}>🗺️</div>
               <div style={{fontSize:16,fontWeight:700,color:"var(--text2)",marginBottom:8}}>{t("map_empty_title","Карта пуста")}</div>
-              <div style={{fontSize:14,color:"var(--text4)"}}>{t("map_empty_hint","Нажмите + Шаг, дважды кликните на фон или кликните на пустое место.")}</div>
+              <div style={{fontSize:14,color:"var(--text4)"}}>{t("map_empty_hint","Нажмите + Шаг, дважды кликните на фон или перетащите фон для перемещения.")}</div>
             </div>
           </div>
         )}
@@ -4852,11 +4855,11 @@ ${ctx}
           </div>
         )}
         {ctxMenu&&(
-          <div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,zIndex:400,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:14,boxShadow:"0 16px 48px rgba(0,0,0,.4)",padding:"8px 0",minWidth:200,animation:"scaleIn .15s ease",backdropFilter:"blur(12px)"}}>
+          <div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,zIndex:400,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:16,boxShadow:"0 20px 56px rgba(0,0,0,.35)",padding:"10px 0",minWidth:220,animation:"scaleIn .15s ease",backdropFilter:"blur(16px)"}}>
             {ctxMenu.node?(
               <>
-                <div style={{padding:"8px 14px",fontSize:12,color:"var(--text4)",borderBottom:"1px solid var(--border)"}}>{ctxMenu.node.title?.slice(0,24)}{(ctxMenu.node.title||"").length>24?"…":""}</div>
-                <button onClick={()=>{scrollToNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>↗ {t("center_on_node","Центрировать")}</button>
+                <div style={{padding:"10px 18px",fontSize:12,color:"var(--text4)",borderBottom:"1px solid var(--border)"}}>{ctxMenu.node.title?.slice(0,24)}{(ctxMenu.node.title||"").length>24?"…":""}</div>
+                <button onClick={()=>{scrollToNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"10px 18px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>↗ {t("center_on_node","Центрировать")}</button>
                 {!readOnly&&<>
                   <button onClick={()=>{duplicateNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>📋 {t("duplicate","Дублировать")}</button>
                   <button onClick={()=>{setClipboard(ctxMenu.node);addToast(t("copied","📋 Скопировано"),"info");setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>📄 {t("copy_short","Копировать")}</button>
@@ -4934,11 +4937,11 @@ ${ctx}
           </div>
         ))}
         {showShortcuts&&(
-          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(6px)"}} onClick={()=>setShowShortcuts(false)}>
-            <div style={{background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",padding:"24px 28px",maxWidth:400,width:"90%",animation:"scaleIn .2s ease"}} onClick={e=>e.stopPropagation()}>
+          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)"}} onClick={()=>setShowShortcuts(false)}>
+            <div style={{background:"var(--bg2)",borderRadius:24,border:"1px solid var(--border)",padding:"32px 36px",maxWidth:440,width:"90%",animation:"scaleIn .2s ease",boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:16}}>⌨️ Горячие клавиши</div>
               <p style={{fontSize:12,color:"var(--text4)",marginBottom:12}}>💡 Ctrl+C / Ctrl+V работают и в этой модалке — можно скопировать комбинацию.</p>
-              {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+Shift+A","Открыть AI-советник"],["Ctrl+F","Поиск шагов"],["Ctrl+A","Выбрать все узлы"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Shift+клик","Мультивыбор узлов"],["Двойной клик на фон","Добавить шаг в точке"],["ПКМ на узле/фоне","Контекстное меню"],["Escape","Снять выбор / закрыть меню"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Alt+Drag","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
+              {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+Shift+A","Открыть AI-советник"],["Ctrl+F","Поиск шагов"],["Ctrl+A","Выбрать все узлы"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Shift+клик","Мультивыбор узлов"],["Двойной клик на фон","Добавить шаг в точке"],["ПКМ на узле/фоне","Контекстное меню"],["Escape","Снять выбор / закрыть меню"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Перетащить фон","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
                 <div key={row[0]} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--border)"}}>
                   <code style={{fontSize:13,background:"var(--surface)",padding:"2px 7px",borderRadius:5,color:"#818cf8",fontFamily:"'JetBrains Mono',monospace"}}>{row[0]}</code>
                   <span style={{fontSize:13,color:"var(--text3)"}}>{row[1]}</span>
@@ -4948,10 +4951,10 @@ ${ctx}
             </div>
           </div>
         )}
-        <div className="zoom-ctrl" style={{position:"absolute",bottom:20,left:20,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"6px 10px",background:"var(--bg2)",borderRadius:12,border:"1px solid var(--border)",boxShadow:"0 4px 20px rgba(0,0,0,.15)"}}>
-          <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
-          <div style={{fontSize:13,color:"var(--text3)",fontWeight:700,minWidth:44,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
-          <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.max(.2,view.zoom*.83);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_out","Уменьшить")} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+        <div className="zoom-ctrl" style={{position:"absolute",bottom:24,left:24,display:"flex",gap:10,alignItems:"center",zIndex:30,padding:"8px 14px",background:"var(--bg2)",borderRadius:14,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,.12)"}}>
+          <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+          <div style={{fontSize:14,color:"var(--text3)",fontWeight:700,minWidth:48,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
+          <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.max(.2,view.zoom*.83);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_out","Уменьшить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
         </div>
       </div>
     </div>
@@ -5023,16 +5026,16 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           <button onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
         </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:16,position:"relative",zIndex:5}}>
-        <div style={{maxWidth:900,margin:"0 auto"}}>
-          <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:14,marginBottom:24}}>
+      <div style={{flex:1,overflowY:"auto",padding:24,position:"relative",zIndex:5}}>
+        <div style={{maxWidth:960,margin:"0 auto"}}>
+          <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:20,marginBottom:32}}>
             <div>
               <h1 style={{fontSize:isMobile?18:22,fontWeight:900,color:"var(--text)",letterSpacing:-.5,marginBottom:2}}>{t("your_projects","Мои проекты")}</h1>
               <div style={{fontSize:13.5,color:"var(--text3)"}}>{myCount} из {tier.projects==="∞"?"∞":tier.projects} проектов</div>
             </div>
             {!isMobile&&<div style={{flex:1}}/>}
-            <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} style={{padding:"7px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",width:isMobile?"100%":200,minWidth:isMobile?undefined:120,fontFamily:"inherit",flex:isMobile?1:undefined}}/>
+            <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit",flex:isMobile?1:undefined}}/>
               <button onClick={()=>{if(atLimit){return;}setCreating(true);}} style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,transition:"all .2s",flexShrink:0}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
             </div>
           </div>
@@ -5053,11 +5056,11 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             </div>
           )}
           {loading?(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:14}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:20}}>
               {[1,2,3].map(i=><div key={i} style={{height:120,borderRadius:14,background:"var(--surface)",animation:"pulse 1.5s ease infinite"}}/>)}
             </div>
           ):(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:14}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:20}}>
               {filtered.map(p=>{
                 const pm=maps[p.id]||[];
                 const myRole=p.owner===user.email?"owner":p.members?.find(m=>m.email===user.email)?.role;
@@ -5066,8 +5069,8 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                 const icon=ICONS[p.id.charCodeAt(0)%ICONS.length];
                 return(
                   <div key={p.id} onClick={()=>onSelectProject(p)} className="icard"
-                    style={{padding:"18px 18px 14px",borderRadius:16,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(0,0,0,.04)"}}>
-                    <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
+                    style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(0,0,0,.04)"}}>
+                    <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:14}}>
                       <div style={{width:40,height:40,borderRadius:11,background:`linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08))`,border:"1px solid rgba(99,102,241,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div className="icard-title" style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:2}}>{p.name}</div>
@@ -5797,7 +5800,7 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
 
 // ── MapTour ──
 const TOUR_STEPS=[
-  {title:"Это ваша стратегическая карта",body:"Каждый узел — шаг к цели. Перетаскивайте их, соединяйте и отслеживайте прогресс. Двигайте фон Alt+Drag, колесо — зум.",icon:"🗺️"},
+  {title:"Это ваша стратегическая карта",body:"Каждый узел — шаг к цели. Перетаскивайте их, соединяйте и отслеживайте прогресс. Перетащите фон для перемещения, колесо мыши — зум.",icon:"🗺️"},
   {title:"Добавляйте шаги",body:'Нажмите + Шаг или кликните на пустое место. У каждого шага — статус, приоритет, метрика, дедлайн. Ctrl+Z / Ctrl+Y — отмена и повтор.',icon:"⊕"},
   {title:"Связывайте шаги",body:'Кнопка "⇒ Связать" или "🔗 AI-связи" — AI предложит логичные зависимости. Режим связи: клик на источник, затем на цель.',icon:"→"},
   {title:"AI-советник",body:'Кнопка "✦ AI" или Ctrl+Shift+A. AI знает карту, связи, дедлайны. Быстрые подсказки: "С чего начать?", "Риски?", "Следующий шаг?".',icon:"✦"},
