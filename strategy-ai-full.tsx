@@ -3082,7 +3082,7 @@ function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme}){
     onJump(-(wx-canvasW/zoom/2)*zoom,-(wy-canvasH/zoom/2)*zoom);
   }
   return(
-    <div onClick={handleClick} style={{position:"absolute",bottom:16,right:16,width:W,height:H,borderRadius:10,overflow:"hidden",background:"var(--bg2)",border:"1px solid var(--border2)",boxShadow:"0 4px 16px rgba(0,0,0,.4)",cursor:"crosshair",zIndex:50}}>
+    <div onClick={handleClick} style={{position:"absolute",bottom:28,right:28,width:W,height:H,borderRadius:14,overflow:"hidden",background:"var(--bg2)",border:"1px solid var(--border2)",boxShadow:"0 8px 24px rgba(0,0,0,.25)",cursor:"crosshair",zIndex:50}}>
       <svg width={W} height={H}>
         {edges.map(e=>{
           const s2=nodes.find(n=>n.id===e.source),t2=nodes.find(n=>n.id===e.target);
@@ -3229,8 +3229,8 @@ function StatsPopup({nodes,edges,onClose}){
   );
 }
 
-// ── RichEditorPanel ──
-function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect,onError,onNotify}){
+// ── RichEditorPanel ── (aiPanelOpen: сдвигает влево, чтобы не перекрывать AI)
+function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect,onError,onNotify,aiPanelOpen}){
   const{t,lang}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
@@ -3327,21 +3327,24 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
   const tabs=[["info","◈ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
 
+  const panelRight=aiPanelOpen?380:0;
+  const panelWidth=aiPanelOpen?320:340;
   return(
-    <div style={{position:"absolute",right:0,top:0,bottom:0,width:320,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:12,padding:"18px 20px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
-        <div style={{width:10,height:10,borderRadius:3,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
-        <div style={{flex:1,fontSize:14,fontWeight:700,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
-        {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"background .15s"}}>↗</button>}
-        <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"background .15s"}}>×</button>
+    <div style={{position:"absolute",right:panelRight,top:0,bottom:0,width:panelWidth,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease",borderRadius:"16px 0 0 0"}}>
+      <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
+        <div style={{width:12,height:12,borderRadius:4,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
+        <div style={{flex:1,fontSize:15,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
+        {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>↗</button>}
+        <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
       </div>
-      <div style={{display:"flex",borderBottom:"1px solid var(--border)",flexShrink:0,overflowX:"auto"}}>
+      <div style={{display:"flex",borderBottom:"1px solid var(--border)",flexShrink:0,overflowX:"auto",padding:"0 14px"}}>
         {tabs.map(item=>{
           const k=item[0],lbl=item[1];
-          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"12px 10px",border:"none",background:tab===k?"var(--surface)":"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
+          const isActive=tab===k;
+          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"14px 16px",border:"none",background:isActive?"var(--surface)":"transparent",color:isActive?"var(--text)":"var(--text4)",fontSize:13,fontWeight:isActive?700:500,cursor:"pointer",borderBottom:isActive?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
         })}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
+      <div style={{flex:1,overflowY:"auto",padding:"22px"}}>
         {tab==="info"&&(
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
             <div>
@@ -3590,23 +3593,23 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   }
 
   return(
-    <div style={{position:"absolute",right:0,top:0,bottom:0,width:360,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:12,padding:"18px 20px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
-        <div style={{width:32,height:32,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,boxShadow:"0 2px 12px var(--accent-glow)"}}>✦</div>
-        <div style={{flex:1}}>
-          <div style={{fontSize:14,fontWeight:800,color:"var(--text)"}}>{t("ai_consultant","AI Советник")}</div>
-          <div style={{fontSize:12,color:tierCfg.color||"#10b981",fontWeight:600}}>{tierCfg.badge} {tierCfg.label}</div>
+    <div style={{position:"absolute",right:0,top:0,bottom:0,width:380,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",animation:"slideRight .2s ease",borderRadius:"16px 0 0 0"}}>
+      <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
+        <div style={{width:36,height:36,borderRadius:12,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0}}>✦</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:15,fontWeight:800,color:"var(--text)"}}>{t("ai_consultant","AI Советник")}</div>
+          <div style={{fontSize:12,color:tierCfg.color||"#10b981",fontWeight:600,marginTop:2}}>{tierCfg.badge} {tierCfg.label}</div>
         </div>
-        <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"6px 10px",borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"background .15s"}}>✕</button>
-        <button onClick={onClose} style={{width:32,height:32,borderRadius:8,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"background .15s"}}>×</button>
+        <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"8px 12px",borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>✕</button>
+        <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
       </div>
-      <div style={{padding:"14px 18px",borderBottom:"1px solid var(--border)",display:"flex",gap:8,flexWrap:"wrap",flexShrink:0}}>
+      <div style={{padding:"14px 20px",borderBottom:"1px solid var(--border)",display:"flex",gap:10,flexWrap:"wrap",flexShrink:0}}>
         {quick.map(q=>(
-          <button key={q} onClick={()=>send(q)} style={{padding:"8px 14px",borderRadius:20,border:"none",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:600,transition:"all .15s"}}
-            onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--accent-soft)";}}>{q}</button>
+          <button key={q} onClick={()=>send(q)} style={{padding:"10px 16px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,transition:"all .15s"}}
+            onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)";}}>{q}</button>
         ))}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"18px 20px",display:"flex",flexDirection:"column",gap:16}}>
+      <div style={{flex:1,overflowY:"auto",padding:"20px 22px",display:"flex",flexDirection:"column",gap:18}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start"}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
@@ -3616,9 +3619,9 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         {load&&<div style={{display:"flex",gap:8,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",borderRadius:"4px 14px 14px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
-      <div style={{padding:"16px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,flexShrink:0,background:"var(--surface)"}}>
-        <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={t("ask_placeholder","Спросите о стратегии…")} style={{flex:1,padding:"12px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"}}/>
-        <button onClick={()=>send()} disabled={!inp.trim()||load} style={{width:44,height:44,borderRadius:12,border:"none",background:inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:inp.trim()&&!load?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none",transition:"all .15s"}}>↑</button>
+      <div style={{padding:"18px 22px",borderTop:"1px solid var(--border)",display:"flex",gap:12,flexShrink:0,background:"var(--surface)"}}>
+        <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={t("ask_placeholder","Спросите о стратегии…")} style={{flex:1,padding:"14px 18px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:14,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"}}/>
+        <button onClick={()=>send()} disabled={!inp.trim()||load} style={{width:48,height:48,borderRadius:14,border:"none",background:inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:inp.trim()&&!load?"pointer":"not-allowed",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none",transition:"all .15s"}}>↑</button>
       </div>
     </div>
   );
@@ -3699,7 +3702,7 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,on
         strokeWidth={selected||isConnSrc||isOverdue?2:1}
         filter={selected?"url(#glow)":"none"}/>
       {selected&&<rect width={240} height={128} rx={12} fill="var(--accent-soft)"/>}
-      <rect x={0} y={0} width={4} height={128} rx={2} fill={st.c}/>
+      <rect x={0} y={12} width={4} height={104} rx={2} fill={st.c}/>
       {/* Заголовок и приоритет — одна линия, выровнены по центру */}
       <rect x={156} y={9} width={70} height={14} rx={7} fill={`${pr.c}20`} stroke={`${pr.c}50`} strokeWidth={1}/>
       <circle cx={167} cy={headerY} r={2.5} fill={pr.c}/>
@@ -4694,7 +4697,7 @@ ${ctx}
 
           {/* Panels */}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-            {ib(showAI,t("ai_consultant_hint","AI-консультант (Ctrl+Shift+A)"),()=>{setShowAI((a:boolean)=>!a);setSelNode(null);},<>✦ AI</>,{width:"auto",padding:"0 10px",fontSize:13,fontWeight:600,color:showAI?"#818cf8":"#a78bfa",borderColor:showAI?"rgba(99,102,241,.5)":"rgba(139,92,246,.25)",background:showAI?"rgba(99,102,241,.14)":"rgba(139,92,246,.06)"})}
+            {ib(showAI,t("ai_consultant_hint","AI-консультант (Ctrl+Shift+A)"),()=>setShowAI((a:boolean)=>!a),<>✦ AI</>,{width:"auto",padding:"0 10px",fontSize:13,fontWeight:600,color:showAI?"#818cf8":"#a78bfa",borderColor:showAI?"rgba(99,102,241,.5)":"rgba(139,92,246,.25)",background:showAI?"rgba(99,102,241,.14)":"rgba(139,92,246,.06)"})}
             {ib(showMini,t("minimap_hint","Миникарта"),()=>setShowMini((m:boolean)=>!m),<>🗺</>)}
             {ib(false,t("stats_title","Статистика"),()=>setShowStats(true),<>📊</>)}
             {ib(false,t("weekly_briefing","Еженедельный брифинг"),()=>setShowBriefing(true),<>📋</>)}
@@ -4726,28 +4729,33 @@ ${ctx}
           {sep}
 
           {/* Export/Import */}
-          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-            <span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>{t("export_label","Экспорт")}</span>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            <span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:4}}>{t("export_label","Экспорт")}</span>
             <button onClick={exportPNG} disabled={exporting} title="Скачать PNG"
-              style={{height:26,padding:"0 9px",borderRadius:6,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>
+              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              onMouseOver={e=>{if(!exporting)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               {exporting?"…":"⬇ PNG"}
             </button>
             <button onClick={exportJSON} title="Скачать JSON"
-              style={{height:26,padding:"0 9px",borderRadius:6,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>
+              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               ⬇ JSON
             </button>
             <button onClick={exportPDF} title={t("export_pdf","Скачать PDF")}
-              style={{height:26,padding:"0 9px",borderRadius:6,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>
+              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               ⬇ PDF
             </button>
             <button onClick={exportPPTX} title={t("export_pptx","Скачать PPTX")}
-              style={{height:26,padding:"0 9px",borderRadius:6,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#f87171",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>
+              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#f87171",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.12)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(239,68,68,.06)";}}>
               ⬇ PPTX
             </button>
             {/* Версии */}
             {API_BASE&&mapData?.id&&(
               <button onClick={()=>setShowVersions(true)} title={t("version_history","История версий")}
-                style={{height:26,padding:"0 9px",borderRadius:6,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.08)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>
+                style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.08)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+                onMouseOver={e=>{e.currentTarget.style.background="rgba(99,102,241,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(99,102,241,.08)";}}>
                 📜
               </button>
             )}
@@ -4763,12 +4771,14 @@ ${ctx}
               </div>
             )}
             {!readOnly&&<><button onClick={importJSON} title="Загрузить JSON"
-              style={{height:26,padding:"0 9px",borderRadius:6,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>
+              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               ⬆ JSON
             </button>
             <input ref={importRef} type="file" accept=".json" style={{display:"none"}} onChange={handleImportFile}/>
             <button onClick={shareMap} title={t("share_map","Поделиться картой")}
-              style={{height:26,padding:"0 10px",borderRadius:6,border:"1px solid rgba(16,185,129,.35)",background:"rgba(16,185,129,.08)",color:"#34d399",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
+              style={{height:32,padding:"0 14px",borderRadius:10,border:"1px solid rgba(16,185,129,.35)",background:"rgba(16,185,129,.08)",color:"#34d399",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:6,transition:"all .15s"}}
+              onMouseOver={e=>{e.currentTarget.style.background="rgba(16,185,129,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(16,185,129,.08)";}}>
               🔗 {t("share_btn","Поделиться")}
             </button>
             </>}
@@ -4855,29 +4865,30 @@ ${ctx}
           </div>
         )}
         {ctxMenu&&(
-          <div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,zIndex:400,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:16,boxShadow:"0 20px 56px rgba(0,0,0,.35)",padding:"10px 0",minWidth:220,animation:"scaleIn .15s ease",backdropFilter:"blur(16px)"}}>
+          <div style={{position:"fixed",left:ctxMenu.x,top:ctxMenu.y,zIndex:400,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:18,boxShadow:"0 20px 56px rgba(0,0,0,.35)",padding:"12px 0",minWidth:240,animation:"scaleIn .15s ease",backdropFilter:"blur(16px)"}}>
             {ctxMenu.node?(
               <>
-                <div style={{padding:"10px 18px",fontSize:12,color:"var(--text4)",borderBottom:"1px solid var(--border)"}}>{ctxMenu.node.title?.slice(0,24)}{(ctxMenu.node.title||"").length>24?"…":""}</div>
-                <button onClick={()=>{scrollToNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"10px 18px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>↗ {t("center_on_node","Центрировать")}</button>
+                <div style={{padding:"12px 20px",fontSize:12,color:"var(--text4)",borderBottom:"1px solid var(--border)"}}>{ctxMenu.node.title?.slice(0,24)}{(ctxMenu.node.title||"").length>24?"…":""}</div>
+                <button onClick={()=>{scrollToNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>↗ {t("center_on_node","Центрировать")}</button>
                 {!readOnly&&<>
-                  <button onClick={()=>{duplicateNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>📋 {t("duplicate","Дублировать")}</button>
-                  <button onClick={()=>{setClipboard(ctxMenu.node);addToast(t("copied","📋 Скопировано"),"info");setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>📄 {t("copy_short","Копировать")}</button>
-                  <button onClick={()=>{startConnect(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>⇒ {t("link_btn","Связать")}</button>
-                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdges(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"8px 14px",border:"none",background:"none",color:"#ef4444",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
+                  <button onClick={()=>{duplicateNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📋 {t("duplicate","Дублировать")}</button>
+                  <button onClick={()=>{setClipboard(ctxMenu.node);addToast(t("copied","📋 Скопировано"),"info");setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📄 {t("copy_short","Копировать")}</button>
+                  <button onClick={()=>{startConnect(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>⇒ {t("link_btn","Связать")}</button>
+                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdges(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"#ef4444",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
                 </>}
               </>
             ):(
-              !readOnly&&<button onClick={()=>{addNodeAt(ctxMenu.x,ctxMenu.y);setCtxMenu(null);}} style={{width:"100%",padding:"10px 14px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>+ {t("add_step_here","Добавить шаг здесь")}</button>
+              !readOnly&&<button onClick={()=>{addNodeAt(ctxMenu.x,ctxMenu.y);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>+ {t("add_step_here","Добавить шаг здесь")}</button>
             )}
           </div>
         )}
         {ctxMenu&&<div style={{position:"fixed",inset:0,zIndex:399}} onClick={()=>setCtxMenu(null)}/>}
         {showMini&&<MiniMap nodes={nodes} edges={edges} viewX={view.x} viewY={view.y} zoom={view.zoom} canvasW={W} canvasH={H} onJump={(x,y)=>{viewRef.current={...viewRef.current,x,y};setView(v=>({...v,x,y}));}} theme={theme}/>}
         {toasts.map(toast=><Toast key={toast.id} msg={toast.msg} type={toast.type} onClose={()=>setToasts(ts=>ts.filter(x=>x.id!==toast.id))}/>)}
-        {selNode&&!showAI&&(
+        {selNode&&(
           <RichEditorPanel
             node={selNode}
+            aiPanelOpen={showAI}
             ctx={mapData?.ctx||""}
             readOnly={readOnly}
             userName={user?.name||user?.email||"Пользователь"}
@@ -4951,7 +4962,7 @@ ${ctx}
             </div>
           </div>
         )}
-        <div className="zoom-ctrl" style={{position:"absolute",bottom:24,left:24,display:"flex",gap:10,alignItems:"center",zIndex:30,padding:"8px 14px",background:"var(--bg2)",borderRadius:14,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,.12)"}}>
+        <div className="zoom-ctrl" style={{position:"absolute",bottom:28,left:28,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"10px 16px",background:"var(--bg2)",borderRadius:16,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,.15)"}}>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
           <div style={{fontSize:14,color:"var(--text3)",fontWeight:700,minWidth:48,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.max(.2,view.zoom*.83);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_out","Уменьшить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
@@ -5247,10 +5258,10 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     const prog=ns.length?Math.round(ns.reduce((s,n)=>s+(n.progress||0),0)/ns.length):0;
     const overdue=ns.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
     return(
-      <div style={{padding:"16px 18px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:14,cursor:"pointer",transition:"all .18s",position:"relative"}}
+      <div style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",transition:"all .2s",position:"relative"}}
         onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}
-        onMouseOver={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.5)":"rgba(99,102,241,.35)";e.currentTarget.style.background="var(--card-hover,var(--surface))";}}
-        onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";e.currentTarget.style.background="var(--card)";}}>
+        onMouseOver={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.5)":"rgba(99,102,241,.35)";e.currentTarget.style.background="var(--card-hover,var(--surface))";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,.15)";}}
+        onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";e.currentTarget.style.background="var(--card)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
           <div style={{width:34,height:34,borderRadius:9,background:isSc?"rgba(139,92,246,.15)":"rgba(99,102,241,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,border:`1px solid ${isSc?"rgba(139,92,246,.25)":"rgba(99,102,241,.15)"}`}}>
             {isSc?"⎇":"🗺️"}
@@ -5284,19 +5295,19 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
 
       {/* Header */}
-      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"12px 20px",display:"flex",alignItems:"center",gap:12}}>
-        <button onClick={onBack} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>←</button>
-        <div style={{flex:1}}>
-          <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{proj.name||"Проект"}</div>
-          <div style={{fontSize:13,color:"var(--text5)"}}>{regularMaps.length} карт • {scenarios.length} сценариев • {(proj.members||[]).length} участников</div>
+      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"16px 24px",display:"flex",alignItems:"center",gap:16}}>
+        <button onClick={onBack} style={{width:40,height:40,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text3)";}}>←</button>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.2}}>{proj.name||"Проект"}</div>
+          <div style={{fontSize:13,color:"var(--text5)",marginTop:2}}>{regularMaps.length} карт • {scenarios.length} сценариев • {(proj.members||[]).length} участников</div>
         </div>
-        <button onClick={onToggleTheme} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>{theme==="dark"?"☀️":"🌙"}</button>
-        <button onClick={onProfile} style={{width:32,height:32,borderRadius:"50%",border:"1px solid var(--border)",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center"}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
+        <button onClick={onToggleTheme} style={{width:40,height:40,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>{theme==="dark"?"☀️":"🌙"}</button>
+        <button onClick={onProfile} style={{width:40,height:40,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
       </div>
 
       {/* Stats bar */}
       {totalNodes>0&&(
-        <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"10px 20px",display:"flex",gap:24}}>
+        <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"14px 24px",display:"flex",gap:32}}>
           {[
             {label:"Шагов всего",val:totalNodes,color:"#6366f1"},
             {label:"Завершено",val:`${doneNodes} (${totalNodes?Math.round(doneNodes/totalNodes*100):0}%)`,color:"#10b981"},
@@ -5312,13 +5323,13 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       )}
 
       {/* Tabs */}
-      <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:"0 20px",background:"var(--bg2)"}}>
+      <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:"0 24px",background:"var(--bg2)"}}>
         {[["maps",`🗺 Карты (${regularMaps.length})`],["scenarios",`⎇ Сценарии (${scenarios.length})`],["team",`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
-          <button key={k} onClick={()=>setTab(k)} style={{padding:"10px 16px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13.5,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"2px solid #6366f1":"2px solid transparent",marginBottom:-1,transition:"all .15s"}}>{lbl}</button>
+          <button key={k} onClick={()=>setTab(k)} style={{padding:"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s"}}>{lbl}</button>
         ))}
       </div>
 
-      <div style={{maxWidth:900,margin:"0 auto",padding:"20px"}}>
+      <div style={{maxWidth:960,margin:"0 auto",padding:"28px 24px"}}>
         {/* Maps Tab */}
         {tab==="maps"&&(
           <div>
@@ -5339,7 +5350,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 {canEdit&&<button onClick={()=>createMap()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Создать карту</button>}
               </div>
             ):(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:12}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
                 {regularMaps.map(m=><MapCard key={m.id} m={m} isSc={false}/>)}
               </div>
             )}
