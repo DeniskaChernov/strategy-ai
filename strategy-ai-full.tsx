@@ -438,7 +438,7 @@ const LANGS={
     stats_empty:'Добавьте шаги на карту, чтобы увидеть аналитику.',
     add_step_hint:'Добавить шаг (клик на пустое место)',link_mode_hint:'Режим связи: клик на источник, затем на цель',
     ai_consultant_hint:'AI-консультант (Ctrl+Shift+A)',minimap_hint:'Миникарта',
-    simulation_hint:'Симуляция выполнения стратегии',templates_hint:'Шаблоны карт',gantt_hint:'Диаграмма Ганта',
+    simulation_hint:'Симуляция выполнения стратегии',templates_hint:'Шаблоны карт',gantt_title:'Диаграмма Ганта',
     dismiss:'Скрыть',map_empty_title:'Карта пуста',map_empty_hint:'Нажмите + Шаг, дважды кликните на фон или кликните на пустое место.',
     search_no_results:'Ничего не найдено',search_no_results_hint:'Сбросьте поиск или фильтр статусов.',
     zoom_in:'Увеличить',zoom_out:'Уменьшить',
@@ -451,7 +451,7 @@ const LANGS={
     type_question:'Спросите о стратегии…',send_btn:'Отправить',
     quick_actions:'Быстрые действия',
     // GanttView
-    gantt_title:'Gantt Таймлайн',no_deadlines:'Нет дедлайнов',
+    no_deadlines:'Нет дедлайнов',
     gantt_hint:'Добавьте дедлайны к шагам в редакторе',
     today:'Сегодня',overdue:'Просрочено',
     // ProfileModal
@@ -820,7 +820,7 @@ const LANGS={
     stats_empty:'Add steps to the map to see analytics.',
     add_step_hint:'Add step (click on empty area)',link_mode_hint:'Link mode: click source, then target',
     ai_consultant_hint:'AI advisor (Ctrl+Shift+A)',minimap_hint:'Minimap',
-    simulation_hint:'Strategy execution simulation',templates_hint:'Map templates',gantt_hint:'Gantt chart',
+    simulation_hint:'Strategy execution simulation',templates_hint:'Map templates',gantt_title:'Gantt chart',
     dismiss:'Dismiss',map_empty_title:'Map is empty',map_empty_hint:'Click + Step, double-click on canvas, or click on empty area.',
     search_no_results:'No results found',search_no_results_hint:'Clear search or status filter.',
     zoom_in:'Zoom in',zoom_out:'Zoom out',
@@ -833,7 +833,7 @@ const LANGS={
     type_question:'Ask about strategy…',send_btn:'Send',
     quick_actions:'Quick actions',
     // GanttView
-    gantt_title:'Gantt Timeline',no_deadlines:'No deadlines',
+    no_deadlines:'No deadlines',
     gantt_hint:'Add deadlines to steps in the editor',
     today:'Today',overdue:'Overdue',
     // ProfileModal
@@ -1203,7 +1203,7 @@ const LANGS={
     stats_empty:"Analitikani ko'rish uchun xaritaga qadamlar qo'shing.",
     add_step_hint:"Qadam qo'shish (bo'sh joyga bosing)",link_mode_hint:"Bog'lash rejimi: manba, keyin maqsad",
     ai_consultant_hint:"AI maslahatchi (Ctrl+Shift+A)",minimap_hint:"Minixarita",
-    simulation_hint:"Strategiya bajarilishi simulyatsiyasi",templates_hint:"Xarita shablonlari",gantt_hint:"Gantt diagrammasi",
+    simulation_hint:"Strategiya bajarilishi simulyatsiyasi",templates_hint:"Xarita shablonlari",gantt_title:"Gantt diagrammasi",
     dismiss:"Yashirish",map_empty_title:"Xarita bo'sh",map_empty_hint:"+ Qadam, fonni ikki marta bosing yoki bo'sh joyni bosing.",
     search_no_results:"Hech narsa topilmadi",search_no_results_hint:"Qidiruv yoki status filtriini tozalang.",
     zoom_in:"Kattalashtirish",zoom_out:"Kichiklashtirish",
@@ -1216,7 +1216,7 @@ const LANGS={
     type_question:"Savol yozing…",send_btn:"Yuborish",
     quick_actions:"Tezkor harakatlar",
     // GanttView
-    gantt_title:"Gantt Taymlayn",no_deadlines:"Muddatlar yo'q",
+    no_deadlines:"Muddatlar yo'q",
     gantt_hint:"Muddatlarni qadam muharririda qo'shing",
     today:"Bugun",overdue:"Kechiktirilgan",
     // ProfileModal
@@ -1445,7 +1445,6 @@ const LANGS={
     delete_err:"O'chirishda xato",
     settings_saved:"Sozlamalar saqlandi ✓",
     appearance:"Ko'rinish",
-    light_theme_label:"☀️ Yorug'",dark_theme_label:"🌙 Qorong'u",
     compact_desc:"Kichroq tugun kartalari",
     autosave_desc:"Har bir o'zgarishda xaritani saqlash",
     canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 Ro'yxat",
@@ -5031,7 +5030,7 @@ ${ctx}
                 📋 Шаблоны
               </button>
             )}
-            <button onClick={()=>setShowGantt(g=>!g)} title={t("gantt_hint","Диаграмма Ганта")}
+            <button onClick={()=>setShowGantt(g=>!g)} title={t("gantt_title","Диаграмма Ганта")}
               style={{height:26,padding:"0 10px",borderRadius:6,border:`1px solid ${showGantt?"rgba(16,185,129,.5)":"rgba(16,185,129,.2)"}`,background:showGantt?"rgba(16,185,129,.14)":"rgba(16,185,129,.06)",color:"#34d399",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
               📅 Gantt
             </button>
