@@ -1744,6 +1744,8 @@ async function deleteProject(id:string){
   await store.del(`sa_maps_${id}`);
 }
 function normalizeMap(m:any){if(!m)return m;return{...m,isScenario:m.isScenario??m.is_scenario??false};}
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function isUUID(s:any){return typeof s==="string"&&UUID_RE.test(s);}
 async function getMaps(pid:string){
   if(API_BASE){
     try{const d=await apiFetch(`/api/projects/${pid}/maps`);return (d.maps||[]).map(normalizeMap);}
@@ -1754,7 +1756,8 @@ async function getMaps(pid:string){
 async function saveMap(pid:string,map:any){
   if(API_BASE){
     try{
-      if(map._new){
+      const treatAsNew=map._new||!isUUID(map.id);
+      if(treatAsNew){
         const d=await apiFetch(`/api/projects/${pid}/maps`,{method:"POST",body:JSON.stringify({name:map.name,nodes:map.nodes,edges:map.edges,ctx:map.ctx,is_scenario:map.isScenario})});
         return normalizeMap(d.map)||map;
       } else {
@@ -2249,7 +2252,7 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
   },[]);
   return(
     <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleCancel();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,360px)",background:"var(--bg2)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--border)"}`,boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,360px)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--border)"}`,boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"var(--accent-soft)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"var(--accent-1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -2276,7 +2279,7 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
   const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",border:"1px solid var(--border)",borderRadius:20,boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>
             {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
@@ -2490,7 +2493,7 @@ function PostOnboardFlow({pendingMap,currentUser,theme='dark',onComplete,onBack}
   async function doSaveAndGo(proj,u,replaceMapId){
     setSaving(true);if(replaceMapId)await deleteMap(proj.id,replaceMapId);
     const map={id:uid(),name:"Карта от AI",nodes:pendingMap?.nodes||[],edges:pendingMap?.edges||[],ctx:pendingMap?.ctx||"",isScenario:false,createdAt:Date.now()};
-    await saveMap(proj.id,map);setSaving(false);onComplete(u,proj,map);
+    const saved=await saveMap(proj.id,map);setSaving(false);onComplete(u,proj,saved);
   }
   if(saving)return <SavingScreen theme={theme}/>;
   if(step==="auth")return(
@@ -2660,7 +2663,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)handleClose();}}>
       <style>{CSS}</style>
-      <div className={`glass-panel ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
 
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
@@ -3380,7 +3383,7 @@ function StatsPopup({nodes,edges,onClose}){
   if(total===0){
     return(
       <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-        <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,420px)",background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"28px 24px",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+        <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,420px)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"28px 24px",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
           <div style={{fontSize:44,marginBottom:14}}>📊</div>
           <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:8}}>{t("stats_title","Статистика")}</div>
           <div style={{fontSize:14,color:"var(--text4)",lineHeight:1.6}}>{t("stats_empty","Добавьте шаги на карту, чтобы увидеть аналитику.")}</div>
@@ -3418,7 +3421,7 @@ function StatsPopup({nodes,edges,onClose}){
   const healthColor=healthScore>=70?"#10b981":healthScore>=40?"#f59e0b":"#ef4444";
   return(
     <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,620px)",background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,620px)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
           <div>
             <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>📊 Аналитика карты</div>
@@ -4210,7 +4213,7 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="d
   }
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{background:"var(--bg2)",borderRadius:20,width:"min(480px,94vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(480px,94vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 24px",borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
           <div style={{fontWeight:800,fontSize:16,color:"var(--text)"}}>📜 {t("version_history","История версий")}</div>
           <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
@@ -4273,7 +4276,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
 
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{background:"var(--bg2)",borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{background:"var(--surface)",padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
@@ -5589,7 +5592,7 @@ function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
   }
   return(
     <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="glass-panel" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px"}} onClick={e=>e.stopPropagation()}>
+      <div className="glass-panel" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px"}} onClick={e=>e.stopPropagation()}>
         <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:18}}>✍️ {item.id?t("edit","Редактировать"):t("add_content_item","Публикация")}</div>
         <input placeholder={t("title","Название")} value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:10,outline:"none",fontFamily:"inherit"}}/>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_type_post","Тип")}</div>
@@ -5669,9 +5672,9 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       const reg=cur.filter(m=>!m.isScenario);
       if(reg.length>=tier.maps){setToast({msg:t("map_limit_tier","Лимит карт для {tier}: {n}").replace("{tier}",tier.label).replace("{n}",String(fmt(tier.maps))),type:"warn"});return;}
       const map={id:uid(),name:tmpl?tmpl.name:`Карта ${reg.length+1}`,nodes:tmpl?.nodes||[],edges:tmpl?.edges||[],ctx:"",isScenario:false,createdAt:Date.now()};
-      await saveMap(proj.id,map);
+      const saved=await saveMap(proj.id,map);
       if(tmpl){await load();setToast({msg:`Шаблон "${tmpl.name}" применён!`,type:"success"});}
-      else onOpenMap(map,proj,true,myRole==="viewer");
+      else onOpenMap(saved,proj,true,myRole==="viewer");
     }finally{creatingRef.current=false;}
   }
 
@@ -5679,8 +5682,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     setShowScChoice(false);
     const sc=(await getMaps(proj.id)).filter(m=>m.isScenario);
     const map={id:uid(),name:`Сценарий ${sc.length+1}`,nodes:[],edges:[],ctx:"",isScenario:true,createdAt:Date.now()};
-    await saveMap(proj.id,map);
-    onOpenMap(map,proj,true,myRole==="viewer");
+    const saved=await saveMap(proj.id,map);
+    onOpenMap(saved,proj,true,myRole==="viewer");
   }
 
   async function createScenarioFromTemplate(parsed){
@@ -5688,10 +5691,10 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     const sc=(await getMaps(proj.id)).filter(m=>m.isScenario);
     const name=parsed.scenarioName?`${parsed.scenarioIcon} ${parsed.scenarioName}`:`Сценарий ${sc.length+1}`;
     const map={id:uid(),name,nodes:parsed.nodes||[],edges:parsed.edges||[],ctx:"",isScenario:true,createdAt:Date.now()};
-    await saveMap(proj.id,map);
+    const saved=await saveMap(proj.id,map);
     await load();
     setToast({msg:`Сценарий "${name}" создан!`,type:"success"});
-    onOpenMap(map,proj,false,myRole==="viewer");
+    onOpenMap(saved,proj,false,myRole==="viewer");
   }
 
   async function tryCreateScenario(){
@@ -6276,7 +6279,7 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
   return(
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
       <style>{CSS}</style>
-      <div className="glass-panel" style={{width:"min(95vw,760px)",maxHeight:"86vh",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
+      <div className="glass-panel" style={{width:"min(95vw,760px)",maxHeight:"86vh",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         <div style={{padding:"18px 22px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{flex:1}}>
             <div style={{fontSize:15,fontWeight:900,color:"var(--text)"}}>📋 Шаблоны карт</div>
@@ -7065,6 +7068,14 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       background-clip:text;
       animation:lGradShift 4s ease infinite;
     }
+    .lprc .lprc-price{color:#f0eeff;transition:color .2s, background .2s, background-position .2s;}
+    .lprc:hover .lprc-price{
+      background:linear-gradient(90deg,#818cf8,#a78bfa,#38bdf8,#c4b5fd,#818cf8);
+      background-size:300% 100%;
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+      animation:lGradShift 4s ease infinite;
+    }
     .lprc .lprc-desc{color:rgba(240,238,255,.38);transition:color .25s;}
     .lprc:hover .lprc-desc{color:rgba(240,238,255,.75);}
     .lprc .lprc-feat{color:rgba(240,238,255,.45);transition:color .2s;}
@@ -7340,7 +7351,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
                 {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(99,102,241,.18)",border:"1px solid rgba(99,102,241,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#818cf8",letterSpacing:2,textTransform:"uppercase"}}>{t("pricing_hot_badge","★ ТОП")}</div>}
                 <span className="lprc-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:p.hot?"#818cf8":"rgba(240,238,255,.3)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:26}}>{p.tier}</span>
                 <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
-                  <span style={{fontSize:p.tier==="Enterprise"?48:64,fontWeight:900,letterSpacing:p.tier==="Enterprise"?-1:-3,lineHeight:.88,color:"#f0eeff",...(p.hot?{background:"linear-gradient(135deg,#818cf8,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}:{})}}>{p.price}</span>
+                  <span className="lprc-price" style={{fontSize:p.tier==="Enterprise"?48:64,fontWeight:900,letterSpacing:p.tier==="Enterprise"?-1:-3,lineHeight:.88,color:"#f0eeff",...(p.hot?{background:"linear-gradient(135deg,#818cf8,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}:{})}}>${p.price}</span>
                   <span style={{fontSize:17,fontWeight:300,color:"rgba(240,238,255,.25)",marginBottom:10}}>{p.mo}</span>
                 </div>
                 <div className="lprc-desc" style={{fontSize:13,marginBottom:32,paddingBottom:32,borderBottom:"1px solid rgba(255,255,255,.06)",lineHeight:1.6}}>{p.desc}</div>
