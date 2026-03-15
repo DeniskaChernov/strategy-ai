@@ -23,7 +23,7 @@ const TIERS = {
     maps: 3,
     projects: 3,
     members: 3,
-    scenarios: 1,
+    scenarios: 2,
     ai_messages: 1500,
     features: [
       'Unlimited стратегии',
@@ -43,7 +43,7 @@ const TIERS = {
     maps: 5,
     projects: 10,
     members: 5,
-    scenarios: 3,
+    scenarios: 5,
     ai_messages: 8000,
     features: [
       'Unlimited стратегии',
@@ -64,7 +64,7 @@ const TIERS = {
     maps: 15,
     projects: 25,
     members: 10,
-    scenarios: 10,
+    scenarios: 15,
     ai_messages: 25000,
     features: [
       'Unlimited стратегии',

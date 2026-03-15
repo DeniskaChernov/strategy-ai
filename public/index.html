@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="description" content="Strategy AI — визуальное стратегическое планирование с AI-советником уровня McKinsey. Карты целей, Gantt, сценарии, экспорт."/>
   <title>Strategy AI — Визуальное стратегическое планирование с AI</title>
   <link rel="icon" type="image/png" href="/logo.png"/>
@@ -41,6 +41,15 @@
   </script>
 </head>
 <body>
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('sa_theme'); var p = localStorage.getItem('sa_palette');
+        document.body.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+        document.body.setAttribute('data-palette', (p && ['indigo','ocean','forest','sunset','mono'].indexOf(p) >= 0) ? p : 'indigo');
+      } catch (_) {}
+    })();
+  </script>
   <div id="splash">
     <div id="splash-logo"><img src="/logo.png" alt="Strategy AI"/></div>
     <div style="font-size:22px;font-weight:800;color:#f1f5f9;letter-spacing:-0.5px">Strategy AI</div>

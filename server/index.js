@@ -311,15 +311,18 @@ async function runDeadlineReminders() {
   }
 }
 
+let lastDeadlineRunDate = null;
 function startCron() {
-  // Проверяем раз в час, запускаем письма только в 08:00 UTC
   setInterval(() => {
-    const hour = new Date().getUTCHours();
-    const minute = new Date().getUTCMinutes();
-    if (hour === 8 && minute < 60) {
+    const now = new Date();
+    const hour = now.getUTCHours();
+    const minute = now.getUTCMinutes();
+    const today = now.toISOString().slice(0, 10);
+    if (hour === 8 && minute < 5 && lastDeadlineRunDate !== today) {
+      lastDeadlineRunDate = today;
       runDeadlineReminders();
     }
-  }, 60 * 60 * 1000); // каждый час
+  }, 60 * 60 * 1000);
 }
 
 // ── Start ─────────────────────────────────────────────────────────────────────

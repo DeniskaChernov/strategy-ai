@@ -28,7 +28,7 @@ async function requireAuth(req, res, next) {
 
     // Проверяем, что пользователь ещё существует
     const { rows } = await pool.query(
-      'SELECT id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, theme, palette, trial_ends_at, stripe_subscription_id, tier_valid_until, created_at, email_verified FROM users WHERE email = $1',
+      'SELECT id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, theme, palette, trial_ends_at, stripe_customer_id, stripe_subscription_id, tier_valid_until, created_at, email_verified FROM users WHERE email = $1',
       [decoded.email]
     );
     if (!rows[0]) {
@@ -55,6 +55,7 @@ async function requireAuth(req, res, next) {
       user.trial_ends_at = null;
     }
 
+    user.is_dev = (process.env.DEV_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean).includes(user.email);
     req.user = user;
     next();
   } catch (err) {

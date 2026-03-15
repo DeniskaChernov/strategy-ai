@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { io as ioClient } from "socket.io-client";
 
 const NW=240,NH=128;
 
@@ -84,6 +85,19 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 [data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);}
 [data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);}
 [data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);}
+/* ── Синхронизация с body: тема и палитра применяются ко всему документу ── */
+body[data-theme="dark"]{--bg:#060a12;--bg2:#0a0f1a;--bg3:#0e1422;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;--input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);--card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;--divider:rgba(255,255,255,.08);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);--node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
+body[data-theme="light"]{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);--border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);--text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;--input-bg:#ffffff;--input-border:rgba(0,0,0,.18);--card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;--divider:rgba(0,0,0,.1);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);--node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
+body[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);}
+body[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);}
+body[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);}
+body[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);}
+body[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);}
+body[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);}
+body[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);}
+body[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);}
+body[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);}
+body[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);}
 [data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{
   background:var(--input-bg) !important;border-color:var(--input-border) !important;
   color:var(--text) !important;color-scheme:light;
@@ -102,8 +116,8 @@ select{appearance:none;-webkit-appearance:none;}
 ::-webkit-scrollbar-thumb:hover{background:var(--text4)}
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:2px solid var(--accent-1);outline-offset:2px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
@@ -199,9 +213,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes scrollPulse{0%,100%{opacity:.4}50%{opacity:1}}
 @keyframes slideRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
 @keyframes slideLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
-.panel-slide{animation:slideRight .35s cubic-bezier(.25,.46,.45,.94) forwards;}
-.panel-slide-fast{animation:slideRight .25s cubic-bezier(.25,.46,.45,.94) forwards;}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+.panel-slide{animation:slideRight .4s cubic-bezier(0.22,1,0.36,1) forwards;}
+.panel-slide-fast{animation:slideRight .28s cubic-bezier(0.22,1,0.36,1) forwards;}
 .modal-scale{animation:scaleIn .28s cubic-bezier(.25,.46,.45,.94) forwards;}
 @keyframes ripple{from{transform:scale(0);opacity:.4}to{transform:scale(2.5);opacity:0}}
 @keyframes checkmark{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
@@ -215,9 +229,64 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes slideInPanel{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
 @keyframes tourStep{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes statsReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes hoverLift{to{transform:translateY(-2px)}}
+@keyframes softPulse{0%,100%{opacity:1}50%{opacity:.92}}
 .node-selected{animation:nodeSelect .25s ease;}
 .tour-card{animation:tourStep .25s ease;}
 .stats-card{animation:statsReveal .3s ease both;}
+.animate-fade-in-up{animation:fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards;}
+.animate-hover-lift{transition:transform .25s ease,box-shadow .25s ease;}
+.animate-hover-lift:hover{animation:hoverLift .25s ease forwards;}
+/* Интерактив: кнопки и карточки */
+.btn-interactive{transition:transform .12s ease,box-shadow .2s ease,background .2s ease;}
+.btn-interactive:hover{transform:translateY(-1px);}
+.btn-interactive:active{transform:translateY(0) scale(0.98);}
+.card-interactive{transition:transform .28s cubic-bezier(0.22,1,0.36,1),box-shadow .28s ease,border-color .2s ease;}
+.card-interactive:hover{transform:translateY(-3px);}
+.input-focus-ring:focus{box-shadow:0 0 0 3px var(--accent-glow);outline:none;}
+
+/* ── Плавные анимации экранов и списков ── */
+@keyframes screenEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes screenEnterLeft{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes listItemIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeScaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+@keyframes backdropIn{from{opacity:0;backdrop-filter:blur(0)}to{opacity:1;backdrop-filter:blur(16px)}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+.screen-enter{animation:screenEnter .4s cubic-bezier(0.22,1,0.36,1) forwards;}
+.screen-enter-left{animation:screenEnterLeft .35s cubic-bezier(0.22,1,0.36,1) forwards;}
+.list-item-in{animation:listItemIn .35s cubic-bezier(0.22,1,0.36,1) forwards;}
+.fade-scale-in{animation:fadeScaleIn .3s cubic-bezier(0.22,1,0.36,1) forwards;}
+.backdrop-in{animation:backdropIn .25s ease forwards;}
+.toast-in{animation:toastIn .3s cubic-bezier(0.22,1,0.36,1) forwards;}
+/* Плавные переходы для кнопок и инпутов */
+.btn-smooth{transition:transform .18s ease,box-shadow .25s ease,background .2s ease,color .2s ease,border-color .2s ease,opacity .2s ease;}
+.btn-smooth:hover{transform:translateY(-1px);}
+.btn-smooth:active{transform:translateY(0);}
+.input-smooth{transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;}
+.input-smooth:focus{box-shadow:0 0 0 3px var(--accent-glow);}
+/* Карточки проектов и карт — плавное появление */
+.card-stagger{opacity:0;animation:listItemIn .4s cubic-bezier(0.22,1,0.36,1) forwards;}
+/* Контейнер экрана с плавной сменой */
+.screen-wrap{transition:opacity .2s ease;}
+/* Модалки — более мягкое появление */
+.modal-backdrop{animation:backdropIn .28s ease forwards;}
+.modal-content-pop{animation:fadeScaleIn .32s cubic-bezier(0.22,1,0.36,1) forwards;}
+/* Панели (боковые) — плавный slide */
+.panel-enter{animation:slideRight .4s cubic-bezier(0.22,1,0.36,1) forwards;}
+/* Вкладки — лёгкий fade контента */
+.tab-content{animation:fadeScaleIn .28s cubic-bezier(0.22,1,0.36,1) forwards;}
+
+/* ── Мобильная адаптация (max-width: 640px) ── */
+@media (max-width: 640px){
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  .btn-smooth{min-height:44px;}
+  .input-smooth{min-height:44px;font-size:16px;}
+  .screen-enter{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
+}
+@media (max-width: 480px){
+  .card-stagger{animation-duration:.3s;}
+}
 `;
 const {createContext,useContext}=React;
 const LangCtx=createContext({lang:'ru',setLang:()=>{},t:(k,fb)=>fb||k});
@@ -417,6 +486,9 @@ const LANGS={
     login_or_register:"Войдите или создайте аккаунт бесплатно",
     loading_short:"Загрузка…",
     why_label:"Зачем?",
+    why_placeholder:"Зачем этот шаг, какой результат нужен",
+    action_label:"Что сделать",
+    action_placeholder:"Напр.: Провести 15 интервью с ЦА до пятницы",
     tools_label:"Инструментарий",
     use_ai_comment:"Используйте @AI чтобы задать вопрос AI.",
     use_connect:"Используйте ⇒ Связать или ✦ AI-связи.",
@@ -433,6 +505,8 @@ const LANGS={
     no_comments2:"Нет комментариев.",
     no_projects:"Нет проектов",
     upgrade_to_pro:"Перейти на Pro",
+    ai_free_upgrade:"AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.",
+    ai_free_placeholder:"Доступно с тарифа Starter",
     by_priority:"По приоритетам",
     by_status:"По статусам",
     continue_btn:"Продолжить",
@@ -782,6 +856,9 @@ const LANGS={
     login_or_register:"Sign in or create a free account",
     loading_short:"Loading…",
     why_label:"Why?",
+    why_placeholder:"Why this step, what outcome is needed",
+    action_label:"What to do",
+    action_placeholder:"E.g.: Run 15 customer interviews by Friday",
     tools_label:"Toolkit",
     use_ai_comment:"Use @AI to ask the AI a question.",
     use_connect:"Use ⇒ Connect or ✦ AI-links.",
@@ -798,6 +875,8 @@ const LANGS={
     no_comments2:"No comments.",
     no_projects:"No projects",
     upgrade_to_pro:"Upgrade to Pro",
+    ai_free_upgrade:"AI chat is available on Starter plan. Upgrade in profile.",
+    ai_free_placeholder:"Available on Starter plan",
     by_priority:"By priority",
     by_status:"By status",
     continue_btn:"Continue",
@@ -1151,6 +1230,9 @@ const LANGS={
     login_or_register:"Kiring yoki bepul akkaunt yarating",
     loading_short:"Yuklanmoqda…",
     why_label:"Nima uchun?",
+    why_placeholder:"Nima uchun bu qadam, qanday natija kerak",
+    action_label:"Nima qilish kerak",
+    action_placeholder:"Masalan: 15 ta mijoz suhbatini juma kuniga qadar o'tkazish",
     tools_label:"Vositalar",
     use_ai_comment:"AI ga savol berish uchun @AI dan foydalaning.",
     use_connect:"Bog'lash yoki ✦ AI-bog'lanishlardan foydalaning.",
@@ -1167,6 +1249,8 @@ const LANGS={
     no_comments2:"Izohlar yo'q.",
     no_projects:"Loyihalar yo'q",
     upgrade_to_pro:"Pro ga o'tish",
+    ai_free_upgrade:"AI chat Starter tarifida mavjud. Profilda yangilang.",
+    ai_free_placeholder:"Starter tarifida mavjud",
     by_priority:"Muhimlik bo'yicha",
     by_status:"Holat bo'yicha",
     continue_btn:"Davom etish",
@@ -1503,6 +1587,7 @@ function normalizeUser(raw:any){
     createdAt:raw.createdAt??raw.created_at,
     trialEndsAt:raw.trialEndsAt??raw.trial_ends_at,
     emailVerified:raw.emailVerified??raw.email_verified??true,
+    is_dev:raw.is_dev??false,
   };
 }
 
@@ -1686,7 +1771,7 @@ async function callAI(messages:any[],system:string,maxTokens=1200):Promise<strin
     throw e;
   }
 }
-function defaultNodes(){return[{id:"n1",x:200,y:270,title:"Анализ рынка",reason:"Понять ЦА",metric:"100 интервью",status:"completed",priority:"high",progress:100},{id:"n2",x:480,y:155,title:"MVP продукт",reason:"Проверить гипотезу",metric:"50 платящих",status:"active",priority:"critical",progress:60},{id:"n3",x:480,y:395,title:"Маркетинг",reason:"Первые клиенты",metric:"CAC < $100",status:"active",priority:"high",progress:25},{id:"n4",x:760,y:270,title:"Рост",reason:"Масштаб",metric:"$50k MRR",status:"planning",priority:"critical",progress:0}];}
+function defaultNodes(){return[{id:"n1",x:200,y:270,title:"Анализ рынка",reason:"Понять ЦА",action:"Провести 15 интервью с целевой аудиторией",metric:"100 интервью",status:"completed",priority:"high",progress:100},{id:"n2",x:480,y:155,title:"MVP продукт",reason:"Проверить гипотезу",action:"Запустить бета-версию и собрать платящих пользователей",metric:"50 платящих",status:"active",priority:"critical",progress:60},{id:"n3",x:480,y:395,title:"Маркетинг",reason:"Первые клиенты",action:"Настроить каналы и запустить первую кампанию",metric:"CAC < $100",status:"active",priority:"high",progress:25},{id:"n4",x:760,y:270,title:"Рост",reason:"Масштаб",action:"Масштабировать успешные каналы до целевого MRR",metric:"$50k MRR",status:"planning",priority:"critical",progress:0}];}
 function topSort(nodes,edges){
   const ind=Object.fromEntries(nodes.map(n=>[n.id,0])),adj=Object.fromEntries(nodes.map(n=>[n.id,[]]));
   edges.forEach(e=>{const from=e.from||e.source,to=e.to||e.target;if(adj[from]!==undefined&&ind[to]!==undefined){adj[from].push(to);ind[to]++;}});
@@ -1762,10 +1847,17 @@ const AI_KNOWLEDGE=`ОТРАСЛИ И МЕТРИКИ (глубоко):
 
 ФОРМАТ: Действие (глагол+объект) + обоснование + метрика (число, %, срок). Actionable, конкретно.`;
 
+// Единые правила для AI: только действия и результат, без воды
+const AI_STRICT_RULES=`КРИТИЧНО — соблюдай всегда:
+• ЗАПРЕЩЕНО: общие фразы ("важно понять", "следует обратить внимание"), мотивация без действия, советы без конкретики.
+• РАЗРЕШЕНО: только конкретные ДЕЙСТВИЯ — что именно сделать (кто, что, когда, как), пример действия, измеримый РЕЗУЛЬТАТ (число, срок, метрика).
+• Каждый совет = одно действие + как измерить результат. Без воды.`;
+
 // ── AI tier configs (МАКСИМАЛЬНАЯ глубина: chain-of-thought, распознавание намерений, структура) ──
 const AI_TIER={
   free:{label:"Free",badge:"⬡",color:"#64748b",
-    system:(ctx,map,meta,fullCtx)=>`Ты — AI-помощник по стратегии. Глубоко понимай контекст и намерение.
+    system:(ctx,map,meta,fullCtx)=>`Ты — AI-помощник по стратегии. Глубоко понимай контекст и намерение пользователя.
+${AI_STRICT_RULES}
 
 КОНТЕКСТ: ${meta?.projectName?"Проект: "+meta.projectName+". ":""}${meta?.mapName?"Карта: "+meta.mapName+". ":""}Бизнес: ${ctx||"стартап"}
 ШАГИ: ${map||"пустая"}
@@ -1774,11 +1866,12 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
 РАСПОЗНАЙ НАМЕРЕНИЕ: анализ, риск, следующий шаг, приоритет, добавить шаг, "с чего начать"/"помоги"/"не знаю"/"застрял"/"что не так"/"что упускаю". "Не знаю" = overwhelm — дай ОДИН чёткий первый шаг.
 Читай между строк: короткий вопрос — структура; "всё плохо" — ищи корень; "помоги" — конкретное действие.
-Правила: по-русски, 2–4 предложения. КОНКРЕТНОЕ действие. Не предлагай шаг, если его блокирует незавершённый.
-<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
+Ответ: по-русски, 2–4 предложения. Только конкретное действие + результат. Не предлагай шаг, если его блокирует незавершённый.
+<ADD>{"title":"Название шага (глагол+объект)","reason":"Зачем","action":"Что именно сделать","metric":"KPI/результат","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
   },
   starter:{label:"Starter",badge:"◈",color:"#10b981",
     system:(ctx,map,meta,fullCtx)=>`Ты — бизнес-консультант. Глубоко понимай пользователя и контекст.
+${AI_STRICT_RULES}
 
 КОНТЕКСТ: ${meta?.projectName?"Проект: "+meta.projectName+". ":""}${meta?.mapName?"Карта: "+meta.mapName+". ":""}Бизнес: ${ctx||"стартап"}
 ШАГИ: ${map||"пустая"}
@@ -1787,11 +1880,12 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
 РАСПОЗНАЙ: анализ/риск/приоритет/следующий шаг/добавить шаг/застрял/оптимизация/что не так. Читай между строк — что подразумевает.
 Учитывай связи, дедлайны, блокировки. Маркетинг (AIDA, CAC), продажи (pipeline, BANT), SWOT.
-Формат: краткий диагноз → 2-3 конкретных действия.
-<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
+Формат: краткий диагноз → 2-3 КОНКРЕТНЫХ действия (что сделать + как измерить). Без общих фраз.
+<ADD>{"title":"Название шага","reason":"Зачем","action":"Что именно сделать","metric":"KPI","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
   },
   pro:{label:"Pro",badge:"◆",color:"#8b5cf6",
     system:(ctx,map,meta,fullCtx)=>`Ты — стратегический советник 15+ лет. МАКСИМАЛЬНАЯ ГЛУБИНА.
+${AI_STRICT_RULES}
 
 МЕТОД (chain-of-thought): 1) Проанализируй карту: связи, блокировки, health, паттерны. 2) Что пользователь НЕ сказал, но важно? 3) Ответь структурированно.
 
@@ -1804,11 +1898,12 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
 РАСПОЗНАЙ ГЛУБОКО: анализ/риск/приоритет/маркетинг/продажи/стратегия/добавить шаг/застрял/оптимизация/аудит/что не так/что упускаю. Учитывай историю чата.
 Читай между строк: эмоции, неявные ограничения, скрытые цели, strategic blind spots.
-Формат: **Диагноз** → **Рекомендация** (2-3 действия с KPI) → **Риск** → **Быстрая победа**.
-<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"active","priority":"high","progress":0,"tags":[]}</ADD>`,
+Формат: **Диагноз** → **Рекомендация** (2-3 действия: что сделать + результат) → **Риск** → **Быстрая победа** (одно действие). Только действия и метрики.
+<ADD>{"title":"Название шага","reason":"Зачем","action":"Конкретное действие","metric":"KPI","status":"active","priority":"high","progress":0,"tags":[]}</ADD>`,
   },
   team:{label:"Team",badge:"✦",color:"#f59e0b",
     system:(ctx,map,meta,fullCtx)=>`Ты — партнёр McKinsey. МАКСИМАЛЬНАЯ ГЛУБИНА. Думай как senior partner.
+${AI_STRICT_RULES}
 
 МЕТОД (chain-of-thought): 1) Полный анализ: карта, связи, блокировки, health, просрочки. 2) Что подразумевает пользователь? Что критично, но не названо? 3) Executable рекомендации.
 
@@ -1821,11 +1916,12 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
 РАСПОЗНАЙ: анализ/аудит/GTM/unit economics/риск/приоритет/добавить шаг/масштабирование/оптимизация/non-obvious. Учитывай историю.
 Читай между строк: политика, ресурсы, неозвученные риски. Strategic blind spots.
-Структура: **Executive Insight** → **Ситуация** → **Топ-3 приоритета** (кто, что, когда, KPI) → **Critical Risk** → **Следующий шаг**.
-<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
+Структура: **Executive Insight** → **Ситуация** → **Топ-3 приоритета** (кто, что, когда, KPI — только действия) → **Critical Risk** → **Следующий шаг** (одно действие).
+<ADD>{"title":"Название шага","reason":"Зачем","action":"Конкретное действие","metric":"KPI","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
   },
   enterprise:{label:"Enterprise",badge:"💎",color:"#06b6d4",
     system:(ctx,map,meta,fullCtx)=>`Ты — коллегиум C-level (CSO, CMO, CRO, CFO). АБСОЛЮТНАЯ ГЛУБИНА.
+${AI_STRICT_RULES}
 
 МЕТОД (chain-of-thought): 1) Полный контекстный анализ: карта, связи, блокировки, просрочки, health. 2) Что не сказано? Системные риски? Non-obvious moves? 3) Думай на 2-3 шага вперёд. 4) Ответь.
 
@@ -1838,8 +1934,8 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 
 РАСПОЗНАЙ: board meeting уровень. Аудит, стратегия, риск, приоритеты, масштаб, M&A, due diligence. Учитывай историю — полный контекст.
 Читай между строк: stakeholder dynamics, неозвученные ограничения, strategic blind spots.
-Формат: **EXECUTIVE SUMMARY** → **CRITICAL FINDINGS** → **TOP PRIORITIES** (кто, что, когда, KPI) → **STRATEGIC RISK** → **NON-OBVIOUS MOVE**.
-<ADD>{"title":"Действие","reason":"Зачем","metric":"KPI","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
+Формат: **EXECUTIVE SUMMARY** → **CRITICAL FINDINGS** → **TOP PRIORITIES** (кто, что, когда, KPI) → **STRATEGIC RISK** → **NON-OBVIOUS MOVE** (действие). Без воды.
+<ADD>{"title":"Название шага","reason":"Зачем","action":"Конкретное действие","metric":"KPI","status":"active","priority":"critical","progress":0,"tags":[]}</ADD>`,
   },
 };
 
@@ -1974,7 +2070,7 @@ function Toast({msg,type="info",onClose,action,onAction}){
   const icons={error:"⚠",success:"✓",warn:"⚡",info:"ℹ"};
   const borderCol=type==="info"?"var(--accent-soft)":type==="error"?"rgba(239,68,68,.33)":type==="success"?"rgba(16,185,129,.33)":"rgba(245,158,11,.33)";
   return(
-    <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,borderRadius:12,background:"var(--bg3)",border:`1px solid ${borderCol}`,color:"var(--text)",fontSize:13,fontWeight:500,boxShadow:"var(--shadow-lg)",animation:"slideUp .25s ease",maxWidth:480,backdropFilter:"blur(14px)",overflow:"hidden"}}
+    <div className="toast-in" style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,borderRadius:12,background:"var(--bg3)",border:`1px solid ${borderCol}`,color:"var(--text)",fontSize:13,fontWeight:500,boxShadow:"var(--shadow-lg)",maxWidth:480,backdropFilter:"blur(14px)",overflow:"hidden"}}
       onClick={onClose}>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"11px 16px",cursor:"pointer"}}>
         <span style={{color:type==="info"?"var(--accent-1)":C[type],fontSize:14,flexShrink:0}}>{icons[type]}</span>
@@ -2002,8 +2098,8 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
   },[]);
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(8px)",animation:"fadeIn .15s ease",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
-      <div style={{width:"min(95vw,360px)",background:"var(--surface,#0f1729)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--accent-1)"}`,boxShadow:"var(--shadow,0 32px 80px rgba(0,0,0,.9))",overflow:"hidden",animation:"slideUp .2s cubic-bezier(.34,1.56,.64,1)"}}>
+    <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(8px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
+      <div className="modal-content-pop" style={{width:"min(95vw,360px)",background:"var(--surface,#0f1729)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--accent-1)"}`,boxShadow:"var(--shadow,0 32px 80px rgba(0,0,0,.9))",overflow:"hidden"}}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"var(--accent-soft)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"var(--accent-1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -2027,8 +2123,8 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
   async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
   const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)",animation:"fadeIn .2s ease",padding:16}}>
-      <div style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg3)",border:"1px solid var(--accent-1)",borderRadius:20,boxShadow:"0 40px 80px rgba(0,0,0,.8)",animation:"slideUp .3s ease"}}>
+    <div data-theme={theme} className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)",padding:16}}>
+      <div className="modal-content-pop" style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg3)",border:"1px solid var(--accent-1)",borderRadius:20,boxShadow:"0 40px 80px rgba(0,0,0,.8)"}}>
         <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>
             {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
@@ -2348,7 +2444,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   }
   async function executeBuy(){
     // Dev-аккаунт — мгновенное переключение без оплаты
-    if(user.email==="denisblackman2@gmail.com"){
+    if(user.is_dev){
       setCardError(null);setBuyPhase("processing");
       await new Promise(r=>setTimeout(r,600));
       const u=await patchUser(user.email,{tier:selected});if(u)onUpdate(u);setBuyPhase("success");
@@ -2408,9 +2504,9 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   ];
 
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)onClose();}}>
+    <div data-theme={theme} className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)onClose();}}>
       <style>{CSS}</style>
-      <div style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,background:"var(--bg2)",borderRadius:isMobile?20:28,borderTopLeftRadius:20,borderTopRightRadius:20,border:"1px solid var(--border2)",boxShadow:"0 50px 120px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",animation:isMobile?"slideUp .25s ease":"none",overflow:"hidden"}}>
+      <div className={isMobile?"":"modal-content-pop"} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,background:"var(--bg2)",borderRadius:isMobile?20:28,borderTopLeftRadius:20,borderTopRightRadius:20,border:"1px solid var(--border2)",boxShadow:"0 50px 120px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",animation:isMobile?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}}>
 
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--bg3)"}}>
@@ -2722,9 +2818,9 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                         </div>
                       ))}
                     </div>
-                    <div style={{marginBottom:16,padding:"12px 14px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)",overflowX:"auto"}}>
+                    <div style={{marginBottom:16,padding:"12px 14px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
                       <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:10}}>{t("tier_comparison","Сравнение тарифов")}</div>
-                      <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:0,fontSize:12,minWidth:"min(100%,520px)"}}>
+                      <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(6,minmax(72px,1fr))":"repeat(6,1fr)",gap:0,fontSize:isMobile?11:12,minWidth:isMobile?432:"min(100%,520px)"}}>
                         <div style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",fontWeight:600,color:"var(--text4)"}}>{t("feature","Функция")}</div>
                         {TIER_ORDER.map(k=>(
                           <div key={k} style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",textAlign:"center",fontWeight:k===user.tier?700:500,color:k===user.tier?TIERS[k].color:"var(--text4)"}}>{TIERS[k].label}</div>
@@ -2744,7 +2840,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                         ))}
                       </div>
                     </div>
-                    {isUpgrade&&user.email!=="denisblackman2@gmail.com"&&(
+                    {isUpgrade&&!user.is_dev&&(
                       <div style={{marginBottom:16,padding:"14px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)"}}>
                         <div style={{fontSize:13,fontWeight:700,color:"var(--text)",marginBottom:12}}>{t("card_data_title","💳 Данные карты")}</div>
                         <input style={fi} placeholder={t("card_number_ph","Номер карты…")} value={cardNum} onChange={e=>setCardNum(formatCardNum(e.target.value))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
@@ -2778,10 +2874,10 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                     ):(
                       <button onClick={executeBuy} style={{width:"100%",padding:"13px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${selTier.color},${selTier.color}cc)`,color:"#fff",fontSize:13.5,fontWeight:800,cursor:"pointer",boxShadow:`0 8px 24px ${selTier.color}40`,transition:"all .2s"}}
                         onMouseOver={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseOut={e=>e.currentTarget.style.transform="none"}>
-                        {isUpgrade?(user.email==="denisblackman2@gmail.com"?t("activate_btn","⚡ Активировать")+" "+selTier.label:"🔒 "+t("go_to_plan","Перейти на {plan} — {price}").replace("{plan}",selTier.label).replace("{price}",getTierPrice(selected,t))):t("downgrade_to","↓ Перейти на ")+selTier.label}
+                        {isUpgrade?(user.is_dev?t("activate_btn","⚡ Активировать")+" "+selTier.label:"🔒 "+t("go_to_plan","Перейти на {plan} — {price}").replace("{plan}",selTier.label).replace("{price}",getTierPrice(selected,t))):t("downgrade_to","↓ Перейти на ")+selTier.label}
                       </button>
                     )}
-                    {isUpgrade&&user.email==="denisblackman2@gmail.com"&&<div style={{textAlign:"center",marginTop:8,fontSize:13.5,color:"var(--text4)"}}>{t("demo_payment_skipped","Демо — оплата пропущена")}</div>}
+                    {isUpgrade&&user.is_dev&&<div style={{textAlign:"center",marginTop:8,fontSize:13.5,color:"var(--text4)"}}>{t("demo_payment_skipped","Демо — оплата пропущена")}</div>}
                   </>
                 )}
               </div>
@@ -3232,8 +3328,8 @@ function StatsPopup({nodes,edges,onClose}){
   );
 }
 
-// ── RichEditorPanel ── (aiPanelOpen: сдвигает влево, чтобы не перекрывать AI)
-function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect,onError,onNotify,aiPanelOpen}){
+// ── RichEditorPanel ── (aiPanelOpen: сдвигает влево, чтобы не перекрывать AI; isMobile: полноэкранная панель)
+function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect,onError,onNotify,aiPanelOpen,isMobile}){
   const{t,lang}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
@@ -3257,18 +3353,19 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
       const raw=await callAI([{role:"user",content:`Перефразируй шаг стратегической карты. Сделай название КОНКРЕТНЫМ ДЕЙСТВИЕМ (глагол+объект).
 Текущее: ${node.title||""}
 Причина: ${node.reason||"нет"}
+Действие: ${node.action||"нет"}
 Метрика: ${node.metric||"нет"}
 Контекст: ${ctx||"стартап"}
 Связи: ${connStr}
 
-Правила: title — действие (напр. "Провести 15 интервью с ЦА"), reason — зачем, metric — измеримый результат. Учитывай связи и отрасль. Формулировка — actionable, вписывается в логику карты.
-Верни ТОЛЬКО JSON: {"title":"...","reason":"...","metric":"..."}`}],"Ты редактор стратегических карт. Глубоко понимай контекст. Делай формулировки actionable, конкретные. Учитывай связи, отрасль, этап бизнеса. Сохраняй смысл, улучшай ясность.",400);
+Правила: title — название (глагол+объект), reason — зачем, action — что именно сделать (конкретное действие), metric — измеримый результат. Учитывай связи и отрасль. Формулировка — actionable.
+Верни ТОЛЬКО JSON: {"title":"...","reason":"...","action":"...","metric":"..."}`}],"Ты редактор стратегических карт. Делай формулировки конкретными: название + зачем + что сделать + результат. Без воды.",400);
       let p;
       try{p=JSON.parse(raw.replace(/```json|```/g,"").trim());}
       catch{const m=raw.match(/\{[\s\S]*\}/);p=m?JSON.parse(m[0]):null;}
       if(p?.title){
         const hEntry={id:uid(),type:"ai_rephrase",at:Date.now(),by:"AI ✦",before:{title:node.title},after:{title:p.title}};
-        onUpdate({...p,history:[...history,hEntry]});
+        onUpdate({...p,action:p.action!=null?p.action:node.action,history:[...history,hEntry]});
       }else{onError?.(t("ai_rephrase_no_result","AI не смог перефразировать. Попробуйте ещё раз."));}
     }catch(e:any){onError?.(e?.message||t("ai_rephrase_error","Ошибка AI. Проверьте сеть и ключ API."));}
     setAiRephrLoading(false);
@@ -3288,7 +3385,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
       try{
         const nodeEdges=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id);
         const connStr=nodeEdges.length?nodeEdges.map(e=>{const s=allNodes.find(n=>n.id===(e.source||e.from)),t=allNodes.find(n=>n.id===(e.target||e.to));return `${s?.title||""} ${e.type||"→"} ${t?.title||""}`;}).join("; "):"нет";
-        const answer=await callAI([{role:"user",content:`Вопрос по шагу "${node.title||""}" (причина: ${node.reason||"-"}, метрика: ${node.metric||"-"}): ${q}\nКонтекст: ${ctx||"стартап"}. Связи: ${connStr}\nОтветь кратко, 2–3 предложения. Дай КОНКРЕТНЫЙ совет — что сделать, зачем, как измерить. Учитывай связи, отрасль. Читай между строк — что пользователь подразумевает.`}],"Ты AI-советник. Глубоко понимай контекст. Отвечай конкретно, actionable. Учитывай связи, отрасль. Читай между строк. Формат: совет → действие → метрика (если уместно).",300);
+        const answer=await callAI([{role:"user",content:`Вопрос по шагу "${node.title||""}" (зачем: ${node.reason||"-"}, что сделать: ${node.action||"-"}, метрика: ${node.metric||"-"}): ${q}\nКонтекст: ${ctx||"стартап"}. Связи: ${connStr}\nОтветь кратко. Дай ТОЛЬКО конкретное действие — что сделать, зачем, как измерить. Без общих фраз.`}],"Ты AI-советник. Отвечай ТОЛЬКО конкретными действиями и измеримым результатом. Формат: что сделать → зачем → метрика. Без воды.",300);
         onUpdate({comments:[...base,{...aiPlaceholder,text:answer}]});
       }catch(e:any){onUpdate({comments:[...base,{...aiPlaceholder,text:t("ai_comment_error","Ошибка AI. Попробуйте ещё раз.")}]});onError?.(e?.message||t("ai_comment_error","Ошибка AI. Попробуйте ещё раз."));}
       setAiCommentLoading(false);
@@ -3331,10 +3428,11 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
   const tabs=[["info","◈ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
 
-  const panelRight=aiPanelOpen?360:0;
-  const panelWidth=aiPanelOpen?320:340;
+  const panelRight=isMobile?0:aiPanelOpen?360:0;
+  const panelWidth=isMobile?"100%":aiPanelOpen?320:340;
+  const panelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:panelRight,top:0,bottom:0,width:panelWidth,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
-    <div className="panel-slide" style={{position:"absolute",right:panelRight,top:0,bottom:0,width:panelWidth,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"}}>
+    <div className="panel-slide" style={panelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:12,height:12,borderRadius:4,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
         <div style={{flex:1,fontSize:15,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
@@ -3359,8 +3457,12 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
               <textarea value={node.title||""} onChange={e=>!readOnly&&onUpdate({title:e.target.value})} rows={1} style={{...iS,minHeight:44}} readOnly={readOnly}/>
             </div>
             <div>
-              <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6}}>{t("why_label","Зачем?")}</div>
-              <textarea value={node.reason||""} onChange={e=>!readOnly&&onUpdate({reason:e.target.value})} rows={2} style={{...iS,minHeight:56}} readOnly={readOnly}/>
+              <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6}}>{t("why_label","Зачем?")} <span style={{fontSize:11,color:"var(--text5)",fontWeight:400}}>(описание)</span></div>
+              <textarea value={node.reason||""} onChange={e=>!readOnly&&onUpdate({reason:e.target.value})} placeholder={t("why_placeholder","Зачем этот шаг, какой результат нужен")} rows={2} style={{...iS,minHeight:56}} readOnly={readOnly}/>
+            </div>
+            <div>
+              <div style={{fontSize:12,fontWeight:600,color:"var(--accent-2)",marginBottom:6}}>{t("action_label","Что сделать")} <span style={{fontSize:11,color:"var(--text5)",fontWeight:400}}>(конкретное действие)</span></div>
+              <textarea value={node.action||""} onChange={e=>!readOnly&&onUpdate({action:e.target.value})} placeholder={t("action_placeholder","Напр.: Провести 15 интервью с ЦА до пятницы")} rows={2} style={{...iS,minHeight:56,borderColor:"var(--accent-1)"}} readOnly={readOnly}/>
             </div>
             <div>
               <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6}}>{t("metric_label","Метрика")}</div>
@@ -3487,8 +3589,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   );
 }
 
-// ── AiPanel ──
-function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal,projectName="",mapName="",userName="",msgs:msgsProp,onMsgsChange,onError}){
+// ── AiPanel ── (isMobile: полноэкранная панель)
+function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal,projectName="",mapName="",userName="",msgs:msgsProp,onMsgsChange,onError,isMobile}){
   const{t}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
@@ -3540,14 +3642,19 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   const[showMoreQuick,setShowMoreQuick]=useState(false);
   const quick=showMoreQuick?allQuick:allQuick.slice(0,QUICK_SHOW);
 
+  const aiFreeTier=tier==="free";
   async function send(text){
     const q=text||inp.trim();
     if(!q||load)return;
+    if(aiFreeTier){
+      setMsgs(m=>[...m,{role:"user",text:q},{role:"sys",text:t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле →")}]);
+      return;
+    }
     setInp("");
     const nM=[...msgs,{role:"user",text:q}];
     setMsgs(nM);
     setLoad(true);
-    const mapSummary=nodes.map(n=>`${n.title}|${n.reason||"-"}|${n.metric||"-"}|${STATUS[n.status]?.label||n.status}|${n.progress||0}%|${PRIORITY[n.priority]?.label||n.priority}${n.deadline?"|📅"+n.deadline:""}${n.tags?.length?"|"+n.tags.join(","):""}`).join("\n");
+    const mapSummary=nodes.map(n=>`${n.title}|${n.reason||"-"}|${n.action||"-"}|${n.metric||"-"}|${STATUS[n.status]?.label||n.status}|${n.progress||0}%|${PRIORITY[n.priority]?.label||n.priority}${n.deadline?"|📅"+n.deadline:""}${n.tags?.length?"|"+n.tags.join(","):""}`).join("\n");
     const edgesSummary=edges.length?edges.map(e=>{const s=nodes.find(n=>n.id===e.source),t=nodes.find(n=>n.id===e.target);return`${s?.title||e.source} → ${t?.title||e.target}: ${e.type||"requires"}`;}).join("\n"):"нет";
     const done=nodes.filter(n=>n.status==="completed").length;
     const blocked=nodes.filter(n=>n.status==="blocked").length;
@@ -3570,7 +3677,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
           const raw=addMatch[1].replace(/[\r\n]/g," ").trim();
           const fallback=raw.match(/\{[\s\S]*\}/);
           const nodeData=JSON.parse(fallback?fallback[0]:raw);
-          const n={title:nodeData.title||"Новый шаг",reason:nodeData.reason||"",metric:nodeData.metric||"",status:nodeData.status||"planning",priority:nodeData.priority||"medium",progress:nodeData.progress??0,tags:Array.isArray(nodeData.tags)?nodeData.tags:[],color:nodeData.color||""};
+          const n={title:nodeData.title||"Новый шаг",reason:nodeData.reason||"",action:nodeData.action||"",metric:nodeData.metric||"",status:nodeData.status||"planning",priority:nodeData.priority||"medium",progress:nodeData.progress??0,tags:Array.isArray(nodeData.tags)?nodeData.tags:[],color:nodeData.color||""};
           onAddNode(n);
           setMsgs(m=>[...m,{role:"sys",text:"✅ Шаг добавлен на карту: "+n.title}]);
         }catch{setMsgs(m=>[...m,{role:"sys",text:"⚠️ AI предложил шаг, но формат не распознан. Добавьте вручную."}]);}
@@ -3584,8 +3691,9 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     inpRef.current?.focus();
   }
 
+  const aiPanelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:0,top:0,bottom:0,width:360,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
-    <div className="panel-slide" style={{position:"absolute",right:0,top:0,bottom:0,width:360,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"}}>
+    <div className="panel-slide" style={aiPanelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:36,height:36,borderRadius:12,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0}}>✦</div>
         <div style={{flex:1,minWidth:0}}>
@@ -3598,7 +3706,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
       <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           {quick.map(q=>(
-            <button key={q} onClick={()=>send(q)} style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}
+            <button key={q} className="btn-interactive" onClick={()=>send(q)} style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600}}
               onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)";}}>{q}</button>
           ))}
           {allQuick.length>QUICK_SHOW&&(
@@ -3610,7 +3718,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
       </div>
       <div style={{flex:1,overflowY:"auto",padding:"16px 18px",display:"flex",flexDirection:"column",gap:14}}>
         {msgs.map((m,i)=>(
-          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start",animation:"slideDown .2s ease"}}>
+          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start",animation:"fadeInUp .35s cubic-bezier(0.22,1,0.36,1) forwards"}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
             <div style={{maxWidth:"85%",padding:"12px 16px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--accent-soft)":m.role==="sys"?"rgba(16,185,129,.1)":"var(--surface)",border:"none",fontSize:14,lineHeight:1.6,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 8px var(--accent-glow)":m.role==="sys"?"none":"0 1px 4px rgba(0,0,0,.08)",transition:"opacity .2s"}}>{m.text}</div>
           </div>
@@ -3618,9 +3726,12 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         {load&&<div style={{display:"flex",gap:8,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",borderRadius:"4px 14px 14px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
-      <div style={{padding:"18px 22px",borderTop:"1px solid var(--border)",display:"flex",gap:12,flexShrink:0,background:"var(--surface)"}}>
-        <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={t("ask_placeholder","Спросите о стратегии…")} style={{flex:1,padding:"14px 18px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:14,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"}}/>
-        <button onClick={()=>send()} disabled={!inp.trim()||load} style={{width:48,height:48,borderRadius:14,border:"none",background:inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:inp.trim()&&!load?"pointer":"not-allowed",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none",transition:"all .15s"}}>↑</button>
+      <div style={{padding:"18px 22px",borderTop:"1px solid var(--border)",display:"flex",gap:12,flexShrink:0,background:"var(--surface)",flexDirection:"column"}}>
+        {aiFreeTier&&<div style={{padding:"10px 14px",borderRadius:10,background:"rgba(100,116,139,.12)",border:"1px solid rgba(100,116,139,.25)",color:"var(--text3)",fontSize:12.5,marginBottom:8}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</div>}
+        <div style={{display:"flex",gap:12}}>
+          <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,padding:"14px 18px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:14,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s",opacity:aiFreeTier?.7:1}}/>
+          <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:48,height:48,borderRadius:14,border:"none",background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:!aiFreeTier&&inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>
+        </div>
       </div>
     </div>
   );
@@ -3683,12 +3794,13 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,on
   const progress=node.progress||0;
   const progressW=Math.max(0,progress/100*204);
   const title=(node.title||"Новый шаг").slice(0,26);
-  const hasMeta=node.reason||node.metric;
-  // Единая сетка 8px: header 16, reason 30, metric 44, progress 58, status 74, tags 92
+  const hasMeta=node.reason||node.action||node.metric;
+  const hasAction=!!(node.action&&node.action.trim());
   const headerY=16;
   const reasonY=30;
-  const metricY=44;
-  const progressY=hasMeta?58:36;
+  const actionY=40;
+  const metricY=hasAction?50:44;
+  const progressY=hasMeta?(hasAction?64:58):36;
   const progressBarH=6;
   const progressCenterY=progressY+progressBarH/2;
   const statusY=progressY+progressBarH+12;
@@ -3712,6 +3824,11 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,on
       {node.reason&&(
         <text x={14} y={reasonY} fontSize={9} fill={reasonColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
           {node.reason.slice(0,36)}{node.reason.length>36?"…":""}
+        </text>
+      )}
+      {node.action&&node.action.trim()&&(
+        <text x={14} y={actionY} fontSize={8.5} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle",fontWeight:600}}>
+          ▶ {node.action.slice(0,32)}{node.action.length>32?"…":""}
         </text>
       )}
       {node.metric&&(
@@ -4102,10 +4219,8 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     if(!API_BASE||!mapData?.id||!user||readOnly)return;
     let socket:any;
     try{
-      const io=(window as any).io;
-      if(!io){return;}
       const token=getJWT();
-      socket=io(API_BASE,{transports:["websocket","polling"],auth:{token}});
+      socket=ioClient(API_BASE,{transports:["websocket","polling"],auth:{token}});
       socketRef.current=socket;
       socket.emit("join-map",{mapId:mapData.id,userName:user.name||user.email});
       socket.on("user-joined",(data:any)=>setOnlineUsers((u:any[])=>[...u.filter(x=>x.email!==data.email),data]));
@@ -4150,14 +4265,23 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     socketRef.current?.emit("node-update",{mapId:mapData?.id,node});
   }
   function emitEdgeUpdate(edges:any[]){
-    socketRef.current?.emit("edge-update",{mapId:mapData?.id,edges});
+    if(!readOnly)socketRef.current?.emit("edge-update",{mapId:mapData?.id,edges});
+  }
+  function setEdgesUser(updater:(prev:any[])=>any[]){
+    setEdges(prev=>{const next=updater(prev);emitEdgeUpdate(next);return next;});
   }
   function undo(){if(!undoStack.length)return;const prev=undoStack[undoStack.length-1];setRedoStack(r=>[...r,{nodes,edges}]);setNodes(prev.nodes);setEdges(prev.edges);setUndoStack(s=>s.slice(0,-1));}
   function redo(){if(!redoStack.length)return;const next=redoStack[redoStack.length-1];setUndoStack(s=>[...s,{nodes,edges}]);setNodes(next.nodes);setEdges(next.edges);setRedoStack(r=>r.slice(0,-1));}
 
   function updateNode(n){pushUndo(nodes,edges);setNodes(ns=>ns.map(x=>x.id===n.id?n:x));}
-  function deleteNode(id){pushUndo(nodes,edges);setNodes(ns=>ns.filter(x=>x.id!==id));setEdges(es=>es.filter(e=>e.source!==id&&e.target!==id));setSelNode(null);}
-  function duplicateNode(n){const copy={...n,id:uid(),x:n.x+60,y:n.y+60,title:n.title+" (копия)"};pushUndo(nodes,edges);setNodes(ns=>[...ns,copy]);}
+  function deleteNode(id){
+    pushUndo(nodes,edges);
+    setNodes(ns=>ns.filter(x=>x.id!==id));
+    setEdges(es=>{const next=es.filter(e=>e.source!==id&&e.target!==id);if(!readOnly)socketRef.current?.emit("edge-update",{mapId:mapData?.id,edges:next});return next;});
+    setSelNode(null);
+    if(!readOnly)socketRef.current?.emit("node-delete",{mapId:mapData?.id,nodeId:id});
+  }
+  function duplicateNode(n){const copy={...n,id:uid(),x:n.x+60,y:n.y+60,title:n.title+" (копия)",comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,copy]);if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:copy});}
   function importJSON(){importRef.current?.click();}
   function handleImportFile(e){
     const f=e.target.files[0];if(!f)return;
@@ -4167,8 +4291,10 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
         const d=JSON.parse(ev.target.result);
         if(d.nodes||d.edges){
           pushUndo(nodes,edges);
+          const newEdges=d.edges||[];
           setNodes((d.nodes||[]).map(n=>({...n,comments:n.comments||[],history:n.history||[]})));
-          setEdges(d.edges||[]);
+          setEdges(newEdges);
+          emitEdgeUpdate(newEdges);
           setTimeout(fitView,100);
           addToast(t("imported_steps","✅ Импортировано: {n} шагов").replace("{n}",String((d.nodes||[]).length)),"success");
         }else addToast(t("json_invalid","Некорректный формат JSON"),"error");
@@ -4182,8 +4308,9 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     const v=viewRef.current;
     const mapX=snap((W/2-v.x)/v.zoom-120);
     const mapY=snap((H/2-v.y)/v.zoom-64);
-    const n={id:uid(),x:mapX,y:mapY,title:t("new_step_title","Новый шаг"),reason:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:"",comments:[],history:[]};
+    const n={id:uid(),x:mapX,y:mapY,title:t("new_step_title","Новый шаг"),reason:"",action:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:"",comments:[],history:[]};
     pushUndo(nodes,edges);setNodes(ns=>[...ns,n]);setSelNode(n);
+    if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:n});
   }
   function addNodeAt(clientX:number,clientY:number){
     const rect=svgRef.current?.getBoundingClientRect();
@@ -4192,8 +4319,9 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     const cx=clientX-rect.left,cy=clientY-rect.top;
     const mapX=snap((cx-v.x)/v.zoom-120);
     const mapY=snap((cy-v.y)/v.zoom-64);
-    const n={id:uid(),x:mapX,y:mapY,title:t("new_step_title","Новый шаг"),reason:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:"",comments:[],history:[]};
+    const n={id:uid(),x:mapX,y:mapY,title:t("new_step_title","Новый шаг"),reason:"",action:"",metric:"",status:"planning",priority:"medium",progress:0,tags:[],color:"",comments:[],history:[]};
     pushUndo(nodes,edges);setNodes(ns=>[...ns,n]);setSelNode(n);
+    if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:n});
   }
 
   async function exportPNG(){
@@ -4401,7 +4529,7 @@ ${ctx}
       );
       if(filtered.length){
         pushUndo(nodes,edges);
-        setEdges(es=>[...es,...filtered.map(e=>({...e,id:uid(),label:e.reason||""}))]);
+        setEdgesUser(es=>[...es,...filtered.map(e=>({...e,id:uid(),label:e.reason||""}))]);
         addToast(t("links_added","🔗 Добавлено: {n} связей").replace("{n}",String(filtered.length)),"success");
         // Open AI panel and show reasoning
         setShowAI(true);
@@ -4482,10 +4610,10 @@ ${ctx}
         const toDel=selNodes.size?Array.from(selNodes):[selNode.id];
         pushUndo(nodes,edges);
         setNodes(ns=>ns.filter(n=>!toDel.includes(n.id)));
-        setEdges(es=>es.filter(e=>!toDel.includes(e.source)&&!toDel.includes(e.target)));
+        setEdgesUser(es=>es.filter(e=>!toDel.includes(e.source)&&!toDel.includes(e.target)));
         setSelNodes(new Set());setSelNode(null);
       }
-      else if((e.key==="Delete"||e.key==="Backspace")&&selEdge){pushUndo(nodes,edges);setEdges(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}
+      else if((e.key==="Delete"||e.key==="Backspace")&&selEdge){pushUndo(nodes,edges);setEdgesUser(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}
       else if(e.key==="?"||e.key==="/"){ setShowShortcuts(s=>!s);}
       else if((e.ctrlKey||e.metaKey)&&e.key==="a"){e.preventDefault();if(nodes.length){setSelNodes(new Set(nodes.map(n=>n.id)));setSelNode(nodes[0]);}}
       else if((selNode||selNodes.size)&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){
@@ -4544,7 +4672,7 @@ ${ctx}
       if(connectSrc&&connectSrc.id!==node.id){
         if(!edges.find(ex=>ex.source===connectSrc.id&&ex.target===node.id)){
           const ne={id:uid(),source:connectSrc.id,target:node.id,type:"requires",label:""};
-          pushUndo(nodes,edges);setEdges(es=>[...es,ne]);
+          pushUndo(nodes,edges);setEdgesUser(es=>[...es,ne]);
         }
       }else{setConnectSrc(node);}
       return;
@@ -4615,8 +4743,8 @@ ${ctx}
           <div style={{display:"flex",alignItems:"center",gap:isMobile?8:8,flexShrink:0}}>
             {tb(false,onBack,<>{t("back_btn","← Назад")}</>)}
             {!readOnly&&<>{sep}
-            <button onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)",transition:"transform .15s,box-shadow .15s"}}
-              onMouseOver={e=>{e.currentTarget.style.transform="translateY(-1px)";e.currentTarget.style.boxShadow="0 4px 20px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
+            <button className="btn-interactive" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)"}}
+              onMouseOver={e=>{e.currentTarget.style.boxShadow="0 6px 24px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
               <span style={{fontSize:17,lineHeight:1}}>+</span> Шаг
             </button>
             <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}} title={connecting?t("cancel","Отмена"):t("link_mode_hint","Режим связи: клик на источник, затем на цель")}
@@ -4856,11 +4984,11 @@ ${ctx}
             <span style={{fontSize:13,color:"#64748b",fontWeight:600}}>{t("edge_type","Тип связи:")}</span>
             <CustomSelect
               value={selEdge.type||"requires"}
-              onChange={v=>{const ne={...selEdge,type:v};pushUndo(nodes,edges);setEdges(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}}
+              onChange={v=>{const ne={...selEdge,type:v};pushUndo(nodes,edges);setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}}
               options={Object.entries(ETYPE).map(([k,e])=>({value:k,label:e.label,dot:e.c}))}
             />
-            <input value={selEdge.label||""} onChange={e=>{const ne={...selEdge,label:e.target.value};setEdges(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder="Подпись…" style={{fontSize:13,padding:"5px 10px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",borderRadius:8,color:"#e2e8f0",outline:"none",fontFamily:"inherit",width:120}}/>
-            <button onClick={()=>{pushUndo(nodes,edges);setEdges(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>🗑 Удалить</button>
+            <input value={selEdge.label||""} onChange={e=>{const ne={...selEdge,label:e.target.value};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder="Подпись…" style={{fontSize:13,padding:"5px 10px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",borderRadius:8,color:"#e2e8f0",outline:"none",fontFamily:"inherit",width:120}}/>
+            <button onClick={()=>{pushUndo(nodes,edges);setEdgesUser(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>🗑 Удалить</button>
           </div>
         )}
         {ctxMenu&&(
@@ -4873,7 +5001,7 @@ ${ctx}
                   <button onClick={()=>{duplicateNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📋 {t("duplicate","Дублировать")}</button>
                   <button onClick={()=>{setClipboard(ctxMenu.node);addToast(t("copied","📋 Скопировано"),"info");setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📄 {t("copy_short","Копировать")}</button>
                   <button onClick={()=>{startConnect(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>⇒ {t("link_btn","Связать")}</button>
-                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdges(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"#ef4444",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
+                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdgesUser(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"#ef4444",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
                 </>}
               </>
             ):(
@@ -4888,6 +5016,7 @@ ${ctx}
           <RichEditorPanel
             node={selNode}
             aiPanelOpen={showAI}
+            isMobile={isMobile}
             ctx={mapData?.ctx||""}
             readOnly={readOnly}
             userName={user?.name||user?.email||"Пользователь"}
@@ -4896,9 +5025,11 @@ ${ctx}
             onUpdate={(patch)=>{
               const n={...selNode,...patch};
               const hEntry=(patch.title&&patch.title!==selNode.title)?{id:uid(),type:"edit",at:Date.now(),by:user?.name||user?.email||"user",before:{title:selNode.title},after:{title:patch.title}}:null;
+              const fullNode={...n,history:hEntry?[...(selNode.history||[]),hEntry]:(selNode.history||[])};
               pushUndo(nodes,edges);
-              updateNode({...n,history:hEntry?[...(selNode.history||[]),hEntry]:(selNode.history||[])});
-              setSelNode({...n,history:hEntry?[...(selNode.history||[]),hEntry]:(selNode.history||[])});
+              updateNode(fullNode);
+              setSelNode(fullNode);
+              if(!readOnly)emitNodeUpdate(fullNode);
             }}
             onDelete={(id)=>{deleteNode(id);}}
             onClose={()=>setSelNode(null)}
@@ -4907,27 +5038,27 @@ ${ctx}
               if(cfg.startNode){startConnect(cfg.startNode);}
               else if(cfg.source&&cfg.target){
                 const ne={id:uid(),source:cfg.source,target:cfg.target,type:cfg.type||"requires",label:""};
-                pushUndo(nodes,edges);setEdges(es=>[...es,ne]);
+                pushUndo(nodes,edges);setEdgesUser(es=>[...es,ne]);
               }
             }}
             onError={(msg)=>addToast(msg,"error")}
             onNotify={(msg,type)=>addToast(msg,type||"info")}
           />
         )}
-        {showAI&&<AiPanel nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgs} onMsgsChange={setAiChatMsgs} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")}/>}
+        {showAI&&<AiPanel isMobile={isMobile} nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgs} onMsgsChange={setAiChatMsgs} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:nn});}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")}/>}
         {showStats&&<StatsPopup nodes={nodes} edges={edges} onClose={()=>setShowStats(false)}/>}
-        {showTemplates&&<TemplateModal tier={user?.tier} onSelect={(tmpl:any)=>{setShowTemplates(false);if(tmpl){pushUndo(nodes,edges);setNodes(tmpl.nodes.map((n:any)=>({...n,comments:[],history:[]})));setEdges(tmpl.edges);setTimeout(fitView,100);}}} onClose={()=>setShowTemplates(false)} theme={theme}/>}
+        {showTemplates&&<TemplateModal tier={user?.tier} onSelect={(tmpl:any)=>{setShowTemplates(false);if(tmpl){pushUndo(nodes,edges);setNodes(tmpl.nodes.map((n:any)=>({...n,comments:[],history:[]})));setEdges(tmpl.edges);emitEdgeUpdate(tmpl.edges);setTimeout(fitView,100);}}} onClose={()=>setShowTemplates(false)} theme={theme}/>}
         {showGantt&&<GanttView nodes={nodes} onClose={()=>setShowGantt(false)}/>}
         {showTour&&<MapTour onDone={()=>setShowTour(false)}/>}
         {showSim&&<SimulationModal mapData={{...mapData,nodes,edges}} allProjectMaps={allMaps} onClose={()=>setShowSim(false)} theme={theme}/>}
-        {showOnboarding&&<InMapOnboarding project={project} tier={user?.tier} theme={theme} onDone={(mapObj:any)=>{setShowOnboarding(false);setNodes(mapObj.nodes||[]);setEdges(mapObj.edges||[]);setTimeout(fitView,200);}} onSkip={()=>{setShowOnboarding(false);setNodes(defaultNodes());}}/>}
+        {showOnboarding&&<InMapOnboarding project={project} tier={user?.tier} theme={theme} onDone={(mapObj:any)=>{setShowOnboarding(false);const es=mapObj.edges||[];setNodes(mapObj.nodes||[]);setEdges(es);emitEdgeUpdate(es);setTimeout(fitView,200);}} onSkip={()=>{setShowOnboarding(false);setNodes(defaultNodes());}}/>}
         {showBriefing&&(
           <WeeklyBriefingModal nodes={nodes} mapName={mapData?.name||"Карта"} user={user} onClose={()=>setShowBriefing(false)} theme={theme} onError={(msg)=>addToast(msg,"error")}/>
         )}
         {showVersions&&mapData?.id&&(
           <VersionHistoryModal
             mapId={mapData.id} projectId={project?.id||""} theme={theme}
-            onRestore={(v:any)=>{pushUndo(nodes,edges);setNodes(v.nodes||[]);setEdges(v.edges||[]);addToast(t("version_restored","Версия восстановлена"),"success");}}
+            onRestore={(v:any)=>{pushUndo(nodes,edges);const es=v.edges||[];setNodes(v.nodes||[]);setEdges(es);emitEdgeUpdate(es);addToast(t("version_restored","Версия восстановлена"),"success");}}
             onError={(msg)=>addToast(msg,"error")}
             onClose={()=>setShowVersions(false)}
           />
@@ -5036,7 +5167,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           <button onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
         </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:24,position:"relative",zIndex:5}}>
+      <div style={{flex:1,overflowY:"auto",padding:isMobile?16:24,position:"relative",zIndex:5}}>
         <div style={{maxWidth:960,margin:"0 auto"}}>
           <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:20,marginBottom:32}}>
             <div>
@@ -5045,8 +5176,8 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             </div>
             {!isMobile&&<div style={{flex:1}}/>}
             <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit",flex:isMobile?1:undefined}}/>
-              <button onClick={()=>{if(atLimit){return;}setCreating(true);}} style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,transition:"all .2s",flexShrink:0}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} className="input-smooth" style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit",flex:isMobile?1:undefined}}/>
+              <button onClick={()=>{if(atLimit){return;}setCreating(true);}} className="btn-smooth" style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,flexShrink:0,boxShadow:atLimit?"none":"0 2px 12px var(--accent-glow)"}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
             </div>
           </div>
           {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
@@ -5066,20 +5197,20 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             </div>
           )}
           {loading?(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:20}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:20}}>
               {[1,2,3].map(i=><div key={i} style={{height:120,borderRadius:14,background:"var(--surface)",animation:"pulse 1.5s ease infinite"}}/>)}
             </div>
           ):(
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:20}}>
-              {filtered.map(p=>{
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:20}}>
+              {filtered.map((p,i)=>{
                 const pm=maps[p.id]||[];
                 const myRole=p.owner===user.email?"owner":p.members?.find(m=>m.email===user.email)?.role;
                 const roleLabel=ROLES[myRole]||"";
                 const ICONS=["📋","🚀","💡","🗺","⚡","🎯","📊","🔬","🌱","💼"];
                 const icon=ICONS[p.id.charCodeAt(0)%ICONS.length];
                 return(
-                  <div key={p.id} onClick={()=>onSelectProject(p)} className="icard"
-                    style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(0,0,0,.04)"}}>
+                  <div key={p.id} onClick={()=>onSelectProject(p)} className="icard card-stagger card-interactive"
+                    style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(0,0,0,.04)",animationDelay:`${i*0.06}s`}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:14}}>
                       <div style={{width:40,height:40,borderRadius:11,background:`linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08))`,border:"1px solid rgba(99,102,241,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
@@ -5137,6 +5268,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
 // ── ProjectDetail ──
 function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier}){
   const{t,lang}=useLang();
+  const isMobile=useIsMobile();
   const[maps,setMaps]=useState([]);
   const[loading,setLoading]=useState(true);
   const[tab,setTab]=useState("maps");
@@ -5251,16 +5383,16 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   const avgProgress=totalNodes?Math.round(allNodes.reduce((s,n)=>s+(n.progress||0),0)/totalNodes):0;
   const overdueCount=allNodes.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
 
-  function MapCard({m,isSc}){
+  function MapCard({m,isSc,staggerIndex=0}){
     const ns=m.nodes||[];
     const done=ns.filter(n=>n.status==="completed").length;
     const prog=ns.length?Math.round(ns.reduce((s,n)=>s+(n.progress||0),0)/ns.length):0;
     const overdue=ns.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
     return(
-      <div style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",transition:"all .2s",position:"relative"}}
+      <div className="card-stagger card-interactive" style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",position:"relative",animationDelay:`${staggerIndex*0.05}s`,boxShadow:"0 2px 12px rgba(0,0,0,.06)"}}
         onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}
-        onMouseOver={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.5)":"rgba(99,102,241,.35)";e.currentTarget.style.background="var(--card-hover,var(--surface))";e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,.15)";}}
-        onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";e.currentTarget.style.background="var(--card)";e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}>
+        onMouseOver={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.5)":"rgba(99,102,241,.35)";e.currentTarget.style.background="var(--card-hover,var(--surface))";e.currentTarget.style.boxShadow="0 12px 32px rgba(0,0,0,.12)";}}
+        onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";e.currentTarget.style.background="var(--card)";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.06)";}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
           <div style={{width:34,height:34,borderRadius:9,background:isSc?"rgba(139,92,246,.15)":"rgba(99,102,241,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,border:`1px solid ${isSc?"rgba(139,92,246,.25)":"rgba(99,102,241,.15)"}`}}>
             {isSc?"⎇":"🗺️"}
@@ -5294,19 +5426,19 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
 
       {/* Header */}
-      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"16px 24px",display:"flex",alignItems:"center",gap:16}}>
-        <button onClick={onBack} style={{width:40,height:40,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text3)";}}>←</button>
+      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"16px 24px",display:"flex",alignItems:"center",gap:isMobile?12:16}}>
+        <button onClick={onBack} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text3)";}}>←</button>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.2}}>{proj.name||"Проект"}</div>
-          <div style={{fontSize:13,color:"var(--text5)",marginTop:2}}>{regularMaps.length} карт • {scenarios.length} сценариев • {(proj.members||[]).length} участников</div>
+          <div style={{fontSize:isMobile?15:16,fontWeight:900,color:"var(--text)",letterSpacing:-.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{proj.name||"Проект"}</div>
+          <div style={{fontSize:isMobile?12:13,color:"var(--text5)",marginTop:2}}>{regularMaps.length} карт • {scenarios.length} сцен. • {(proj.members||[]).length} уч.</div>
         </div>
-        <button onClick={onToggleTheme} style={{width:40,height:40,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>{theme==="dark"?"☀️":"🌙"}</button>
-        <button onClick={onProfile} style={{width:40,height:40,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
+        <button onClick={onToggleTheme} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>{theme==="dark"?"☀️":"🌙"}</button>
+        <button onClick={onProfile} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
       </div>
 
       {/* Stats bar */}
       {totalNodes>0&&(
-        <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"14px 24px",display:"flex",gap:32}}>
+        <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"14px 24px",display:"flex",gap:isMobile?16:32,flexWrap:"wrap"}}>
           {[
             {label:"Шагов всего",val:totalNodes,color:"#6366f1"},
             {label:"Завершено",val:`${doneNodes} (${totalNodes?Math.round(doneNodes/totalNodes*100):0}%)`,color:"#10b981"},
@@ -5322,13 +5454,13 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       )}
 
       {/* Tabs */}
-      <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:"0 24px",background:"var(--bg2)"}}>
-        {[["maps",`🗺 Карты (${regularMaps.length})`],["scenarios",`⎇ Сценарии (${scenarios.length})`],["team",`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
-          <button key={k} onClick={()=>setTab(k)} style={{padding:"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s"}}>{lbl}</button>
+      <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:isMobile?"0 16px":"0 24px",background:"var(--bg2)",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+        {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
+          <button key={k} onClick={()=>setTab(k)} style={{padding:isMobile?"12px 14px":"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:isMobile?13:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s",flexShrink:0}}>{lbl}</button>
         ))}
       </div>
 
-      <div style={{maxWidth:960,margin:"0 auto",padding:"28px 24px"}}>
+      <div style={{maxWidth:960,margin:"0 auto",padding:isMobile?"20px 16px":"28px 24px"}}>
         {/* Maps Tab */}
         {tab==="maps"&&(
           <div>
@@ -5349,8 +5481,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 {canEdit&&<button onClick={()=>createMap()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Создать карту</button>}
               </div>
             ):(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20}}>
-                {regularMaps.map(m=><MapCard key={m.id} m={m} isSc={false}/>)}
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(280px,1fr))",gap:isMobile?16:20}}>
+                {regularMaps.map((m,i)=><MapCard key={m.id} m={m} isSc={false} staggerIndex={i}/>)}
               </div>
             )}
           </div>
@@ -5387,8 +5519,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 {canEdit&&<button onClick={tryCreateScenario} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#8b5cf6,#6366f1)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Создать сценарий</button>}
               </div>
             ):(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:12}}>
-                {scenarios.map(m=><MapCard key={m.id} m={m} isSc={true}/>)}
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:12}}>
+                {scenarios.map((m,i)=><MapCard key={m.id} m={m} isSc={true} staggerIndex={i}/>)}
               </div>
             )}
           </div>
@@ -6969,6 +7101,7 @@ export default function App(){
   const[verifiedToast,setVerifiedToast]=useState(false);
   const[paymentToast,setPaymentToast]=useState(false);
   const[authChecked,setAuthChecked]=useState(false);
+  const[loadError,setLoadError]=useState<string|null>(null);
   const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
   // Синхронизация темы и палитры из профиля пользователя (при загрузке с API и после сохранения)
@@ -6977,6 +7110,14 @@ export default function App(){
     if(user.theme){setTheme(user.theme);try{localStorage.setItem("sa_theme",user.theme);}catch{}}
     if(user.palette){setPalette(user.palette);try{localStorage.setItem("sa_palette",user.palette);}catch{}}
   },[user?.email,user?.theme,user?.palette]);
+
+  // Применение темы и палитры к document.body — интерфейс и цвета обновляются глобально при смене темы/палитры
+  useEffect(()=>{
+    const b=document.body;
+    if(b.getAttribute("data-theme")!==theme)b.setAttribute("data-theme",theme);
+    const p=screen==="landing"?"indigo":(palette||"indigo");
+    if(b.getAttribute("data-palette")!==p)b.setAttribute("data-palette",p);
+  },[theme,palette,screen]);
   // t функция для LangCtx.Provider (App является корневым провайдером)
   const t=(k:string,fb?:string)=>{
     try{const L=(LANGS as any);return(L[lang]||L.ru)?.[k]||fb||k;}catch{return fb||k;}
@@ -6984,6 +7125,8 @@ export default function App(){
 
   useEffect(()=>{
     (async()=>{
+      try{
+      setLoadError(null);
       // Проверяем share-ссылку в URL (поддерживаем и hash и query param)
       const searchParams=new URLSearchParams(window.location.search);
       const shareFromQuery=searchParams.get("share");
@@ -7053,6 +7196,10 @@ export default function App(){
         }
       }
       setScreen("landing");setAuthChecked(true);
+      }catch(e:any){
+        setLoadError(e?.message||"Не удалось загрузить данные");
+        setAuthChecked(true);
+      }
     })();
   },[]);
 
@@ -7143,14 +7290,25 @@ export default function App(){
   },[screen,project?.id,mapData?.id]);
 
   const appPalette=screen==="landing"?undefined:palette;
+
+  if(loadError)return(
+    <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
+      <div data-theme={theme} data-palette={palette} style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:20}}>
+        <style>{CSS}</style>
+        <div style={{fontSize:18,fontWeight:700,color:"var(--text)",textAlign:"center"}}>{loadError}</div>
+        <button onClick={()=>{setLoadError(null);window.location.reload();}} style={{padding:"14px 28px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px var(--accent-glow)"}}>{t("retry","Повторить")}</button>
+      </div>
+    </LangCtx.Provider>
+  );
+
   return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
-      <div data-theme={theme} data-palette={appPalette} style={{minHeight:"100vh",background:"var(--bg)",transition:"background .25s ease, color .25s ease"}}>
+      <div data-theme={theme} data-palette={appPalette} className="screen-wrap" style={{minHeight:"100vh",background:"var(--bg)",transition:"background .35s ease, color .35s ease"}}>
       <style>{CSS}</style>
       <OfflineBanner/>
       <>
         {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>prev==="projects"?prev:"landing")} theme={theme} authReady={authChecked}/>}
-        {screen==="landing"&&<LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onGetStarted={()=>setScreen("welcome")}/>}
+        {screen==="landing"&&<div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}><LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onGetStarted={()=>setScreen("welcome")}/></div>}
         {screen==="sharedMap"&&sharedMapData&&(
           <MapEditor
             user={null} mapData={sharedMapData.map} project={{name:sharedMapData.projectName||""}}
@@ -7161,13 +7319,13 @@ export default function App(){
           />
         )}
         {screen==="welcome"&&(
-          <>
+          <div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}>
             <WelcomeScreen theme={theme} onBack={()=>setScreen("landing")} onLogin={()=>{setAuthTab("login");setShowAuth(true);}} onRegister={()=>{setAuthTab("register");setShowAuth(true);}}/>
             {showAuth&&<AuthModal initialTab={authTab} theme={theme} onClose={()=>setShowAuth(false)} onAuth={handleAuth}/>}
-          </>
+          </div>
         )}
         {screen==="projects"&&user&&(
-          <>
+          <div className="screen-enter" style={{height:"100%",display:"flex",flexDirection:"column",flex:1}}>
             <TrialBanner user={user} onUpgrade={()=>setShowProfile(true)}/>
             <EmailVerifyBanner user={user}/>
             <ProjectsPage
@@ -7180,10 +7338,10 @@ export default function App(){
               onToggleTheme={toggleTheme}
             />
             {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={(u:any)=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
-          </>
+          </div>
         )}
         {screen==="project"&&user&&project&&(
-          <>
+          <div className="screen-enter" style={{height:"100%",display:"flex",flexDirection:"column",flex:1}}>
             <ProjectDetail
               user={user} project={project} theme={theme}
               onBack={()=>setScreen("projects")}
@@ -7193,10 +7351,10 @@ export default function App(){
               onChangeTier={onChangeTier}
             />
             {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
-          </>
+          </div>
         )}
         {screen==="map"&&user&&mapData&&project&&(
-          <>
+          <div className="screen-enter" style={{height:"100%",display:"flex",flexDirection:"column",flex:1}}>
             <MapEditor
               user={user} mapData={mapData} project={project}
               isNew={mapIsNew} theme={theme} readOnly={mapReadOnly}
@@ -7205,7 +7363,7 @@ export default function App(){
               onToggleTheme={toggleTheme}
             />
             {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
-          </>
+          </div>
         )}
       {verifiedToast&&(
         <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"12px 22px",borderRadius:12,background:"rgba(16,185,129,.15)",border:"1px solid rgba(16,185,129,.4)",color:"#34d399",fontSize:14,fontWeight:700,boxShadow:"0 8px 32px rgba(0,0,0,.4)",animation:"slideUp .3s ease",backdropFilter:"blur(12px)"}}>

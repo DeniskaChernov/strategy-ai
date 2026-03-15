@@ -5,8 +5,11 @@ const { pool } = require('../db');
 const { signToken, signRefreshToken, requireAuth } = require('../middleware/auth');
 const { sendEmail, welcomeEmail, resetPasswordEmail, verifyEmailTemplate } = require('./email');
 
-// Вспомогательная функция: пользователь без пароля и чувствительных полей
-function safeUser(row) {
+function getDevEmails() {
+  return (process.env.DEV_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
+}
+
+function safeUser(row, isDev = false) {
   const {
     password_hash,
     reset_token,
@@ -16,7 +19,7 @@ function safeUser(row) {
     stripe_subscription_id,
     ...rest
   } = row;
-  return rest;
+  return { ...rest, is_dev: isDev };
 }
 
 // POST /api/auth/register
@@ -78,7 +81,7 @@ router.post('/register', async (req, res, next) => {
     const { subject: vs, html: vh } = verifyEmailTemplate(displayName, verifyToken);
     sendEmail({ to: emailLower, subject: vs, html: vh }).catch(() => {});
 
-    res.status(201).json({ token, refreshToken, user: safeUser(user), isNew: true });
+    res.status(201).json({ token, refreshToken, user: safeUser(user, getDevEmails().includes(user.email)), isNew: true });
   } catch (err) {
     await client.query('ROLLBACK').catch(() => {});
     next(err);
@@ -103,7 +106,7 @@ router.post('/login', async (req, res, next) => {
 
     const token = signToken({ email: user.email, id: user.id });
     const refreshToken = signRefreshToken({ email: user.email, id: user.id });
-    res.json({ token, refreshToken, user: safeUser(user), isNew: false });
+    res.json({ token, refreshToken, user: safeUser(user, getDevEmails().includes(user.email)), isNew: false });
   } catch (err) {
     next(err);
   }
@@ -186,9 +189,8 @@ router.patch('/profile', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'Bio не может быть длиннее 500 символов' });
     }
 
-    // Смена тарифа через profile разрешена только dev-аккаунту (обычные пользователи платят через Stripe)
-    const DEV_EMAILS = (process.env.DEV_EMAILS || 'denisblackman2@gmail.com').split(',').map(e => e.trim());
-    const newTier = tier && ALLOWED_TIERS.includes(tier) && DEV_EMAILS.includes(req.user.email) ? tier : null;
+    const DEV_EMAILS = getDevEmails();
+    const newTier = tier && ALLOWED_TIERS.includes(tier) && req.user.is_dev && DEV_EMAILS.includes(req.user.email) ? tier : null;
 
     const { rows } = await pool.query(
       `UPDATE users SET
@@ -208,7 +210,8 @@ router.patch('/profile', requireAuth, async (req, res, next) => {
        RETURNING id, email, name, bio, tier, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, theme, palette, trial_ends_at, created_at, email_verified`,
       [name, bio, ai_lang, notif_email, notif_push, auto_save, compact_mode, default_view, req.user.email, newTier, theme, palette]
     );
-    res.json({ user: rows[0] });
+    const userRow = rows[0];
+    res.json({ user: { ...userRow, is_dev: getDevEmails().includes(userRow.email) } });
   } catch (err) {
     next(err);
   }
