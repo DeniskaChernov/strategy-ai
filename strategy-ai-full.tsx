@@ -9,11 +9,11 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const snap=v=>Math.round(v/20)*20;
 
 const TIERS={
-  free:    {label:"Free",    price:"Бесплатно",  color:"#64748b",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
-  starter: {label:"Starter", price:"$9/мес",    color:"#10b981",badge:"◈", projects:3,  users:1,  maps:3,  scenarios:2,  templates:false,ai:"starter", clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для старта"},
-  pro:     {label:"Pro",     price:"$29/мес",   color:"#8b5cf6",badge:"◆", projects:10, users:3,  maps:5,  scenarios:5,  templates:false,ai:"advanced",clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для профессионалов"},
-  team:    {label:"Team",    price:"$59/мес",   color:"#f59e0b",badge:"✦", projects:25, users:10, maps:15, scenarios:15, templates:true, ai:"full",    clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для команд"},
-  enterprise:{label:"Enterprise",price:"$149+/мес",color:"#06b6d4",badge:"💎",projects:999,users:999,maps:999,scenarios:999,templates:true,ai:"priority",clone:true,wl:true,api:true,report:true,pptx:true,desc:"Для топ-команд"},
+  free:    {label:"Free",    price:"Бесплатно",  color:"#64748b",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
+  starter: {label:"Starter", price:"$9/мес",    color:"#10b981",badge:"◈", projects:3,  users:1,  maps:3,  scenarios:2,  templates:false,contentPlan:false,ai:"starter", clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для старта"},
+  pro:     {label:"Pro",     price:"$29/мес",   color:"#8b5cf6",badge:"◆", projects:10, users:3,  maps:5,  scenarios:5,  templates:false,contentPlan:true, ai:"advanced",clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для профессионалов"},
+  team:    {label:"Team",    price:"$59/мес",   color:"#f59e0b",badge:"✦", projects:25, users:10, maps:15, scenarios:15, templates:true, contentPlan:true, ai:"full",    clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для команд"},
+  enterprise:{label:"Enterprise",price:"$149+/мес",color:"#06b6d4",badge:"💎",projects:999,users:999,maps:999,scenarios:999,templates:true,contentPlan:true,ai:"priority",clone:true,wl:true,api:true,report:true,pptx:true,desc:"Для топ-команд"},
 };
 const ROLES_C  ={owner:"#6366f1",editor:"#10b981",viewer:"#94a3b8"};
 const STATUS  ={planning:{c:"#6366f1"},active:{c:"#0ea5e9"},completed:{c:"#10b981"},paused:{c:"#f59e0b"},blocked:{c:"#ef4444"}};
@@ -117,6 +117,7 @@ select{appearance:none;-webkit-appearance:none;}
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:2px solid var(--accent-1);outline-offset:2px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDownOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(18px)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -212,10 +213,19 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes priceCount{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes scrollPulse{0%,100%{opacity:.4}50%{opacity:1}}
 @keyframes slideRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes slideRightOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(40px)}}
 @keyframes slideLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
 @keyframes scaleIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+@keyframes scaleOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(0.97)}}
+@keyframes backdropOut{from{opacity:1}to{opacity:0}}
 .panel-slide{animation:slideRight .4s cubic-bezier(0.22,1,0.36,1) forwards;}
+.panel-slide-out{animation:slideRightOut .32s cubic-bezier(0.32,0,0.67,0) forwards;pointer-events:none;}
 .panel-slide-fast{animation:slideRight .28s cubic-bezier(0.22,1,0.36,1) forwards;}
+.modal-backdrop-out{animation:backdropOut .22s ease forwards;pointer-events:none;}
+.modal-content-out{animation:scaleOut .22s ease forwards;}
+.panel-slide-down-out{animation:slideDownOut .28s ease forwards;pointer-events:none;}
+@keyframes slideDownOutGantt{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(100%)}}
+.gantt-panel-out{animation:slideDownOutGantt .3s ease forwards;pointer-events:none;}
 .modal-scale{animation:scaleIn .28s cubic-bezier(.25,.46,.45,.94) forwards;}
 @keyframes ripple{from{transform:scale(0);opacity:.4}to{transform:scale(2.5);opacity:0}}
 @keyframes checkmark{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
@@ -252,6 +262,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes listItemIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeScaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
 @keyframes backdropIn{from{opacity:0;backdrop-filter:blur(0)}to{opacity:1;backdrop-filter:blur(16px)}}
+/* ── Glass (glassmorphism) ── */
+.glass{background:var(--glass-bg,rgba(10,15,26,.75));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border,rgba(255,255,255,.08));box-shadow:0 24px 64px rgba(0,0,0,.35);}
+[data-theme="light"] .glass{--glass-bg:rgba(255,255,255,.82);--glass-border:rgba(0,0,0,.06);box-shadow:0 24px 64px rgba(0,0,0,.12);}
+.glass-panel{background:var(--glass-panel-bg,rgba(10,15,26,.88));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-panel-border,rgba(255,255,255,.1));box-shadow:0 16px 48px rgba(0,0,0,.4);}
+[data-theme="light"] .glass-panel{--glass-panel-bg:rgba(255,255,255,.92);--glass-panel-border:rgba(0,0,0,.08);box-shadow:0 16px 48px rgba(0,0,0,.1);}
+.glass-card{background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--r-lg);}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
 .screen-enter{animation:screenEnter .4s cubic-bezier(0.22,1,0.36,1) forwards;}
 .screen-enter-left{animation:screenEnterLeft .35s cubic-bezier(0.22,1,0.36,1) forwards;}
@@ -440,6 +456,7 @@ const LANGS={
     today:'Сегодня',overdue:'Просрочено',
     // ProfileModal
     profile_title:'Профиль',security_title:'Безопасность',
+    login_methods:'Вход в аккаунт',email_verified:'Email подтверждён',email_not_verified:'Подтвердите email',google_login_coming:'Вход через Google — скоро',
     settings_title:'Настройки',stats_tab:'Статистика',billing_title:'Тариф',
     display_name:'Имя',bio_label:'О себе',change_password:'Сменить пароль',
     current_password:'Текущий пароль',new_password:'Новый пароль',
@@ -479,6 +496,16 @@ const LANGS={
     scenarios:"Сценарии",
     no_scenarios:"Нет сценариев",
     scenarios_pro:"Сценарии доступны с Pro",
+    content_plan:"Контент-план",
+    content_plan_tab:"Контент-план",
+    content_plan_locked_title:"Контент-план доступен на Pro",
+    content_plan_pro_only:"Приложение использует знания о вашем бизнесе и стратегии для планирования постов.",
+    content_plan_empty:"Планируйте посты, рассылки и публикации. AI подскажет идеи по шагам стратегии.",
+    add_content_item:"+ Публикация",
+    content_status_draft:"Черновик",content_status_scheduled:"Запланировано",content_status_published:"Опубликовано",
+    content_type_post:"Пост",content_type_story:"Сторис",content_type_email:"Рассылка",content_type_video:"Видео",
+    content_channel_blog:"Блог",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"ВКонтакте",content_channel_youtube:"YouTube",
+    content_link_step:"Связать с шагом стратегии",content_ai_suggest:"✨ Предложить по стратегии",
     scenario_templates:"Шаблоны сценариев",
     no_limits:"Без лимитов.",
     no_comparison:"Без сравнения",
@@ -651,7 +678,7 @@ const LANGS={
     settings_saved:"Настройки сохранены ✓",
     appearance:"Внешний вид",
     light_theme_label:"☀️ Светлая",dark_theme_label:"🌙 Тёмная",
-    palette_label:"Цветовая палитра",
+    palette_label:"Цветовая палитра",palette_hint:"Цвет кнопок и акцентов. Сохраняется автоматически.",
     compact_desc:"Уменьшенные карточки узлов",
     autosave_desc:"Сохранять карту при каждом изменении",
     canvas_view:"🗺 Канвас",gantt_view:"📅 Gantt",list_view:"📋 Список",
@@ -671,6 +698,7 @@ const LANGS={
     scenarios_count:"сцен.",
     map_limit_tier:"Лимит карт для {tier}: {n}",
     template_applied:"Шаблон применён ✓",
+    ai_customize_template_offer:"Я применил шаблон. Хотите подстроить его под ваш бизнес? Напишите, чем вы занимаетесь и какая цель — я адаптирую шаги и формулировки под вас.",
     scenario_created:"Сценарий создан ✓",
     scenario_limit:"Лимит сценариев для тарифа",
     members_limit:"Лимит участников: {n}",
@@ -810,6 +838,7 @@ const LANGS={
     today:'Today',overdue:'Overdue',
     // ProfileModal
     profile_title:'Profile',security_title:'Security',
+    login_methods:'Account sign-in',email_verified:'Verified',email_not_verified:'Not verified',google_login_coming:'Google sign-in coming soon',
     settings_title:'Settings',stats_tab:'Statistics',billing_title:'Billing',
     display_name:'Name',bio_label:'Bio',change_password:'Change password',
     current_password:'Current password',new_password:'New password',
@@ -849,6 +878,16 @@ const LANGS={
     scenarios:"Scenarios",
     no_scenarios:"No scenarios",
     scenarios_pro:"Scenarios available with Pro",
+    content_plan:"Content plan",
+    content_plan_tab:"Content plan",
+    content_plan_locked_title:"Content plan available on Pro",
+    content_plan_pro_only:"The app uses your business and strategy context to plan content.",
+    content_plan_empty:"Plan posts, newsletters, and updates. AI will suggest ideas based on your strategy steps.",
+    add_content_item:"+ Add post",
+    content_status_draft:"Draft",content_status_scheduled:"Scheduled",content_status_published:"Published",
+    content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
+    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",
+    content_link_step:"Link to strategy step",content_ai_suggest:"✨ Suggest from strategy",
     scenario_templates:"Scenario Templates",
     no_limits:"No limits.",
     no_comparison:"No comparison",
@@ -1021,7 +1060,7 @@ const LANGS={
     settings_saved:"Settings saved ✓",
     appearance:"Appearance",
     light_theme_label:"☀️ Light",dark_theme_label:"🌙 Dark",
-    palette_label:"Color palette",
+    palette_label:"Color palette",palette_hint:"Color of buttons and accents. Saves automatically.",
     compact_desc:"Smaller node cards",
     autosave_desc:"Save map on every change",
     canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 List",
@@ -1041,6 +1080,7 @@ const LANGS={
     scenarios_count:"scen.",
     map_limit_tier:"Map limit for {tier}: {n}",
     template_applied:"Template applied ✓",
+    ai_customize_template_offer:"I've applied the template. Want to adapt it to your business? Describe what you do and your goal — I'll adjust the steps and wording for you.",
     scenario_created:"Scenario created ✓",
     scenario_limit:"Scenario limit for plan",
     members_limit:"Member limit: {n}",
@@ -1181,6 +1221,7 @@ const LANGS={
     today:"Bugun",overdue:"Kechiktirilgan",
     // ProfileModal
     profile_title:"Profil",security_title:"Xavfsizlik",
+    login_methods:"Hisobga kirish",email_verified:"Tasdiqlangan",email_not_verified:"Tasdiqlanmagan",google_login_coming:"Google orqali kirish tez kunda",
     settings_title:"Sozlamalar",stats_tab:"Statistika",billing_title:"Tarif",
     display_name:"Ism",bio_label:"Bio",change_password:"Parolni o'zgartirish",
     current_password:"Joriy parol",new_password:"Yangi parol",
@@ -1188,7 +1229,7 @@ const LANGS={
     danger_zone:"Xavfli zona",delete_account:"Hisobni o'chirish",
     theme_label:"Mavzu",dark_theme:"Qorong'u",light_theme:"Yorug'",
     light_theme_label:"☀️ Yorug'",dark_theme_label:"🌙 Qorong'u",
-    palette_label:"Rang palitrasi",
+    palette_label:"Rang palitrasi",palette_hint:"Tugmalar va urg'u ranglari. Avtomatik saqlanadi.",
     compact_mode:"Ixcham rejim",default_view:"Standart ko'rinish",
     auto_save:"Avtomatik saqlash",ai_language:"AI tili",
     email_notifications:"Email bildirishnomalar",push_notifications:"Push bildirishnomalar",
@@ -1223,6 +1264,16 @@ const LANGS={
     scenarios:"Stsenariylar",
     no_scenarios:"Stsenariylar yo'q",
     scenarios_pro:"Stsenariylar Pro bilan mavjud",
+    content_plan:"Kontent reja",
+    content_plan_tab:"Kontent reja",
+    content_plan_locked_title:"Kontent rejasi Pro da",
+    content_plan_pro_only:"Ilova biznesingiz va strategiyangiz bo'yicha kontentni rejalashtirishda yordam beradi.",
+    content_plan_empty:"Postlar, xatlar va yangiliklarni rejalashtiring. AI strategiya qadamlari bo'yicha takliflar beradi.",
+    add_content_item:"+ Post qo'shish",
+    content_status_draft:"Qoralama",content_status_scheduled:"Rejalashtirilgan",content_status_published:"Nashr qilindi",
+    content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
+    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",
+    content_link_step:"Strategiya qadami bilan bog'lash",content_ai_suggest:"✨ Strategiyadan taklif",
     scenario_templates:"Stsenariy shablonlari",
     no_limits:"Cheksiz.",
     no_comparison:"Taqqoslash yo'q",
@@ -1414,6 +1465,7 @@ const LANGS={
     scenarios_count:"stsen.",
     map_limit_tier:"Tarif uchun xarita limiti {tier}: {n}",
     template_applied:"Shablon qo'llanildi ✓",
+    ai_customize_template_offer:"Shablon qo'llanildi. Biznesingizga moslashtirishni xohlaysizmi? Nima qilasiz va maqsadingizni yozing — qadamlarni sizga moslashtiraman.",
     scenario_created:"Stsenariy yaratildi ✓",
     scenario_limit:"Tarif uchun stsenariy limiti",
     members_limit:"A'zo limiti: {n}",
@@ -1729,6 +1781,22 @@ async function deleteMap(pid:string,mid:string){
   await store.set(`sa_maps_${pid}`,a.filter((m:any)=>m.id!==mid));
 }
 
+// ── Content Plan (per project, Pro+) ──
+async function getContentPlan(projectId:string):Promise<any[]>{
+  if(API_BASE){
+    try{const d=await apiFetch(`/api/projects/${projectId}/content-plan`);return d.items||[];}
+    catch{return[];}
+  }
+  return (await store.get(`sa_content_${projectId}`))||[];
+}
+async function saveContentPlan(projectId:string,items:any[]){
+  if(API_BASE){
+    try{await apiFetch(`/api/projects/${projectId}/content-plan`,{method:"PUT",body:JSON.stringify({items})});return;}
+    catch{throw new Error("Ошибка сохранения");}
+  }
+  await store.set(`sa_content_${projectId}`,items);
+}
+
 // ── utils ──
 function edgePt(cx,cy,tx,ty){const dx=tx-cx,dy=ty-cy;if(!dx&&!dy)return{x:cx,y:cy};const hw=NW/2+8,hh=NH/2+8,t=Math.abs(dy)*hw<Math.abs(dx)*hh?hw/Math.abs(dx):hh/Math.abs(dy);return{x:cx+dx*t,y:cy+dy*t};}
 async function callAI(messages:any[],system:string,maxTokens=1200):Promise<string>{
@@ -2036,6 +2104,86 @@ const TEMPLATES=[
       {id:"ese5",source:"es4",target:"es5",type:"follows",label:""},
     ]
   },
+  {id:"content",name:"✍️ Контент-маркетинг",desc:"Система контента и лидогенерации",
+    nodes:[
+      {id:"c1",x:160,y:260,title:"Аудит контента и каналов",reason:"Понять что работает",metric:"Топ-5 каналов по конверсии",status:"planning",priority:"high",progress:0,tags:["audit"],color:""},
+      {id:"c2",x:420,y:150,title:"Контент-план и редактура",reason:"Регулярные публикации",metric:"12 постов/мес",status:"planning",priority:"high",progress:0,tags:["content"],color:""},
+      {id:"c3",x:420,y:370,title:"SEO и ключевые слова",reason:"Органический трафик",metric:"Топ-10 по ключам",status:"planning",priority:"high",progress:0,tags:["seo"],color:""},
+      {id:"c4",x:680,y:260,title:"Лендинги и лид-магниты",reason:"Сбор контактов",metric:"Конверсия > 3%",status:"planning",priority:"critical",progress:0,tags:["leads"],color:""},
+      {id:"c5",x:940,y:260,title:"Автоматизация рассылок",reason:"Прогрев лидов",metric:"Open rate > 25%",status:"planning",priority:"medium",progress:0,tags:["email"],color:""},
+    ],
+    edges:[
+      {id:"ce1",source:"c1",target:"c2",type:"requires",label:""},
+      {id:"ce2",source:"c1",target:"c3",type:"affects",label:""},
+      {id:"ce3",source:"c2",target:"c4",type:"affects",label:""},
+      {id:"ce4",source:"c3",target:"c4",type:"requires",label:""},
+      {id:"ce5",source:"c4",target:"c5",type:"follows",label:""},
+    ]
+  },
+  {id:"product_dev",name:"🛠 Разработка продукта",desc:"От идеи до релиза",
+    nodes:[
+      {id:"pd1",x:160,y:260,title:"Discovery и приоритизация",reason:"Выбрать что строить",metric:"Backlog с приоритетами",status:"planning",priority:"high",progress:0,tags:["discovery"],color:""},
+      {id:"pd2",x:420,y:150,title:"Дизайн и прототипы",reason:"Визуализация решения",metric:"Figma-прототип",status:"planning",priority:"high",progress:0,tags:["design"],color:""},
+      {id:"pd3",x:420,y:370,title:"Техническая спецификация",reason:"Единое понимание",metric:"Спека для команды",status:"planning",priority:"high",progress:0,tags:["spec"],color:""},
+      {id:"pd4",x:680,y:260,title:"Разработка и тесты",reason:"Качественный релиз",metric:"Покрытие тестами > 70%",status:"planning",priority:"critical",progress:0,tags:["dev"],color:""},
+      {id:"pd5",x:940,y:260,title:"Релиз и мониторинг",reason:"Стабильная работа",metric:"Uptime > 99.5%",status:"planning",priority:"critical",progress:0,tags:["release"],color:""},
+    ],
+    edges:[
+      {id:"pde1",source:"pd1",target:"pd2",type:"requires",label:""},
+      {id:"pde2",source:"pd1",target:"pd3",type:"requires",label:""},
+      {id:"pde3",source:"pd2",target:"pd4",type:"affects",label:""},
+      {id:"pde4",source:"pd3",target:"pd4",type:"requires",label:""},
+      {id:"pde5",source:"pd4",target:"pd5",type:"follows",label:""},
+    ]
+  },
+  {id:"customer_success",name:"💚 Customer Success",desc:"Удержание и рост LTV",
+    nodes:[
+      {id:"cs1",x:160,y:260,title:"Онбординг клиентов",reason:"Быстрый time-to-value",metric:"Активация за 7 дней",status:"planning",priority:"critical",progress:0,tags:["onboard"],color:""},
+      {id:"cs2",x:420,y:150,title:"Регулярные проверки здоровья",reason:"Снизить отток",metric:"NPS и health score",status:"planning",priority:"high",progress:0,tags:["health"],color:""},
+      {id:"cs3",x:420,y:370,title:"Обучение и база знаний",reason:"Самообслуживание",metric:"50% запросов без тикета",status:"planning",priority:"high",progress:0,tags:["education"],color:""},
+      {id:"cs4",x:680,y:260,title:"Upsell и кросс-селл",reason:"Рост LTV",metric:"+20% к ARPU",status:"planning",priority:"high",progress:0,tags:["upsell"],color:""},
+      {id:"cs5",x:940,y:260,title:"Рефералы и кейсы",reason:"Сарафан и доверие",metric:"5 кейсов в год",status:"planning",priority:"medium",progress:0,tags:["referral"],color:""},
+    ],
+    edges:[
+      {id:"cse1",source:"cs1",target:"cs2",type:"requires",label:""},
+      {id:"cse2",source:"cs1",target:"cs3",type:"affects",label:""},
+      {id:"cse3",source:"cs2",target:"cs4",type:"affects",label:""},
+      {id:"cse4",source:"cs3",target:"cs4",type:"affects",label:""},
+      {id:"cse5",source:"cs4",target:"cs5",type:"follows",label:""},
+    ]
+  },
+  {id:"hiring",name:"👥 Найм и команда",desc:"Масштабирование команды",
+    nodes:[
+      {id:"h1",x:160,y:260,title:"Описание ролей и компетенций",reason:"Чёткие критерии найма",metric:"JD по каждой роли",status:"planning",priority:"high",progress:0,tags:["jd"],color:""},
+      {id:"h2",x:420,y:150,title:"Каналы привлечения",reason:"Качественный входящий поток",metric:"10+ откликов на вакансию",status:"planning",priority:"high",progress:0,tags:["sourcing"],color:""},
+      {id:"h3",x:420,y:370,title:"Интервью и оценка",reason:"Отбор лучших",metric:"Структурированное интервью",status:"planning",priority:"critical",progress:0,tags:["interview"],color:""},
+      {id:"h4",x:680,y:260,title:"Оффер и онбординг",reason:"Закрыть кандидата",metric:"Accept rate > 80%",status:"planning",priority:"critical",progress:0,tags:["offer"],color:""},
+      {id:"h5",x:940,y:260,title:"Адаптация и развитие",reason:"Быстрая продуктивность",metric:"90 дней до полной нагрузки",status:"planning",priority:"high",progress:0,tags:["onboard"],color:""},
+    ],
+    edges:[
+      {id:"he1",source:"h1",target:"h2",type:"requires",label:""},
+      {id:"he2",source:"h1",target:"h3",type:"requires",label:""},
+      {id:"he3",source:"h2",target:"h4",type:"affects",label:""},
+      {id:"he4",source:"h3",target:"h4",type:"requires",label:""},
+      {id:"he5",source:"h4",target:"h5",type:"follows",label:""},
+    ]
+  },
+  {id:"rebrand",name:"🎨 Ребрендинг",desc:"Смена позиционирования и упаковки",
+    nodes:[
+      {id:"rb1",x:160,y:260,title:"Исследование и позиционирование",reason:"Новая ниша и ЦА",metric:"Документ позиционирования",status:"planning",priority:"critical",progress:0,tags:["research"],color:""},
+      {id:"rb2",x:420,y:150,title:"Нейминг и визуал",reason:"Узнаваемый бренд",metric:"Логотип, палитра, шрифты",status:"planning",priority:"high",progress:0,tags:["brand"],color:""},
+      {id:"rb3",x:420,y:370,title:"Контент и тоналность",reason:"Единый голос",metric:"Tone of voice гайд",status:"planning",priority:"high",progress:0,tags:["content"],color:""},
+      {id:"rb4",x:680,y:260,title:"Обновление носителей",reason:"Сайт, соцсети, материалы",metric:"Все точки касания",status:"planning",priority:"critical",progress:0,tags:["touchpoints"],color:""},
+      {id:"rb5",x:940,y:260,title:"Запуск и коммуникация",reason:"Донести изменения",metric:"Презентация клиентам/команде",status:"planning",priority:"high",progress:0,tags:["launch"],color:""},
+    ],
+    edges:[
+      {id:"rbe1",source:"rb1",target:"rb2",type:"requires",label:""},
+      {id:"rbe2",source:"rb1",target:"rb3",type:"requires",label:""},
+      {id:"rbe3",source:"rb2",target:"rb4",type:"affects",label:""},
+      {id:"rbe4",source:"rb3",target:"rb4",type:"affects",label:""},
+      {id:"rbe5",source:"rb4",target:"rb5",type:"follows",label:""},
+    ]
+  },
 ];
 
 // ── OfflineBanner ──
@@ -2093,13 +2241,16 @@ function Toast({msg,type="info",onClose,action,onAction}){
 // ── ConfirmDialog ──
 function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,onCancel,danger=true}){
   const{t}=useLang();
+  const[closing,setClosing]=useState(false);
+  const handleCancel=()=>{if(closing)return;setClosing(true);setTimeout(()=>onCancel(),220);};
+  const handleConfirm=()=>{if(closing)return;setClosing(true);setTimeout(()=>onConfirm(),220);};
   useEffect(()=>{
-    const h=e=>{if(e.key==="Escape")onCancel();if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))onConfirm();};
+    const h=e=>{if(e.key==="Escape")handleCancel();if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))handleConfirm();};
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
   },[]);
   return(
-    <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(8px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onCancel();}}>
-      <div className="modal-content-pop" style={{width:"min(95vw,360px)",background:"var(--surface,#0f1729)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--accent-1)"}`,boxShadow:"var(--shadow,0 32px 80px rgba(0,0,0,.9))",overflow:"hidden"}}>
+    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleCancel();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,360px)",background:"var(--bg2)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--border)"}`,boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"var(--accent-soft)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"var(--accent-1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -2108,8 +2259,8 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
           <div style={{fontSize:13,color:"var(--text3)",lineHeight:1.65,marginBottom:24}}>{message}</div>
         </div>
         <div style={{display:"flex",gap:10,padding:"0 24px 24px"}}>
-          <button onClick={onCancel} style={{flex:1,padding:"12px",borderRadius:11,border:"1px solid rgba(255,255,255,.12)",background:"rgba(255,255,255,.06)",color:"#cbd5e1",fontSize:13,fontWeight:600,cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(255,255,255,.1)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.06)";}}>{t("cancel","Отмена")}</button>
-          <button onClick={onConfirm} style={{flex:1,padding:"12px",borderRadius:11,border:"none",background:danger?"linear-gradient(135deg,#dc2626,#ef4444)":"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.transform="translateY(-1px)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{confirmLabel}</button>
+          <button onClick={handleCancel} className="btn-interactive" style={{flex:1,padding:"12px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("cancel","Отмена")}</button>
+          <button onClick={handleConfirm} className="btn-interactive" style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:danger?"linear-gradient(135deg,#dc2626,#ef4444)":"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}}>{confirmLabel}</button>
         </div>
       </div>
     </div>
@@ -2120,11 +2271,13 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
 function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitle}){
   const{lang,setLang,t}=useLang();
   const[tab,setTab]=useState(initialTab),[email,setEmail]=useState(""),[pw,setPw]=useState(""),[name,setName]=useState(""),[err,setErr]=useState(""),[loading,setLoading]=useState(false);
+  const[closing,setClosing]=useState(false);
+  const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
   async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
   const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   return(
-    <div data-theme={theme} className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)",padding:16}}>
-      <div className="modal-content-pop" style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg3)",border:"1px solid var(--accent-1)",borderRadius:20,boxShadow:"0 40px 80px rgba(0,0,0,.8)"}}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:20,boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>
             {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
@@ -2143,7 +2296,7 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
                 </button>
               ))}
             </div>
-            {onClose&&<button onClick={onClose} style={{width:28,height:28,borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text4)",cursor:"pointer",fontSize:16}}>×</button>}
+            {onClose&&<button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
           </div>
         </div>
         <div style={{padding:"20px 24px 24px"}}>
@@ -2493,7 +2646,9 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
     }catch(e){setMsg({t:t("delete_err","Ошибка при удалении"),ok:false});}
     setLoading(false);
   }
-  useEffect(()=>{const h=e=>{if(e.key==="Escape"&&!buyPhase)onClose();};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);},[buyPhase]);
+  const[closing,setClosing]=useState(false);
+  const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),260);};
+  useEffect(()=>{const h=e=>{if(e.key==="Escape"&&!buyPhase)handleClose();};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);},[buyPhase,closing]);
 
   const TABS=[
     ["profile","👤",t("profile_title","Профиль")],
@@ -2504,23 +2659,23 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   ];
 
   return(
-    <div data-theme={theme} className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)onClose();}}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)handleClose();}}>
       <style>{CSS}</style>
-      <div className={isMobile?"":"modal-content-pop"} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,background:"var(--bg2)",borderRadius:isMobile?20:28,borderTopLeftRadius:20,borderTopRightRadius:20,border:"1px solid var(--border2)",boxShadow:"0 50px 120px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",animation:isMobile?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}}>
+      <div className={`glass-panel ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
 
         {/* Header */}
-        <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--bg3)"}}>
-          <div style={{width:48,height:48,borderRadius:"50%",background:`linear-gradient(135deg,${tier.color},${tier.color}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,color:"#fff",boxShadow:`0 6px 20px ${tier.color}44`}}>{(user.name||user.email)[0].toUpperCase()}</div>
+        <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
+          <div style={{width:44,height:44,borderRadius:"50%",background:`linear-gradient(135deg,${tier.color},${tier.color}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:800,color:"#fff",boxShadow:`0 4px 16px ${tier.color}44`}}>{(user.name||user.email)[0].toUpperCase()}</div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>{user.name||t("user_word","Пользователь")}</div>
             <div style={{fontSize:13,color:"var(--text4)",marginTop:1}}>{user.email}</div>
             {user.bio&&<div style={{fontSize:13,color:"var(--text5)",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:320}}>{user.bio}</div>}
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:20,background:`${tier.color}18`,border:`1px solid ${tier.color}44`}}>
-            <span style={{fontSize:14}}>{tier.badge}</span>
+          <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:12,background:`${tier.color}18`,border:`1px solid ${tier.color}44`}}>
+            <span style={{fontSize:13}}>{tier.badge}</span>
             <span style={{fontSize:13,fontWeight:700,color:tier.color}}>{tier.label}</span>
           </div>
-          <button onClick={onClose} style={{width:34,height:34,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.background="var(--surface2)"} onMouseOut={e=>e.currentTarget.style.background="var(--surface)"}>×</button>
+          <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.background="var(--surface2)"} onMouseOut={e=>e.currentTarget.style.background="var(--surface)"}>×</button>
         </div>
 
         {/* Tab bar */}
@@ -2582,6 +2737,21 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
           {tab==="security"&&(
             <div style={{flex:1,overflowY:"auto",padding:"28px 32px",minHeight:380}}>
               <div style={{maxWidth:420}}>
+                <div style={{fontSize:13,fontWeight:800,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:10}}>{t("login_methods","Вход в аккаунт")}</div>
+                <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>✉️ Email</div>
+                    <div style={{fontSize:12,color:"var(--text4)",marginTop:2}}>{user.email}</div>
+                  </div>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:user.emailVerified!==false?"rgba(16,185,129,.12)":"rgba(245,158,11,.12)",border:`1px solid ${user.emailVerified!==false?"rgba(16,185,129,.3)":"rgba(245,158,11,.3)"}`,color:user.emailVerified!==false?"#10b981":"#f59e0b",fontSize:12,fontWeight:700}}>
+                    {user.emailVerified!==false?t("email_verified","Подтверждён"):t("email_not_verified","Не подтверждён")}
+                  </div>
+                </div>
+                {API_BASE&&(
+                  <div style={{padding:"12px 16px",borderRadius:11,background:"var(--surface2)",border:"1px solid var(--border)",marginBottom:20,fontSize:12,color:"var(--text4)"}}>
+                    🔜 {t("google_login_coming","Вход через Google будет доступен в следующем обновлении.")}
+                  </div>
+                )}
                 <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:4}}>{t("change_password","Изменить пароль")}</div>
                 <div style={{fontSize:13.5,color:"var(--text4)",marginBottom:20}}>{t("pw_hint","Пароль должен быть не менее 6 символов")}</div>
                 <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:8}}>{t("current_password","Текущий пароль")}</div>
@@ -2646,7 +2816,8 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   </div>
                   {onPaletteChange&&(
                     <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginTop:8,marginBottom:8}}>
-                      <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("palette_label","Цветовая палитра")}</div>
+                      <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:4}}>{t("palette_label","Цветовая палитра")}</div>
+                      <div style={{fontSize:12,color:"var(--text5)",marginBottom:8}}>{t("palette_hint","Цвет кнопок и акцентов. Сохраняется автоматически.")}</div>
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                         {[
                           {id:"indigo",label:"◆ Indigo",c1:"#5b6bc0",c2:"#7c8dd9"},
@@ -2746,6 +2917,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   {[
                     {label:t("lpr2_f4","Клонирование карт"),ok:tier.clone},
                     {label:t("templates","Шаблоны стратегий"),ok:tier.templates},
+                    {label:t("content_plan","Контент-план"),ok:tier.contentPlan},
                     {label:"White-label",ok:tier.wl},
                     {label:"API",ok:tier.api},
                     {label:t("export_pdf","Отчёты"),ok:tier.report},
@@ -3204,14 +3376,16 @@ function StatsPopup({nodes,edges,onClose}){
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const total=nodes.length;
+  const[closing,setClosing]=useState(false);
+  const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
   if(total===0){
     return(
-      <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(10px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-        <div style={{width:"min(96vw,420px)",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 50px 120px rgba(0,0,0,.7)",padding:"32px 28px",animation:"scaleIn .22s cubic-bezier(.34,1.56,.64,1)",textAlign:"center"}}>
-          <div style={{fontSize:48,marginBottom:16}}>📊</div>
+      <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+        <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,420px)",background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"28px 24px",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+          <div style={{fontSize:44,marginBottom:14}}>📊</div>
           <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:8}}>{t("stats_title","Статистика")}</div>
           <div style={{fontSize:14,color:"var(--text4)",lineHeight:1.6}}>{t("stats_empty","Добавьте шаги на карту, чтобы увидеть аналитику.")}</div>
-          <button onClick={onClose} style={{marginTop:20,padding:"10px 24px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("close","Закрыть")}</button>
+          <button onClick={handleClose} className="btn-interactive" style={{marginTop:20,padding:"10px 24px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("close","Закрыть")}</button>
         </div>
       </div>
     );
@@ -3244,14 +3418,14 @@ function StatsPopup({nodes,edges,onClose}){
   });
   const healthColor=healthScore>=70?"#10b981":healthScore>=40?"#f59e0b":"#ef4444";
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(10px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div style={{width:"min(96vw,620px)",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 50px 120px rgba(0,0,0,.7)",padding:"24px 26px",animation:"scaleIn .22s cubic-bezier(.34,1.56,.64,1)"}}>
+    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,620px)",background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
           <div>
             <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>📊 Аналитика карты</div>
             <div style={{fontSize:13.5,color:"var(--text4)",marginTop:2}}>{total} шагов · {edges.length} связей</div>
           </div>
-          <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:17,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.background="var(--surface2)"} onMouseOut={e=>e.currentTarget.style.background="var(--surface)"}>×</button>
         </div>
         {/* Top: donut + score */}
         <div style={{display:"flex",gap:22,marginBottom:20,alignItems:"center"}}>
@@ -3340,6 +3514,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const[aiRephrLoading,setAiRephrLoading]=useState(false);
   const[aiCommentLoading,setAiCommentLoading]=useState(false);
   const[autoConnLoading,setAutoConnLoading]=useState(false);
+  const[exiting,setExiting]=useState(false);
+  const handleClose=()=>{if(exiting)return;setExiting(true);setTimeout(()=>onClose(),320);};
   const comments=node.comments||[];
   const history=node.history||[];
   const COLORS=["","#6366f1","#8b5cf6","#0ea5e9","#10b981","#f59e0b","#ef4444","#ec4899","#06b6d4","#84cc16","#f97316"];
@@ -3432,12 +3608,12 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const panelWidth=isMobile?"100%":aiPanelOpen?320:340;
   const panelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:panelRight,top:0,bottom:0,width:panelWidth,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
-    <div className="panel-slide" style={panelStyle}>
+    <div className={exiting?"panel-slide panel-slide-out":"panel-slide"} style={panelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:12,height:12,borderRadius:4,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
         <div style={{flex:1,fontSize:15,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
         {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>↗</button>}
-        <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
+        <button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
       </div>
       <div style={{display:"flex",borderBottom:"1px solid var(--border)",flexShrink:0,overflowX:"auto",padding:"0 14px"}}>
         {tabs.map(item=>{
@@ -3602,6 +3778,8 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   const setMsgs=isControlled?onMsgsChange:setLocalMsgs;
   const[inp,setInp]=useState("");
   const[load,setLoad]=useState(false);
+  const[exiting,setExiting]=useState(false);
+  const handleClose=()=>{if(exiting)return;setExiting(true);setTimeout(()=>onClose(),320);};
   const endRef=useRef(null);
   const inpRef=useRef<HTMLInputElement>(null);
   const initRef=useRef(false);
@@ -3693,7 +3871,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
 
   const aiPanelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:0,top:0,bottom:0,width:360,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
-    <div className="panel-slide" style={aiPanelStyle}>
+    <div className={exiting?"panel-slide panel-slide-out":"panel-slide"} style={aiPanelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:36,height:36,borderRadius:12,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0}}>✦</div>
         <div style={{flex:1,minWidth:0}}>
@@ -3701,7 +3879,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
           <div style={{fontSize:12,color:tierCfg.color||"#10b981",fontWeight:600,marginTop:2}}>{tierCfg.badge} {tierCfg.label}</div>
         </div>
         <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"8px 12px",borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>✕</button>
-        <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
+        <button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
       </div>
       <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -3873,14 +4051,16 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,on
 function GanttView({nodes,onClose}){
   const{t,lang}=useLang();
   const STATUS=getSTATUS(t);
+  const[exiting,setExiting]=useState(false);
+  const handleClose=()=>{if(exiting)return;setExiting(true);setTimeout(()=>onClose(),280);};
   const withDates=nodes.filter(n=>n.deadline);
   const now=new Date();
   if(withDates.length===0)return(
-    <div style={{position:"absolute",bottom:70,left:"50%",transform:"translateX(-50%)",background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:14,padding:"16px 22px",zIndex:30,boxShadow:"0 20px 60px rgba(0,0,0,.5)",textAlign:"center",minWidth:280}}>
+    <div className={exiting?"panel-slide-down-out":""} style={{position:"absolute",bottom:70,left:"50%",transform:"translateX(-50%)",background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:16,padding:"18px 24px",zIndex:30,boxShadow:"0 20px 60px rgba(0,0,0,.4)",textAlign:"center",minWidth:280,animation:exiting?"none":"fadeInUp .3s ease"}}>
       <div style={{fontSize:22,marginBottom:6}}>📅</div>
       <div style={{fontSize:13,fontWeight:700,color:"var(--text3)"}}>{t("no_deadlines","Нет дедлайнов")}</div>
       <div style={{fontSize:13.5,color:"var(--text5)",marginBottom:12}}>{t("gantt_hint","Добавьте дедлайны к шагам в редакторе")}</div>
-      <button onClick={onClose} style={{padding:"6px 16px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{t("close","Закрыть")}</button>
+      <button onClick={handleClose} className="btn-interactive" style={{padding:"8px 18px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("close","Закрыть")}</button>
     </div>
   );
   const sorted=[...withDates].sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
@@ -3889,11 +4069,11 @@ function GanttView({nodes,onClose}){
   const range=Math.max(1,(maxDate-minDate)/864e5);
 
   return(
-    <div style={{position:"absolute",bottom:0,left:0,right:0,height:220,background:"var(--bg2)",borderTop:"1px solid var(--border)",zIndex:30,display:"flex",flexDirection:"column",animation:"slideUp .2s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+    <div className={exiting?"gantt-panel-out":""} style={{position:"absolute",bottom:0,left:0,right:0,height:220,background:"var(--bg2)",borderTop:"1px solid var(--border)",zIndex:30,display:"flex",flexDirection:"column",animation:exiting?"none":"slideUp .28s cubic-bezier(0.22,1,0.36,1)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 16px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <span style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{t("gantt","📅 Gantt")}</span>
         <span style={{fontSize:13.5,color:"var(--text5)",flex:1}}>{t("steps_with_deadlines","{n} шагов с дедлайнами").replace("{n}",String(sorted.length))}</span>
-        <button onClick={onClose} style={{width:22,height:22,borderRadius:5,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+        <button onClick={handleClose} style={{width:32,height:32,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.background="var(--surface2)"} onMouseOut={e=>e.currentTarget.style.background="var(--surface)"}>×</button>
       </div>
       <div style={{flex:1,overflowY:"auto",overflowX:"auto",padding:"8px 14px"}}>
         {sorted.map(n=>{
@@ -4014,6 +4194,8 @@ function DeadlineReminders({nodes,onGoToNode,onDismiss}:{nodes:any[],onGoToNode:
 function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="dark"}:{mapId:string,projectId:string,onRestore:(v:any)=>void,onClose:()=>void,onError?:(msg:string)=>void,theme?:string}){
   const{t}=useLang();
   const[versions,setVersions]=useState<any[]>([]);const[loading,setLoading]=useState(false);const[restoring,setRestoring]=useState<string|null>(null);const[restoreConfirm,setRestoreConfirm]=useState<any>(null);
+  const[closing,setClosing]=useState(false);
+  const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
   useEffect(()=>{
     if(!API_BASE)return;
     setLoading(true);
@@ -4028,11 +4210,11 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="d
     onRestore(v);setRestoring(null);setRestoreConfirm(null);onClose();
   }
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(8px)"}}>
-      <div style={{background:"var(--surface)",borderRadius:18,width:"min(480px,94vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.5)"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"20px 24px",borderBottom:"1px solid var(--border)"}}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{background:"var(--bg2)",borderRadius:20,width:"min(480px,94vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 24px",borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
           <div style={{fontWeight:800,fontSize:16,color:"var(--text)"}}>📜 {t("version_history","История версий")}</div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:20}}>✕</button>
+          <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
         </div>
         <div style={{overflowY:"auto",flex:1}}>
           {loading&&<div style={{padding:24,textAlign:"center",color:"var(--text3)"}}>…</div>}
@@ -4067,6 +4249,8 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
   const{t,lang}=useLang();
   const[loading,setLoading]=useState(false);
   const[summary,setSummary]=useState("");
+  const[closing,setClosing]=useState(false);
+  const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
   const done=nodes.filter((n:any)=>n.status==="completed");
   const blocked=nodes.filter((n:any)=>n.status==="blocked");
   const critical=nodes.filter((n:any)=>n.priority==="critical"&&n.status!=="completed");
@@ -4089,14 +4273,14 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
   useEffect(()=>{fetchBriefing();},[]);
 
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(8px)"}}>
-      <div style={{background:"var(--surface)",borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.5)",overflow:"hidden"}}>
-        <div style={{background:"var(--accent-soft)",padding:"22px 26px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{background:"var(--bg2)",borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+        <div style={{background:"var(--surface)",padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
             <div style={{fontSize:12,color:"var(--text3)",marginTop:3}}>{mapName} · {new Date().toLocaleDateString(lang==="uz"?"uz-UZ":lang==="en"?"en-US":"ru-RU",{weekday:"long",day:"numeric",month:"long"})}</div>
           </div>
-          <button onClick={onClose} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:20}}>✕</button>
+          <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
         </div>
         <div style={{padding:"22px 26px"}}>
           {/* Метрики */}
@@ -4142,8 +4326,8 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
             </div>
           )}
         </div>
-        <div style={{padding:"0 26px 20px",display:"flex",justifyContent:"flex-end",gap:10}}>
-          <button onClick={onClose} style={{padding:"10px 22px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("close","Закрыть")}</button>
+        <div style={{padding:"0 26px 20px",display:"flex",justifyContent:"flex-end",gap:10,borderTop:"1px solid var(--border)"}}>
+          <button onClick={handleClose} className="btn-interactive" style={{padding:"10px 22px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("close","Закрыть")}</button>
         </div>
       </div>
     </div>
@@ -5047,7 +5231,7 @@ ${ctx}
         )}
         {showAI&&<AiPanel isMobile={isMobile} nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgs} onMsgsChange={setAiChatMsgs} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:nn});}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")}/>}
         {showStats&&<StatsPopup nodes={nodes} edges={edges} onClose={()=>setShowStats(false)}/>}
-        {showTemplates&&<TemplateModal tier={user?.tier} onSelect={(tmpl:any)=>{setShowTemplates(false);if(tmpl){pushUndo(nodes,edges);setNodes(tmpl.nodes.map((n:any)=>({...n,comments:[],history:[]})));setEdges(tmpl.edges);emitEdgeUpdate(tmpl.edges);setTimeout(fitView,100);}}} onClose={()=>setShowTemplates(false)} theme={theme}/>}
+        {showTemplates&&<TemplateModal tier={user?.tier} onSelect={(tmpl:any)=>{setShowTemplates(false);if(tmpl){pushUndo(nodes,edges);setNodes(tmpl.nodes.map((n:any)=>({...n,comments:[],history:[]})));setEdges(tmpl.edges);emitEdgeUpdate(tmpl.edges);setTimeout(fitView,100);setPendingAiMsgs([{role:"ai",text:t("ai_customize_template_offer","Я применил шаблон. Хотите подстроить его под ваш бизнес? Напишите, чем вы занимаетесь и какая цель — я адаптирую шаги под вас.")}]);setShowAI(true);}}} onClose={()=>setShowTemplates(false)} theme={theme}/>}
         {showGantt&&<GanttView nodes={nodes} onClose={()=>setShowGantt(false)}/>}
         {showTour&&<MapTour onDone={()=>setShowTour(false)}/>}
         {showSim&&<SimulationModal mapData={{...mapData,nodes,edges}} allProjectMaps={allMaps} onClose={()=>setShowSim(false)} theme={theme}/>}
@@ -5265,6 +5449,184 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   );
 }
 
+// ── ContentPlanTab (Pro+): ведение контент-плана по проекту, связь с шагами стратегии ──
+const CONTENT_TYPES=[{id:"post",labelKey:"content_type_post"},{id:"story",labelKey:"content_type_story"},{id:"email",labelKey:"content_type_email"},{id:"video",labelKey:"content_type_video"}];
+const CONTENT_CHANNELS=[{id:"blog",labelKey:"content_channel_blog"},{id:"instagram",labelKey:"content_channel_instagram"},{id:"telegram",labelKey:"content_channel_telegram"},{id:"vk",labelKey:"content_channel_vk"},{id:"youtube",labelKey:"content_channel_youtube"}];
+const CONTENT_STATUSES=[{id:"draft",labelKey:"content_status_draft"},{id:"scheduled",labelKey:"content_status_scheduled"},{id:"published",labelKey:"content_status_published"}];
+
+function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
+  const [items,setItems]=useState<any[]>([]);
+  const [loading,setLoading]=useState(true);
+  const [editId,setEditId]=useState<string|null>(null);
+  const [filterStatus,setFilterStatus]=useState<string>("all");
+  const [aiSuggesting,setAiSuggesting]=useState(false);
+  const isMobile=useIsMobile();
+
+  useEffect(()=>{(async()=>{setLoading(true);const list=await getContentPlan(projectId);setItems(Array.isArray(list)?list:[]);setLoading(false);})();},[projectId]);
+
+  const allNodes=maps.flatMap((m:any)=>(m.nodes||[]).map((n:any)=>({...n,mapName:m.name})));
+  const filtered=filterStatus==="all"?items:items.filter((x:any)=>x.status===filterStatus);
+
+  async function saveItem(item:any){
+    const id=item.id||uid();
+    const next={...item,id,updatedAt:Date.now()};
+    const list=items.some((x:any)=>x.id===id)?items.map((x:any)=>x.id===id?next:x):[...items,next];
+    setItems(list);
+    await saveContentPlan(projectId,list);
+    setEditId(null);
+  }
+  function removeItem(id:string){
+    const list=items.filter((x:any)=>x.id!==id);
+    setItems(list);
+    saveContentPlan(projectId,list);
+    setEditId(null);
+  }
+  async function aiSuggest(){
+    if(allNodes.length===0)return;
+    setAiSuggesting(true);
+    try{
+      const stepsCtx=allNodes.slice(0,15).map((n:any)=>`«${n.title}»`).join(", ");
+      const sys=`Ты помощник по контент-маркетингу. Проект: ${projectName}. Шаги стратегии: ${stepsCtx}. Предложи 3 конкретные идеи контента (пост/видео/рассылка) — заголовок, канал, краткий тезис. Формат: одна идея на строку: ЗАГОЛОВОК | канал | тезис`;
+      const res=await callAI([{role:"user",content:"Предложи 3 идеи контента по шагам стратегии. Кратко: заголовок, канал, тезис."}],sys,600);
+      const lines=res.split("\n").filter((l:string)=>l.trim().length>5).slice(0,3);
+      const newItems=lines.map((line:string)=>{
+        const parts=line.replace(/^[\d\.\-\*]\s*/i,"").split("|").map((s:string)=>s.trim());
+        const title=parts[0]||"Идея";
+        const ch=parts[1]?.toLowerCase()||"";
+        const channel=ch.includes("inst")?"instagram":ch.includes("теле")||ch.includes("telegram")?"telegram":ch.includes("блог")?"blog":ch.includes("ютуб")||ch.includes("youtube")?"youtube":"blog";
+        const brief=parts[2]||"";
+        return {id:uid(),title,channel,type:"post",status:"draft",brief,scheduledDate:"",strategyStepId:"",strategyStepTitle:"",createdAt:Date.now()};
+      });
+      const list=[...items,...newItems];
+      setItems(list);
+      await saveContentPlan(projectId,list);
+    }catch{}
+    setAiSuggesting(false);
+  }
+
+  const editingItem=editId?items.find((x:any)=>x.id===editId):null;
+
+  return(
+    <div>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
+        <div style={{flex:1,fontSize:13,fontWeight:700,color:"var(--text)"}}>✍️ {t("content_plan","Контент-план")}</div>
+        {allNodes.length>0&&(
+          <button onClick={aiSuggest} disabled={aiSuggesting} style={{padding:"7px 14px",borderRadius:9,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:aiSuggesting?"wait":"pointer",fontSize:13,fontWeight:700}}>
+            {aiSuggesting?"…":t("content_ai_suggest","✨ Предложить по стратегии")}
+          </button>
+        )}
+        <button onClick={()=>setEditId("new")} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add_content_item","+ Публикация")}</button>
+      </div>
+      <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+        {["all",...CONTENT_STATUSES.map(s=>s.id)].map(s=>(
+          <button key={s} onClick={()=>setFilterStatus(s)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${filterStatus===s?"var(--accent-1)":"var(--border)"}`,background:filterStatus===s?"var(--accent-soft)":"var(--surface)",color:filterStatus===s?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>
+            {s==="all"?t("all_statuses","Все"):t(CONTENT_STATUSES.find(x=>x.id===s)?.labelKey||"")}
+          </button>
+        ))}
+      </div>
+      {loading?(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:12}}>
+          {[1,2,3].map(i=><div key={i} style={{height:100,borderRadius:14,background:"var(--surface)",animation:"pulse 1.5s ease infinite",border:"1px solid var(--border)"}}/>)}
+        </div>
+      ):filtered.length===0?(
+        <div className="glass-card" style={{textAlign:"center",padding:"44px 24px",border:"1px dashed var(--border2)"}}>
+          <div style={{fontSize:36,marginBottom:10}}>✍️</div>
+          <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_empty","Планируйте посты и публикации")}</div>
+          <div style={{fontSize:13,color:"var(--text5)",marginBottom:16}}>{t("content_plan_empty","Планируйте посты, рассылки и публикации. AI подскажет идеи по шагам стратегии.")}</div>
+          <button onClick={()=>setEditId("new")} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add_content_item","+ Публикация")}</button>
+        </div>
+      ):(
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {filtered.map((it:any)=>(
+            <div key={it.id} className="glass-card" style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:4}}>{it.title||"Без названия"}</div>
+                <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
+                  <span>{t(CONTENT_TYPES.find(x=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+                  <span>·</span>
+                  <span>{t(CONTENT_CHANNELS.find(x=>x.id===it.channel)?.labelKey||"content_channel_blog")}</span>
+                  {it.scheduledDate&&<><span>·</span><span>{it.scheduledDate}</span></>}
+                  {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
+                </div>
+              </div>
+              <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"rgba(99,102,241,.12)":"var(--surface2)",border:`1px solid ${it.status==="published"?"rgba(16,185,129,.3)":it.status==="scheduled"?"rgba(99,102,241,.25)":"var(--border)"}`,color:it.status==="published"?"#10b981":it.status==="scheduled"?"#6366f1":"var(--text3)",fontSize:12,fontWeight:700}}>
+                {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft")}
+              </div>
+              <button onClick={()=>setEditId(it.id)} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600}}>✏️</button>
+              <button onClick={()=>removeItem(it.id)} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {(editId==="new"||editingItem)&&(
+        <ContentPlanItemModal
+          item={editingItem||{title:"",type:"post",channel:"blog",status:"draft",brief:"",scheduledDate:"",strategyStepId:"",strategyStepTitle:""}}
+          allNodes={allNodes}
+          t={t}
+          theme={theme}
+          onSave={(item)=>saveItem(editId==="new"?{...item,createdAt:Date.now()}:{...editingItem,...item})}
+          onClose={()=>setEditId(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
+  const [title,setTitle]=useState(item.title||"");
+  const [type,setType]=useState(item.type||"post");
+  const [channel,setChannel]=useState(item.channel||"blog");
+  const [status,setStatus]=useState(item.status||"draft");
+  const [brief,setBrief]=useState(item.brief||"");
+  const [scheduledDate,setScheduledDate]=useState(item.scheduledDate||"");
+  const [stepId,setStepId]=useState(item.strategyStepId||"");
+  useEffect(()=>{setTitle(item.title||"");setType(item.type||"post");setChannel(item.channel||"blog");setStatus(item.status||"draft");setBrief(item.brief||"");setScheduledDate(item.scheduledDate||"");setStepId(item.strategyStepId||"");},[item?.id]);
+  const stepOptions=allNodes.map((n:any)=>({id:n.id,title:n.title,mapName:n.mapName}));
+  const selectedStep=stepOptions.find((s:any)=>s.id===stepId);
+  function handleSave(){
+    const stepTitle=stepOptions.find((s:any)=>s.id===stepId)?.title||"";
+    onSave({title:title.trim()||"Без названия",type,channel,status,brief,scheduledDate,strategyStepId:stepId||"",strategyStepTitle:stepTitle});
+  }
+  return(
+    <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div className="glass-panel" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg2)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px"}} onClick={e=>e.stopPropagation()}>
+        <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:18}}>✍️ {item.id?t("edit","Редактировать"):t("add_content_item","Публикация")}</div>
+        <input placeholder={t("title","Название")} value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:10,outline:"none",fontFamily:"inherit"}}/>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_type_post","Тип")}</div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
+          {CONTENT_TYPES.map(x=>(<button key={x.id} onClick={()=>setType(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${type===x.id?"var(--accent-1)":"var(--border)"}`,background:type===x.id?"var(--accent-soft)":"var(--surface)",color:type===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
+        </div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_channel_blog","Канал")}</div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
+          {CONTENT_CHANNELS.map(x=>(<button key={x.id} onClick={()=>setChannel(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${channel===x.id?"var(--accent-1)":"var(--border)"}`,background:channel===x.id?"var(--accent-soft)":"var(--surface)",color:channel===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
+        </div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_status_draft","Статус")}</div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
+          {CONTENT_STATUSES.map(x=>(<button key={x.id} onClick={()=>setStatus(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${status===x.id?"var(--accent-1)":"var(--border)"}`,background:status===x.id?"var(--accent-soft)":"var(--surface)",color:status===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
+        </div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("scheduled_date_short","Дата")}</div>
+        <input type="date" value={scheduledDate} onChange={e=>setScheduledDate(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}/>
+        {stepOptions.length>0&&(
+          <>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_link_step","Связать с шагом стратегии")}</div>
+            <select value={stepId} onChange={e=>setStepId(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}>
+              <option value="">— Не привязан</option>
+              {stepOptions.map((s:any)=>(<option key={s.id} value={s.id}>{s.title} {s.mapName?`(${s.mapName})`:""}</option>))}
+            </select>
+          </>
+        )}
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("brief","Тезис / описание")}</div>
+        <textarea placeholder={t("brief","Краткое описание или тезис")} value={brief} onChange={e=>setBrief(e.target.value)} rows={3} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:18,outline:"none",resize:"vertical",fontFamily:"inherit"}}/>
+        <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+          <button onClick={onClose} style={{padding:"10px 20px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("cancel","Отмена")}</button>
+          <button onClick={handleSave} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("save","Сохранить")}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── ProjectDetail ──
 function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier}){
   const{t,lang}=useLang();
@@ -5455,7 +5817,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
 
       {/* Tabs */}
       <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:isMobile?"0 16px":"0 24px",background:"var(--bg2)",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
+        {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
           <button key={k} onClick={()=>setTab(k)} style={{padding:isMobile?"12px 14px":"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:isMobile?13:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s",flexShrink:0}}>{lbl}</button>
         ))}
       </div>
@@ -5522,6 +5884,22 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:12}}>
                 {scenarios.map((m,i)=><MapCard key={m.id} m={m} isSc={true} staggerIndex={i}/>)}
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Content Plan Tab (Pro+) */}
+        {tab==="content"&&(
+          <div>
+            {!tier.contentPlan?(
+              <div className="glass-card" style={{textAlign:"center",padding:"50px 24px",border:"1px dashed rgba(139,92,246,.25)",borderRadius:16,background:"rgba(139,92,246,.03)"}}>
+                <div style={{fontSize:36,marginBottom:10}}>✍️</div>
+                <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_locked_title","Контент-план доступен на Pro")}</div>
+                <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:360,margin:"0 auto 16px"}}>{t("content_plan_pro_only","Приложение использует знания о вашем бизнесе и стратегии для планирования постов.")}</div>
+                {onChangeTier&&<button onClick={onChangeTier} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#8b5cf6,#6366f1)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+              </div>
+            ):(
+              <ContentPlanTab projectId={proj.id} projectName={proj.name||"Проект"} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/>
             )}
           </div>
         )}
@@ -5897,9 +6275,9 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
   const canUse=tierData.templates;
   const[selected,setSelected]=useState(null);
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(12px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
       <style>{CSS}</style>
-      <div style={{width:"min(95vw,760px)",maxHeight:"86vh",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
+      <div className="glass-panel" style={{width:"min(95vw,760px)",maxHeight:"86vh",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         <div style={{padding:"18px 22px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{flex:1}}>
             <div style={{fontSize:15,fontWeight:900,color:"var(--text)"}}>📋 Шаблоны карт</div>
@@ -7192,7 +7570,10 @@ export default function App(){
         if(sess?.email){
           const accs=await store.get("sa_acc")||[];
           const u=(accs as any[]).find((a:any)=>a.email===sess.email);
-          if(u){setUser(u);setScreen("projects");setAuthChecked(true);return;}
+          if(u){
+            const merged={...u,theme:u.theme||(typeof localStorage!=="undefined"?localStorage.getItem("sa_theme"):null)||"dark",palette:u.palette||(typeof localStorage!=="undefined"?localStorage.getItem("sa_palette"):null)||"indigo"};
+            setUser(merged);setScreen("projects");setAuthChecked(true);return;
+          }
         }
       }
       setScreen("landing");setAuthChecked(true);
@@ -7245,8 +7626,8 @@ export default function App(){
     try{localStorage.setItem("sa_last_project",JSON.stringify({id:proj.id,name:proj.name}));localStorage.setItem("sa_last_map",JSON.stringify({id:m.id,name:m.name}));}catch{}
   }
 
-  function toggleTheme(){const next=t=>t==="dark"?"light":"dark";setTheme(t=>{const n=next(t);try{localStorage.setItem("sa_theme",n);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{theme:n}).catch(()=>{});return n;});}
-  function changePalette(p:string){setPalette(p);try{localStorage.setItem("sa_palette",p);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{palette:p}).catch(()=>{});}
+  function toggleTheme(){const next=t=>t==="dark"?"light":"dark";setTheme(t=>{const n=next(t);try{localStorage.setItem("sa_theme",n);document.body.setAttribute("data-theme",n);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{theme:n}).then(u=>u&&setUser(u)).catch(()=>{});return n;});}
+  function changePalette(p:string){setPalette(p);try{localStorage.setItem("sa_palette",p);}catch{};try{document.body.setAttribute("data-palette",p);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{palette:p}).then(u=>u&&setUser(u)).catch(()=>{});}
 
   if(showTiers){
     return(
