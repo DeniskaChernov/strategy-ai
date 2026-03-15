@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { io as ioClient } from "socket.io-client";
 
 const NW=240,NH=128;
@@ -74,30 +74,30 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
   --accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);
   --gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;
 }
-/* ── Palettes: спокойные приглушённые цвета (только Strategy AI app, не лендинг) ── */
-[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);}
-[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);}
-[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);}
-[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);}
-[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);}
-[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);}
-[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);}
-[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);}
-[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);}
-[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);}
+/* ── Palettes: переопределяют --accent-* и переменные стекла (граница/тень в тон палитры) ── */
+[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
+[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--glass-border-accent:rgba(91,107,192,.12);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.06);}
+[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
+[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);--glass-border-accent:rgba(91,143,185,.12);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.06);}
+[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
+[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);--glass-border-accent:rgba(90,140,123,.12);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.06);}
+[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
+[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
+[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
+[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
 /* ── Синхронизация с body: тема и палитра применяются ко всему документу ── */
 body[data-theme="dark"]{--bg:#060a12;--bg2:#0a0f1a;--bg3:#0e1422;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;--input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);--card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;--divider:rgba(255,255,255,.08);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);--node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
 body[data-theme="light"]{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);--border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);--text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;--input-bg:#ffffff;--input-border:rgba(0,0,0,.18);--card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;--divider:rgba(0,0,0,.1);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);--node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
-body[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);}
-body[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);}
-body[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);}
-body[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);}
-body[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);}
-body[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);}
-body[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);}
-body[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);}
-body[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);}
-body[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);}
+body[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
+body[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--glass-border-accent:rgba(91,107,192,.12);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.06);}
+body[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
+body[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);--glass-border-accent:rgba(91,143,185,.12);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.06);}
+body[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
+body[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);--glass-border-accent:rgba(90,140,123,.12);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.06);}
+body[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
+body[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
+body[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
+body[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
 [data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{
   background:var(--input-bg) !important;border-color:var(--input-border) !important;
   color:var(--text) !important;color-scheme:light;
@@ -262,13 +262,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes listItemIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeScaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
 @keyframes backdropIn{from{opacity:0;backdrop-filter:blur(0)}to{opacity:1;backdrop-filter:blur(16px)}}
-/* ── Glass (glassmorphism) ── */
-.glass{background:var(--glass-bg,rgba(10,15,26,.75));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border,rgba(255,255,255,.08));box-shadow:0 24px 64px rgba(0,0,0,.35);}
-[data-theme="light"] .glass{--glass-bg:rgba(255,255,255,.82);--glass-border:rgba(0,0,0,.06);box-shadow:0 24px 64px rgba(0,0,0,.12);}
-.glass-panel{background:var(--glass-panel-bg,rgba(10,15,26,.88));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-panel-border,rgba(255,255,255,.1));box-shadow:0 16px 48px rgba(0,0,0,.4);}
-[data-theme="light"] .glass-panel{--glass-panel-bg:rgba(255,255,255,.92);--glass-panel-border:rgba(0,0,0,.08);box-shadow:0 16px 48px rgba(0,0,0,.1);}
-.glass-card{background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--r-lg);}
+/* ── Glass (glassmorphism): малопрозрачный фон, размытие, граница/тень в тон палитры ── */
+.glass{background:var(--glass-bg,rgba(12,18,30,.92));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border-accent,var(--glass-border,rgba(255,255,255,.1)));box-shadow:var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4);}
+[data-theme="light"] .glass{--glass-bg:rgba(255,255,255,.92);--glass-border:rgba(0,0,0,.08);box-shadow:var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.1);}
+.glass-panel{background:var(--glass-panel-bg,rgba(12,18,30,.96));backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid var(--glass-border-accent,var(--glass-panel-border,rgba(255,255,255,.12)));box-shadow:var(--glass-shadow-accent,none),0 16px 48px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.05);}
+[data-theme="light"] .glass-panel{--glass-panel-bg:rgba(255,255,255,.97);--glass-panel-border:rgba(0,0,0,.1);box-shadow:var(--glass-shadow-accent,none),0 16px 48px rgba(0,0,0,.12);}
+.glass-card{background:var(--glass-card-bg,var(--surface));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border-accent,var(--border));border-radius:var(--r-lg);box-shadow:var(--glass-shadow-accent,none);}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes toastOut{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,8px)}}
+.toast-out{animation:toastOut .25s ease forwards;pointer-events:none;}
 .screen-enter{animation:screenEnter .4s cubic-bezier(0.22,1,0.36,1) forwards;}
 .screen-enter-left{animation:screenEnterLeft .35s cubic-bezier(0.22,1,0.36,1) forwards;}
 .list-item-in{animation:listItemIn .35s cubic-bezier(0.22,1,0.36,1) forwards;}
@@ -2209,29 +2211,52 @@ function OfflineBanner(){
 // ── Toast ──
 function Toast({msg,type="info",onClose,action,onAction}){
   const[progress,setProgress]=useState(100);
+  const[closing,setClosing]=useState(false);
   const DURATION=4000;
+  const onCloseRef=useRef(onClose);
+  const closingRef=useRef(false);
+  onCloseRef.current=onClose;
   useEffect(()=>{
     const start=Date.now();
-    const tick=()=>{const elapsed=Date.now()-start;const pct=Math.max(0,100-(elapsed/DURATION*100));setProgress(pct);if(pct<=0){onClose();}else{requestAnimationFrame(tick);}};
-    const raf=requestAnimationFrame(tick);
-    return()=>cancelAnimationFrame(raf);
+    let rafId=0;
+    const tick=()=>{
+      if(closingRef.current)return;
+      const elapsed=Date.now()-start;
+      const pct=Math.max(0,100-(elapsed/DURATION*100));
+      setProgress(pct);
+      if(pct<=0){
+        closingRef.current=true;
+        setClosing(true);
+        setTimeout(()=>onCloseRef.current(),260);
+        return;
+      }
+      rafId=requestAnimationFrame(tick);
+    };
+    rafId=requestAnimationFrame(tick);
+    return()=>cancelAnimationFrame(rafId);
   },[]);
+  function handleClose(){
+    if(closingRef.current)return;
+    closingRef.current=true;
+    setClosing(true);
+    setTimeout(()=>onClose(),260);
+  }
   const C={info:"var(--accent-1)",error:"#ef4444",success:"#10b981",warn:"#f59e0b"};
   const icons={error:"⚠",success:"✓",warn:"⚡",info:"ℹ"};
   const borderCol=type==="info"?"var(--accent-soft)":type==="error"?"rgba(239,68,68,.33)":type==="success"?"rgba(16,185,129,.33)":"rgba(245,158,11,.33)";
   return(
-    <div className="toast-in" style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,borderRadius:12,background:"var(--bg3)",border:`1px solid ${borderCol}`,color:"var(--text)",fontSize:13,fontWeight:500,boxShadow:"var(--shadow-lg)",maxWidth:480,backdropFilter:"blur(14px)",overflow:"hidden"}}
-      onClick={onClose}>
+    <div className={closing?"toast-out":"toast-in"} style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,borderRadius:12,background:"var(--bg3)",border:`1px solid ${borderCol}`,color:"var(--text)",fontSize:13,fontWeight:500,boxShadow:"var(--shadow-lg)",maxWidth:480,backdropFilter:"blur(14px)",overflow:"hidden",transition:"opacity .2s ease"}}
+      onClick={handleClose}>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"11px 16px",cursor:"pointer"}}>
         <span style={{color:type==="info"?"var(--accent-1)":C[type],fontSize:14,flexShrink:0}}>{icons[type]}</span>
         <span style={{flex:1}}>{msg}</span>
         {action&&onAction&&(
-          <button onClick={e=>{e.stopPropagation();onAction();onClose();}}
+          <button onClick={e=>{e.stopPropagation();onAction();handleClose();}}
             style={{padding:"3px 10px",borderRadius:6,border:`1px solid ${borderCol}`,background:type==="info"?"var(--accent-soft)":`${C[type]}15`,color:type==="info"?"var(--accent-1)":C[type],fontSize:13,cursor:"pointer",fontWeight:700,flexShrink:0,whiteSpace:"nowrap"}}>
             {action}
           </button>
         )}
-        <button onClick={e=>{e.stopPropagation();onClose();}} style={{color:"var(--text5)",background:"none",border:"none",cursor:"pointer",fontSize:16,lineHeight:1,flexShrink:0}}>×</button>
+        <button onClick={e=>{e.stopPropagation();handleClose();}} style={{color:"var(--text5)",background:"none",border:"none",cursor:"pointer",fontSize:16,lineHeight:1,flexShrink:0}}>×</button>
       </div>
       <div style={{height:2,background:type==="info"?"var(--accent-soft)":`${C[type]}20`}}>
         <div style={{width:`${progress}%`,height:"100%",background:type==="info"?"var(--accent-1)":C[type],transition:"width .1s linear",opacity:.7}}/>
@@ -2244,15 +2269,19 @@ function Toast({msg,type="info",onClose,action,onAction}){
 function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,onCancel,danger=true}){
   const{t}=useLang();
   const[closing,setClosing]=useState(false);
-  const handleCancel=()=>{if(closing)return;setClosing(true);setTimeout(()=>onCancel(),220);};
-  const handleConfirm=()=>{if(closing)return;setClosing(true);setTimeout(()=>onConfirm(),220);};
+  const onCancelRef=useRef(onCancel);
+  const onConfirmRef=useRef(onConfirm);
+  onCancelRef.current=onCancel;
+  onConfirmRef.current=onConfirm;
+  const handleCancel=()=>{if(closing)return;setClosing(true);setTimeout(()=>onCancelRef.current(),220);};
+  const handleConfirm=()=>{if(closing)return;setClosing(true);setTimeout(()=>onConfirmRef.current(),220);};
   useEffect(()=>{
-    const h=e=>{if(e.key==="Escape")handleCancel();if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))handleConfirm();};
+    const h=(e:KeyboardEvent)=>{if(e.key==="Escape")handleCancel();if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))handleConfirm();};
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
   },[]);
   return(
     <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleCancel();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,360px)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--border)"}`,boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,360px)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--glass-border-accent,var(--border))"}`,boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"var(--accent-soft)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"var(--accent-1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -2279,7 +2308,7 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
   const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",border:"1px solid var(--border)",borderRadius:20,boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",border:"1px solid var(--glass-border-accent,var(--border))",borderRadius:20,boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>
             {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
@@ -2663,7 +2692,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)handleClose();}}>
       <style>{CSS}</style>
-      <div className={`glass-panel ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
 
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
@@ -2698,7 +2727,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── PROFILE TAB ── */}
           {tab==="profile"&&(
-            <div style={{flex:1,overflowY:"auto",padding:isMobile?"20px 16px":"28px 32px",minHeight:380}}>
+            <div className="tab-content" style={{flex:1,overflowY:"auto",padding:isMobile?"20px 16px":"28px 32px",minHeight:380}}>
               <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?24:28,maxWidth:680}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:10}}>{t("display_name","Отображаемое имя")}</div>
@@ -2737,7 +2766,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── SECURITY TAB ── */}
           {tab==="security"&&(
-            <div style={{flex:1,overflowY:"auto",padding:"28px 32px",minHeight:380}}>
+            <div className="tab-content" style={{flex:1,overflowY:"auto",padding:"28px 32px",minHeight:380}}>
               <div style={{maxWidth:420}}>
                 <div style={{fontSize:13,fontWeight:800,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.7,marginBottom:10}}>{t("login_methods","Вход в аккаунт")}</div>
                 <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -2803,7 +2832,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── SETTINGS TAB ── */}
           {tab==="settings"&&(
-            <div style={{flex:1,overflowY:"auto",padding:isMobile?"20px 16px":"28px 32px",minHeight:380}}>
+            <div className="tab-content" style={{flex:1,overflowY:"auto",padding:isMobile?"20px 16px":"28px 32px",minHeight:380}}>
               <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?24:32,maxWidth:720}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🎨</span> {t("appearance","Внешний вид")}</div>
@@ -2894,7 +2923,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── STATS TAB ── */}
           {tab==="stats"&&(
-            <div style={{flex:1,overflowY:"auto",padding:"28px 32px",minHeight:380}}>
+            <div className="tab-content" style={{flex:1,overflowY:"auto",padding:"28px 32px",minHeight:380}}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:20}}>{t("stats_tab","Статистика аккаунта")}</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24,maxWidth:620}}>
                 {[
@@ -2940,7 +2969,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── TIER TAB ── */}
           {tab==="tier"&&(
-            <div style={{display:"flex",width:"100%",overflow:"hidden",minHeight:380}}>
+            <div className="tab-content" style={{display:"flex",width:"100%",overflow:"hidden",minHeight:380}}>
               <div style={{width:190,flexShrink:0,borderRight:"1px solid var(--border)",padding:"12px 8px",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
                 {TIER_ORDER.map(k=>{
                   const tierItem=TIERS[k];
@@ -3383,7 +3412,7 @@ function StatsPopup({nodes,edges,onClose}){
   if(total===0){
     return(
       <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-        <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,420px)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"28px 24px",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+        <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,420px)",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"28px 24px",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
           <div style={{fontSize:44,marginBottom:14}}>📊</div>
           <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:8}}>{t("stats_title","Статистика")}</div>
           <div style={{fontSize:14,color:"var(--text4)",lineHeight:1.6}}>{t("stats_empty","Добавьте шаги на карту, чтобы увидеть аналитику.")}</div>
@@ -3421,7 +3450,7 @@ function StatsPopup({nodes,edges,onClose}){
   const healthColor=healthScore>=70?"#10b981":healthScore>=40?"#f59e0b":"#ef4444";
   return(
     <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,620px)",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,620px)",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
           <div>
             <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>📊 Аналитика карты</div>
@@ -3608,9 +3637,9 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
 
   const panelRight=isMobile?0:aiPanelOpen?360:0;
   const panelWidth=isMobile?"100%":aiPanelOpen?320:340;
-  const panelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:panelRight,top:0,bottom:0,width:panelWidth,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
+  const panelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:panelRight,top:0,bottom:0,width:panelWidth,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
-    <div className={exiting?"panel-slide panel-slide-out":"panel-slide"} style={panelStyle}>
+    <div className={`glass-panel panel-slide ${exiting?"panel-slide-out":""}`.trim()} style={panelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:12,height:12,borderRadius:4,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
         <div style={{flex:1,fontSize:15,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
@@ -3871,9 +3900,9 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     inpRef.current?.focus();
   }
 
-  const aiPanelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:0,top:0,bottom:0,width:360,background:"var(--bg2)",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
+  const aiPanelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
-    <div className={exiting?"panel-slide panel-slide-out":"panel-slide"} style={aiPanelStyle}>
+    <div className={`glass-panel panel-slide ${exiting?"panel-slide-out":""}`.trim()} style={aiPanelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:36,height:36,borderRadius:12,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0}}>✦</div>
         <div style={{flex:1,minWidth:0}}>
@@ -4213,7 +4242,7 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="d
   }
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(480px,94vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(480px,94vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 24px",borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
           <div style={{fontWeight:800,fontSize:16,color:"var(--text)"}}>📜 {t("version_history","История версий")}</div>
           <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
@@ -4276,7 +4305,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
 
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{background:"var(--surface)",padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
@@ -4393,7 +4422,8 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   function addToast(msg:string,type="info"){
     const id=uid();
     setToasts((t:any[])=>[...t,{id,msg,type}]);
-    setTimeout(()=>setToasts((t:any[])=>t.filter((x:any)=>x.id!==id)),2600);
+    // автоудаление через 4.3s — тост сам вызовет onClose после анимации (4s + 0.26s выход)
+    setTimeout(()=>setToasts((t:any[])=>t.filter((x:any)=>x.id!==id)),4300);
   }
   function pushUndo(n:any,e:any){setUndoStack((s:any[])=>[...s.slice(-29),{nodes:n,edges:e}]);setRedoStack([]);}
 
@@ -4920,7 +4950,7 @@ ${ctx}
       <style>{CSS}</style>
 
       {/* ── TOOLBAR — 2 rows ── */}
-      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--border)",background:"var(--bg2)",backdropFilter:"blur(16px)",boxShadow:"0 1px 0 var(--border)"}}>
+      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--glass-border-accent,var(--border))",background:"var(--bg2)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:"0 1px 0 var(--glass-border-accent,var(--border))"}}>
 
         {/* ROW 1 — primary actions + search */}
         <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
@@ -4974,8 +5004,8 @@ ${ctx}
               style={{width:32,height:32,borderRadius:"50%",border:`2px solid ${tier.color}55`,background:`linear-gradient(135deg,${tier.color}cc,${tier.color}44)`,color:"#fff",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               {(user?.name||user?.email||"U")[0].toUpperCase()}
             </button>
-            <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981"}}>
-              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span>✓</span> {t("saved","Сохранено")}</>}
+            <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981",transition:"color .25s ease, opacity .25s ease"}}>
+              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button className="btn-interactive" onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span style={{animation:"successPop .35s ease"}}>✓</span> {t("saved","Сохранено")}</>}
             </div>
               </>
             )}
@@ -5264,8 +5294,8 @@ ${ctx}
           </div>
         ))}
         {showShortcuts&&(
-          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(8px)"}} onClick={()=>setShowShortcuts(false)}>
-            <div style={{background:"var(--bg2)",borderRadius:24,border:"1px solid var(--border)",padding:"32px 36px",maxWidth:440,width:"90%",animation:"scaleIn .2s ease",boxShadow:"0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+          <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={()=>setShowShortcuts(false)}>
+            <div className="glass-panel" style={{borderRadius:24,border:"1px solid var(--glass-border-accent,var(--border))",padding:"32px 36px",maxWidth:440,width:"90%",animation:"scaleIn .2s ease",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:16}}>⌨️ Горячие клавиши</div>
               <p style={{fontSize:12,color:"var(--text4)",marginBottom:12}}>💡 Ctrl+C / Ctrl+V работают и в этой модалке — можно скопировать комбинацию.</p>
               {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+Shift+A","Открыть AI-советник"],["Ctrl+F","Поиск шагов"],["Ctrl+A","Выбрать все узлы"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Shift+клик","Мультивыбор узлов"],["Двойной клик на фон","Добавить шаг в точке"],["ПКМ на узле/фоне","Контекстное меню"],["Escape","Снять выбор / закрыть меню"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Перетащить фон","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
@@ -5278,7 +5308,7 @@ ${ctx}
             </div>
           </div>
         )}
-        <div className="zoom-ctrl" style={{position:"absolute",bottom:28,left:28,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"10px 16px",background:"var(--bg2)",borderRadius:16,border:"1px solid var(--border)",boxShadow:"0 8px 32px rgba(0,0,0,.15)"}}>
+        <div className="zoom-ctrl glass-card" style={{position:"absolute",bottom:28,left:28,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"10px 16px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 8px 32px rgba(0,0,0,.2)"}}>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
           <div style={{fontSize:14,color:"var(--text3)",fontWeight:700,minWidth:48,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.max(.2,view.zoom*.83);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_out","Уменьшить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
@@ -5539,8 +5569,8 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
         </div>
       ):(
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          {filtered.map((it:any)=>(
-            <div key={it.id} className="glass-card" style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+          {filtered.map((it:any,i:number)=>(
+            <div key={it.id} className="glass-card list-item-in" style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",animationDelay:`${i*0.04}s`}}>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:4}}>{it.title||"Без названия"}</div>
                 <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -5592,7 +5622,7 @@ function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
   }
   return(
     <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="glass-panel" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20,border:"1px solid var(--border)",boxShadow:"0 24px 64px rgba(0,0,0,.4)",padding:"24px"}} onClick={e=>e.stopPropagation()}>
+      <div className="glass-panel" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"24px"}} onClick={e=>e.stopPropagation()}>
         <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:18}}>✍️ {item.id?t("edit","Редактировать"):t("add_content_item","Публикация")}</div>
         <input placeholder={t("title","Название")} value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:10,outline:"none",fontFamily:"inherit"}}/>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_type_post","Тип")}</div>
@@ -6279,7 +6309,7 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
   return(
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
       <style>{CSS}</style>
-      <div className="glass-panel" style={{width:"min(95vw,760px)",maxHeight:"86vh",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.6)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
+      <div className="glass-panel" style={{width:"min(95vw,760px)",maxHeight:"86vh",borderRadius:22,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.5)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         <div style={{padding:"18px 22px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{flex:1}}>
             <div style={{fontSize:15,fontWeight:900,color:"var(--text)"}}>📋 Шаблоны карт</div>
@@ -7499,13 +7529,18 @@ export default function App(){
     if(user.palette){setPalette(user.palette);try{localStorage.setItem("sa_palette",user.palette);}catch{}}
   },[user?.email,user?.theme,user?.palette]);
 
-  // Применение темы и палитры к document.body — интерфейс и цвета обновляются глобально при смене темы/палитры
+  // Синхронизация темы и палитры с body до отрисовки — смена темы/палитры сразу меняет цвета (body[data-theme][data-palette] в CSS)
+  const bodyPalette=screen==="landing"?"indigo":(palette||"indigo");
+  useLayoutEffect(()=>{
+    const b=document.body;
+    b.setAttribute("data-theme",theme);
+    b.setAttribute("data-palette",bodyPalette);
+  },[theme,bodyPalette]);
   useEffect(()=>{
     const b=document.body;
     if(b.getAttribute("data-theme")!==theme)b.setAttribute("data-theme",theme);
-    const p=screen==="landing"?"indigo":(palette||"indigo");
-    if(b.getAttribute("data-palette")!==p)b.setAttribute("data-palette",p);
-  },[theme,palette,screen]);
+    if(b.getAttribute("data-palette")!==bodyPalette)b.setAttribute("data-palette",bodyPalette);
+  },[theme,bodyPalette]);
   // t функция для LangCtx.Provider (App является корневым провайдером)
   const t=(k:string,fb?:string)=>{
     try{const L=(LANGS as any);return(L[lang]||L.ru)?.[k]||fb||k;}catch{return fb||k;}
@@ -7684,10 +7719,10 @@ export default function App(){
 
   if(loadError)return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
-      <div data-theme={theme} data-palette={palette} style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:20}}>
+      <div data-theme={theme} data-palette={palette} className="screen-enter" style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:20}}>
         <style>{CSS}</style>
         <div style={{fontSize:18,fontWeight:700,color:"var(--text)",textAlign:"center"}}>{loadError}</div>
-        <button onClick={()=>{setLoadError(null);window.location.reload();}} style={{padding:"14px 28px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px var(--accent-glow)"}}>{t("retry","Повторить")}</button>
+        <button className="btn-interactive" onClick={()=>{setLoadError(null);window.location.reload();}} style={{padding:"14px 28px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px var(--accent-glow)",transition:"transform .2s ease, box-shadow .25s ease"}}>{t("retry","Повторить")}</button>
       </div>
     </LangCtx.Provider>
   );
