@@ -4,7 +4,7 @@
   "description": "Strategy AI — full-stack SaaS for strategic planning",
   "main": "server/index.js",
   "scripts": {
-    "build": "node -e \"require('fs').mkdirSync('public',{recursive:true})\" && esbuild strategy-ai-full.tsx --bundle --outfile=public/app.js --jsx=transform --define:process.env.NODE_ENV='\\\"production\\\"' --minify",
+    "build": "node build.js",
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
     "seed": "node server/seed.js",
