@@ -77,6 +77,16 @@ async function initDB() {
       )
     `);
 
+    // Контент-план проекта (Pro+): список элементов хранится как JSONB
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS project_content_plans (
+        project_id  UUID PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
+        items       JSONB NOT NULL DEFAULT '[]',
+        created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `);
+
     // Публичные ссылки (read-only шаринг)
     await client.query(`
       CREATE TABLE IF NOT EXISTS shares (

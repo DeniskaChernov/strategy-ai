@@ -75,28 +75,28 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
   --gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;
 }
 /* ── Palettes: переопределяют --accent-* и переменные стекла (граница/тень в тон палитры) ── */
-[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
+[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-rgb:91,107,192;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
 [data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--glass-border-accent:rgba(91,107,192,.12);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.06);}
-[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
+[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-rgb:91,143,185;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
 [data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);--glass-border-accent:rgba(91,143,185,.12);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.06);}
-[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
+[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-rgb:90,140,123;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
 [data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);--glass-border-accent:rgba(90,140,123,.12);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.06);}
-[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
+[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-rgb:184,138,106;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
 [data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
-[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
+[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-rgb:107,122,138;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
 [data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
 /* ── Синхронизация с body: тема и палитра применяются ко всему документу ── */
 body[data-theme="dark"]{--bg:#060a12;--bg2:#0a0f1a;--bg3:#0e1422;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;--input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);--card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;--divider:rgba(255,255,255,.08);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);--node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
 body[data-theme="light"]{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);--border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);--text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;--input-bg:#ffffff;--input-border:rgba(0,0,0,.18);--card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;--divider:rgba(0,0,0,.1);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);--node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
-body[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
+body[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-rgb:91,107,192;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
 body[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--glass-border-accent:rgba(91,107,192,.12);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.06);}
-body[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
+body[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-rgb:91,143,185;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
 body[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);--glass-border-accent:rgba(91,143,185,.12);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.06);}
-body[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
+body[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-rgb:90,140,123;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
 body[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);--glass-border-accent:rgba(90,140,123,.12);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.06);}
-body[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
+body[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-rgb:184,138,106;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
 body[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
-body[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
+body[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-rgb:107,122,138;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
 body[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
 [data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{
   background:var(--input-bg) !important;border-color:var(--input-border) !important;
@@ -119,6 +119,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDownOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(18px)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes dropOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-6px) scale(.985)}}
+@keyframes softExpand{from{max-height:0;opacity:0;transform:translateY(-4px)}to{max-height:1200px;opacity:1;transform:translateY(0)}}
+@keyframes softCollapse{from{max-height:1200px;opacity:1;transform:translateY(0)}to{max-height:0;opacity:0;transform:translateY(-4px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
@@ -257,6 +261,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .input-focus-ring:focus{box-shadow:0 0 0 3px var(--accent-glow);outline:none;}
 
 /* ── Плавные анимации экранов и списков ── */
+.drop-panel{animation:dropIn .16s cubic-bezier(0.22,1,0.36,1) both;transform-origin:top center;}
+.drop-panel-out{animation:dropOut .14s cubic-bezier(0.32,0,0.67,0) both;transform-origin:top center;pointer-events:none;}
+.collapse-wrap{overflow:hidden;will-change:max-height,opacity,transform;}
+.collapse-in{animation:softExpand .22s cubic-bezier(0.22,1,0.36,1) both;}
+.collapse-out{animation:softCollapse .18s cubic-bezier(0.32,0,0.67,0) both;pointer-events:none;}
 @keyframes screenEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes screenEnterLeft{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
 @keyframes listItemIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -493,11 +502,15 @@ const LANGS={
     uppercase_chars:"Заглавные",
     choose_template:"Выберите готовую стратегическую карту или начните с нуля",
     choose_template_left:"Выберите шаблон слева",
+    start_from_scratch:"Начать с нуля",
+    ai_generating_map:"AI генерирует карту…",
+    tour_start_work:"Начать работу ✓",tour_nav_hint:"← → или пробел для навигации • Esc — закрыть",
     empty_scenario:"Пустой сценарий",
     new_scenario:"Новый сценарий",
     scenarios:"Сценарии",
     no_scenarios:"Нет сценариев",
     scenarios_pro:"Сценарии доступны с Pro",
+    new_map:"Новая карта",create_scenario:"Создать сценарий",
     content_plan:"Контент-план",
     content_plan_tab:"Контент-план",
     content_plan_locked_title:"Контент-план доступен на Pro",
@@ -506,14 +519,17 @@ const LANGS={
     add_content_item:"+ Публикация",
     content_status_draft:"Черновик",content_status_scheduled:"Запланировано",content_status_published:"Опубликовано",
     content_type_post:"Пост",content_type_story:"Сторис",content_type_email:"Рассылка",content_type_video:"Видео",
-    content_channel_blog:"Блог",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"ВКонтакте",content_channel_youtube:"YouTube",
+    content_channel_blog:"Блог",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"ВКонтакте",content_channel_youtube:"YouTube",content_channel_email:"Email",
     content_link_step:"Связать с шагом стратегии",content_ai_suggest:"✨ Предложить по стратегии",
+    content_view_tree:"Дерево",content_view_list:"Список",content_tree_title:"Дерево контент‑плана",content_tree_hint:"Проект → канал → статус → публикации. Нажмите на карточку, чтобы редактировать.",content_more:"Ещё",untitled:"Без названия",
+    project_ai_tab:"AI",project_ai_title:"AI по проекту",project_ai_hint:"Один и тот же чат, доступен и в карте. Здесь AI видит контекст всех карт проекта.",project_scope:"Проект",
     scenario_templates:"Шаблоны сценариев",
     no_limits:"Без лимитов.",
     no_comparison:"Без сравнения",
     view_label:"Вид",
     login_or_register:"Войдите или создайте аккаунт бесплатно",
     loading_short:"Загрузка…",
+    load_error_hint:"Если это происходит снова — проверьте подключение к интернету и доступность API. В офлайн‑режиме можно войти в демо‑аккаунт без сервера.",
     why_label:"Зачем?",
     why_placeholder:"Зачем этот шаг, какой результат нужен",
     action_label:"Что сделать",
@@ -685,11 +701,22 @@ const LANGS={
     autosave_desc:"Сохранять карту при каждом изменении",
     canvas_view:"🗺 Канвас",gantt_view:"📅 Gantt",list_view:"📋 Список",
     ai_assistant_title:"🤖 AI-ассистент",notifications_title:"🔔 Уведомления",
+    ai_hub_title:"✦ AI (единый чат)",
+    ai_hub_hint:"Этот чат общий для всего приложения. Здесь AI видит портфель проектов и загруженные карты.",
+    all_projects:"Все проекты",
+    notif_center:"Уведомления",
+    notif_unread_n:"Непрочитанных: {n}",
+    notif_all_read:"Все прочитано",
+    notif_read_all:"Прочитать все",
+    notif_empty:"Пока нет уведомлений",
+    notification:"Уведомление",
     save_settings:"Сохранить настройки",
     maps_available:"Карт доступно",scenarios_available:"Сценариев",
     projects_available:"Проектов",ai_level:"AI уровень",
     // ProjectsPage/ProjectDetail
     projects_of:"{n} из {max} проектов",
+    search_results:"Результаты поиска",
+    search_empty:"Ничего не найдено",
     project_limit:"Лимит проектов для тарифа",
     new_project_btn:"+ Проект",
     scenarios_label:"Сценарии",
@@ -875,11 +902,15 @@ const LANGS={
     uppercase_chars:"Uppercase",
     choose_template:"Choose a ready-made strategy map or start from scratch",
     choose_template_left:"Choose a template on the left",
+    start_from_scratch:"Start from scratch",
+    ai_generating_map:"AI is generating a map…",
+    tour_start_work:"Start working ✓",tour_nav_hint:"← → or Space to navigate • Esc — close",
     empty_scenario:"Empty scenario",
     new_scenario:"New scenario",
     scenarios:"Scenarios",
     no_scenarios:"No scenarios",
     scenarios_pro:"Scenarios available with Pro",
+    new_map:"New map",create_scenario:"Create scenario",
     content_plan:"Content plan",
     content_plan_tab:"Content plan",
     content_plan_locked_title:"Content plan available on Pro",
@@ -888,14 +919,17 @@ const LANGS={
     add_content_item:"+ Add post",
     content_status_draft:"Draft",content_status_scheduled:"Scheduled",content_status_published:"Published",
     content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
-    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",
+    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",content_channel_email:"Email",
     content_link_step:"Link to strategy step",content_ai_suggest:"✨ Suggest from strategy",
+    content_view_tree:"Tree",content_view_list:"List",content_tree_title:"Content plan tree",content_tree_hint:"Project → channel → status → items. Click a card to edit.",content_more:"More",untitled:"Untitled",
+    project_ai_tab:"AI",project_ai_title:"Project AI",project_ai_hint:"Same chat as in the map. Here AI can see the context of all project maps.",project_scope:"Project",
     scenario_templates:"Scenario Templates",
     no_limits:"No limits.",
     no_comparison:"No comparison",
     view_label:"View",
     login_or_register:"Sign in or create a free account",
     loading_short:"Loading…",
+    load_error_hint:"If this keeps happening, check your internet connection and API availability. In offline mode you can use the demo account without the server.",
     why_label:"Why?",
     why_placeholder:"Why this step, what outcome is needed",
     action_label:"What to do",
@@ -1067,11 +1101,22 @@ const LANGS={
     autosave_desc:"Save map on every change",
     canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 List",
     ai_assistant_title:"🤖 AI Assistant",notifications_title:"🔔 Notifications",
+    ai_hub_title:"✦ AI (unified chat)",
+    ai_hub_hint:"This chat is shared across the app. Here AI can see your project portfolio and loaded maps.",
+    all_projects:"All projects",
+    notif_center:"Notifications",
+    notif_unread_n:"Unread: {n}",
+    notif_all_read:"All caught up",
+    notif_read_all:"Mark all read",
+    notif_empty:"No notifications yet",
+    notification:"Notification",
     save_settings:"Save settings",
     maps_available:"Maps available",scenarios_available:"Scenarios",
     projects_available:"Projects",ai_level:"AI level",
     // ProjectsPage/ProjectDetail
     projects_of:"{n} of {max} projects",
+    search_results:"Search results",
+    search_empty:"No results",
     project_limit:"Project limit for plan",
     new_project_btn:"+ Project",
     scenarios_label:"Scenarios",
@@ -1261,11 +1306,15 @@ const LANGS={
     uppercase_chars:"Bosh harflar",
     choose_template:"Tayyor strategiya xaritasini tanlang yoki noldan boshlang",
     choose_template_left:"Chapdan shablon tanlang",
+    start_from_scratch:"Noldan boshlash",
+    ai_generating_map:"AI xaritani yaratmoqda…",
+    tour_start_work:"Boshlash ✓",tour_nav_hint:"← → yoki Space • Esc — yopish",
     empty_scenario:"Bo'sh stsenariy",
     new_scenario:"Yangi stsenariy",
     scenarios:"Stsenariylar",
     no_scenarios:"Stsenariylar yo'q",
     scenarios_pro:"Stsenariylar Pro bilan mavjud",
+    new_map:"Yangi xarita",create_scenario:"Stsenariy yaratish",
     content_plan:"Kontent reja",
     content_plan_tab:"Kontent reja",
     content_plan_locked_title:"Kontent rejasi Pro da",
@@ -1274,14 +1323,17 @@ const LANGS={
     add_content_item:"+ Post qo'shish",
     content_status_draft:"Qoralama",content_status_scheduled:"Rejalashtirilgan",content_status_published:"Nashr qilindi",
     content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
-    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",
+    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",content_channel_email:"Email",
     content_link_step:"Strategiya qadami bilan bog'lash",content_ai_suggest:"✨ Strategiyadan taklif",
+    content_view_tree:"Daraxt",content_view_list:"Ro‘yxat",content_tree_title:"Kontent‑reja daraxti",content_tree_hint:"Loyiha → kanal → status → nashrlar. Tahrirlash uchun kartani bosing.",content_more:"Yana",untitled:"Nomsiz",
+    project_ai_tab:"AI",project_ai_title:"Loyiha uchun AI",project_ai_hint:"Xuddi shu chat: xaritada ham mavjud. Bu yerda AI loyihadagi barcha xaritalar kontekstini ko‘radi.",project_scope:"Loyiha",
     scenario_templates:"Stsenariy shablonlari",
     no_limits:"Cheksiz.",
     no_comparison:"Taqqoslash yo'q",
     view_label:"Ko'rinish",
     login_or_register:"Kiring yoki bepul akkaunt yarating",
     loading_short:"Yuklanmoqda…",
+    load_error_hint:"Agar bu yana takrorlansa, internet va API ishlashini tekshiring. Oflayn rejimda server siz demo akkauntdan foydalanishingiz mumkin.",
     why_label:"Nima uchun?",
     why_placeholder:"Nima uchun bu qadam, qanday natija kerak",
     action_label:"Nima qilish kerak",
@@ -1451,11 +1503,22 @@ const LANGS={
     autosave_desc:"Har bir o'zgarishda xaritani saqlash",
     canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 Ro'yxat",
     ai_assistant_title:"🤖 AI Yordamchi",notifications_title:"🔔 Bildirishnomalar",
+    ai_hub_title:"✦ AI (yagona chat)",
+    ai_hub_hint:"Bu chat butun ilova bo‘ylab umumiy. Bu yerda AI loyihalar portfeli va yuklangan xaritalarni ko‘radi.",
+    all_projects:"Barcha loyihalar",
+    notif_center:"Bildirishnomalar",
+    notif_unread_n:"O‘qilmaganlar: {n}",
+    notif_all_read:"Hammasi o‘qildi",
+    notif_read_all:"Hammasini o‘qilgan qil",
+    notif_empty:"Hali bildirishnoma yo‘q",
+    notification:"Bildirishnoma",
     save_settings:"Sozlamalarni saqlash",
     maps_available:"Xaritalar mavjud",scenarios_available:"Stsenariylar",
     projects_available:"Loyihalar",ai_level:"AI darajasi",
     // ProjectsPage/ProjectDetail
     projects_of:"{n} dan {max} loyiha",
+    search_results:"Qidiruv natijalari",
+    search_empty:"Hech narsa topilmadi",
     project_limit:"Tarif uchun loyiha limiti",
     new_project_btn:"+ Loyiha",
     scenarios_label:"Stsenariylar",
@@ -1745,6 +1808,33 @@ async function deleteProject(id:string){
   await store.set("sa_proj",a.filter((p:any)=>p.id!==id));
   await store.del(`sa_maps_${id}`);
 }
+
+// ── notifications ──
+async function getNotifications(){
+  if(API_BASE){
+    try{return await apiFetch("/api/notifications");}catch{return {notifications:[],unread:0};}
+  }
+  return {notifications:[],unread:0};
+}
+async function readAllNotifications(){
+  if(API_BASE){
+    try{return await apiFetch("/api/notifications/read-all",{method:"POST"});}catch{return {ok:false};}
+  }
+  return {ok:true};
+}
+async function readNotification(id:string){
+  if(API_BASE){
+    try{return await apiFetch(`/api/notifications/${id}/read`,{method:"POST"});}catch{return {ok:false};}
+  }
+  return {ok:true};
+}
+async function deleteNotification(id:string){
+  if(API_BASE){
+    try{return await apiFetch(`/api/notifications/${id}`,{method:"DELETE"});}catch{return {ok:false};}
+  }
+  return {ok:true};
+}
+
 function normalizeMap(m:any){if(!m)return m;return{...m,isScenario:m.isScenario??m.is_scenario??false};}
 const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function isUUID(s:any){return typeof s==="string"&&UUID_RE.test(s);}
@@ -2696,15 +2786,15 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
-          <div style={{width:44,height:44,borderRadius:"50%",background:`linear-gradient(135deg,${tier.color},${tier.color}88)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:800,color:"#fff",boxShadow:`0 4px 16px ${tier.color}44`}}>{(user.name||user.email)[0].toUpperCase()}</div>
+          <div style={{width:44,height:44,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"var(--accent-on-bg)",boxShadow:"0 6px 18px var(--accent-glow)"}}>{(user.name||user.email)[0].toUpperCase()}</div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>{user.name||t("user_word","Пользователь")}</div>
             <div style={{fontSize:13,color:"var(--text4)",marginTop:1}}>{user.email}</div>
             {user.bio&&<div style={{fontSize:13,color:"var(--text5)",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:320}}>{user.bio}</div>}
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:12,background:`${tier.color}18`,border:`1px solid ${tier.color}44`}}>
+          <div className="glass-card" style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",borderRadius:12,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)"}}>
             <span style={{fontSize:13}}>{tier.badge}</span>
-            <span style={{fontSize:13,fontWeight:700,color:tier.color}}>{tier.label}</span>
+            <span style={{fontSize:13,fontWeight:800,color:"var(--text)"}}>{tier.label}</span>
           </div>
           <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.background="var(--surface2)"} onMouseOut={e=>e.currentTarget.style.background="var(--surface)"}>×</button>
         </div>
@@ -3152,7 +3242,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
         <div style={{display:"flex",gap:10}}>
           <button onClick={onToggleTheme} style={{padding:"7px 12px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,cursor:"pointer"}}>{theme==="dark"?"☀️":"🌙"}</button>
           <button onClick={()=>setShowAuth(true)} style={{padding:"7px 16px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("sign_in","Войти")}</button>
-          <button onClick={onStart} style={{padding:"7px 18px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 16px rgba(99,102,241,.35)"}}>{t("start_free_arrow","Начать бесплатно →")}</button>
+          <button onClick={onStart} className="btn-interactive" style={{padding:"7px 18px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 16px var(--accent-glow)"}}>{t("start_free_arrow","Начать бесплатно →")}</button>
         </div>
       </div>
       <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px",position:"relative",zIndex:10}}>
@@ -3168,7 +3258,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
           <p style={{fontSize:17,color:"var(--text3)",lineHeight:1.6,marginBottom:32}}>AI задаст 6 вопросов о вашем бизнесе и построит персональную стратегическую карту с приоритетами, метриками и связями.</p>
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
             <button onClick={onStart}
-              style={{padding:"14px 32px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 8px 28px rgba(99,102,241,.4)",letterSpacing:-.3,transition:"all .2s"}}
+              style={{padding:"14px 32px",borderRadius:14,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:900,cursor:"pointer",boxShadow:"0 8px 28px var(--accent-glow)",letterSpacing:-.3,transition:"all .2s"}}
               onMouseOver={e=>e.currentTarget.style.transform="translateY(-2px)"}
               onMouseOut={e=>e.currentTarget.style.transform="none"}>
               ✦ Создать карту бесплатно
@@ -3204,7 +3294,7 @@ function CookieConsent(){
   return(
     <div style={{position:"fixed",bottom:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:"rgba(15,23,42,.95)",backdropFilter:"blur(12px)",border:"1px solid rgba(99,102,241,.25)",borderRadius:14,padding:"14px 20px",display:"flex",alignItems:"center",gap:16,maxWidth:560,width:"92vw",boxShadow:"0 8px 32px rgba(0,0,0,.4)"}}>
       <span style={{fontSize:12,color:"#94a3b8",flex:1,lineHeight:1.5}}>{t("cookie_text","🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей")} <a href="/privacy" target="_blank" style={{color:"#818cf8",textDecoration:"underline"}}>{t("cookie_policy","Политикой конфиденциальности")}</a>.</span>
-      <button onClick={accept} style={{padding:"8px 18px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>{t("cookie_accept","Принять")}</button>
+      <button onClick={accept} className="btn-interactive" style={{padding:"8px 18px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:13,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("cookie_accept","Принять")}</button>
     </div>
   );
 }
@@ -3797,7 +3887,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
 }
 
 // ── AiPanel ── (isMobile: полноэкранная панель)
-function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal,projectName="",mapName="",userName="",msgs:msgsProp,onMsgsChange,onError,isMobile}){
+function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal,projectName="",mapName="",userName="",msgs:msgsProp,onMsgsChange,onError,isMobile,embedded=false}){
   const{t}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
@@ -3900,9 +3990,13 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     inpRef.current?.focus();
   }
 
-  const aiPanelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
+  const aiPanelStyle=embedded
+    ? {position:"relative" as const,width:"100%",height:isMobile?560:680,display:"flex",flexDirection:"column",zIndex:1,borderRadius:18,overflow:"hidden"}
+    : (isMobile
+        ? {position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}
+        : {position:"absolute" as const,right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"});
   return(
-    <div className={`glass-panel panel-slide ${exiting?"panel-slide-out":""}`.trim()} style={aiPanelStyle}>
+    <div className={`glass-panel ${embedded?"":"panel-slide"} ${exiting&&!embedded?"panel-slide-out":""}`.trim()} style={aiPanelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
         <div style={{width:36,height:36,borderRadius:12,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0}}>✦</div>
         <div style={{flex:1,minWidth:0}}>
@@ -3910,7 +4004,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
           <div style={{fontSize:12,color:tierCfg.color||"#10b981",fontWeight:600,marginTop:2}}>{tierCfg.badge} {tierCfg.label}</div>
         </div>
         <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"8px 12px",borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>✕</button>
-        <button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
+        {!embedded&&<button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>}
       </div>
       <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -3981,7 +4075,7 @@ function EdgeLine({edge,nodes,selected,onClick}){
 }
 
 // ── NodeCard ── (единая сетка 8px, выравнивание, поддержка светлой/тёмной темы)
-function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,onContextMenu,theme}){
+function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,onMouseDown,onContextMenu,theme}){
   const{t}=useLang();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
@@ -4017,6 +4111,7 @@ function NodeCard({node,selected,connecting,connectSource,onClick,onMouseDown,on
   return(
     <g className="node-card" transform={`translate(${node.x},${node.y})`} onClick={e=>{e.stopPropagation();onClick(node,{shiftKey:e.shiftKey});}} onPointerDown={e=>onMouseDown(e,node)} onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContextMenu?.(e.clientX,e.clientY,node);}} style={{cursor:connecting?"crosshair":"grab"}}>
       {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill="var(--accent-soft)" style={{filter:"blur(8px)"}}/>}
+      {focused&&<rect x={-2} y={0} width={244} height={132} rx={14} fill="transparent" stroke="var(--accent-1)" strokeWidth={2} style={{filter:"drop-shadow(0 0 12px var(--accent-glow))"}}/>}
       <rect width={240} height={128} rx={12} fill={bg}
         stroke={selected?"var(--accent-1)":isConnSrc?"#10b981":isOverdue?"#ef4444":isLight?(node.color||"rgba(0,0,0,.12)"):(node.color||"rgba(255,255,255,.12)")}
         strokeWidth={selected||isConnSrc||isOverdue?2:1}
@@ -4366,7 +4461,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
 }
 
 // ── MapEditor ──
-function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false}){
+function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false,aiChatMsgs,aiChatSetMsgs,focusNodeId=null}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
   const STATUS=getSTATUS(t);
@@ -4384,9 +4479,8 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   const[showMini,setShowMini]=useState(true);
   const[search,setSearch]=useState("");
   const[pendingAiMsgs,setPendingAiMsgs]=useState([]);
-  const[aiChatMsgs,setAiChatMsgs]=useState(()=>{
-    try{const k=`sa_ai_chat_${project?.id||"p"}_${mapData?.id||mapData?.name||"default"}`;const s=localStorage.getItem(k);if(s){const j=JSON.parse(s);return Array.isArray(j)?j:[];}}catch{}return [];
-  });
+  const aiChatMsgsLocal = aiChatMsgs || [];
+  const setAiChatMsgsLocal = aiChatSetMsgs || (()=>{});
   const[statusFilter,setStatusFilter]=useState("all");
   const[toasts,setToasts]=useState([]);
   const[saveState,setSaveState]=useState("saved");
@@ -4406,6 +4500,10 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   const[showVersions,setShowVersions]=useState(false);
   const[showDeadlines,setShowDeadlines]=useState(true);
   const[showBriefing,setShowBriefing]=useState(false);
+  const[showNotifs,setShowNotifs]=useState(false);
+  const[notifs,setNotifs]=useState<any[]>([]);
+  const[notifUnread,setNotifUnread]=useState(0);
+  const[notifLoading,setNotifLoading]=useState(false);
   // WebSocket presence
   const[onlineUsers,setOnlineUsers]=useState<any[]>([]);
   const[remoteCursors,setRemoteCursors]=useState<Record<string,{x:number,y:number,name:string,email:string}>>({});
@@ -4416,6 +4514,8 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   const panning=useRef<any>(null);
   const viewRef=useRef({x:0,y:0,zoom:0.85});
   const[view,setView]=useState({x:0,y:0,zoom:0.85});
+  const focusPulseRef=useRef<any>(null);
+  const[focusPulseId,setFocusPulseId]=useState<string|null>(null);
   const W=typeof window!=="undefined"?window.innerWidth:1400;
   const H=typeof window!=="undefined"?window.innerHeight:900;
 
@@ -4426,6 +4526,39 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     setTimeout(()=>setToasts((t:any[])=>t.filter((x:any)=>x.id!==id)),4300);
   }
   function pushUndo(n:any,e:any){setUndoStack((s:any[])=>[...s.slice(-29),{nodes:n,edges:e}]);setRedoStack([]);}
+
+  async function loadNotifications(){
+    if(!API_BASE||!user?.email)return;
+    setNotifLoading(true);
+    try{
+      const d=await getNotifications();
+      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
+      setNotifUnread(Number(d?.unread||0));
+    }catch{}
+    setNotifLoading(false);
+  }
+  useEffect(()=>{loadNotifications();},[]);
+  useEffect(()=>{
+    if(!showNotifs)return;
+    loadNotifications();
+    const id=setInterval(()=>loadNotifications(),30000);
+    return()=>clearInterval(id);
+  },[showNotifs]);
+
+  useEffect(()=>{
+    if(!focusNodeId)return;
+    const n=nodes.find((x:any)=>x.id===focusNodeId);
+    if(!n)return;
+    const z=1.05;
+    const nx=-n.x+W/2, ny=-n.y+H/2;
+    setView({x:nx,y:ny,zoom:z});
+    viewRef.current={x:nx,y:ny,zoom:z};
+    setSelNode(n);
+    setFocusPulseId(n.id);
+    if(focusPulseRef.current)clearTimeout(focusPulseRef.current);
+    focusPulseRef.current=setTimeout(()=>setFocusPulseId(null),1600);
+    return()=>{ if(focusPulseRef.current)clearTimeout(focusPulseRef.current); };
+  },[focusNodeId,nodes.length]);
 
   // Флаг: текущее изменение nodes/edges пришло от удалённого коллеги (не сохраняем локально)
   const remoteUpdateRef=useRef(false);
@@ -4468,10 +4601,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
 
   useEffect(()=>{document.title=`${mapData?.name||project?.name||"Карта"} — Strategy AI`;return()=>{document.title="Strategy AI";};},[mapData?.name,project?.name]);
 
-  // Сохранение чата AI в localStorage при уходе с карты
-  useEffect(()=>{
-    return()=>{try{const k=`sa_ai_chat_${project?.id||"p"}_${mapData?.id||mapData?.name||"default"}`;if(aiChatMsgs.length>0)localStorage.setItem(k,JSON.stringify(aiChatMsgs));}catch{}};
-  },[mapData?.id,mapData?.name,project?.id,aiChatMsgs]);
+  // Состояние единого AI-чата живёт в App и прокидывается сюда
 
   // Трансляция перемещения узла через WebSocket
   function emitNodeMove(nodeId:string,x:number,y:number){
@@ -4996,6 +5126,7 @@ ${ctx}
           {/* RIGHT: user + save */}
           <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
             {ib(false,"Переключить тему",onToggleTheme,theme==="dark"?<>☀️</>:<>🌙</>)}
+            {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
             {readOnly?(
               <div style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",fontSize:13,fontWeight:600,color:"var(--text4)"}}>{t("read_only","Только просмотр")}</div>
             ):(
@@ -5165,7 +5296,7 @@ ${ctx}
               <EdgeLine key={e.id} edge={e} nodes={nodes} selected={selEdge?.id===e.id} onClick={ed=>{setSelEdge(ed);setSelNode(null);}}/>
             ))}
             {filteredNodes.map(n=>(
-              <NodeCard key={n.id} node={n} selected={selNode?.id===n.id||selNodes.has(n.id)} connecting={connecting} connectSource={connectSrc} onClick={onNodeClick} onMouseDown={onNodeMouseDown} onContextMenu={(x,y,nd)=>{if(!readOnly)setCtxMenu({x,y,node:nd});}} theme={theme}/>
+              <NodeCard key={n.id} node={n} selected={selNode?.id===n.id||selNodes.has(n.id)} focused={focusPulseId===n.id} connecting={connecting} connectSource={connectSrc} onClick={onNodeClick} onMouseDown={onNodeMouseDown} onContextMenu={(x,y,nd)=>{if(!readOnly)setCtxMenu({x,y,node:nd});}} theme={theme}/>
             ))}
           </g>
           {connecting&&(
@@ -5261,7 +5392,7 @@ ${ctx}
             onNotify={(msg,type)=>addToast(msg,type||"info")}
           />
         )}
-        {showAI&&<AiPanel isMobile={isMobile} nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgs} onMsgsChange={setAiChatMsgs} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:nn});}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")}/>}
+        {showAI&&<AiPanel isMobile={isMobile} nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgsLocal} onMsgsChange={setAiChatMsgsLocal} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:nn});}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")}/>}
         {showStats&&<StatsPopup nodes={nodes} edges={edges} onClose={()=>setShowStats(false)}/>}
         {showTemplates&&<TemplateModal tier={user?.tier} onSelect={(tmpl:any)=>{setShowTemplates(false);if(tmpl){pushUndo(nodes,edges);setNodes(tmpl.nodes.map((n:any)=>({...n,comments:[],history:[]})));setEdges(tmpl.edges);emitEdgeUpdate(tmpl.edges);setTimeout(fitView,100);setPendingAiMsgs([{role:"ai",text:t("ai_customize_template_offer","Я применил шаблон. Хотите подстроить его под ваш бизнес? Напишите, чем вы занимаетесь и какая цель — я адаптирую шаги под вас.")}]);setShowAI(true);}}} onClose={()=>setShowTemplates(false)} theme={theme}/>}
         {showGantt&&<GanttView nodes={nodes} onClose={()=>setShowGantt(false)}/>}
@@ -5308,6 +5439,60 @@ ${ctx}
             </div>
           </div>
         )}
+
+        {showNotifs&&(
+          <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:260,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowNotifs(false);}}>
+            <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,560px)",maxHeight:isMobile?"78vh":"80vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
+              <div style={{padding:"16px 18px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
+                <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--text4)",fontWeight:900}}>N</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
+                  <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
+                </div>
+                <button className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                  {t("notif_read_all","Прочитать все")}
+                </button>
+                <button onClick={()=>setShowNotifs(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+              </div>
+              <div style={{padding:"10px 12px",overflow:"auto"}}>
+                {notifLoading&&notifs.length===0?(
+                  <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
+                ):notifs.length===0?(
+                  <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
+                ):(
+                  <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                    {notifs.map((n:any)=>(
+                      <div key={n.id} className="glass-card" style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${n.is_read?"var(--border)":"var(--glass-border-accent,var(--border))"}`,background:"var(--surface)"}}>
+                        <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                          <div style={{width:10,height:10,borderRadius:"50%",marginTop:6,background:n.is_read?"var(--border2)":"var(--accent-1)",boxShadow:n.is_read?"none":"0 0 0 3px var(--accent-soft)"}}/>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.title||t("notification","Уведомление")}</div>
+                            {n.body&&<div style={{fontSize:12.8,color:"var(--text4)",lineHeight:1.45,whiteSpace:"pre-wrap"}}>{n.body}</div>}
+                          </div>
+                          <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
+                            {!n.is_read&&(
+                              <button className="btn-interactive" onClick={async()=>{await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                                ✓
+                              </button>
+                            )}
+                            <button className="btn-interactive" onClick={async()=>{await deleteNotification(n.id);setNotifs(xs=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
+                              ×
+                            </button>
+                            {n.link&&(
+                              <button className="btn-interactive" onClick={async()=>{if(!n.is_read){await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));} window.location.href=n.link;}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:900}}>
+                                ↗
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="zoom-ctrl glass-card" style={{position:"absolute",bottom:28,left:28,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"10px 16px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 8px 32px rgba(0,0,0,.2)"}}>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
           <div style={{fontSize:14,color:"var(--text3)",fontWeight:700,minWidth:48,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
@@ -5319,7 +5504,7 @@ ${ctx}
 }
 
 // ── ProjectsPage ──
-function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onProfile,theme,onToggleTheme}){
+function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onProfile,theme,onToggleTheme,aiChatMsgs,aiChatSetMsgs}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
   const ROLES=getROLES(t);
@@ -5327,9 +5512,16 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const[maps,setMaps]=useState({});
   const[loading,setLoading]=useState(true);
   const[search,setSearch]=useState("");
+  const[searching,setSearching]=useState(false);
+  const[searchResults,setSearchResults]=useState<any[]>([]);
   const[creating,setCreating]=useState(false);
   const[newName,setNewName]=useState("");
   const[delId,setDelId]=useState(null);
+  const[showNotifs,setShowNotifs]=useState(false);
+  const[notifs,setNotifs]=useState<any[]>([]);
+  const[notifUnread,setNotifUnread]=useState(0);
+  const[notifLoading,setNotifLoading]=useState(false);
+  const[showAIHub,setShowAIHub]=useState(false);
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
 
   useEffect(()=>{(async()=>{
@@ -5339,7 +5531,40 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
     setMaps(mm);setLoading(false);
   })();},[]);
 
+  async function loadNotifications(){
+    if(!API_BASE)return;
+    setNotifLoading(true);
+    try{
+      const d=await getNotifications();
+      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
+      setNotifUnread(Number(d?.unread||0));
+    }catch{}
+    setNotifLoading(false);
+  }
+  useEffect(()=>{loadNotifications();},[]);
+  useEffect(()=>{
+    if(!showNotifs)return;
+    loadNotifications();
+    const id=setInterval(()=>loadNotifications(),30000);
+    return()=>clearInterval(id);
+  },[showNotifs]);
+
   useEffect(()=>{document.title=loading?"Strategy AI — Загрузка…":"Strategy AI — Проекты";},[loading]);
+
+  useEffect(()=>{
+    if(!API_BASE){setSearchResults([]);return;}
+    const q=(search||"").trim();
+    if(q.length<2){setSearchResults([]);setSearching(false);return;}
+    setSearching(true);
+    const t=setTimeout(async()=>{
+      try{
+        const d=await apiFetch(`/api/search?q=${encodeURIComponent(q)}`);
+        setSearchResults(Array.isArray(d?.results)?d.results:[]);
+      }catch{setSearchResults([]);}
+      setSearching(false);
+    },250);
+    return()=>clearTimeout(t);
+  },[search]);
 
   async function createProject(){
     if(!newName.trim())return;
@@ -5364,11 +5589,15 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const atLimit=myCount>=tier.projects;
   const lastProj=(()=>{try{const s=localStorage.getItem("sa_last_project");if(!s)return null;const j=JSON.parse(s);return projects.find(p=>p.id===j.id||p.name===j.name)||null;}catch{return null;}})();
   const lastMapData=(()=>{if(!lastProj)return null;try{const s=localStorage.getItem("sa_last_map");if(!s)return null;const j=JSON.parse(s);const ms=maps[lastProj.id]||[];return ms.find((m:any)=>m.id===j.id||m.name===j.name)||null;}catch{return null;}})();
+  const allMapsForAI=Object.values(maps||{}).flatMap((arr:any)=>Array.isArray(arr)?arr:[]);
+  const aiNodes=allMapsForAI.flatMap((m:any)=>m.nodes||[]).slice(0,220);
+  const aiEdges=allMapsForAI.flatMap((m:any)=>m.edges||[]).slice(0,260);
+  const aiCtx=`Портфель проектов пользователя: ${(projects||[]).slice(0,20).map((p:any)=>`«${p.name||"Проект"}»`).join(", ")}. Всего проектов: ${(projects||[]).length}. Всего карт загружено: ${allMapsForAI.length}.`;
 
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{CSS}</style>
-      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(99,102,241,.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:0}}>
           <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
@@ -5376,9 +5605,22 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
         </div>
         <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0}}>
           <button onClick={onToggleTheme} style={{padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{theme==="dark"?"☀️":"🌙"}</button>
+          <button className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)") } style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800}}>
+            ✦
+          </button>
+          {API_BASE&&(
+            <button className="btn-interactive" onClick={()=>setShowNotifs(true)} title={t("notifications_title","🔔 Уведомления")} style={{position:"relative",padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,fontWeight:800}}>
+              •
+              {notifUnread>0&&(
+                <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
+                  {notifUnread>99?"99+":notifUnread}
+                </span>
+              )}
+            </button>
+          )}
           <button onClick={onProfile} style={{display:"flex",alignItems:"center",gap:isMobile?4:8,padding:"6px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
-            <div style={{width:24,height:24,borderRadius:"50%",background:`linear-gradient(135deg,${tier.color}cc,${tier.color}55)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</div>
-            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:13.5,color:tier.color,fontWeight:700}}>{tier.badge} {tier.label}</span></>}
+            <div style={{width:24,height:24,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"var(--accent-on-bg)",flexShrink:0,boxShadow:"0 2px 10px var(--accent-glow)"}}>{(user.name||user.email)[0].toUpperCase()}</div>
+            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:13.5,color:"var(--text4)",fontWeight:700}}>{tier.label}</span></>}
           </button>
           <button onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
         </div>
@@ -5392,7 +5634,49 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             </div>
             {!isMobile&&<div style={{flex:1}}/>}
             <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} className="input-smooth" style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit",flex:isMobile?1:undefined}}/>
+              <div style={{position:"relative",flex:isMobile?1:undefined}}>
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} className="input-smooth" style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit"}}/>
+                {API_BASE&&((search||"").trim().length>=2)&&(searching||searchResults.length>0)&&(
+                  <div className="glass-panel drop-panel" style={{position:"absolute",top:"calc(100% + 8px)",left:0,right:0,zIndex:50,borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",overflow:"hidden",boxShadow:"var(--glass-shadow-accent,none),0 22px 60px rgba(0,0,0,.35)"}}>
+                    <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,background:"var(--surface)"}}>
+                      <div style={{fontSize:12.5,fontWeight:900,color:"var(--text)"}}>{t("search_results","Результаты поиска")}</div>
+                      <div style={{fontSize:12,color:"var(--text5)"}}>{searching?t("loading_short","Загрузка…"):`${searchResults.length}`}</div>
+                    </div>
+                    <div style={{maxHeight:360,overflow:"auto",padding:"8px 8px 10px",background:"var(--surface)"}}>
+                      {searching&&searchResults.length===0?(
+                        <div style={{padding:"10px 8px",fontSize:12.5,color:"var(--text5)"}}>{t("loading_short","Загрузка…")}</div>
+                      ):searchResults.length===0?(
+                        <div style={{padding:"10px 8px",fontSize:12.5,color:"var(--text5)"}}>{t("search_empty","Ничего не найдено")}</div>
+                      ):(
+                        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                          {searchResults.slice(0,24).map((r:any)=>(
+                            <button key={`${r.type}:${r.id}`} className="btn-interactive" onClick={async()=>{
+                              try{
+                                const proj=projects.find((p:any)=>p.id===r.projectId)||{id:r.projectId,name:r.subtitle||"Проект"};
+                                if(r.type==="map"){
+                                  onOpenMap({id:r.id},proj,false,false);
+                                }else if(r.type==="node"){
+                                  onOpenMap({id:r.mapId},proj,false,false,r.id);
+                                }
+                                setSearchResults([]);setSearch("");
+                              }catch{}
+                            }} style={{textAlign:"left",padding:"10px 12px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",display:"flex",gap:10,alignItems:"flex-start"}}>
+                              <div style={{width:26,height:26,borderRadius:9,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,color:"var(--text4)"}}>
+                                {r.type==="map"?"M":"N"}
+                              </div>
+                              <div style={{flex:1,minWidth:0}}>
+                                <div style={{fontSize:13,fontWeight:900,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.title||t("untitled","Без названия")}</div>
+                                <div style={{fontSize:12.5,color:"var(--text5)",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.subtitle||""}</div>
+                                {r.highlight&&<div style={{fontSize:12.5,color:"var(--text4)",marginTop:6,lineHeight:1.4,opacity:.95}}>{String(r.highlight)}</div>}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button onClick={()=>{if(atLimit){return;}setCreating(true);}} className="btn-smooth" style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,flexShrink:0,boxShadow:atLimit?"none":"0 2px 12px var(--accent-glow)"}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
             </div>
           </div>
@@ -5422,19 +5706,18 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                 const pm=maps[p.id]||[];
                 const myRole=p.owner===user.email?"owner":p.members?.find(m=>m.email===user.email)?.role;
                 const roleLabel=ROLES[myRole]||"";
-                const ICONS=["📋","🚀","💡","🗺","⚡","🎯","📊","🔬","🌱","💼"];
-                const icon=ICONS[p.id.charCodeAt(0)%ICONS.length];
+                const icon=((p.name||"P").trim()[0]||"P").toUpperCase();
                 return(
                   <div key={p.id} onClick={()=>onSelectProject(p)} className="icard card-stagger card-interactive"
                     style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(0,0,0,.04)",animationDelay:`${i*0.06}s`}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:14}}>
-                      <div style={{width:40,height:40,borderRadius:11,background:`linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.08))`,border:"1px solid rgba(99,102,241,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{icon}</div>
+                      <div style={{width:40,height:40,borderRadius:12,background:"var(--surface2)",border:"1px solid var(--glass-border-accent,var(--border))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,color:"var(--text2)",fontWeight:900,letterSpacing:.3}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div className="icard-title" style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:2}}>{p.name}</div>
                         <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {(p.createdAt||p.created_at)?new Date(p.createdAt||p.created_at).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"}):"—"}</div>
                       </div>
                       {p.owner===user.email&&(
-                        <button onClick={e=>{e.stopPropagation();setDelId(p.id);}} style={{width:24,height:24,borderRadius:6,border:"none",background:"transparent",color:"var(--text4)",cursor:"pointer",fontSize:14,opacity:.4,display:"flex",alignItems:"center",justifyContent:"center"}} onMouseOver={e=>{e.stopPropagation();e.currentTarget.style.opacity="1";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.opacity=".4";e.currentTarget.style.color="var(--text4)";}}>🗑</button>
+                        <button onClick={e=>{e.stopPropagation();setDelId(p.id);}} style={{width:24,height:24,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:14,opacity:.7,display:"flex",alignItems:"center",justifyContent:"center"}} onMouseOver={e=>{e.stopPropagation();e.currentTarget.style.opacity="1";e.currentTarget.style.borderColor="rgba(239,68,68,.25)";e.currentTarget.style.background="rgba(239,68,68,.06)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.opacity=".7";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text4)";}}>×</button>
                       )}
                     </div>
                     {/* Progress bar based on completed nodes */}
@@ -5457,17 +5740,17 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                       );
                     })()}
                     <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:"auto"}}>
-                      <div style={{padding:"3px 9px",borderRadius:6,background:"var(--surface)",border:"1px solid var(--border)",fontSize:13,color:"var(--text3)"}}>🗺 {pm.filter(m=>!m.isScenario).length} карт</div>
-                      {pm.filter(m=>m.isScenario).length>0&&<div style={{padding:"3px 9px",borderRadius:6,background:"var(--surface)",border:"1px solid var(--border)",fontSize:13,color:"var(--text3)"}}>🔀 {pm.filter(m=>m.isScenario).length} сцен.</div>}
-                      {(()=>{const n=pm.flatMap(m=>m.nodes||[]).length;return n>0?<div style={{padding:"3px 9px",borderRadius:6,background:"var(--surface)",border:"1px solid var(--border)",fontSize:13,color:"var(--text3)"}}>📌 {n} шагов</div>:null;})()}
-                      {p.members?.length>1&&<div style={{padding:"3px 9px",borderRadius:6,background:"var(--surface)",border:"1px solid var(--border)",fontSize:13,color:"var(--text3)"}}>👥 {p.members.length}</div>}
+                      <div style={{padding:"3px 9px",borderRadius:999,background:"var(--surface)",border:"1px solid var(--border)",fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{pm.filter(m=>!m.isScenario).length} {t("maps","карт")}</div>
+                      {pm.filter(m=>m.isScenario).length>0&&<div style={{padding:"3px 9px",borderRadius:999,background:"var(--surface)",border:"1px solid var(--border)",fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{pm.filter(m=>m.isScenario).length} {t("scenarios_short","сцен.")}</div>}
+                      {(()=>{const n=pm.flatMap(m=>m.nodes||[]).length;return n>0?<div style={{padding:"3px 9px",borderRadius:999,background:"var(--surface)",border:"1px solid var(--border)",fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{n} {t("steps_label","шагов")}</div>:null;})()}
+                      {p.members?.length>1&&<div style={{padding:"3px 9px",borderRadius:999,background:"var(--surface)",border:"1px solid var(--border)",fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{p.members.length} {t("members","участников")}</div>}
                     </div>
                   </div>
                 );
               })}
               {!filtered.length&&!loading&&(
                 <div style={{gridColumn:"1/-1",textAlign:"center",padding:"48px 0",color:"var(--text4)"}}>
-                  <div style={{fontSize:32,marginBottom:10}}>🗂</div>
+                  <div style={{fontSize:28,marginBottom:10,letterSpacing:6,opacity:.7}}>• • •</div>
                   <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{t("no_projects","Нет проектов")}</div>
                   <div style={{fontSize:13}}>{t("click_new_project","Нажмите «+ Проект» чтобы начать")}</div>
                 </div>
@@ -5477,13 +5760,151 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
         </div>
       </div>
       {delId&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message="Все карты и данные проекта будут удалены без возможности восстановления." confirmLabel="Удалить" onConfirm={()=>deleteProj(delId)} onCancel={()=>setDelId(null)} danger={true}/>}
+
+      {showNotifs&&(
+        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:220,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowNotifs(false);}}>
+          <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,560px)",maxHeight:isMobile?"78vh":"80vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
+            <div style={{padding:"16px 18px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--text4)",fontWeight:900}}>N</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
+                <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
+              </div>
+              <button className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                {t("notif_read_all","Прочитать все")}
+              </button>
+              <button onClick={()=>setShowNotifs(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+            </div>
+            <div style={{padding:"10px 12px",overflow:"auto"}}>
+              {notifLoading&&notifs.length===0?(
+                <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
+              ):notifs.length===0?(
+                <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
+              ):(
+                <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  {notifs.map((n:any)=>(
+                    <div key={n.id} className="glass-card" style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${n.is_read?"var(--border)":"var(--glass-border-accent,var(--border))"}`,background:"var(--surface)"}}>
+                      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                        <div style={{width:10,height:10,borderRadius:"50%",marginTop:6,background:n.is_read?"var(--border2)":"var(--accent-1)",boxShadow:n.is_read?"none":"0 0 0 3px var(--accent-soft)"}}/>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.title||t("notification","Уведомление")}</div>
+                          {n.body&&<div style={{fontSize:12.8,color:"var(--text4)",lineHeight:1.45,whiteSpace:"pre-wrap"}}>{n.body}</div>}
+                          <div style={{fontSize:12,color:"var(--text6)",marginTop:8,display:"flex",gap:10,flexWrap:"wrap"}}>
+                            <span>{n.created_at?new Date(n.created_at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"—"}</span>
+                            {n.type&&<span>· {String(n.type)}</span>}
+                          </div>
+                        </div>
+                        <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
+                          {!n.is_read&&(
+                            <button className="btn-interactive" onClick={async()=>{await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                              ✓
+                            </button>
+                          )}
+                          <button className="btn-interactive" onClick={async()=>{await deleteNotification(n.id);setNotifs(xs=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
+                            🗑
+                          </button>
+                          {n.link&&(
+                            <button
+                              className="btn-interactive"
+                              onClick={async()=>{
+                                if(!n.is_read){
+                                  await readNotification(n.id);
+                                  setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));
+                                  setNotifUnread(u=>Math.max(0,u-1));
+                                }
+                                try{
+                                  const u=new URL(n.link,window.location.origin);
+                                  const open=(u.searchParams.get("open")||"").toLowerCase();
+                                  const projectId=u.searchParams.get("projectId")||"";
+                                  const mapId=u.searchParams.get("mapId")||"";
+                                  const nodeId=u.searchParams.get("nodeId")||"";
+                                  if(open==="project"&&projectId){
+                                    const p=projects.find((x:any)=>x.id===projectId);
+                                    if(p){setShowNotifs(false);onSelectProject(p);return;}
+                                  }
+                                  if(open==="map"&&projectId&&mapId){
+                                    const p=projects.find((x:any)=>x.id===projectId);
+                                    if(p){
+                                      setShowNotifs(false);
+                                      onOpenMap({id:mapId},p,false,false,nodeId||null);
+                                      return;
+                                    }
+                                  }
+                                }catch{}
+                                window.location.href=n.link;
+                              }}
+                              style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:900}}
+                            >
+                              ↗
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAIHub&&(
+        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:230,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowAIHub(false);}}>
+          <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,720px)",maxHeight:isMobile?"86vh":"86vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
+            <div style={{padding:"14px 16px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10,background:"var(--surface)"}}>
+              <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",fontWeight:900}}>✦</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("ai_hub_title","✦ AI (единый чат)")}</div>
+                <div style={{fontSize:12.5,color:"var(--text5)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t("ai_hub_hint","Этот чат общий для всего приложения. Здесь AI видит портфель проектов и загруженные карты.")}</div>
+              </div>
+              <button onClick={()=>setShowAIHub(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+            </div>
+            <div style={{padding:12}}>
+              <AiPanel
+                embedded={true}
+                isMobile={isMobile}
+                nodes={aiNodes}
+                edges={aiEdges}
+                ctx={aiCtx}
+                tier={user?.tier||"free"}
+                projectName={t("all_projects","Все проекты")}
+                mapName=""
+                userName={user?.name||user?.email||""}
+                msgs={aiChatMsgs||[]}
+                onMsgsChange={aiChatSetMsgs||(()=>{})}
+                onAddNode={()=>{}}
+                onClose={()=>{}}
+                externalMsgs={[]}
+                onClearExternal={()=>{}}
+                onError={()=>{}}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function NotifBell({unread,onClick}:{unread:number,onClick:()=>void}){
+  const{t}=useLang();
+  if(!API_BASE)return null;
+  return(
+    <button className="btn-interactive" onClick={onClick} title={t("notifications_title","Уведомления")} style={{position:"relative",padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,fontWeight:800}}>
+      •
+      {unread>0&&(
+        <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
+          {unread>99?"99+":unread}
+        </span>
+      )}
+    </button>
   );
 }
 
 // ── ContentPlanTab (Pro+): ведение контент-плана по проекту, связь с шагами стратегии ──
 const CONTENT_TYPES=[{id:"post",labelKey:"content_type_post"},{id:"story",labelKey:"content_type_story"},{id:"email",labelKey:"content_type_email"},{id:"video",labelKey:"content_type_video"}];
-const CONTENT_CHANNELS=[{id:"blog",labelKey:"content_channel_blog"},{id:"instagram",labelKey:"content_channel_instagram"},{id:"telegram",labelKey:"content_channel_telegram"},{id:"vk",labelKey:"content_channel_vk"},{id:"youtube",labelKey:"content_channel_youtube"}];
+const CONTENT_CHANNELS=[{id:"blog",labelKey:"content_channel_blog"},{id:"instagram",labelKey:"content_channel_instagram"},{id:"telegram",labelKey:"content_channel_telegram"},{id:"vk",labelKey:"content_channel_vk"},{id:"youtube",labelKey:"content_channel_youtube"},{id:"email",labelKey:"content_channel_email"}];
 const CONTENT_STATUSES=[{id:"draft",labelKey:"content_status_draft"},{id:"scheduled",labelKey:"content_status_scheduled"},{id:"published",labelKey:"content_status_published"}];
 
 function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
@@ -5491,13 +5912,33 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
   const [loading,setLoading]=useState(true);
   const [editId,setEditId]=useState<string|null>(null);
   const [filterStatus,setFilterStatus]=useState<string>("all");
+  const [viewMode,setViewMode]=useState<"list"|"tree">("tree");
   const [aiSuggesting,setAiSuggesting]=useState(false);
   const isMobile=useIsMobile();
+  const treePrefsKey=`sa_cp_tree_${projectId}`;
+  const [treeCollapsed,setTreeCollapsed]=useState<{channels:Record<string,boolean>,statuses:Record<string,boolean>}>(()=>{
+    try{
+      const raw=localStorage.getItem(treePrefsKey);
+      const parsed=raw?JSON.parse(raw):null;
+      if(parsed&&typeof parsed==="object") return {channels:parsed.channels||{},statuses:parsed.statuses||{}};
+    }catch{}
+    return {channels:{},statuses:{}};
+  });
+  useEffect(()=>{
+    try{localStorage.setItem(treePrefsKey,JSON.stringify(treeCollapsed));}catch{}
+  },[treePrefsKey,treeCollapsed]);
 
   useEffect(()=>{(async()=>{setLoading(true);const list=await getContentPlan(projectId);setItems(Array.isArray(list)?list:[]);setLoading(false);})();},[projectId]);
 
   const allNodes=maps.flatMap((m:any)=>(m.nodes||[]).map((n:any)=>({...n,mapName:m.name})));
   const filtered=filterStatus==="all"?items:items.filter((x:any)=>x.status===filterStatus);
+
+  const CHANNEL_LABEL:any={blog:t("content_channel_blog","Блог"),telegram:t("content_channel_telegram","Telegram"),instagram:t("content_channel_instagram","Instagram"),youtube:t("content_channel_youtube","YouTube"),email:t("content_channel_email","Email")};
+  const STATUS_LABEL:any={
+    draft:t("content_status_draft","Черновик"),
+    scheduled:t("content_status_scheduled","Запланировано"),
+    published:t("content_status_published","Опубликовано"),
+  };
 
   async function saveItem(item:any){
     const id=item.id||uid();
@@ -5538,16 +5979,113 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
 
   const editingItem=editId?items.find((x:any)=>x.id===editId):null;
 
+  function ContentTree(){
+    // root → channel → status → items
+    const byChannel:any = {};
+    filtered.forEach((it:any)=>{
+      const ch=it.channel||"blog";
+      const st=it.status||"draft";
+      byChannel[ch] ||= {};
+      byChannel[ch][st] ||= [];
+      byChannel[ch][st].push(it);
+    });
+    const channelOrder=["blog","telegram","instagram","youtube","email"];
+    const statusOrder=["draft","scheduled","published"];
+    const channels = channelOrder.filter(ch=>byChannel[ch]).concat(Object.keys(byChannel).filter(ch=>!channelOrder.includes(ch)));
+    if(channels.length===0) return null;
+
+    return(
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        <div className="glass-card" style={{padding:isMobile?"14px 14px":"16px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:13,fontWeight:800,color:"var(--text)"}}>🌳 {t("content_tree_title","Дерево контент‑плана")}</div>
+            <div style={{fontSize:12,color:"var(--text4)",marginTop:2}}>{t("content_tree_hint","Проект → канал → статус → публикации. Нажмите на карточку, чтобы редактировать.")}</div>
+          </div>
+          <button className="btn-interactive" onClick={()=>setEditId("new")} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:12.5,fontWeight:800,whiteSpace:"nowrap"}}>
+            {t("add_content_item","+ Публикация")}
+          </button>
+        </div>
+
+        {channels.map((ch:string,ci:number)=>(
+          <div key={ch} className="glass-card list-item-in" style={{padding:isMobile?"12px 12px":"14px 16px",animationDelay:`${ci*0.05}s`}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
+                <div style={{width:10,height:10,borderRadius:"50%",background:"var(--accent-1)",boxShadow:"0 0 0 3px var(--accent-soft)"}}/>
+                <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{CHANNEL_LABEL[ch]||ch}</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <div style={{fontSize:12,color:"var(--text5)",fontWeight:700}}>{Object.values(byChannel[ch]).reduce((s:any,a:any)=>s+(a?.length||0),0)} шт.</div>
+                <button className="btn-interactive" onClick={(e)=>{e.preventDefault();e.stopPropagation();setTreeCollapsed(p=>({channels:{...p.channels,[ch]:!p.channels[ch]},statuses:p.statuses}));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                  {treeCollapsed.channels[ch]?"▸":"▾"}
+                </button>
+              </div>
+            </div>
+
+            {!treeCollapsed.channels[ch]&&(
+              <div className="collapse-wrap collapse-in" style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,minmax(0,1fr))",gap:10}}>
+                {statusOrder.filter(st=>byChannel[ch][st]?.length).map((st:string,si:number)=>{
+                  const statusKey=`${ch}:${st}`;
+                  const collapsed=!!treeCollapsed.statuses[statusKey];
+                  return(
+                    <div key={st} style={{borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.02)",padding:"10px 10px 12px",boxShadow:"var(--glass-shadow-accent,none)"}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
+                        <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
+                          <div style={{fontSize:12.5,fontWeight:900,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{STATUS_LABEL[st]||st}</div>
+                          <button className="btn-interactive" onClick={(e)=>{e.preventDefault();e.stopPropagation();setTreeCollapsed(p=>({channels:p.channels,statuses:{...p.statuses,[statusKey]:!p.statuses[statusKey]}}));}} style={{padding:"4px 8px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:900,flexShrink:0}}>
+                            {collapsed?"▸":"▾"}
+                          </button>
+                        </div>
+                        <div style={{fontSize:12,color:"var(--text5)",fontWeight:800}}>{byChannel[ch][st].length}</div>
+                      </div>
+                      {!collapsed&&(
+                        <div className="collapse-wrap collapse-in" style={{display:"flex",flexDirection:"column",gap:8}}>
+                          {byChannel[ch][st].slice(0,isMobile?6:8).map((it:any,ii:number)=>(
+                            <button key={it.id} className="btn-interactive" onClick={()=>setEditId(it.id)} style={{textAlign:"left",padding:"10px 12px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer"}}>
+                              <div style={{fontSize:12.5,fontWeight:900,marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.title||t("untitled","Без названия")}</div>
+                              <div style={{fontSize:11.5,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap",lineHeight:1.4}}>
+                                {it.scheduledDate&&<span>📅 {it.scheduledDate}</span>}
+                                {it.strategyStepTitle&&<span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span>}
+                                {it.brief&&<span style={{opacity:.9}}>{it.brief.slice(0,64)}{it.brief.length>64?"…":""}</span>}
+                              </div>
+                            </button>
+                          ))}
+                          {byChannel[ch][st].length>(isMobile?6:8)&&(
+                            <div style={{fontSize:12,color:"var(--text5)",padding:"2px 6px"}}>{t("content_more","Ещё")}: +{byChannel[ch][st].length-(isMobile?6:8)}</div>
+                          )}
+                        </div>
+                      )}
+                      {collapsed&&(
+                        <div style={{fontSize:12.5,color:"var(--text5)",padding:"2px 6px"}}>{t("content_more","Ещё")}: {byChannel[ch][st].length}</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return(
     <div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
         <div style={{flex:1,fontSize:13,fontWeight:700,color:"var(--text)"}}>✍️ {t("content_plan","Контент-план")}</div>
+        <div style={{display:"flex",gap:6,padding:4,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface2)"}}>
+          <button onClick={()=>setViewMode("tree")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="tree"?"var(--accent-soft)":"transparent",color:viewMode==="tree"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+            🌳 {t("content_view_tree","Дерево")}
+          </button>
+          <button onClick={()=>setViewMode("list")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="list"?"var(--accent-soft)":"transparent",color:viewMode==="list"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+            ≡ {t("content_view_list","Список")}
+          </button>
+        </div>
         {allNodes.length>0&&(
           <button onClick={aiSuggest} disabled={aiSuggesting} style={{padding:"7px 14px",borderRadius:9,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:aiSuggesting?"wait":"pointer",fontSize:13,fontWeight:700}}>
             {aiSuggesting?"…":t("content_ai_suggest","✨ Предложить по стратегии")}
           </button>
         )}
-        <button onClick={()=>setEditId("new")} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add_content_item","+ Публикация")}</button>
+        <button className="btn-interactive" onClick={()=>setEditId("new")} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
       </div>
       <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
         {["all",...CONTENT_STATUSES.map(s=>s.id)].map(s=>(
@@ -5568,27 +6106,31 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
           <button onClick={()=>setEditId("new")} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add_content_item","+ Публикация")}</button>
         </div>
       ):(
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          {filtered.map((it:any,i:number)=>(
-            <div key={it.id} className="glass-card list-item-in" style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",animationDelay:`${i*0.04}s`}}>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:4}}>{it.title||"Без названия"}</div>
-                <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
-                  <span>{t(CONTENT_TYPES.find(x=>x.id===it.type)?.labelKey||"content_type_post")}</span>
-                  <span>·</span>
-                  <span>{t(CONTENT_CHANNELS.find(x=>x.id===it.channel)?.labelKey||"content_channel_blog")}</span>
-                  {it.scheduledDate&&<><span>·</span><span>{it.scheduledDate}</span></>}
-                  {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
+        viewMode==="tree"
+          ? <ContentTree/>
+          : (
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {filtered.map((it:any,i:number)=>(
+                <div key={it.id} className="glass-card list-item-in" style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",animationDelay:`${i*0.04}s`}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:4}}>{it.title||t("untitled","Без названия")}</div>
+                    <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
+                      <span>{t(CONTENT_TYPES.find(x=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+                      <span>·</span>
+                      <span>{t(CONTENT_CHANNELS.find(x=>x.id===it.channel)?.labelKey||"content_channel_blog")}</span>
+                      {it.scheduledDate&&<><span>·</span><span>{it.scheduledDate}</span></>}
+                      {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
+                    </div>
+                  </div>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",border:`1px solid ${it.status==="published"?"rgba(16,185,129,.3)":it.status==="scheduled"?"var(--glass-border-accent,var(--border))":"var(--border)"}`,color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
+                    {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft")}
+                  </div>
+                  <button onClick={()=>setEditId(it.id)} className="btn-interactive" style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:700}}>✏️</button>
+                  <button onClick={()=>removeItem(it.id)} className="btn-interactive" style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:800}}>🗑</button>
                 </div>
-              </div>
-              <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"rgba(99,102,241,.12)":"var(--surface2)",border:`1px solid ${it.status==="published"?"rgba(16,185,129,.3)":it.status==="scheduled"?"rgba(99,102,241,.25)":"var(--border)"}`,color:it.status==="published"?"#10b981":it.status==="scheduled"?"#6366f1":"var(--text3)",fontSize:12,fontWeight:700}}>
-                {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft")}
-              </div>
-              <button onClick={()=>setEditId(it.id)} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600}}>✏️</button>
-              <button onClick={()=>removeItem(it.id)} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+              ))}
             </div>
-          ))}
-        </div>
+          )
       )}
 
       {(editId==="new"||editingItem)&&(
@@ -5660,7 +6202,7 @@ function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
 }
 
 // ── ProjectDetail ──
-function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier}){
+function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier,aiChatMsgs,aiChatSetMsgs}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
   const[maps,setMaps]=useState([]);
@@ -5676,6 +6218,10 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   const[toast,setToast]=useState(null);
   const[delMapId,setDelMapId]=useState<string|null>(null);
   const[delProjConfirm,setDelProjConfirm]=useState(false);
+  const[showNotifs,setShowNotifs]=useState(false);
+  const[notifs,setNotifs]=useState<any[]>([]);
+  const[notifUnread,setNotifUnread]=useState(0);
+  const[notifLoading,setNotifLoading]=useState(false);
   const creatingRef=useRef(false);
 
   const tier=TIERS[user.tier]||TIERS.free;
@@ -5684,6 +6230,24 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   const canEdit=myRole==="owner"||myRole==="editor";
 
   useEffect(()=>{load();},[]);
+
+  async function loadNotifications(){
+    if(!API_BASE)return;
+    setNotifLoading(true);
+    try{
+      const d=await getNotifications();
+      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
+      setNotifUnread(Number(d?.unread||0));
+    }catch{}
+    setNotifLoading(false);
+  }
+  useEffect(()=>{loadNotifications();},[]);
+  useEffect(()=>{
+    if(!showNotifs)return;
+    loadNotifications();
+    const id=setInterval(()=>loadNotifications(),30000);
+    return()=>clearInterval(id);
+  },[showNotifs]);
 
   async function load(){
     setLoading(true);
@@ -5772,6 +6336,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
 
   // Stats
   const allNodes=maps.flatMap(m=>m.nodes||[]);
+  const allEdges=maps.flatMap(m=>m.edges||[]);
   const totalNodes=allNodes.length;
   const doneNodes=allNodes.filter(n=>n.status==="completed").length;
   const avgProgress=totalNodes?Math.round(allNodes.reduce((s,n)=>s+(n.progress||0),0)/totalNodes):0;
@@ -5785,10 +6350,10 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     return(
       <div className="card-stagger card-interactive" style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",position:"relative",animationDelay:`${staggerIndex*0.05}s`,boxShadow:"0 2px 12px rgba(0,0,0,.06)"}}
         onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}
-        onMouseOver={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.5)":"rgba(99,102,241,.35)";e.currentTarget.style.background="var(--card-hover,var(--surface))";e.currentTarget.style.boxShadow="0 12px 32px rgba(0,0,0,.12)";}}
+        onMouseOver={e=>{e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.background="var(--card-hover,var(--surface))";e.currentTarget.style.boxShadow="var(--glass-shadow-accent, none),0 12px 32px rgba(0,0,0,.12)";}}
         onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";e.currentTarget.style.background="var(--card)";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.06)";}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-          <div style={{width:34,height:34,borderRadius:9,background:isSc?"rgba(139,92,246,.15)":"rgba(99,102,241,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,border:`1px solid ${isSc?"rgba(139,92,246,.25)":"rgba(99,102,241,.15)"}`}}>
+          <div style={{width:34,height:34,borderRadius:9,background:"var(--accent-soft)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,border:"1px solid var(--glass-border-accent,var(--border))"}}>
             {isSc?"⎇":"🗺️"}
           </div>
           <div style={{flex:1,minWidth:0}}>
@@ -5805,11 +6370,11 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               <span style={{fontSize:13,fontWeight:700,color:"var(--text4)"}}>{prog}%</span>
             </div>
             <div style={{height:4,borderRadius:2,background:"var(--surface2)",overflow:"hidden"}}>
-              <div style={{height:"100%",borderRadius:2,background:isSc?"#8b5cf6":"#6366f1",width:`${prog}%`,transition:"width .3s"}}/>
+              <div style={{height:"100%",borderRadius:2,background:"var(--gradient-accent)",width:`${prog}%`,transition:"width .3s"}}/>
             </div>
           </div>
         )}
-        {overdue>0&&<div style={{marginTop:7,fontSize:13.5,color:"#ef4444",fontWeight:600}}>⚠ {overdue} просрочено</div>}
+        {overdue>0&&<div style={{marginTop:7,fontSize:13.5,color:"var(--danger,#ef4444)",fontWeight:600}}>⚠ {overdue} просрочено</div>}
       </div>
     );
   }
@@ -5827,7 +6392,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
           <div style={{fontSize:isMobile?12:13,color:"var(--text5)",marginTop:2}}>{regularMaps.length} карт • {scenarios.length} сцен. • {(proj.members||[]).length} уч.</div>
         </div>
         <button onClick={onToggleTheme} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>{theme==="dark"?"☀️":"🌙"}</button>
-        <button onClick={onProfile} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:14,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
+        {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
+        <button onClick={onProfile} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
       </div>
 
       {/* Stats bar */}
@@ -5849,7 +6415,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
 
       {/* Tabs */}
       <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:isMobile?"0 16px":"0 24px",background:"var(--bg2)",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
+        {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],["ai",isMobile?"✦":"✦ "+t("project_ai_tab","AI")],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
           <button key={k} onClick={()=>setTab(k)} style={{padding:isMobile?"12px 14px":"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:isMobile?13:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s",flexShrink:0}}>{lbl}</button>
         ))}
       </div>
@@ -5861,7 +6427,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
               <div style={{flex:1,fontSize:13,fontWeight:700,color:"var(--text)"}}>{t("strategy_maps","Стратегические карты")}</div>
               {canEdit&&tier.templates&&<button onClick={()=>setShowTmpls(true)} style={{padding:"7px 14px",borderRadius:9,border:"1px solid rgba(245,158,11,.25)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:13,fontWeight:700}}>📋 Из шаблона</button>}
-              {canEdit&&<button onClick={()=>createMap()} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Новая карта</button>}
+              {canEdit&&<button className="btn-interactive" onClick={()=>createMap()} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>+ {t("new_map","Новая карта")}</button>}
             </div>
             {loading?(
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:12}}>
@@ -5872,7 +6438,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 <div style={{fontSize:36,marginBottom:10}}>🗺️</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("no_maps","Нет карт")}</div>
                 <div style={{fontSize:13,color:"var(--text5)",marginBottom:16}}>{t("create_first_map","Создайте первую стратегическую карту")}</div>
-                {canEdit&&<button onClick={()=>createMap()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Создать карту</button>}
+                {canEdit&&<button className="btn-interactive" onClick={()=>createMap()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>+ {t("create_map","Создать карту")}</button>}
               </div>
             ):(
               <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(280px,1fr))",gap:isMobile?16:20}}>
@@ -5894,7 +6460,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 tier.scenarios===0?(
                   <button onClick={()=>onChangeTier&&onChangeTier()} style={{padding:"7px 14px",borderRadius:9,border:"1px solid rgba(245,158,11,.25)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:13,fontWeight:700}}>🔒 Pro+</button>
                 ):(
-                  <button onClick={tryCreateScenario} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#8b5cf6,#6366f1)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Новый сценарий</button>
+                  <button className="btn-interactive" onClick={tryCreateScenario} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>+ {t("new_scenario","Новый сценарий")}</button>
                 )
               )}
             </div>
@@ -5903,14 +6469,14 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 <div style={{fontSize:36,marginBottom:10}}>⎇</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("scenarios_pro","Сценарии доступны с Pro")}</div>
                 <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:300,margin:"0 auto 16px"}}>Создавайте альтернативные планы: «Что если потеряем ключевого клиента?» или «Что если вырастем ×3 за год?»</div>
-                {onChangeTier&&<button onClick={onChangeTier} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#8b5cf6,#6366f1)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+                {onChangeTier&&<button className="btn-interactive" onClick={onChangeTier} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
               </div>
             ):scenarios.length===0?(
               <div style={{textAlign:"center",padding:"50px 20px",border:"1px dashed var(--border2)",borderRadius:16}}>
                 <div style={{fontSize:36,marginBottom:10}}>⎇</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("no_scenarios","Нет сценариев")}</div>
                 <div style={{fontSize:13,color:"var(--text5)",marginBottom:16}}>{t("create_first_scenario","Создайте первый сценарий вручную или с помощью AI шаблонов")}</div>
-                {canEdit&&<button onClick={tryCreateScenario} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#8b5cf6,#6366f1)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Создать сценарий</button>}
+                {canEdit&&<button className="btn-interactive" onClick={tryCreateScenario} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>+ {t("create_scenario","Создать сценарий")}</button>}
               </div>
             ):(
               <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:12}}>
@@ -5924,11 +6490,11 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
         {tab==="content"&&(
           <div>
             {!tier.contentPlan?(
-              <div className="glass-card" style={{textAlign:"center",padding:"50px 24px",border:"1px dashed rgba(139,92,246,.25)",borderRadius:16,background:"rgba(139,92,246,.03)"}}>
+              <div className="glass-card" style={{textAlign:"center",padding:"50px 24px",border:"1px dashed var(--glass-border-accent,var(--border2))",borderRadius:16,background:"var(--accent-soft)"}}>
                 <div style={{fontSize:36,marginBottom:10}}>✍️</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_locked_title","Контент-план доступен на Pro")}</div>
                 <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:360,margin:"0 auto 16px"}}>{t("content_plan_pro_only","Приложение использует знания о вашем бизнесе и стратегии для планирования постов.")}</div>
-                {onChangeTier&&<button onClick={onChangeTier} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#8b5cf6,#6366f1)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+                {onChangeTier&&<button className="btn-interactive" onClick={onChangeTier} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
               </div>
             ):(
               <ContentPlanTab projectId={proj.id} projectName={proj.name||"Проект"} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/>
@@ -5936,12 +6502,45 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
           </div>
         )}
 
+        {/* AI Tab */}
+        {tab==="ai"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            <div className="glass-card" style={{padding:"14px 16px",borderRadius:14}}>
+              <div style={{fontSize:14,fontWeight:900,color:"var(--text)",display:"flex",alignItems:"center",gap:10}}>
+                <span style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"var(--accent-on-bg)",boxShadow:"0 2px 12px var(--accent-glow)",fontWeight:900}}>✦</span>
+                {t("project_ai_title","AI по проекту")}
+              </div>
+              <div style={{fontSize:13.5,color:"var(--text5)",marginTop:6}}>
+                {t("project_ai_hint","Один и тот же чат, доступен и в карте. Здесь AI видит контекст всех карт проекта.")}
+              </div>
+            </div>
+            <AiPanel
+              embedded={true}
+              isMobile={isMobile}
+              nodes={allNodes}
+              edges={allEdges}
+              ctx={projCtx||""}
+              tier={user?.tier||"free"}
+              projectName={proj?.name||""}
+              mapName={t("project_scope","Проект")}
+              userName={user?.name||user?.email||""}
+              msgs={aiChatMsgs||[]}
+              onMsgsChange={aiChatSetMsgs||(()=>{})}
+              onAddNode={()=>{}}
+              onClose={()=>{}}
+              externalMsgs={[]}
+              onClearExternal={()=>{}}
+              onError={(msg)=>setToast({msg,type:"error"})}
+            />
+          </div>
+        )}
+
         {/* Team Tab */}
         {tab==="team"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             {(proj.members||[]).map(m=>(
-              <div key={m.email} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)"}}>
-                <div style={{width:34,height:34,borderRadius:"50%",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"#fff",fontWeight:800,flexShrink:0}}>{(m.email||"?")[0].toUpperCase()}</div>
+              <div key={m.email} className="glass-card" style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderRadius:12}}>
+                <div style={{width:34,height:34,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,flexShrink:0,boxShadow:"0 2px 10px var(--accent-glow)"}}>{(m.email||"?")[0].toUpperCase()}</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.email}</div>
                   <div style={{fontSize:13.5,color:"var(--text5)"}}>{m.role==="owner"?t("role_owner","Владелец"):m.role==="editor"?t("role_editor","Редактор"):t("observer","Наблюдатель")}</div>
@@ -5958,13 +6557,13 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               </div>
             ))}
             {isOwner&&(proj.members||[]).length<tier.users&&(
-              <div style={{display:"flex",gap:9,padding:"12px 16px",borderRadius:12,border:"1px dashed var(--border2)",background:"var(--surface)"}}>
+              <div className="glass-card" style={{display:"flex",gap:9,padding:"12px 16px",borderRadius:12,border:"1px dashed var(--glass-border-accent,var(--border2))"}}>
                 <input value={newMember} onChange={e=>setNewMember(e.target.value)} placeholder="Email участника" onKeyDown={e=>{if(e.key==="Enter")addMember();}} style={{flex:1,padding:"8px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:13,outline:"none"}}/>
                 <select value={nmRole} onChange={e=>setNmRole(e.target.value)} style={{padding:"8px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface2)",color:"var(--text)",fontSize:13}}>
                   <option value="editor">{t("role_editor","Редактор")}</option>
                   <option value="viewer">{t("observer","Наблюдатель")}</option>
                 </select>
-                <button onClick={addMember} style={{padding:"8px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add","Добавить")}</button>
+                <button className="btn-interactive" onClick={addMember} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add","Добавить")}</button>
               </div>
             )}
             {(proj.members||[]).length>=tier.users&&<div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",padding:"8px",borderRadius:8,border:"1px dashed var(--border2)"}}>{t("member_limit","Лимит участников для {plan}: {n}.").replace("{plan}",tier.label).replace("{n}",String(tier.users))} <span onClick={onChangeTier} style={{color:"var(--accent-2)",cursor:"pointer",fontWeight:700}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</span></div>}
@@ -5985,7 +6584,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                   <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{TIERS[user.tier]?.label||"Free"}</div>
                   <div style={{fontSize:13,color:"var(--text5)"}}>до {fmt(tier.maps)} карт • {fmt(tier.scenarios)} сценариев • {fmt(tier.users)} участников</div>
                 </div>
-                {onChangeTier&&<button onClick={onChangeTier} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("upgrade_plan","Улучшить")}</button>}
+                {onChangeTier&&<button className="btn-interactive" onClick={onChangeTier} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("upgrade_plan","Улучшить")}</button>}
               </div>
             </div>
             {isOwner&&(
@@ -6001,20 +6600,93 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       {delMapId&&<ConfirmDialog title={t("confirm_delete_map","Удалить карту?")} message={t("confirm_delete_map_desc","Карта будет удалена без возможности восстановления.")} confirmLabel={t("delete","Удалить")} onConfirm={doDelMap} onCancel={()=>setDelMapId(null)} danger={true}/>}
       {delProjConfirm&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message={t("confirm_delete_proj","Все карты и данные проекта будут удалены безвозвратно.")} confirmLabel={t("delete","Удалить")} onConfirm={async()=>{await deleteProject(proj.id);setDelProjConfirm(false);onBack();}} onCancel={()=>setDelProjConfirm(false)} danger={true}/>}
 
+      {showNotifs&&(
+        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:220,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowNotifs(false);}}>
+          <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,560px)",maxHeight:isMobile?"78vh":"80vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
+            <div style={{padding:"16px 18px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--text4)",fontWeight:900}}>N</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
+                <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
+              </div>
+              <button className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                {t("notif_read_all","Прочитать все")}
+              </button>
+              <button onClick={()=>setShowNotifs(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+            </div>
+            <div style={{padding:"10px 12px",overflow:"auto"}}>
+              {notifLoading&&notifs.length===0?(
+                <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
+              ):notifs.length===0?(
+                <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
+              ):(
+                <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  {notifs.map((n:any)=>(
+                    <div key={n.id} className="glass-card" style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${n.is_read?"var(--border)":"var(--glass-border-accent,var(--border))"}`,background:"var(--surface)"}}>
+                      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                        <div style={{width:10,height:10,borderRadius:"50%",marginTop:6,background:n.is_read?"var(--border2)":"var(--accent-1)",boxShadow:n.is_read?"none":"0 0 0 3px var(--accent-soft)"}}/>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.title||t("notification","Уведомление")}</div>
+                          {n.body&&<div style={{fontSize:12.8,color:"var(--text4)",lineHeight:1.45,whiteSpace:"pre-wrap"}}>{n.body}</div>}
+                          <div style={{fontSize:12,color:"var(--text6)",marginTop:8,display:"flex",gap:10,flexWrap:"wrap"}}>
+                            <span>{n.created_at?new Date(n.created_at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"—"}</span>
+                            {n.type&&<span>· {String(n.type)}</span>}
+                          </div>
+                        </div>
+                        <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
+                          {!n.is_read&&(
+                            <button className="btn-interactive" onClick={async()=>{await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                              ✓
+                            </button>
+                          )}
+                          <button className="btn-interactive" onClick={async()=>{await deleteNotification(n.id);setNotifs(xs=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
+                            ×
+                          </button>
+                          {n.link&&(
+                            <button className="btn-interactive" onClick={async()=>{
+                              if(!n.is_read){await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}
+                              try{
+                                const u=new URL(n.link,window.location.origin);
+                                const open=(u.searchParams.get("open")||"").toLowerCase();
+                                const projectId=u.searchParams.get("projectId")||"";
+                                const mapId=u.searchParams.get("mapId")||"";
+                                const nodeId=u.searchParams.get("nodeId")||"";
+                                if(open==="map"&&projectId&&mapId&&projectId===proj.id){
+                                  setShowNotifs(false);
+                                  onOpenMap({id:mapId},proj,false,false,nodeId||null);
+                                  return;
+                                }
+                              }catch{}
+                              window.location.href=n.link;
+                            }} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:900}}>
+                              ↗
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Scenario choice modal */}
       {showScChoice&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:160,backdropFilter:"blur(10px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)setShowScChoice(false);}}>
-          <div style={{width:"min(95vw,460px)",background:"var(--bg2)",borderRadius:22,border:"1px solid rgba(139,92,246,.25)",overflow:"hidden",boxShadow:"0 40px 80px rgba(0,0,0,.8)",animation:"scaleIn .2s ease"}}>
+        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:160,backdropFilter:"blur(14px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)setShowScChoice(false);}}>
+          <div className="glass-panel" style={{width:"min(95vw,460px)",borderRadius:22,border:"1px solid var(--glass-border-accent,var(--border))",overflow:"hidden",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.6)",animation:"scaleIn .2s ease"}}>
             <div style={{padding:"18px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:30,height:30,borderRadius:8,background:"linear-gradient(135deg,#8b5cf6,#6366f1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>⎇</div>
+              <div style={{width:30,height:30,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>⎇</div>
               <div style={{fontSize:14,fontWeight:800,color:"var(--text)",flex:1}}>{t("new_scenario","Новый сценарий")}</div>
               <button onClick={()=>setShowScChoice(false)} style={{width:26,height:26,borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
             </div>
             <div style={{padding:"18px 20px",display:"flex",flexDirection:"column",gap:10}}>
-              <button onClick={createBlankScenario} style={{padding:"16px 18px",borderRadius:14,border:"1px solid rgba(99,102,241,.25)",background:"rgba(99,102,241,.06)",textAlign:"left",cursor:"pointer",display:"flex",gap:14,alignItems:"center",transition:"all .2s"}}
-                onMouseOver={e=>{e.currentTarget.style.background="rgba(99,102,241,.12)";e.currentTarget.style.borderColor="rgba(99,102,241,.5)";}}
-                onMouseOut={e=>{e.currentTarget.style.background="rgba(99,102,241,.06)";e.currentTarget.style.borderColor="rgba(99,102,241,.25)";}}>
-                <div style={{width:40,height:40,borderRadius:10,background:"rgba(99,102,241,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>✏️</div>
+              <button onClick={createBlankScenario} className="btn-interactive" style={{padding:"16px 18px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",textAlign:"left",cursor:"pointer",display:"flex",gap:14,alignItems:"center",transition:"all .2s"}}
+                onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";}}
+                onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--glass-border-accent,var(--border))";}}>
+                <div style={{width:40,height:40,borderRadius:10,background:"var(--accent-soft)",border:"1px solid var(--glass-border-accent,var(--border))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>✏️</div>
                 <div>
                   <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:3}}>{t("empty_scenario","Пустой сценарий")}</div>
                   <div style={{fontSize:13.5,color:"var(--text4)"}}>{t("start_ai_interview","Начать с чистой карты и AI-интервью")}</div>
@@ -6235,7 +6907,7 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
       <div style={{width:"min(95vw,860px)",maxHeight:"90vh",margin:"auto",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.7)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
-          <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#8b5cf6,#6366f1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15}}>⎇</div>
+          <div style={{width:32,height:32,borderRadius:9,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>⎇</div>
           <div style={{flex:1}}>
             <div style={{fontSize:14.5,fontWeight:900,color:"var(--text)"}}>{t("scenario_templates","Шаблоны сценариев")}</div>
             <div style={{fontSize:13.5,color:"var(--text4)"}}>AI сгенерирует стратегическую карту под ваш контекст</div>
@@ -6283,11 +6955,11 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
                   </div>
                 ))}
                 {error&&<div style={{padding:"9px 12px",borderRadius:9,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#ef4444",fontSize:13}}>{error}</div>}
-                <button onClick={build} disabled={generating} style={{padding:"11px",borderRadius:11,border:"none",background:generating?"var(--surface2)":"linear-gradient(135deg,#6366f1,#8b5cf6)",color:generating?"var(--text4)":"#fff",cursor:generating?"wait":"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                  <button onClick={build} disabled={generating} className="btn-interactive" style={{padding:"11px",borderRadius:11,border:"none",background:generating?"var(--surface2)":"var(--gradient-accent)",color:generating?"var(--text4)":"var(--accent-on-bg)",cursor:generating?"wait":"pointer",fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:generating?"none":"0 2px 14px var(--accent-glow)"}}>
                   {generating?(
-                    <><div style={{display:"flex",gap:3}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"#6366f1",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>AI генерирует карту…</>
+                      <><div style={{display:"flex",gap:3}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>{t("ai_generating_map","AI генерирует карту…")}</>
                   ):(
-                    <>✦ Создать сценарий</>
+                      <>✦ {t("create_scenario","Создать сценарий")}</>
                   )}
                 </button>
               </div>
@@ -6323,8 +6995,8 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
             const locked=!canUse;
             return(
               <div key={tmpl.id} onClick={()=>!locked&&setSelected(tmpl.id===selected?null:tmpl.id)}
-                style={{padding:"16px",borderRadius:14,border:`2px solid ${selected===tmpl.id?"#6366f1":locked?"var(--border)":"var(--border)"}`,background:selected===tmpl.id?"rgba(99,102,241,.08)":locked?"var(--surface)":"var(--card)",cursor:locked?"not-allowed":"pointer",transition:"all .2s",opacity:locked?.5:1}}
-                onMouseOver={e=>{if(!locked)e.currentTarget.style.borderColor="#6366f1cc";}}
+                style={{padding:"16px",borderRadius:14,border:`2px solid ${selected===tmpl.id?"var(--accent-1)":locked?"var(--border)":"var(--border)"}`,background:selected===tmpl.id?"var(--accent-soft)":locked?"var(--surface)":"var(--card)",cursor:locked?"not-allowed":"pointer",transition:"all .2s",opacity:locked?.5:1}}
+                onMouseOver={e=>{if(!locked)e.currentTarget.style.borderColor="var(--accent-1)";}}
                 onMouseOut={e=>{if(selected!==tmpl.id)e.currentTarget.style.borderColor="var(--border)";}}>
                 <div style={{fontSize:22,marginBottom:8}}>{tmpl.name.split(" ")[0]}</div>
                 <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",marginBottom:4}}>{tmpl.name.split(" ").slice(1).join(" ")}</div>
@@ -6333,15 +7005,15 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
                   <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{tmpl.nodes.length} шагов</div>
                   <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{tmpl.edges.length} связей</div>
                 </div>
-                {locked&&<div style={{marginTop:6,fontSize:13,color:"#f59e0b",fontWeight:600}}>🔒 Team+</div>}
+                {locked&&<div style={{marginTop:6,fontSize:13,color:"#f59e0b",fontWeight:700}}>🔒 Team+</div>}
               </div>
             );
           })}
         </div>
         <div style={{padding:"14px 22px",borderTop:"1px solid var(--border)",display:"flex",gap:10,justifyContent:"flex-end"}}>
           <button onClick={onClose} style={{padding:"9px 18px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("cancel","Отмена")}</button>
-          <button onClick={()=>{if(selected){const tmpl=TEMPLATES.find(x=>x.id===selected);if(tmpl)onSelect(tmpl);}else{onSelect(null);}}} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>
-            {selected?"Использовать шаблон":"Начать с нуля"}
+          <button className="btn-interactive" onClick={()=>{if(selected){const tmpl=TEMPLATES.find(x=>x.id===selected);if(tmpl)onSelect(tmpl);}else{onSelect(null);}}} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 14px var(--accent-glow)"}}>
+            {selected?t("use_template","Использовать шаблон"):t("start_from_scratch","Начать с нуля")}
           </button>
         </div>
       </div>
@@ -6376,24 +7048,24 @@ function MapTour({onDone}){
   return(
     <div style={{position:"fixed",inset:0,zIndex:9999,pointerEvents:"none"}}>
       <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.45)",backdropFilter:"blur(3px)",pointerEvents:"all"}} onClick={()=>isLast?onDone():setStep(st=>st+1)}/>
-      <div style={{position:"absolute",bottom:"50%",left:"50%",transform:"translate(-50%,50%)",width:400,background:"linear-gradient(135deg,#0d1525,#111827)",borderRadius:22,border:"1px solid rgba(99,102,241,.4)",boxShadow:"0 32px 80px rgba(0,0,0,.8),0 0 0 1px rgba(99,102,241,.15)",padding:"26px 28px",pointerEvents:"all",animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)",zIndex:10000}}>
+      <div className="glass-panel" style={{position:"absolute",bottom:"50%",left:"50%",transform:"translate(-50%,50%)",width:400,borderRadius:22,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 32px 80px rgba(0,0,0,.6)",padding:"26px 28px",pointerEvents:"all",animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)",zIndex:10000}}>
         {/* Progress */}
         <div style={{display:"flex",gap:4,marginBottom:20}}>
           {TOUR_STEPS.map((_,i)=>(
-            <div key={i} onClick={()=>setStep(i)} style={{flex:i===step?3:1,height:3,borderRadius:2,background:i===step?"#6366f1":i<step?"rgba(99,102,241,.5)":"rgba(255,255,255,.1)",cursor:"pointer",transition:"all .3s"}}/>
+            <div key={i} onClick={()=>setStep(i)} style={{flex:i===step?3:1,height:3,borderRadius:2,background:i===step?"var(--accent-1)":i<step?"rgba(99,102,241,.5)":"var(--border)",cursor:"pointer",transition:"all .3s"}}/>
           ))}
         </div>
         <div style={{fontSize:32,marginBottom:14,textAlign:"center"}}>{s.icon}</div>
-        <div style={{fontSize:15,fontWeight:900,color:"#e2e8f0",textAlign:"center",marginBottom:10}}>{s.title}</div>
-        <div style={{fontSize:13,color:"#94a3b8",lineHeight:1.75,textAlign:"center",marginBottom:22}}>{s.body}</div>
+        <div style={{fontSize:15,fontWeight:900,color:"var(--text)",textAlign:"center",marginBottom:10}}>{s.title}</div>
+        <div style={{fontSize:13,color:"var(--text3)",lineHeight:1.75,textAlign:"center",marginBottom:22}}>{s.body}</div>
         <div style={{display:"flex",gap:9,justifyContent:"center"}}>
-          {step>0&&<button onClick={e=>{e.stopPropagation();setStep(st=>st-1);}} style={{padding:"9px 18px",borderRadius:10,border:"1px solid rgba(255,255,255,.1)",background:"rgba(255,255,255,.04)",color:"#94a3b8",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>}
-          <button onClick={e=>{e.stopPropagation();isLast?onDone():setStep(st=>st+1);}} style={{padding:"9px 22px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700}}>
-            {isLast?"Начать работу ✓":"Далее →"}
+          {step>0&&<button className="btn-interactive" onClick={e=>{e.stopPropagation();setStep(st=>st-1);}} style={{padding:"9px 18px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800}}>{t("back_btn","← Назад")}</button>}
+          <button className="btn-interactive" onClick={e=>{e.stopPropagation();isLast?onDone():setStep(st=>st+1);}} style={{padding:"9px 22px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 14px var(--accent-glow)"}}>
+            {isLast?t("tour_start_work","Начать работу ✓"):t("next","Далее →")}
           </button>
-          <button onClick={e=>{e.stopPropagation();onDone();}} style={{padding:"9px 14px",borderRadius:10,border:"1px solid rgba(255,255,255,.08)",background:"transparent",color:"#475569",cursor:"pointer",fontSize:13}}>{t("skip","Пропустить")}</button>
+          <button className="btn-interactive" onClick={e=>{e.stopPropagation();onDone();}} style={{padding:"9px 14px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text4)",cursor:"pointer",fontSize:13,fontWeight:800}}>{t("skip","Пропустить")}</button>
         </div>
-        <div style={{textAlign:"center",marginTop:12,fontSize:13.5,color:"var(--text4)"}}>← → или пробел для навигации • Esc — закрыть</div>
+        <div style={{textAlign:"center",marginTop:12,fontSize:13.5,color:"var(--text4)"}}>{t("tour_nav_hint","← → или пробел для навигации • Esc — закрыть")}</div>
       </div>
     </div>
   );
@@ -6667,7 +7339,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
             <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",marginBottom:6}}>✦ Спросить AI</div>
             <div style={{display:"flex",gap:6}}>
               <input value={aiInp} onChange={e=>setAiInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")askAI();}} placeholder="Вопрос о симуляции…" style={{flex:1,padding:"7px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
-              <button onClick={askAI} disabled={!aiInp.trim()||aiLoad} style={{width:30,height:30,borderRadius:8,border:"none",background:aiInp.trim()&&!aiLoad?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface)",color:aiInp.trim()&&!aiLoad?"#fff":"var(--text4)",cursor:aiInp.trim()&&!aiLoad?"pointer":"not-allowed",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>↑</button>
+              <button onClick={askAI} disabled={!aiInp.trim()||aiLoad} className="btn-interactive" style={{width:30,height:30,borderRadius:8,border:"none",background:aiInp.trim()&&!aiLoad?"var(--gradient-accent)":"var(--surface)",color:aiInp.trim()&&!aiLoad?"var(--accent-on-bg)":"var(--text4)",cursor:aiInp.trim()&&!aiLoad?"pointer":"not-allowed",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:aiInp.trim()&&!aiLoad?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>
             </div>
           </div>
         </div>
@@ -6752,7 +7424,7 @@ ${mapHint} X:150–900, Y:80–520.`;
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",display:"flex",flexDirection:"column",zIndex:250,backdropFilter:"blur(20px)",animation:"fadeIn .2s ease"}}>
       <style>{CSS}</style>
       <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
-        <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div>
+        <div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>✦</div>
         <div style={{flex:1}}>
           <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>AI создаёт карту · {project?.name}</div>
           <div style={{height:3,borderRadius:2,background:"var(--surface2)",marginTop:4,overflow:"hidden"}}>
@@ -6764,11 +7436,11 @@ ${mapHint} X:150–900, Y:80–520.`;
       <div style={{flex:1,overflowY:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:12,maxWidth:680,margin:"0 auto",width:"100%"}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10}}>
-            {m.role==="ai"&&<div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
+            {m.role==="ai"&&<div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,flexShrink:0,marginTop:2,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div>}
             <div style={{maxWidth:"80%",padding:"10px 14px",borderRadius:m.role==="user"?"12px 12px 3px 12px":"3px 12px 12px 12px",background:m.role==="user"?"rgba(99,102,241,.18)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(99,102,241,.3)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>{m.text}</div>
           </div>
         ))}
-        {(loading||generating)&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:26,height:26,borderRadius:7,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 12px 12px 12px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"#6366f1",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
+        {(loading||generating)&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 12px 12px 12px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
       {mapGenFailed&&(
@@ -6780,8 +7452,8 @@ ${mapHint} X:150–900, Y:80–520.`;
       {!generating&&!mapGenFailed&&(
         <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,maxWidth:680,margin:"0 auto",width:"100%"}}>
           <input ref={inputRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}} placeholder="Ваш ответ…" style={{flex:1,padding:"11px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"inherit"}} disabled={loading}/>
-          <button onClick={submit} disabled={!inp.trim()||loading} style={{padding:"11px 22px",borderRadius:12,border:"none",background:inp.trim()&&!loading?"linear-gradient(135deg,#6366f1,#8b5cf6)":"var(--surface)",color:inp.trim()&&!loading?"#fff":"var(--text4)",fontSize:14,fontWeight:700,cursor:inp.trim()&&!loading?"pointer":"not-allowed"}}>
-            {qCount>=MAX_Q?"Создать ✦":"Ответить →"}
+          <button onClick={submit} disabled={!inp.trim()||loading} className="btn-interactive" style={{padding:"11px 22px",borderRadius:12,border:"none",background:inp.trim()&&!loading?"var(--gradient-accent)":"var(--surface)",color:inp.trim()&&!loading?"var(--accent-on-bg)":"var(--text4)",fontSize:14,fontWeight:900,cursor:inp.trim()&&!loading?"pointer":"not-allowed",boxShadow:inp.trim()&&!loading?"0 4px 18px var(--accent-glow)":"none"}}>
+            {qCount>=MAX_Q?t("create","Создать")+" ✦":t("answer","Ответить")+" →"}
           </button>
         </div>
       )}
@@ -7511,6 +8183,7 @@ export default function App(){
   const[mapData,setMapData]=useState(null);
   const[mapIsNew,setMapIsNew]=useState(false);
   const[mapReadOnly,setMapReadOnly]=useState(false);
+  const[mapFocusNodeId,setMapFocusNodeId]=useState<string|null>(null);
   const[sharedMapData,setSharedMapData]=useState(null);
   const[showAuth,setShowAuth]=useState(false);
   const[authTab,setAuthTab]=useState("login");
@@ -7522,6 +8195,28 @@ export default function App(){
   const[loadError,setLoadError]=useState<string|null>(null);
   const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
+
+  // ── Global AI chat (единый диалог на всё приложение) ──
+  const aiChatKey=`sa_ai_chat_${user?.email||"guest"}`;
+  const[aiChatMsgs,setAiChatMsgs]=useState<any[]>(()=>{
+    try{const s=localStorage.getItem(aiChatKey);if(s){const j=JSON.parse(s);return Array.isArray(j)?j:[];}}catch{}
+    return [];
+  });
+  // При смене пользователя перечитываем его историю чата
+  useEffect(()=>{
+    try{
+      const s=localStorage.getItem(aiChatKey);
+      if(s){const j=JSON.parse(s);setAiChatMsgs(Array.isArray(j)?j:[]);}
+      else setAiChatMsgs([]);
+    }catch{setAiChatMsgs([]);}
+  },[aiChatKey]);
+  // Сохраняем историю чата постоянно (debounce)
+  useEffect(()=>{
+    try{
+      const t=setTimeout(()=>{localStorage.setItem(aiChatKey,JSON.stringify(aiChatMsgs||[]));},250);
+      return()=>clearTimeout(t);
+    }catch{}
+  },[aiChatKey,aiChatMsgs]);
   // Синхронизация темы и палитры из профиля пользователя (при загрузке с API и после сохранения)
   useEffect(()=>{
     if(!user?.theme&&!user?.palette)return;
@@ -7546,13 +8241,61 @@ export default function App(){
     try{const L=(LANGS as any);return(L[lang]||L.ru)?.[k]||fb||k;}catch{return fb||k;}
   };
 
-  useEffect(()=>{
-    (async()=>{
-      try{
+  const initRunningRef=useRef(false);
+  const pendingDeepLinkRef=useRef<any>(null);
+
+  async function openDeepLink(dl:any, userObj:any){
+    try{
+      if(!dl||!userObj?.email)return false;
+      if(!API_BASE)return false;
+      const ps=await getProjects(userObj.email);
+      const p=ps.find((x:any)=>x.id===dl.projectId);
+      if(!p)return false;
+      if(dl.open==="projects"){
+        setScreen("projects");
+        return true;
+      }
+      if(dl.open==="project"){
+        setProject(p);setScreen("project");
+        return true;
+      }
+      if(dl.open==="map"){
+        const ms=await getMaps(p.id);
+        const m=ms.find((x:any)=>x.id===dl.mapId);
+        if(!m)return false;
+        setProject(p);
+        setMapData(m);
+        setMapIsNew(false);
+        setMapReadOnly(false);
+        setMapFocusNodeId(dl.nodeId||null);
+        setScreen("map");
+        try{
+          localStorage.setItem("sa_last_project",JSON.stringify({id:p.id,name:p.name}));
+          localStorage.setItem("sa_last_map",JSON.stringify({id:m.id,name:m.name}));
+        }catch{}
+        return true;
+      }
+    }catch{}
+    return false;
+  }
+
+  async function initApp(){
+    if(initRunningRef.current)return;
+    initRunningRef.current=true;
+    try{
       setLoadError(null);
-      // Проверяем share-ссылку в URL (поддерживаем и hash и query param)
+      // Проверяем share-ссылку и deep-link в URL (поддерживаем query)
       const searchParams=new URLSearchParams(window.location.search);
       const shareFromQuery=searchParams.get("share");
+      const openParam=(searchParams.get("open")||"").toLowerCase(); // projects | project | map
+      const dlProjectId=searchParams.get("projectId")||"";
+      const dlMapId=searchParams.get("mapId")||"";
+      const dlNodeId=searchParams.get("nodeId")||"";
+      if(openParam==="projects"){
+        pendingDeepLinkRef.current={open:openParam};
+      } else if((openParam==="project"||openParam==="map")&&dlProjectId){
+        pendingDeepLinkRef.current={open:openParam,projectId:dlProjectId,mapId:dlMapId,nodeId:dlNodeId};
+      }
       const hash=typeof window!=="undefined"?window.location.hash:"";
       const shareFromHash=hash.startsWith("#share=")?hash.slice(7).replace(/\?.*/,"").trim():"";
       const shareId=shareFromQuery||shareFromHash;
@@ -7599,10 +8342,21 @@ export default function App(){
           try{
             const d=await apiFetch("/api/auth/me");
             if(d.user){
-              setUser(normalizeUser(d.user));
+              const uNorm=normalizeUser(d.user);
+              setUser(uNorm);
               if(paymentStatus==="success"){
                 setPaymentToast(true);
                 setTimeout(()=>setPaymentToast(false),4000);
+              }
+              // Если в URL был deep-link — пробуем открыть сразу после login
+              if(pendingDeepLinkRef.current){
+                const ok=await openDeepLink(pendingDeepLinkRef.current,uNorm);
+                if(ok){
+                  pendingDeepLinkRef.current=null;
+                  window.history.replaceState({},"",window.location.pathname);
+                  setAuthChecked(true);
+                  return;
+                }
               }
               setScreen("projects");setAuthChecked(true);return;
             }
@@ -7611,23 +8365,28 @@ export default function App(){
           }
         }
       } else {
-        const sess=await getSession();
-        if(sess?.email){
-          const accs=await store.get("sa_acc")||[];
-          const u=(accs as any[]).find((a:any)=>a.email===sess.email);
-          if(u){
-            const merged={...u,theme:u.theme||(typeof localStorage!=="undefined"?localStorage.getItem("sa_theme"):null)||"dark",palette:u.palette||(typeof localStorage!=="undefined"?localStorage.getItem("sa_palette"):null)||"indigo"};
-            setUser(merged);setScreen("projects");setAuthChecked(true);return;
+        try{
+          const sess=await getSession();
+          if(sess?.email){
+            const accs=await store.get("sa_acc")||[];
+            const u=(accs as any[]).find((a:any)=>a.email===sess.email);
+            if(u){
+              const merged={...u,theme:u.theme||(typeof localStorage!=="undefined"?localStorage.getItem("sa_theme"):null)||"dark",palette:u.palette||(typeof localStorage!=="undefined"?localStorage.getItem("sa_palette"):null)||"indigo"};
+              setUser(merged);setScreen("projects");setAuthChecked(true);return;
+            }
           }
-        }
+        }catch{}
       }
       setScreen("landing");setAuthChecked(true);
-      }catch(e:any){
-        setLoadError(e?.message||"Не удалось загрузить данные");
-        setAuthChecked(true);
-      }
-    })();
-  },[]);
+    }catch(e:any){
+      setLoadError(e?.message||"Не удалось загрузить данные");
+      setAuthChecked(true);
+    }finally{
+      initRunningRef.current=false;
+    }
+  }
+
+  useEffect(()=>{initApp();},[]);
 
   // Глобальный обработчик истёкшей сессии
   useEffect(()=>{
@@ -7655,6 +8414,7 @@ export default function App(){
   async function onLogout(){
     await clearSession();
     setUser(null);setProject(null);setMapData(null);
+    setAiChatMsgs([]);
     setScreen("landing");
   }
 
@@ -7663,11 +8423,11 @@ export default function App(){
     try{localStorage.setItem("sa_last_project",JSON.stringify({id:p.id,name:p.name}));localStorage.removeItem("sa_last_map");}catch{}
   }
 
-  async function onOpenMap(map,proj,isNew,readOnlyMap=false){
+  async function onOpenMap(map,proj,isNew,readOnlyMap=false,focusNodeId:string|null=null){
     setProject(proj);
     const fresh=await getMaps(proj.id);
     const m=fresh.find(x=>x.id===map.id)||map;
-    setMapData(m);setMapIsNew(isNew||false);setMapReadOnly(readOnlyMap);setScreen("map");
+    setMapData(m);setMapIsNew(isNew||false);setMapReadOnly(readOnlyMap);setMapFocusNodeId(focusNodeId);setScreen("map");
     try{localStorage.setItem("sa_last_project",JSON.stringify({id:proj.id,name:proj.name}));localStorage.setItem("sa_last_map",JSON.stringify({id:m.id,name:m.name}));}catch{}
   }
 
@@ -7722,7 +8482,10 @@ export default function App(){
       <div data-theme={theme} data-palette={palette} className="screen-enter" style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:20}}>
         <style>{CSS}</style>
         <div style={{fontSize:18,fontWeight:700,color:"var(--text)",textAlign:"center"}}>{loadError}</div>
-        <button className="btn-interactive" onClick={()=>{setLoadError(null);window.location.reload();}} style={{padding:"14px 28px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px var(--accent-glow)",transition:"transform .2s ease, box-shadow .25s ease"}}>{t("retry","Повторить")}</button>
+        <button className="btn-interactive" onClick={()=>{setLoadError(null);initApp();}} style={{padding:"14px 28px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px var(--accent-glow)",transition:"transform .2s ease, box-shadow .25s ease"}}>{t("retry","Повторить")}</button>
+        <div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",maxWidth:520,lineHeight:1.5}}>
+          {t("load_error_hint","Если это происходит снова — проверьте подключение к интернету и доступность API. В офлайн‑режиме можно войти в демо‑аккаунт без сервера.")}
+        </div>
       </div>
     </LangCtx.Provider>
   );
@@ -7742,6 +8505,8 @@ export default function App(){
             onBack={()=>{setSharedMapData(null);setScreen("landing");if(typeof window!=="undefined")window.history.replaceState("","",window.location.pathname);}}
             onProfile={()=>{}}
             onToggleTheme={toggleTheme}
+            aiChatMsgs={aiChatMsgs}
+            aiChatSetMsgs={setAiChatMsgs}
           />
         )}
         {screen==="welcome"&&(
@@ -7762,6 +8527,8 @@ export default function App(){
               onChangeTier={(t:string)=>onChangeTier(t)}
               onProfile={()=>setShowProfile(true)}
               onToggleTheme={toggleTheme}
+              aiChatMsgs={aiChatMsgs}
+              aiChatSetMsgs={setAiChatMsgs}
             />
             {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={(u:any)=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
           </div>
@@ -7775,6 +8542,8 @@ export default function App(){
               onProfile={()=>setShowProfile(true)}
               onToggleTheme={toggleTheme}
               onChangeTier={onChangeTier}
+              aiChatMsgs={aiChatMsgs}
+              aiChatSetMsgs={setAiChatMsgs}
             />
             {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
           </div>
@@ -7787,6 +8556,9 @@ export default function App(){
               onBack={()=>setScreen("project")}
               onProfile={()=>setShowProfile(true)}
               onToggleTheme={toggleTheme}
+              aiChatMsgs={aiChatMsgs}
+              aiChatSetMsgs={setAiChatMsgs}
+              focusNodeId={mapFocusNodeId}
             />
             {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={u=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
           </div>

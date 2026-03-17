@@ -172,8 +172,9 @@ router.put('/:projectId/maps/:mapId', requireAuth, async (req, res, next) => {
       for (const email of recipientEmails) {
         createNotification(email, {
           type: 'info',
-          title: `✏️ Карта обновлена`,
+          title: `Карта обновлена`,
           body: `${req.user.name || req.user.email} обновил карту «${mapName}» в проекте «${projName}»`,
+          link: `/?open=map&projectId=${req.params.projectId}&mapId=${req.params.mapId}`,
         }).catch(() => {});
       }
     }

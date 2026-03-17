@@ -11,6 +11,19 @@ const TIER_LIMITS = {
   enterprise: { projects: Infinity },
 };
 
+// Доступность фич по тарифу
+const CONTENT_PLAN_TIERS = new Set(['pro', 'team', 'enterprise']);
+
+// Проверка доступа к проекту (owner/editor/viewer)
+async function getProjectAccess(projectId, userEmail) {
+  const { rows } = await pool.query('SELECT * FROM projects WHERE id = $1', [projectId]);
+  if (!rows[0]) return { project: null, role: null };
+  const project = rows[0];
+  if (project.owner_email === userEmail) return { project, role: 'owner' };
+  const member = (project.members || []).find(m => m.email === userEmail);
+  return { project, role: member?.role || null };
+}
+
 // GET /api/projects — все проекты пользователя (owner + member)
 router.get('/', requireAuth, async (req, res, next) => {
   try {
@@ -66,6 +79,57 @@ router.get('/:projectId', requireAuth, async (req, res, next) => {
     if (!isOwner && !isMember) return res.status(403).json({ error: 'Нет доступа' });
 
     res.json({ project });
+  } catch (err) { next(err); }
+});
+
+// GET /api/projects/:projectId/content-plan — контент-план проекта (Pro+)
+router.get('/:projectId/content-plan', requireAuth, async (req, res, next) => {
+  try {
+    const { project, role } = await getProjectAccess(req.params.projectId, req.user.email);
+    if (!project) return res.status(404).json({ error: 'Проект не найден' });
+    if (!role) return res.status(403).json({ error: 'Нет доступа' });
+
+    const tier = req.user.tier || 'free';
+    if (!CONTENT_PLAN_TIERS.has(tier)) {
+      return res.status(403).json({ error: 'Контент-план доступен с тарифа Pro', code: 'CONTENT_PLAN_TIER' });
+    }
+
+    const { rows } = await pool.query(
+      'SELECT items FROM project_content_plans WHERE project_id = $1',
+      [req.params.projectId]
+    );
+    const items = rows[0]?.items || [];
+    res.json({ items });
+  } catch (err) { next(err); }
+});
+
+// PUT /api/projects/:projectId/content-plan — сохранить контент-план (owner/editor)
+router.put('/:projectId/content-plan', requireAuth, async (req, res, next) => {
+  try {
+    const { project, role } = await getProjectAccess(req.params.projectId, req.user.email);
+    if (!project) return res.status(404).json({ error: 'Проект не найден' });
+    if (!role || role === 'viewer') return res.status(403).json({ error: 'Нет прав для сохранения' });
+
+    const tier = req.user.tier || 'free';
+    if (!CONTENT_PLAN_TIERS.has(tier)) {
+      return res.status(403).json({ error: 'Контент-план доступен с тарифа Pro', code: 'CONTENT_PLAN_TIER' });
+    }
+
+    const { items } = req.body;
+    if (!Array.isArray(items)) return res.status(400).json({ error: 'items должен быть массивом' });
+
+    const { rows } = await pool.query(
+      `INSERT INTO project_content_plans (project_id, items)
+       VALUES ($1, $2)
+       ON CONFLICT (project_id) DO UPDATE SET items = EXCLUDED.items, updated_at = now()
+       RETURNING items, updated_at`,
+      [req.params.projectId, JSON.stringify(items)]
+    );
+
+    // Потрогаем updated_at проекта — чтобы он всплывал в списке
+    await pool.query('UPDATE projects SET updated_at = now() WHERE id = $1', [req.params.projectId]);
+
+    res.json({ items: rows[0].items, updatedAt: rows[0].updated_at });
   } catch (err) { next(err); }
 });
 

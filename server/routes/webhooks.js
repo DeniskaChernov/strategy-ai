@@ -121,7 +121,7 @@ router.post('/stripe', async (req, res) => {
 
             await createNotification(userEmail, {
               type: 'success',
-              title: `✅ Подписка ${tierLabel} активирована`,
+              title: `Подписка ${tierLabel} активирована`,
               body: `Оплата $${amount}/мес прошла успешно. Спасибо!`,
             }).catch(() => {});
           }
@@ -136,7 +136,7 @@ router.post('/stripe', async (req, res) => {
         if (invoice.customer_email) {
           await createNotification(invoice.customer_email, {
             type: 'error',
-            title: '⚠️ Ошибка оплаты',
+            title: 'Ошибка оплаты',
             body: 'Не удалось списать оплату. Проверьте платёжный метод в портале оплаты.',
           }).catch(() => {});
         }
