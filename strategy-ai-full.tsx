@@ -401,7 +401,7 @@ const LANGS={
     deadline:'Дедлайн',tags_label:'Теги',comments_label:'Комментарии',
     history_label:'История изменений',color_label:'Цвет',
     step_deleted:'удалён',undo_action:'↩ Отменить',
-    saved:'Сохранено ✓',saving:'Сохраняю…',save_error:'Ошибка сохранения',retry:'Повторить',use_template:'Использовать шаблон',connect_select_source:'⇒ выберите источник',
+    saved:'Сохранено ✓',saved_short:'Сохранено',saving:'Сохраняю…',save_error:'Ошибка сохранения',retry:'Повторить',use_template:'Использовать шаблон',connect_select_source:'⇒ выберите источник',
     connect_select_target:'→ выберите цель',
     ai_title:'AI Советник',clear_chat:'Очистить чат',
     ask_placeholder:'Спросите о стратегии…',analyzing:'анализирую…',
@@ -808,7 +808,7 @@ const LANGS={
     deadline:'Deadline',tags_label:'Tags',comments_label:'Comments',
     history_label:'Change history',color_label:'Color',
     step_deleted:'deleted',undo_action:'↩ Undo',
-    saved:'Saved ✓',saving:'Saving…',save_error:'Save failed',retry:'Retry',use_template:'Use template',connect_select_source:'⇒ select source',
+    saved:'Saved ✓',saved_short:'Saved',saving:'Saving…',save_error:'Save failed',retry:'Retry',use_template:'Use template',connect_select_source:'⇒ select source',
     connect_select_target:'→ select target',
     ai_title:'AI Advisor',clear_chat:'Clear chat',
     ask_placeholder:'Ask about strategy…',analyzing:'analyzing…',
@@ -1217,7 +1217,7 @@ const LANGS={
     deadline:"Muddat",tags_label:"Teglar",comments_label:"Izohlar",
     history_label:"O'zgarishlar tarixi",color_label:"Rang",
     step_deleted:"o'chirildi",undo_action:"↩ Bekor qilish",
-    saved:"Saqlandi ✓",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",retry:"Qayta urinish",use_template:"Shablonni ishlatish",
+    saved:"Saqlandi ✓",saved_short:"Saqlandi",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",retry:"Qayta urinish",use_template:"Shablonni ishlatish",
     connect_select_source:"⇒ manba tanlang",connect_select_target:"→ maqsad tanlang",
     ai_title:"AI Maslahatchi",clear_chat:"Chatni tozalash",
     ask_placeholder:"Strategiya haqida so'rang…",analyzing:"tahlil qilinmoqda…",
@@ -4141,7 +4141,7 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
   const progress=node.progress||0;
   const progressW=Math.max(0,progress/100*204);
   const titleFull=node.title||"Новый шаг";
-  const title=titleFull.length>28?titleFull.slice(0,26)+"…":titleFull;
+  const title=titleFull.length>20?titleFull.slice(0,18)+"…":titleFull;
   const hasMeta=node.reason||node.action||node.metric;
   const hasAction=!!(node.action&&node.action.trim());
   const headerY=16;
@@ -4167,7 +4167,7 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
       <rect x={156} y={9} width={70} height={14} rx={7} fill={`${pr.c}20`} stroke={`${pr.c}50`} strokeWidth={1}/>
       <circle cx={167} cy={headerY} r={2.5} fill={pr.c}/>
       <text x={173} y={headerY} fontSize={8.5} fontWeight={700} fill={pr.c} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{pr.label}</text>
-      <g><title>{titleFull}</title><text x={14} y={headerY} fontSize={12} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+      <g clipPath="url(#nodeTitleClip)"><title>{titleFull}</title><text x={14} y={headerY} fontSize={12} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
         {title}
       </text></g>
       {node.reason&&(
@@ -5220,7 +5220,7 @@ ${ctx}
               {(user?.name||user?.email||"U")[0].toUpperCase()}
             </button>
             <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981",transition:"color .25s ease, opacity .25s ease"}}>
-              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button className="btn-interactive" onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span style={{animation:"successPop .35s ease"}}>✓</span> {t("saved","Сохранено")}</>}
+              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button className="btn-interactive" onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span style={{animation:"successPop .35s ease"}}>✓</span> {t("saved_short","Сохранено")}</>}
             </div>
               </>
             )}
@@ -5375,6 +5375,7 @@ ${ctx}
           onDoubleClick={e=>{const t=e.target as Element;if(!readOnly&&(t===svgRef.current||t?.tagName==="svg"||t?.getAttribute?.("data-canvas-bg")==="1")){e.preventDefault();addNodeAt(e.clientX,e.clientY);}}}
           onContextMenu={e=>{const t=e.target as Element;if(t===svgRef.current||t?.tagName==="svg"||t?.getAttribute?.("data-canvas-bg")==="1"){e.preventDefault();if(!readOnly)setCtxMenu({x:e.clientX,y:e.clientY});}}}>
           <defs>
+            <clipPath id="nodeTitleClip"><rect x={14} y={4} width={138} height={14} rx={2}/></clipPath>
             <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x%40},${view.y%40})`}>
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--grid)" strokeWidth="1"/>
