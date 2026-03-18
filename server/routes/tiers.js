@@ -1,99 +1,43 @@
 const router = require('express').Router();
+const path = require('path');
+const fs = require('fs');
 const { pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 
-// Конфигурация тарифов (должна совпадать с фронтендом)
-const TIERS = {
-  free: {
-    label: 'Free',
-    price: 0,
-    currency: 'USD',
-    maps: 1,
-    projects: 1,
-    members: 1,
-    scenarios: 0,
-    ai_messages: 0,
-    features: ['3 стратегии в месяц', 'Базовый анализ ниши', 'Базовая маркетинговая стратегия', 'Экспорт в текст'],
-  },
-  starter: {
-    label: 'Starter',
-    price: 9,
-    currency: 'USD',
-    stripe_price_id: process.env.STRIPE_PRICE_STARTER,
-    maps: 3,
-    projects: 3,
-    members: 3,
-    scenarios: 2,
-    ai_messages: 1500,
-    features: [
-      'Unlimited стратегии',
-      'До 1500 AI сообщений/мес',
-      'Глубокий анализ ниши',
-      'Стратегия продвижения',
-      'Маркетинговая воронка',
-      'Контент-стратегия',
-      'Экспорт стратегии',
-    ],
-  },
-  pro: {
-    label: 'Pro',
-    price: 29,
-    currency: 'USD',
-    stripe_price_id: process.env.STRIPE_PRICE_PRO,
-    maps: 5,
-    projects: 10,
-    members: 5,
-    scenarios: 5,
-    ai_messages: 8000,
-    features: [
-      'Unlimited стратегии',
-      'До 8000 AI сообщений/мес',
-      'Расширенный анализ рынка',
-      'Анализ конкурентов',
-      'Воронки продаж',
-      'Рекламные стратегии',
-      'Генерация маркетинговых гипотез',
-      'Приоритетная скорость',
-    ],
-  },
-  team: {
-    label: 'Team',
-    price: 59,
-    currency: 'USD',
-    stripe_price_id: process.env.STRIPE_PRICE_TEAM,
-    maps: 15,
-    projects: 25,
-    members: 10,
-    scenarios: 15,
-    ai_messages: 25000,
-    features: [
-      'Unlimited стратегии',
-      'До 25000 AI сообщений/мес',
-      'До 10 пользователей',
-      'Совместная работа',
-      'Сохранение стратегий',
-      'Приоритетная поддержка',
-    ],
-  },
-  enterprise: {
-    label: 'Enterprise',
-    price: 149,
-    currency: 'USD',
-    stripe_price_id: process.env.STRIPE_PRICE_ENTERPRISE,
-    maps: 999999,
-    projects: 999999,
-    members: 999999,
-    scenarios: 999999,
-    ai_messages: 999999,
-    features: [
-      'Unlimited всё',
-      'Индивидуальные лимиты',
-      'API доступ',
-      'Кастомные модели',
-      'Персональная поддержка',
-    ],
-  },
-};
+// Единый источник правды: shared/tiers.json
+let TIERS_RAW = null;
+function loadTiers() {
+  if (TIERS_RAW) return TIERS_RAW;
+  try {
+    const p = path.join(__dirname, '../../shared/tiers.json');
+    const data = fs.readFileSync(p, 'utf8');
+    TIERS_RAW = JSON.parse(data);
+    return TIERS_RAW;
+  } catch (e) {
+    console.warn('shared/tiers.json not found, using fallback:', e.message);
+    const fallbackPath = path.join(__dirname, 'tiers.fallback.json');
+    TIERS_RAW = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+    return TIERS_RAW;
+  }
+}
+
+const TIERS = (() => {
+  const raw = loadTiers();
+  const tierKeys = {
+    starter: 'STRIPE_PRICE_STARTER',
+    pro: 'STRIPE_PRICE_PRO',
+    team: 'STRIPE_PRICE_TEAM',
+    enterprise: 'STRIPE_PRICE_ENTERPRISE',
+  };
+  const out = {};
+  for (const [k, v] of Object.entries(raw)) {
+    out[k] = {
+      ...v,
+      stripe_price_id: tierKeys[k] ? process.env[tierKeys[k]] : undefined,
+    };
+  }
+  return out;
+})();
 
 // GET /api/tiers — список всех тарифов (публичный)
 router.get('/', (req, res) => {
@@ -126,7 +70,7 @@ router.get('/usage', requireAuth, async (req, res, next) => {
     );
     const projectsUsed = parseInt(projRows[0].count);
 
-    // Карты
+    // Карты (не сценарии)
     const { rows: mapRows } = await pool.query(
       `SELECT count(*) FROM maps WHERE project_id IN
          (SELECT id FROM projects WHERE owner_email = $1)
@@ -134,6 +78,15 @@ router.get('/usage', requireAuth, async (req, res, next) => {
       [email]
     );
     const mapsUsed = parseInt(mapRows[0].count);
+
+    // Сценарии
+    const { rows: scenarioRows } = await pool.query(
+      `SELECT count(*) FROM maps WHERE project_id IN
+         (SELECT id FROM projects WHERE owner_email = $1)
+       AND is_scenario = true`,
+      [email]
+    );
+    const scenariosUsed = parseInt(scenarioRows[0].count);
 
     const tierConfig = TIERS[tier] || TIERS.free;
     res.json({
@@ -143,6 +96,7 @@ router.get('/usage', requireAuth, async (req, res, next) => {
         ai_messages: { used: aiUsed, limit: tierConfig.ai_messages },
         projects: { used: projectsUsed, limit: tierConfig.projects },
         maps: { used: mapsUsed, limit: tierConfig.maps },
+        scenarios: { used: scenariosUsed, limit: tierConfig.scenarios },
       },
     });
   } catch (err) { next(err); }

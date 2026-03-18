@@ -135,7 +135,8 @@ router.post('/chat', requireAuth, async (req, res, next) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error('OpenAI error:', response.status, errText);
+      const safeErr = (errText || '').substring(0, 200).replace(/\s+/g, ' ');
+      console.error('[AI] OpenAI error:', response.status, safeErr, '| tier:', tier, '| user:', email ? email.slice(0, 3) + '***' : 'n/a');
       await pool.query(
         `UPDATE ai_usage SET count = count - 1 WHERE user_email = $1 AND month_key = $2`,
         [email, monthKey]
@@ -157,7 +158,11 @@ router.post('/chat', requireAuth, async (req, res, next) => {
       content: [{ type: 'text', text }],
       usage: { used: newCount, limit, remaining: Math.max(0, limit - newCount) },
     });
-  } catch (err) { next(err); }
+  } catch (err) {
+    // Логирование без тела запроса (безопасность, мониторинг)
+    console.error('[AI] Error:', err.message || err, '| tier:', req.user?.tier, '| email:', req.user?.email ? '***' : 'n/a');
+    next(err);
+  }
 });
 
 // GET /api/ai/usage — текущий лимит

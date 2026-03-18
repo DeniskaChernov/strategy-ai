@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { io as ioClient } from "socket.io-client";
+import pptxgen from "pptxgenjs";
 
 const NW=240,NH=128;
 
@@ -33,8 +34,8 @@ const CSS=`
 body{font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;}
 input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 :root{
-  /* ── Spacing scale (больше воздуха) ── */
-  --sp-xs:6px;--sp-sm:10px;--sp-md:14px;--sp-lg:20px;--sp-xl:28px;--sp-2xl:40px;--sp-3xl:56px;
+  /* ── Spacing scale (премиальный минимализм, больше воздуха) ── */
+  --sp-xs:8px;--sp-sm:12px;--sp-md:18px;--sp-lg:24px;--sp-xl:32px;--sp-2xl:48px;--sp-3xl:64px;
   /* ── Border radius ── */
   --r-xs:6px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-2xl:28px;--r-full:9999px;
   /* ── Brand palette ── */
@@ -85,6 +86,8 @@ input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
 [data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
 [data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-rgb:107,122,138;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
 [data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
+[data-palette="orange"]{--accent-1:#ea580c;--accent-2:#f97316;--accent-rgb:234,88,12;--accent-soft:rgba(234,88,12,.12);--accent-grid:rgba(234,88,12,.05);--accent-glow:rgba(234,88,12,.25);--glass-border-accent:rgba(234,88,12,.2);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.1);}
+[data-theme="light"][data-palette="orange"]{--accent-soft:rgba(234,88,12,.1);--accent-grid:rgba(234,88,12,.08);--glass-border-accent:rgba(234,88,12,.16);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.08);}
 /* ── Синхронизация с body: тема и палитра применяются ко всему документу ── */
 body[data-theme="dark"]{--bg:#060a12;--bg2:#0a0f1a;--bg3:#0e1422;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;--input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);--card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;--divider:rgba(255,255,255,.08);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);--node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
 body[data-theme="light"]{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);--border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);--text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;--input-bg:#ffffff;--input-border:rgba(0,0,0,.18);--card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;--divider:rgba(0,0,0,.1);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);--node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
@@ -98,6 +101,8 @@ body[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-rgb:1
 body[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
 body[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-rgb:107,122,138;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
 body[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
+body[data-palette="orange"]{--accent-1:#ea580c;--accent-2:#f97316;--accent-rgb:234,88,12;--accent-soft:rgba(234,88,12,.12);--accent-grid:rgba(234,88,12,.05);--accent-glow:rgba(234,88,12,.25);--glass-border-accent:rgba(234,88,12,.2);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.1);}
+body[data-theme="light"][data-palette="orange"]{--accent-soft:rgba(234,88,12,.1);--accent-grid:rgba(234,88,12,.08);--glass-border-accent:rgba(234,88,12,.16);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.08);}
 [data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{
   background:var(--input-bg) !important;border-color:var(--input-border) !important;
   color:var(--text) !important;color-scheme:light;
@@ -384,7 +389,8 @@ const LANGS={
     etype_requires:'Требует',etype_affects:'Влияет',etype_follows:'Следует',etype_blocks:'Блокирует',
     role_owner:'Владелец',role_editor:'Редактор',role_viewer:'Зритель',
     undo:'Отменить',redo:'Повторить',new_step:'+ Шаг',connect_btn:'⇒ Связать',
-    fit:'Вписать',bg_btn:'Фон',simulation:'▶ Симуляция',gantt:'Gantt',
+    fit:'Вписать',fit_view:'Вписать',fit_view_hint:'Вписать карту в экран',center_on_hint:'Центрировать на выбранном шаге',auto_layout_hint:'Автоматическая раскладка по связям',ai_links_hint:'AI предложит связи между шагами',bg_label:'Фон',
+    bg_btn:'Фон',simulation:'▶ Симуляция',gantt:'Gantt',
     export_png:'PNG',export_json:'JSON↓',import_json:'JSON↑',
     ai_advisor:'✦ AI',shortcuts_btn:'?',
     dark_mode:'🌙 Тень',light_mode:'☀️ Свет',layout_btn:'⌥ Авто-раскладка',
@@ -400,7 +406,7 @@ const LANGS={
     ai_title:'AI Советник',clear_chat:'Очистить чат',
     ask_placeholder:'Спросите о стратегии…',analyzing:'анализирую…',
     ai_online:'онлайн',ai_offline:'нет связи',
-    shortcuts_title:'⌨️ Горячие клавиши',
+    shortcuts_title:'⌨️ Горячие клавиши',shortcuts_copy_hint:"Выделите узел, Ctrl+C — копировать, Ctrl+V — вставить. Комбинации можно копировать из этой подсказки.",
     sc_nav:'— НАВИГАЦИЯ —',sc_fit:'Вписать карту',sc_next:'Следующий шаг',
     sc_zoom:'Сброс зума',sc_pan:'Панорамировать',
     sc_edit:'— РЕДАКТИРОВАНИЕ —',sc_new:'Добавить шаг',sc_dup:'Дублировать',
@@ -421,17 +427,18 @@ const LANGS={
     ai_rephrase:'✨ Перефразировать',auto_connect:'🔗 Связать',
     delete_step:'Удалить шаг',add_comment:'Добавить комментарий',
     comments_empty:'Нет комментариев',history_empty:'Нет изменений',
-    scroll_to:'↗ Перейти',read_only:'Только просмотр',
+    scroll_to:'↗ Перейти',read_only:'Только просмотр',read_only_banner:'Режим просмотра — вы можете просматривать карту, но не редактировать',
     connections:'Связи',incoming:'входящих',outgoing:'исходящих',
     // ProjectsPage
     hello:'Привет',your_projects:'Мои проекты',create_first:'Создайте первый проект',
     no_projects_hint:'Создайте проект для стратегического планирования',
-    new_project_name:'Название нового проекта',create_project:'Создать проект',
-    open_project:'Открыть',delete_project:'Удалить',
+    new_project_name:'Название нового проекта',new_project_name_ph:'Название проекта…',create_project:'Создать проект',
+    open_project:'Открыть',delete_project:'Удалить',project_created:'Проект создан',delete_project_err:'Ошибка при удалении проекта',
     last_updated:'Обновлён',maps_count:'карт',
     // MapEditor toolbar
-    back_btn:'← Назад',add_step:'+ Шаг',link_btn:'⇒ Связать',
-    fit_view:'Вписать',auto_layout:'⌥ Авто-раскладка',
+    back_btn:'← Назад',back_to_project:'Вернуться в проект',version_history_short:'История',search_projects_hint:'Поиск по проектам и картам…',
+    add_step:'+ Шаг',link_btn:'⇒ Связать',
+    auto_layout:'⌥ Авто-раскладка',
     ai_links:'🔗 AI-связи',bg_grid:'⊞',bg_stars:'✦',bg_none:'○',
     map_tour:'🗺 Тур',show_stats:'📊',shortcuts:'⌨️',
     simulate:'⎇ Симуляция',templates:'📋 Шаблоны',
@@ -458,7 +465,7 @@ const LANGS={
     blocked:'Заблокировано',critical:'Критических',avg_prog:'Средний прогресс',
     total_connections:'Связей',
     // AiPanel
-    ai_consultant:'AI Советник',clear_chat2:'Очистить',
+    ai_consultant:'AI Советник',ai_quick_questions:'Быстрые вопросы',clear_chat2:'Очистить',
     type_question:'Спросите о стратегии…',send_btn:'Отправить',
     quick_actions:'Быстрые действия',
     // GanttView
@@ -515,13 +522,19 @@ const LANGS={
     content_plan_tab:"Контент-план",
     content_plan_locked_title:"Контент-план доступен на Pro",
     content_plan_pro_only:"Приложение использует знания о вашем бизнесе и стратегии для планирования постов.",
-    content_plan_empty:"Планируйте посты, рассылки и публикации. AI подскажет идеи по шагам стратегии.",
+    content_plan_empty_title:"Планируйте публикации",
+    content_plan_empty_desc:"Добавьте посты, видео и рассылки. AI предложит идеи на основе шагов вашей стратегии.",
     add_content_item:"+ Публикация",
     content_status_draft:"Черновик",content_status_scheduled:"Запланировано",content_status_published:"Опубликовано",
     content_type_post:"Пост",content_type_story:"Сторис",content_type_email:"Рассылка",content_type_video:"Видео",
     content_channel_blog:"Блог",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"ВКонтакте",content_channel_youtube:"YouTube",content_channel_email:"Email",
     content_link_step:"Связать с шагом стратегии",content_ai_suggest:"✨ Предложить по стратегии",
-    content_view_tree:"Дерево",content_view_list:"Список",content_tree_title:"Дерево контент‑плана",content_tree_hint:"Проект → канал → статус → публикации. Нажмите на карточку, чтобы редактировать.",content_more:"Ещё",untitled:"Без названия",
+    content_label_type:"Тип контента",content_label_channel:"Канал публикации",content_label_status:"Статус",
+    content_view_calendar:"Календарь",content_view_map:"Карта",content_view_tree:"Дерево",content_view_list:"Список",
+    content_plan_intro:"Планируйте посты, видео и рассылки. Переключайте вид: календарь по датам, по каналам или список.",
+    content_tree_title:"Публикации по каналам",content_tree_hint:"Канал → статус → публикации. Кликните карточку для редактирования.",
+    content_more:"Ещё",content_show_all:"Показать все",content_no_date:"Без даты",untitled:"Без названия",
+    scheduled_date_short:"Дата публикации",brief:"Тезис / описание",
     project_ai_tab:"AI",project_ai_title:"AI по проекту",project_ai_hint:"Один и тот же чат, доступен и в карте. Здесь AI видит контекст всех карт проекта.",project_scope:"Проект",
     scenario_templates:"Шаблоны сценариев",
     no_limits:"Без лимитов.",
@@ -529,7 +542,7 @@ const LANGS={
     view_label:"Вид",
     login_or_register:"Войдите или создайте аккаунт бесплатно",
     loading_short:"Загрузка…",
-    load_error_hint:"Если это происходит снова — проверьте подключение к интернету и доступность API. В офлайн‑режиме можно войти в демо‑аккаунт без сервера.",
+    load_error:"Ошибка загрузки",load_error_hint:"Если это происходит снова — проверьте подключение к интернету и доступность API. В офлайн‑режиме можно войти в демо‑аккаунт без сервера.",
     why_label:"Зачем?",
     why_placeholder:"Зачем этот шаг, какой результат нужен",
     action_label:"Что сделать",
@@ -560,7 +573,7 @@ const LANGS={
     skip_interview:"Пропустить интервью?",
     editor_role:"Редактор",
     watch_demo:"Смотреть демо →",
-    create_first_map:"Создайте первую стратегическую карту",
+    create_first_map:"Создайте первую стратегическую карту",create_first_map_hint:"Добавьте шаги, свяжите их — AI подскажет следующий ход.",
     create_first_scenario:"Создайте первый сценарий вручную или с помощью AI шаблонов",
     create_map_free:"Создать карту бесплатно ✦",
     strategy_maps:"Стратегические карты",
@@ -652,7 +665,7 @@ const LANGS={
     deadline_reminder:"Напоминания о дедлайнах",
     notif_email_desc:"Важные обновления на почту",notif_push_desc:"Уведомления в браузере",
     restore_confirm:"Восстановить эту версию? Текущие данные будут заменены.",
-    versions_empty:"Нет сохранённых версий",restore_version:"Восстановить",
+    versions_empty:"Нет сохранённых версий",restore_version:"Восстановить",version_saved:"Версия сохранена ✓",save_version_btn:"Сохранить версию",save_version_short:"Версия",version_save_label:"Промежуточная версия",
     version_restored:"Версия восстановлена ✓",
     // WeeklyBriefingModal
     weekly_briefing:"Еженедельный брифинг",
@@ -660,13 +673,13 @@ const LANGS={
     weekly_briefing_gen:"Анализирую карту…",
     weekly_briefing_err:"Не удалось получить AI-анализ.",
     // AI/export
-    ai_error:"Ошибка AI-анализа",
+    ai_error:"Ошибка AI-анализа",ai_rate_limit_hint:"Превышен лимит запросов. Подождите минуту.",
     ai_comment_error:"Ошибка AI. Попробуйте ещё раз.",
     ai_network_err:"Не удалось получить ответ AI. Проверьте сеть и ключ API. Попробуйте ещё раз.",
     ai_map_fallback:"AI не удалось создать карту. Используем базовый шаблон — вы можете отредактировать его.",
     ai_generation_error:"Ошибка генерации. Попробуйте ещё раз.",
     ai_sim_error:"Ошибка AI-консультанта",
-    export_pdf:"Скачать PDF",export_pptx:"Скачать PPTX",
+    export_pdf:"Скачать PDF",export_pdf_hint:"PDF через печать браузера (Ctrl+P → Сохранить как PDF)",export_pptx:"Скачать PPTX",
     // MapEditor toasts & misc
     imported_steps:"✅ Импортировано: {n} шагов",
     json_invalid:"Некорректный формат JSON",
@@ -758,7 +771,7 @@ const LANGS={
     card_number_ph:"Номер карты…",card_holder_ph:"Имя держателя…",
     card_expiry_ph:"ММ/ГГ",card_cvv_ph:"CVV",
     card_data_title:"💳 Данные карты",
-    downgrade_warning:"После смены тарифа часть данных может быть ограничена.",
+    downgrade_warning:"После смены тарифа часть данных может быть ограничена.",downgrade_you_have:"У вас",downgrade_maps_unit:"карт",downgrade_projects_unit:"проектов",
     downgrade_limit_maps:"Карт на новом тарифе",
     downgrade_limit_projects:"Проектов на новом тарифе",
     downgrade_excess:"Данные сверх лимита станут доступны только для чтения.",
@@ -800,7 +813,7 @@ const LANGS={
     ai_title:'AI Advisor',clear_chat:'Clear chat',
     ask_placeholder:'Ask about strategy…',analyzing:'analyzing…',
     ai_online:'online',ai_offline:'offline',
-    shortcuts_title:'⌨️ Keyboard Shortcuts',
+    shortcuts_title:'⌨️ Keyboard Shortcuts',shortcuts_copy_hint:"Select a node, Ctrl+C to copy, Ctrl+V to paste. You can copy shortcuts from this hint.",
     sc_nav:'— NAVIGATION —',sc_fit:'Fit map to screen',sc_next:'Next step',
     sc_zoom:'Reset zoom',sc_pan:'Pan canvas',
     sc_edit:'— EDITING —',sc_new:'Add step',sc_dup:'Duplicate step',
@@ -821,17 +834,19 @@ const LANGS={
     ai_rephrase:'✨ Rephrase',auto_connect:'🔗 Connect',
     delete_step:'Delete step',add_comment:'Add comment',
     comments_empty:'No comments yet',history_empty:'No changes yet',
-    scroll_to:'↗ Go to',read_only:'Read only',
+    scroll_to:'↗ Go to',read_only:'Read only',read_only_banner:'View mode — you can view the map but not edit it',
     connections:'Connections',incoming:'incoming',outgoing:'outgoing',
     // ProjectsPage
     hello:'Hello',your_projects:'My Projects',create_first:'Create your first project',
     no_projects_hint:'Create a project to start strategic planning',
-    new_project_name:'New project name',create_project:'Create project',
-    open_project:'Open',delete_project:'Delete',
+    new_project_name:'New project name',new_project_name_ph:'Project name…',create_project:'Create project',
+    open_project:'Open',delete_project:'Delete',project_created:'Project created',delete_project_err:'Error deleting project',
     last_updated:'Updated',maps_count:'maps',
     // MapEditor toolbar
-    back_btn:'← Back',add_step:'+ Step',link_btn:'⇒ Connect',
-    fit_view:'Fit',auto_layout:'⌥ Auto-layout',
+    back_btn:'← Back',back_to_project:'Back to project',version_history_short:'History',search_projects_hint:'Search projects and maps…',
+    add_step:'+ Step',link_btn:'⇒ Connect',
+    fit_view:'Fit',fit_view_hint:'Fit map to screen',center_on_hint:'Center on selected step',auto_layout_hint:'Auto layout by connections',ai_links_hint:'AI will suggest links between steps',bg_label:'Background',
+    auto_layout:'⌥ Auto-layout',
     ai_links:'🔗 AI-links',bg_grid:'⊞',bg_stars:'✦',bg_none:'○',
     map_tour:'🗺 Tour',show_stats:'📊',shortcuts:'⌨️',
     simulate:'⎇ Simulate',templates:'📋 Templates',
@@ -858,7 +873,7 @@ const LANGS={
     blocked:'Blocked',critical:'Critical',avg_prog:'Avg progress',
     total_connections:'Connections',
     // AiPanel
-    ai_consultant:'AI Advisor',clear_chat2:'Clear',
+    ai_consultant:'AI Advisor',ai_quick_questions:'Quick questions',clear_chat2:'Clear',
     type_question:'Ask about strategy…',send_btn:'Send',
     quick_actions:'Quick actions',
     // GanttView
@@ -915,13 +930,19 @@ const LANGS={
     content_plan_tab:"Content plan",
     content_plan_locked_title:"Content plan available on Pro",
     content_plan_pro_only:"The app uses your business and strategy context to plan content.",
-    content_plan_empty:"Plan posts, newsletters, and updates. AI will suggest ideas based on your strategy steps.",
+    content_plan_empty_title:"Plan your publications",
+    content_plan_empty_desc:"Add posts, videos and newsletters. AI will suggest ideas based on your strategy steps.",
     add_content_item:"+ Add post",
     content_status_draft:"Draft",content_status_scheduled:"Scheduled",content_status_published:"Published",
     content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
     content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",content_channel_email:"Email",
     content_link_step:"Link to strategy step",content_ai_suggest:"✨ Suggest from strategy",
-    content_view_tree:"Tree",content_view_list:"List",content_tree_title:"Content plan tree",content_tree_hint:"Project → channel → status → items. Click a card to edit.",content_more:"More",untitled:"Untitled",
+    content_label_type:"Content type",content_label_channel:"Publication channel",content_label_status:"Status",
+    content_view_calendar:"Calendar",content_view_map:"Map",content_view_tree:"Tree",content_view_list:"List",
+    content_plan_intro:"Plan posts, videos and newsletters. Switch view: calendar by date, by channel, or list.",
+    content_tree_title:"Publications by channel",content_tree_hint:"Channel → status → publications. Click a card to edit.",
+    content_more:"More",content_show_all:"Show all",content_no_date:"No date",untitled:"Untitled",
+    scheduled_date_short:"Publication date",brief:"Brief / description",
     project_ai_tab:"AI",project_ai_title:"Project AI",project_ai_hint:"Same chat as in the map. Here AI can see the context of all project maps.",project_scope:"Project",
     scenario_templates:"Scenario Templates",
     no_limits:"No limits.",
@@ -929,7 +950,7 @@ const LANGS={
     view_label:"View",
     login_or_register:"Sign in or create a free account",
     loading_short:"Loading…",
-    load_error_hint:"If this keeps happening, check your internet connection and API availability. In offline mode you can use the demo account without the server.",
+    load_error:"Load error",load_error_hint:"If this keeps happening, check your internet connection and API availability. In offline mode you can use the demo account without the server.",
     why_label:"Why?",
     why_placeholder:"Why this step, what outcome is needed",
     action_label:"What to do",
@@ -960,7 +981,7 @@ const LANGS={
     skip_interview:"Skip interview?",
     editor_role:"Editor",
     watch_demo:"Watch demo →",
-    create_first_map:"Create your first strategy map",
+    create_first_map:"Create your first strategy map",create_first_map_hint:"Add steps, connect them — AI will suggest the next move.",
     create_first_scenario:"Create your first scenario manually or with AI templates",
     create_map_free:"Create map free ✦",
     strategy_maps:"Strategy Maps",
@@ -1052,7 +1073,7 @@ const LANGS={
     deadline_reminder:"Deadline reminders",
     notif_email_desc:"Important updates by email",notif_push_desc:"Browser notifications",
     restore_confirm:"Restore this version? Current data will be replaced.",
-    versions_empty:"No saved versions",restore_version:"Restore",
+    versions_empty:"No saved versions",restore_version:"Restore",version_saved:"Version saved ✓",save_version_btn:"Save version",save_version_short:"Version",version_save_label:"Checkpoint",
     version_restored:"Version restored ✓",
     // WeeklyBriefingModal
     weekly_briefing:"Weekly briefing",
@@ -1060,13 +1081,13 @@ const LANGS={
     weekly_briefing_gen:"Analyzing map…",
     weekly_briefing_err:"Failed to get AI analysis.",
     // AI/export
-    ai_error:"AI analysis error",
+    ai_error:"AI analysis error",ai_rate_limit_hint:"Rate limit exceeded. Wait a minute.",
     ai_comment_error:"AI error. Please try again.",
     ai_network_err:"Failed to get AI response. Check network and API key. Try again.",
     ai_map_fallback:"AI couldn't create the map. Using a basic template — you can edit it.",
     ai_generation_error:"Generation error. Please try again.",
     ai_sim_error:"AI consultant error",
-    export_pdf:"Download PDF",export_pptx:"Download PPTX",
+    export_pdf:"Download PDF",export_pdf_hint:"PDF via browser print (Ctrl+P → Save as PDF)",export_pptx:"Download PPTX",export_pptx_print_hint:"print window will open",
     // MapEditor toasts & misc
     imported_steps:"✅ Imported: {n} steps",
     json_invalid:"Invalid JSON format",
@@ -1158,7 +1179,7 @@ const LANGS={
     card_number_ph:"Card number…",card_holder_ph:"Cardholder name…",
     card_expiry_ph:"MM/YY",card_cvv_ph:"CVV",
     card_data_title:"💳 Card details",
-    downgrade_warning:"After downgrading, some data may be restricted.",
+    downgrade_warning:"After downgrading, some data may be restricted.",downgrade_you_have:"You have",downgrade_maps_unit:"maps",downgrade_projects_unit:"projects",
     downgrade_limit_maps:"Maps on new plan",
     downgrade_limit_projects:"Projects on new plan",
     downgrade_excess:"Data exceeding limits will become read-only.",
@@ -1201,7 +1222,7 @@ const LANGS={
     ai_title:"AI Maslahatchi",clear_chat:"Chatni tozalash",
     ask_placeholder:"Strategiya haqida so'rang…",analyzing:"tahlil qilinmoqda…",
     ai_online:"onlayn",ai_offline:"aloqa yo'q",
-    shortcuts_title:"⌨️ Tezkor tugmalar",
+    shortcuts_title:"⌨️ Tezkor tugmalar",shortcuts_copy_hint:"Tugunni tanlang, Ctrl+C — nusxalash, Ctrl+V — joylashtirish.",
     sc_nav:"— NAVIGATSIYA —",sc_fit:"Xaritani moslashtirish",sc_next:"Keyingi qadam",
     sc_zoom:"Zoomni tiklash",sc_pan:"Kanvada harakatlanish",
     sc_edit:"— TAHRIRLASH —",sc_new:"Qadam qo'shish",sc_dup:"Nusxa ko'chirish",
@@ -1222,17 +1243,19 @@ const LANGS={
     ai_rephrase:"✨ Qayta yozish",auto_connect:"🔗 Bog'lash",
     delete_step:"Qadamni o'chirish",add_comment:"Izoh qo'shish",
     comments_empty:"Izohlar yo'q",history_empty:"O'zgarishlar yo'q",
-    scroll_to:"↗ O'tish",read_only:"Faqat ko'rish",
+    scroll_to:"↗ O'tish",read_only:"Faqat ko'rish",read_only_banner:"Ko'rish rejimi — xaritani ko'rishingiz mumkin, lekin tahrirlab bo'lmaydi",
     connections:"Bog'liqliklar",incoming:"kiruvchi",outgoing:"chiquvchi",
     // ProjectsPage
     hello:"Salom",your_projects:"Loyihalarim",create_first:"Birinchi loyihani yarating",
     no_projects_hint:"Strategik rejalashtirish uchun loyiha yarating",
-    new_project_name:"Yangi loyiha nomi",create_project:"Loyiha yaratish",
-    open_project:"Ochish",delete_project:"O'chirish",
+    new_project_name:"Yangi loyiha nomi",new_project_name_ph:"Loyiha nomi…",create_project:"Loyiha yaratish",
+    open_project:"Ochish",delete_project:"O'chirish",project_created:"Loyiha yaratildi",delete_project_err:"Loyihani o'chirishda xato",
     last_updated:"Yangilangan",maps_count:"xarita",
     // MapEditor toolbar
-    back_btn:"← Orqaga",add_step:"+ Qadam",link_btn:"⇒ Bog'lash",
-    fit_view:"Moslashtirish",auto_layout:"⌥ Joylashtirish",
+    back_btn:"← Orqaga",back_to_project:"Loyihaga qaytish",version_history_short:"Tarix",search_projects_hint:"Loyihalar va xaritalarni qidirish…",
+    add_step:"+ Qadam",link_btn:"⇒ Bog'lash",
+    fit_view:"Moslashtirish",fit_view_hint:"Xaritani ekranga moslashtirish",center_on_hint:"Tanlangan qadamga markazlash",auto_layout_hint:"Bog'lanishlar bo'yicha avto joylashtirish",ai_links_hint:"AI qadamlarni bog'lashni taklif qiladi",bg_label:"Fon",
+    auto_layout:"⌥ Joylashtirish",
     ai_links:"🔗 AI-bog'liqliklar",bg_grid:"⊞",bg_stars:"✦",bg_none:"○",
     map_tour:"🗺 Tur",show_stats:"📊",shortcuts:"⌨️",
     simulate:"⎇ Simulyatsiya",templates:"📋 Shablonlar",
@@ -1319,7 +1342,8 @@ const LANGS={
     content_plan_tab:"Kontent reja",
     content_plan_locked_title:"Kontent rejasi Pro da",
     content_plan_pro_only:"Ilova biznesingiz va strategiyangiz bo'yicha kontentni rejalashtirishda yordam beradi.",
-    content_plan_empty:"Postlar, xatlar va yangiliklarni rejalashtiring. AI strategiya qadamlari bo'yicha takliflar beradi.",
+    content_plan_empty_title:"Nashrlarni rejalashtiring",
+    content_plan_empty_desc:"Postlar, videolar va xatlarni qo'shing. AI strategiya qadamlaringiz bo'yicha takliflar beradi.",
     add_content_item:"+ Post qo'shish",
     content_status_draft:"Qoralama",content_status_scheduled:"Rejalashtirilgan",content_status_published:"Nashr qilindi",
     content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
@@ -1327,13 +1351,16 @@ const LANGS={
     content_link_step:"Strategiya qadami bilan bog'lash",content_ai_suggest:"✨ Strategiyadan taklif",
     content_view_tree:"Daraxt",content_view_list:"Ro‘yxat",content_tree_title:"Kontent‑reja daraxti",content_tree_hint:"Loyiha → kanal → status → nashrlar. Tahrirlash uchun kartani bosing.",content_more:"Yana",untitled:"Nomsiz",
     project_ai_tab:"AI",project_ai_title:"Loyiha uchun AI",project_ai_hint:"Xuddi shu chat: xaritada ham mavjud. Bu yerda AI loyihadagi barcha xaritalar kontekstini ko‘radi.",project_scope:"Loyiha",
+    content_view_calendar:"Kalendar",content_view_map:"Xarita",content_no_date:"Sanasiz",content_show_all:"Barchasini ko'rsatish",ai_quick_questions:"Tez savollar",
+    content_label_type:"Kontent turi",content_label_channel:"Nashr kanali",content_label_status:"Status",
+    scheduled_date_short:"Nashr sanasi",brief:"Tezis",
     scenario_templates:"Stsenariy shablonlari",
     no_limits:"Cheksiz.",
     no_comparison:"Taqqoslash yo'q",
     view_label:"Ko'rinish",
     login_or_register:"Kiring yoki bepul akkaunt yarating",
     loading_short:"Yuklanmoqda…",
-    load_error_hint:"Agar bu yana takrorlansa, internet va API ishlashini tekshiring. Oflayn rejimda server siz demo akkauntdan foydalanishingiz mumkin.",
+    load_error:"Yuklash xatosi",load_error_hint:"Agar bu yana takrorlansa, internet va API ishlashini tekshiring. Oflayn rejimda server siz demo akkauntdan foydalanishingiz mumkin.",
     why_label:"Nima uchun?",
     why_placeholder:"Nima uchun bu qadam, qanday natija kerak",
     action_label:"Nima qilish kerak",
@@ -1364,7 +1391,7 @@ const LANGS={
     skip_interview:"Intervyuni o'tkazib yuborasizmi?",
     editor_role:"Muharrir",
     watch_demo:"Demo ko'rish →",
-    create_first_map:"Birinchi strategiya xaritangizni yarating",
+    create_first_map:"Birinchi strategiya xaritangizni yarating",create_first_map_hint:"Qadamlarni qo'shing, bog'lang — AI keyingi harakatni taklif qiladi.",
     create_first_scenario:"Birinchi stsenariyni qo'lda yoki AI shablonlari bilan yarating",
     create_map_free:"Bepul xarita yaratish ✦",
     strategy_maps:"Strategiya xaritalari",
@@ -1456,7 +1483,7 @@ const LANGS={
     deadline_reminder:"Muddat eslatmalari",
     notif_email_desc:"Muhim yangilanishlar email orqali",notif_push_desc:"Brauzer bildirishnomalari",
     restore_confirm:"Bu versiyani tiklashni xohlaysizmi? Joriy ma'lumotlar almashtiriladi.",
-    versions_empty:"Saqlangan versiyalar yo'q",restore_version:"Tiklash",
+    versions_empty:"Saqlangan versiyalar yo'q",restore_version:"Tiklash",version_saved:"Versiya saqlandi ✓",save_version_btn:"Versiyani saqlash",save_version_short:"Versiya",version_save_label:"O'rta versiya",
     version_restored:"Versiya tiklandi ✓",
     // WeeklyBriefingModal
     weekly_briefing:"Haftalik xisobot",
@@ -1464,13 +1491,13 @@ const LANGS={
     weekly_briefing_gen:"Xarita tahlil qilinmoqda…",
     weekly_briefing_err:"AI tahlilini olib bo'lmadi.",
     // AI/export
-    ai_error:"AI tahlil xatosi",
+    ai_error:"AI tahlil xatosi",ai_rate_limit_hint:"So'rov limiti oshdi. Bir daqiqa kuting.",
     ai_comment_error:"AI xatosi. Qayta urining.",
     ai_network_err:"AI javob olish muvaffaqiyatsiz. Tarmoq va API kalitini tekshiring.",
     ai_map_fallback:"AI xarita yarata olmadi. Asosiy shablon ishlatiladi.",
     ai_generation_error:"Generatsiya xatosi. Qayta urining.",
     ai_sim_error:"AI maslahatchi xatosi",
-    export_pdf:"PDF yuklab olish",export_pptx:"PPTX yuklab olish",
+    export_pdf:"PDF yuklab olish",export_pdf_hint:"PDF brauzer orqali chop etish (Ctrl+P → PDF sifatida saqlash)",export_pptx:"PPTX yuklab olish",export_pptx_print_hint:"bosish oynasi ochiladi",
     // MapEditor toasts & misc
     imported_steps:"✅ Yuklandi: {n} qadam",
     json_invalid:"Noto'g'ri JSON formati",
@@ -1560,7 +1587,7 @@ const LANGS={
     card_number_ph:"Karta raqami…",card_holder_ph:"Karta egasining ismi…",
     card_expiry_ph:"OY/YIL",card_cvv_ph:"CVV",
     card_data_title:"💳 Karta ma'lumotlari",
-    downgrade_warning:"Tarifni pasaytirgandan so'ng ba'zi ma'lumotlar cheklanishi mumkin.",
+    downgrade_warning:"Tarifni pasaytirgandan so'ng ba'zi ma'lumotlar cheklanishi mumkin.",downgrade_you_have:"Sizda",downgrade_maps_unit:"xarita",downgrade_projects_unit:"loyiha",
     downgrade_limit_maps:"Yangi tarifda xaritalar",
     downgrade_limit_projects:"Yangi tarifda loyihalar",
     downgrade_excess:"Limitdan ortiq ma'lumotlar faqat o'qish uchun bo'ladi.",
@@ -2358,6 +2385,7 @@ function Toast({msg,type="info",onClose,action,onAction}){
 // ── ConfirmDialog ──
 function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,onCancel,danger=true}){
   const{t}=useLang();
+  const isMobile=useIsMobile();
   const[closing,setClosing]=useState(false);
   const onCancelRef=useRef(onCancel);
   const onConfirmRef=useRef(onConfirm);
@@ -2370,8 +2398,8 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
   },[]);
   return(
-    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleCancel();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,360px)",borderRadius:20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--glass-border-accent,var(--border))"}`,boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(12px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleCancel();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:isMobile?"100%":"min(95vw,360px)",borderRadius:isMobile?"18px 18px 0 0":20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--glass-border-accent,var(--border))"}`,boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"var(--accent-soft)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"var(--accent-1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -2670,6 +2698,12 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   const[aiLang,setAiLang]=useState(user.aiLang||"ru");
   const[uiLang,setUiLang]=useState(lang);
   const[settingsSaved,setSettingsSaved]=useState(false);
+  const[usage,setUsage]=useState<{maps?:{used:number};projects?:{used:number};scenarios?:{used:number}}|null>(null);
+
+  useEffect(()=>{
+    if(tab!=="tier"||!API_BASE)return;
+    apiFetch("/api/tiers/usage").then(d=>setUsage(d.usage||null)).catch(()=>setUsage(null));
+  },[tab]);
 
   const selTier=TIERS[selected]||TIERS.free;
   const curIdx=TIER_ORDER.indexOf(user.tier||"free");
@@ -2944,6 +2978,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                           {id:"indigo",label:"◆ Indigo",c1:"#5b6bc0",c2:"#7c8dd9"},
                           {id:"ocean",label:"◇ Ocean",c1:"#5b8fb9",c2:"#7ab8d4"},
                           {id:"forest",label:"◇ Forest",c1:"#5a8c7b",c2:"#6ba881"},
+                          {id:"orange",label:"◇ Orange",c1:"#ea580c",c2:"#f97316"},
                           {id:"sunset",label:"◇ Sunset",c1:"#b88a6a",c2:"#c9a088"},
                           {id:"mono",label:"◇ Mono",c1:"#6b7a8a",c2:"#8a9baa"},
                         ].map(({id,label,c1,c2})=>(
@@ -3151,6 +3186,11 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                     {!isCurrentTier&&!isUpgrade&&(
                       <div style={{marginBottom:12,padding:"12px 14px",borderRadius:10,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.25)",fontSize:13,color:"#f59e0b"}}>
                         <div style={{fontWeight:700,marginBottom:6}}>⚠️ {t("downgrade_warning","После смены тарифа часть данных может быть ограничена.")}</div>
+                        {usage&&(usage.maps?.used>0||usage.projects?.used>0)&&(
+                          <div style={{fontSize:12,marginBottom:6,opacity:.95}}>
+                            {t("downgrade_you_have","У вас")}: {usage.maps?.used||0} {t("downgrade_maps_unit","карт")}, {usage.projects?.used||0} {t("downgrade_projects_unit","проектов")}
+                          </div>
+                        )}
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                           <div style={{background:"rgba(245,158,11,.08)",borderRadius:7,padding:"6px 10px",fontSize:12}}>
                             <span style={{opacity:.7}}>{t("downgrade_limit_maps","Карт")}:</span> <strong>{selTier.maps===999?"∞":selTier.maps}</strong>
@@ -3494,6 +3534,7 @@ function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme}){
 // ── StatsPopup ──
 function StatsPopup({nodes,edges,onClose}){
   const{t}=useLang();
+  const isMobile=useIsMobile();
   const STATUS=getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const total=nodes.length;
@@ -3539,8 +3580,8 @@ function StatsPopup({nodes,edges,onClose}){
   });
   const healthColor=healthScore>=70?"#10b981":healthScore>=40?"#f59e0b":"#ef4444";
   return(
-    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,620px)",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
+    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:isMobile?"100%":"min(96vw,620px)",maxHeight:isMobile?"88vh":"none",overflowY:"auto",borderRadius:isMobile?"18px 18px 0 0":20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
           <div>
             <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>📊 Аналитика карты</div>
@@ -3721,7 +3762,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
     setAutoConnLoading(false);
   }
 
-  const iS={width:"100%",padding:"12px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",resize:"none",transition:"border-color .2s"};
+  const iS={width:"100%",padding:"12px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"};
+  const iSTextarea={...iS,resize:"vertical" as const,minHeight:44,maxHeight:180,overflowY:"auto" as const,wordBreak:"break-word" as const};
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
   const tabs=[["info","◈ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
 
@@ -3748,18 +3790,18 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div>
               <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                Название
+                {t("title","Название")}
                 {!readOnly&&<button onClick={aiRephrase} disabled={aiRephrLoading} style={{fontSize:11,padding:"2px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--surface)",color:aiRephrLoading?"var(--text4)":"var(--accent-2)",cursor:aiRephrLoading?"wait":"pointer",transition:"all .2s"}}>{aiRephrLoading?"…":"✨ AI"}</button>}
               </div>
-              <textarea value={node.title||""} onChange={e=>!readOnly&&onUpdate({title:e.target.value})} rows={1} style={{...iS,minHeight:44}} readOnly={readOnly}/>
+              <textarea value={node.title||""} onChange={e=>!readOnly&&onUpdate({title:e.target.value})} rows={1} style={{...iSTextarea,minHeight:44,maxHeight:80}} readOnly={readOnly} placeholder={t("title","Название шага")}/>
             </div>
             <div>
               <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6}}>{t("why_label","Зачем?")} <span style={{fontSize:11,color:"var(--text5)",fontWeight:400}}>(описание)</span></div>
-              <textarea value={node.reason||""} onChange={e=>!readOnly&&onUpdate({reason:e.target.value})} placeholder={t("why_placeholder","Зачем этот шаг, какой результат нужен")} rows={2} style={{...iS,minHeight:56}} readOnly={readOnly}/>
+              <textarea value={node.reason||""} onChange={e=>!readOnly&&onUpdate({reason:e.target.value})} placeholder={t("why_placeholder","Зачем этот шаг, какой результат нужен")} rows={2} style={{...iSTextarea,minHeight:56}} readOnly={readOnly}/>
             </div>
             <div>
               <div style={{fontSize:12,fontWeight:600,color:"var(--accent-2)",marginBottom:6}}>{t("action_label","Что сделать")} <span style={{fontSize:11,color:"var(--text5)",fontWeight:400}}>(конкретное действие)</span></div>
-              <textarea value={node.action||""} onChange={e=>!readOnly&&onUpdate({action:e.target.value})} placeholder={t("action_placeholder","Напр.: Провести 15 интервью с ЦА до пятницы")} rows={2} style={{...iS,minHeight:56,borderColor:"var(--accent-1)"}} readOnly={readOnly}/>
+              <textarea value={node.action||""} onChange={e=>!readOnly&&onUpdate({action:e.target.value})} placeholder={t("action_placeholder","Напр.: Провести 15 интервью с ЦА до пятницы")} rows={2} style={{...iSTextarea,minHeight:56,borderColor:"var(--accent-1)"}} readOnly={readOnly}/>
             </div>
             <div>
               <div style={{fontSize:12,fontWeight:600,color:"var(--text4)",marginBottom:6}}>{t("metric_label","Метрика")}</div>
@@ -3822,7 +3864,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             ))}
             {!readOnly&&(
               <div style={{marginTop:4,borderTop:"1px solid var(--border)",paddingTop:8,display:"flex",flexDirection:"column",gap:6}}>
-                <textarea value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder="Комментарий… или @AI вопрос (Ctrl+Enter)" rows={2} onKeyDown={e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();addComment();}}} style={{...iS,lineHeight:1.5}}/>
+                <textarea value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder="Комментарий… или @AI вопрос (Ctrl+Enter)" rows={2} onKeyDown={e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();addComment();}}} style={{...iSTextarea,lineHeight:1.5}}/>
                 <button onClick={addComment} disabled={!newComment.trim()||aiCommentLoading} style={{padding:"7px",borderRadius:8,border:"none",background:newComment.trim()&&!aiCommentLoading?"var(--gradient-accent)":"var(--surface2)",color:newComment.trim()&&!aiCommentLoading?"var(--accent-on-bg)":"var(--text4)",fontSize:13,cursor:newComment.trim()&&!aiCommentLoading?"pointer":"not-allowed",fontWeight:600}}>{aiCommentLoading?"AI отвечает…":"Отправить"}</button>
               </div>
             )}
@@ -3996,44 +4038,46 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         ? {position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}
         : {position:"absolute" as const,right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"});
   return(
-    <div className={`glass-panel ${embedded?"":"panel-slide"} ${exiting&&!embedded?"panel-slide-out":""}`.trim()} style={aiPanelStyle}>
-      <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
-        <div style={{width:36,height:36,borderRadius:12,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0}}>✦</div>
+    <div className={`glass-panel ${embedded?"":"panel-slide"} ${exiting&&!embedded?"panel-slide-out":""}`.trim()} style={{...aiPanelStyle,background:"var(--glass-panel-bg)",backdropFilter:"blur(24px)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:16,padding:"24px 24px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent"}}>
+        <div style={{width:44,height:44,borderRadius:14,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:"0 4px 20px var(--accent-glow)",flexShrink:0,border:"2px solid rgba(255,255,255,.15)"}}>✦</div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:15,fontWeight:800,color:"var(--text)"}}>{t("ai_consultant","AI Советник")}</div>
-          <div style={{fontSize:12,color:tierCfg.color||"#10b981",fontWeight:600,marginTop:2}}>{tierCfg.badge} {tierCfg.label}</div>
+          <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:"-0.02em"}}>{t("ai_consultant","AI Советник")}</div>
+          <div style={{fontSize:12,color:"var(--accent-2)",fontWeight:600,marginTop:2}}>{tierCfg.badge} {tierCfg.label}</div>
         </div>
-        <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"8px 12px",borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>✕</button>
-        {!embedded&&<button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>}
+        <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600}}>✕</button>
+        {!embedded&&<button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"1px solid var(--border)",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
       </div>
-      <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
-        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+      <div style={{padding:"16px 20px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent"}}>
+        <div style={{fontSize:11,fontWeight:700,color:"var(--text5)",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>{t("ai_quick_questions","Быстрые вопросы")}</div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {quick.map(q=>(
-            <button key={q} className="btn-interactive" onClick={()=>send(q)} style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600}}
-              onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)";}}>{q}</button>
+            <button key={q} className="btn-interactive" onClick={()=>send(q)} style={{padding:"10px 16px",borderRadius:12,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12.5,fontWeight:600,transition:"all .2s",boxShadow:"0 1px 3px rgba(0,0,0,.06)"}}
+              onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";e.currentTarget.style.transform="translateY(-1px)";}}
+              onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--glass-border-accent,var(--border))";e.currentTarget.style.color="var(--text2)";e.currentTarget.style.transform="";}}>{q}</button>
           ))}
           {allQuick.length>QUICK_SHOW&&(
-            <button onClick={()=>setShowMoreQuick(s=>!s)} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text4)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s"}}>
-              {showMoreQuick?"▲":"+ ещё"}
+            <button onClick={()=>setShowMoreQuick(s=>!s)} style={{padding:"10px 14px",borderRadius:12,border:"1px dashed var(--border)",background:"transparent",color:"var(--text4)",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+              {showMoreQuick?"▲ Свернуть":"+ Ещё…"}
             </button>
           )}
         </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"16px 18px",display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{flex:1,overflowY:"auto",padding:"20px 24px",display:"flex",flexDirection:"column",gap:20,background:"linear-gradient(180deg,transparent 0%,rgba(var(--accent-rgb,91,107,192),.02) 100%)"}}>
         {msgs.map((m,i)=>(
-          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:8,alignItems:"flex-start",animation:"fadeInUp .35s cubic-bezier(0.22,1,0.36,1) forwards"}}>
-            {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
-            <div style={{maxWidth:"85%",padding:"12px 16px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--accent-soft)":m.role==="sys"?"rgba(16,185,129,.1)":"var(--surface)",border:"none",fontSize:14,lineHeight:1.6,color:m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 8px var(--accent-glow)":m.role==="sys"?"none":"0 1px 4px rgba(0,0,0,.08)",transition:"opacity .2s"}}>{m.text}</div>
+          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:12,alignItems:"flex-start",animation:"fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards"}}>
+            {m.role==="ai"&&<div style={{width:32,height:32,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,marginTop:4,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div>}
+            <div style={{maxWidth:"88%",padding:m.role==="user"?"14px 20px":"16px 20px 16px 24px",borderRadius:m.role==="user"?"18px 18px 6px 18px":m.role==="sys"?"12px":"6px 18px 18px 18px",background:m.role==="user"?"var(--gradient-accent)":m.role==="sys"?"rgba(16,185,129,.12)":"linear-gradient(135deg,var(--surface) 0%,rgba(var(--accent-rgb,91,107,192),.06) 100%)",border:m.role==="user"?"none":m.role==="sys"?"1px solid rgba(16,185,129,.25)":"1px solid var(--glass-border-accent,var(--border))",borderLeft:m.role==="ai"?"4px solid var(--accent-1)":"none",fontSize:14,lineHeight:1.65,color:m.role==="user"?"#fff":m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 4px 16px var(--accent-glow)":m.role==="sys"?"none":"0 4px 20px rgba(0,0,0,.08)"}}>{m.text}</div>
           </div>
         ))}
-        {load&&<div style={{display:"flex",gap:8,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",borderRadius:"4px 14px 14px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
+        {load&&<div style={{display:"flex",gap:12,alignItems:"center"}}><div style={{width:32,height:32,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div><div style={{display:"flex",gap:5,padding:"14px 18px",background:"var(--surface)",borderRadius:"6px 18px 18px 18px",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"0 2px 12px rgba(0,0,0,.06)"}}>{[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`,opacity:.7}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
-      <div style={{padding:"18px 22px",borderTop:"1px solid var(--border)",display:"flex",gap:12,flexShrink:0,background:"var(--surface)",flexDirection:"column"}}>
-        {aiFreeTier&&<div style={{padding:"10px 14px",borderRadius:10,background:"rgba(100,116,139,.12)",border:"1px solid rgba(100,116,139,.25)",color:"var(--text3)",fontSize:12.5,marginBottom:8}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</div>}
-        <div style={{display:"flex",gap:12}}>
-          <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,padding:"14px 18px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:14,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s",opacity:aiFreeTier?.7:1}}/>
-          <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:48,height:48,borderRadius:14,border:"none",background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:!aiFreeTier&&inp.trim()&&!load?"var(--accent-on-bg)":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>
+      <div style={{padding:"24px",borderTop:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent",flexDirection:"column",display:"flex",gap:14}}>
+        {aiFreeTier&&<div className="glass-card" style={{padding:"14px 18px",borderRadius:12,border:"1px solid var(--glass-border-accent,var(--border))",color:"var(--text3)",fontSize:13}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</div>}
+        <div style={{display:"flex",gap:14}}>
+          <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,padding:"16px 20px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--glass-border-accent,var(--input-border))",borderRadius:14,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"all .2s",opacity:aiFreeTier?.7:1}}/>
+          <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:52,height:52,borderRadius:14,border:"none",background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:!aiFreeTier&&inp.trim()&&!load?"#fff":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:22,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 4px 20px var(--accent-glow)":"none"}}>↑</button>
         </div>
       </div>
     </div>
@@ -4096,7 +4140,8 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
   const commentCount=(node.comments||[]).length;
   const progress=node.progress||0;
   const progressW=Math.max(0,progress/100*204);
-  const title=(node.title||"Новый шаг").slice(0,26);
+  const titleFull=node.title||"Новый шаг";
+  const title=titleFull.length>28?titleFull.slice(0,26)+"…":titleFull;
   const hasMeta=node.reason||node.action||node.metric;
   const hasAction=!!(node.action&&node.action.trim());
   const headerY=16;
@@ -4122,23 +4167,23 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
       <rect x={156} y={9} width={70} height={14} rx={7} fill={`${pr.c}20`} stroke={`${pr.c}50`} strokeWidth={1}/>
       <circle cx={167} cy={headerY} r={2.5} fill={pr.c}/>
       <text x={173} y={headerY} fontSize={8.5} fontWeight={700} fill={pr.c} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{pr.label}</text>
-      <text x={14} y={headerY} fontSize={12} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
-        {title}{(node.title||"").length>26?"…":""}
-      </text>
+      <g><title>{titleFull}</title><text x={14} y={headerY} fontSize={12} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+        {title}
+      </text></g>
       {node.reason&&(
-        <text x={14} y={reasonY} fontSize={9} fill={reasonColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
-          {node.reason.slice(0,36)}{node.reason.length>36?"…":""}
-        </text>
+        <g><title>{node.reason}</title><text x={14} y={reasonY} fontSize={9} fill={reasonColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+          {node.reason.length>40?node.reason.slice(0,38)+"…":node.reason}
+        </text></g>
       )}
       {node.action&&node.action.trim()&&(
-        <text x={14} y={actionY} fontSize={8.5} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle",fontWeight:600}}>
-          ▶ {node.action.slice(0,32)}{node.action.length>32?"…":""}
-        </text>
+        <g><title>{node.action}</title><text x={14} y={actionY} fontSize={8.5} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle",fontWeight:600}}>
+          ▶ {node.action.length>34?node.action.slice(0,32)+"…":node.action}
+        </text></g>
       )}
       {node.metric&&(
-        <text x={14} y={metricY} fontSize={9} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
-          ◈ {node.metric.slice(0,30)}{node.metric.length>30?"…":""}
-        </text>
+        <g><title>{node.metric}</title><text x={14} y={metricY} fontSize={9} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+          ◈ {node.metric.length>32?node.metric.slice(0,30)+"…":node.metric}
+        </text></g>
       )}
       <rect x={14} y={progressY} width={212} height={progressBarH} rx={3} fill={progressTrack}/>
       {progress>0&&<rect x={14} y={progressY} width={Math.min(212,progressW)} height={progressBarH} rx={3} fill={node.status==="completed"?"#10b981":st.c} opacity={.9}/>}
@@ -4317,7 +4362,7 @@ function DeadlineReminders({nodes,onGoToNode,onDismiss}:{nodes:any[],onGoToNode:
 }
 
 // ── VersionHistoryModal ──
-function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="dark"}:{mapId:string,projectId:string,onRestore:(v:any)=>void,onClose:()=>void,onError?:(msg:string)=>void,theme?:string}){
+function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="dark",isMobile=false}:{mapId:string,projectId:string,onRestore:(v:any)=>void,onClose:()=>void,onError?:(msg:string)=>void,theme?:string,isMobile?:boolean}){
   const{t}=useLang();
   const[versions,setVersions]=useState<any[]>([]);const[loading,setLoading]=useState(false);const[restoring,setRestoring]=useState<string|null>(null);const[restoreConfirm,setRestoreConfirm]=useState<any>(null);
   const[closing,setClosing]=useState(false);
@@ -4336,8 +4381,8 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="d
     onRestore(v);setRestoring(null);setRestoreConfirm(null);onClose();
   }
   return(
-    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(480px,94vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:isMobile?"18px 18px 0 0":20,width:isMobile?"100%":"min(480px,94vw)",maxHeight:isMobile?"78vh":"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 24px",borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
           <div style={{fontWeight:800,fontSize:16,color:"var(--text)"}}>📜 {t("version_history","История версий")}</div>
           <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
@@ -4373,6 +4418,7 @@ function sanitize(str:string|undefined|null):string{
 // ── WeeklyBriefingModal ──
 function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{nodes:any[],mapName:string,user:any,onClose:()=>void,theme?:string,onError?:(msg:string)=>void}){
   const{t,lang}=useLang();
+  const isMobile=useIsMobile();
   const[loading,setLoading]=useState(false);
   const[summary,setSummary]=useState("");
   const[closing,setClosing]=useState(false);
@@ -4399,8 +4445,8 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
   useEffect(()=>{fetchBriefing();},[]);
 
   return(
-    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:20,width:"min(520px,94vw)",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:isMobile?"18px 18px 0 0":20,width:isMobile?"100%":"min(520px,94vw)",maxHeight:isMobile?"85vh":"none",overflowY:"auto",overflowX:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{background:"var(--surface)",padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
@@ -4434,7 +4480,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
             ):(
               <div>
                 <p style={{fontSize:13,color:"var(--text)",lineHeight:1.65,margin:0}}>{summary}</p>
-                {summary===errMsg&&<button onClick={fetchBriefing} style={{marginTop:10,padding:"6px 14px",borderRadius:8,border:"1px solid rgba(99,102,241,.4)",background:"rgba(99,102,241,.1)",color:"#818cf8",fontSize:12,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>}
+                {summary===errMsg&&<button onClick={fetchBriefing} style={{marginTop:10,padding:"6px 14px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",fontSize:12,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>}
               </div>
             )}
           </div>
@@ -4762,13 +4808,35 @@ tr:nth-child(even){background:#f8fafc}
     w.onload=()=>{w.print();(w as any).onafterprint=()=>w.close();};
   }
 
-  function exportPPTX(){
-    // Генерируем HTML-страницу с "слайдами" для печати в PPTX через браузер
+  async function exportPPTX(){
     const title=sanitize(mapData?.name||project?.name||"Strategy Map");
     const date=new Date().toLocaleDateString("ru-RU");
+    const hasRealPptx=TIERS[user?.tier||"free"]?.pptx;
+    if(hasRealPptx){
+      try{
+        const pres=new pptxgen();
+        pres.title=title;
+        pres.author="Strategy AI";
+        const titleSlide=pres.addSlide();
+        titleSlide.addText(title,{x:0.5,y:1.5,w:9,h:1,fontSize:44,bold:true,color:"1e293b"});
+        titleSlide.addText(`${t("strategy_map","Стратегическая карта")} · ${date} · ${nodes.length} ${t("steps_label","шагов")}`,{x:0.5,y:2.5,w:9,h:0.5,fontSize:18,color:"64748b"});
+        for(let i=0;i<nodes.length;i++){
+          const n=nodes[i];
+          const slide=pres.addSlide();
+          slide.addText(sanitize(n.title||""),{x:0.5,y:0.3,w:9,h:0.8,fontSize:28,bold:true,color:"1e293b"});
+          slide.addText(`${n.status||"planning"} · ${n.priority||"medium"}`,{x:0.5,y:1.1,w:9,h:0.3,fontSize:12,color:"64748b"});
+          if(n.reason)slide.addText(sanitize(n.reason).slice(0,500),{x:0.5,y:1.5,w:9,h:1.5,fontSize:14,color:"475569",valign:"top"});
+          if(n.metric)slide.addText(`🎯 ${sanitize(n.metric)}`,{x:0.5,y:3.2,w:9,h:0.4,fontSize:14,color:"6366f1",bold:true});
+          slide.addText(`${n.progress||0}%${n.deadline?` · ${t("deadline","Дедлайн")}: ${n.deadline}`:""}`,{x:0.5,y:3.7,w:9,h:0.3,fontSize:12,color:"64748b"});
+        }
+        const fname=`${title.replace(/[^a-zA-Zа-яА-Я0-9\s-]/g,"").slice(0,40)}.pptx`;
+        await pres.writeFile({fileName:fname});
+        addToast(t("export_pptx","⬇ PPTX")+" ✓","success");
+      }catch(e:any){addToast(e?.message||t("save_error","Ошибка экспорта"),"error");}
+      return;
+    }
     const statusColors:Record<string,string>={completed:"#10b981",active:"#6366f1",planning:"#64748b",paused:"#f59e0b",blocked:"#ef4444"};
     const prioColors:Record<string,string>={critical:"#ef4444",high:"#f59e0b",medium:"#6366f1",low:"#94a3b8"};
-
     const slides=nodes.map((n:any,i:number)=>`
       <div class="slide">
         <div class="slide-num">${i+1} / ${nodes.length}</div>
@@ -4780,7 +4848,6 @@ tr:nth-child(even){background:#f8fafc}
         <div class="progress-wrap"><div class="progress-bar" style="width:${n.progress||0}%"></div></div>
         <div class="prog-label">${n.progress||0}%${n.deadline?` · ${t("deadline","Deadline")}: ${n.deadline}`:""}</div>
       </div>`).join("");
-
     const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
 <style>
 @page{size:297mm 210mm landscape;margin:0}
@@ -4805,10 +4872,10 @@ h2{font-size:32px;font-weight:800;color:#1e293b;margin:0 0 12px;line-height:1.2}
 ${slides}
 </body></html>`;
     const w=window.open("","_blank");
-    if(!w){addToast("Разрешите всплывающие окна для экспорта","warn");return;}
+    if(!w){addToast(t("popup_blocked","Разрешите всплывающие окна для экспорта"),"warn");return;}
     w.document.write(html);w.document.close();
     setTimeout(()=>{w.print();},500);
-    addToast(t("export_pptx","⬇ PPTX") + " — откроется окно печати","success");
+    addToast(t("export_pptx","⬇ PPTX")+" — "+t("export_pptx_print_hint","откроется окно печати"),"success");
   }
 
   function fitView(){
@@ -4894,7 +4961,11 @@ ${ctx}
         setShowAI(true);
         setPendingAiMsgs(prev=>[...prev,{role:"assistant",content:`🔍 **Анализ связей завершён**\n\n${parsed.summary||"Все логические связи уже присутствуют на карте. AI не нашёл новых обоснованных зависимостей."}`,ts:Date.now()}]);
       }
-    }catch(err){addToast(t("ai_error","Ошибка AI-анализа"),"error");}
+    }catch(err:any){
+      const msg=err?.message||"";
+      const hint=msg.includes("429")||msg.includes("лимит")?t("ai_rate_limit_hint","Превышен лимит запросов. Подождите минуту."):msg.includes("network")||msg.includes("fetch")?t("ai_network_err","Проверьте интернет и ключ API."):t("ai_error","Ошибка AI-анализа");
+      addToast(hint,"error");
+    }
   }
 
   // load allMaps + trigger onboarding
@@ -5067,27 +5138,40 @@ ${ctx}
       {children}
     </button>
   );
-  const tb=(active,onClick,children,extraStyle={})=>(
-    <button onClick={onClick} style={{height:38,padding:"0 16px",borderRadius:12,border:"none",background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,transition:"all .2s",display:"flex",alignItems:"center",gap:8,...extraStyle}}
+  const tb=(active,onClick,children,titleOrStyle?:string|object,extraStyle={})=>{
+    const opts=typeof titleOrStyle==="string"?{title:titleOrStyle,...extraStyle}:{...titleOrStyle as object,...extraStyle};
+    const {title,...style}=opts;
+    return (
+    <button onClick={onClick} title={title} style={{height:38,padding:"0 16px",borderRadius:12,border:"none",background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,transition:"all .2s",display:"flex",alignItems:"center",gap:8,...style}}
       onMouseOver={e=>{if(!active)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
       {children}
     </button>
-  );
+  );};
   const retrySave=async()=>{setSaveState("saving");try{await saveMap(project.id,{...mapData,nodes,edges,updatedAt:Date.now()});setSaveState("saved");}catch{setSaveState("error");}};
+  const saveVersion=async()=>{if(!API_BASE||!project?.id||!mapData?.id)return;try{const lbl=t("version_save_label","Промежуточная версия")+" "+new Date().toLocaleString("ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});await apiFetch(`/api/projects/${project.id}/maps/${mapData.id}/versions`,{method:"POST",body:JSON.stringify({label:lbl,nodes,edges,ctx:mapData?.ctx||""})});addToast(t("version_saved","Версия сохранена ✓"),"success");}catch(e:any){addToast(e?.message||t("save_error","Ошибка"),"error");}};
 
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
       <style>{CSS}</style>
-
+      {readOnly&&(
+        <div style={{flexShrink:0,background:"rgba(148,163,184,.12)",borderBottom:"1px solid var(--border)",padding:"6px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontSize:12.5,color:"var(--text3)",fontWeight:600}}>
+          <span>👁</span> {t("read_only_banner","Режим просмотра — вы можете просматривать карту, но не редактировать")}
+        </div>
+      )}
       {/* ── TOOLBAR — 2 rows ── */}
       <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--glass-border-accent,var(--border))",background:"var(--bg2)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:"0 1px 0 var(--glass-border-accent,var(--border))"}}>
 
         {/* ROW 1 — primary actions + search */}
         <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
 
-          {/* LEFT: nav + edit */}
-          <div style={{display:"flex",alignItems:"center",gap:isMobile?8:8,flexShrink:0}}>
-            {tb(false,onBack,<>{t("back_btn","← Назад")}</>)}
+          {/* LEFT: nav + breadcrumb + edit */}
+          <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,flexShrink:0,minWidth:0}}>
+            {tb(false,onBack,<>{t("back_btn","← Назад")}</>,t("back_to_project","Вернуться в проект"))}
+            {project?.name&&mapData?.name&&!isMobile&&(
+              <span style={{fontSize:13,color:"var(--text4)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:200}} title={`${project.name} → ${mapData.name}`}>
+                {project.name} <span style={{opacity:.6}}>→</span> {mapData.name}
+              </span>
+            )}
             {!readOnly&&<>{sep}
             <button className="btn-interactive" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)"}}
               onMouseOver={e=>{e.currentTarget.style.boxShadow="0 6px 24px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
@@ -5149,16 +5233,17 @@ ${ctx}
           {/* View tools */}
           <div style={{display:"flex",alignItems:"center",gap:isMobile?4:6,flexShrink:0}}>
             {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>Вид</span>}
-            {tb(false,fitView,<>{isMobile?"⊡":<>⊡ Вписать</>}</>)}
-            {selNode&&tb(false,()=>scrollToNode(selNode),<>{isMobile?"◎":<>◎ {t("center_on","К узлу")}</>}</>)}
-            {!readOnly&&tb(false,autoLayout,<>{isMobile?"⌥":t("auto_layout","⌥ Расклад")}</>)}
-            {!readOnly&&tb(false,autoConnect,<>{isMobile?"🔗":t("ai_links","🔗 AI-связи")}</>)}
+            {tb(false,fitView,<>{isMobile?"⊡":<>⊡ {t("fit_view","Вписать")}</>}</>,t("fit_view_hint","Вписать карту в экран"))}
+            {selNode&&tb(false,()=>scrollToNode(selNode),<>{isMobile?"◎":<>◎ {t("center_on","К узлу")}</>}</>,t("center_on_hint","Центрировать на выбранном шаге"))}
+            {!readOnly&&tb(false,autoLayout,<>{isMobile?"⌥":t("auto_layout","⌥ Расклад")}</>,t("auto_layout_hint","Автоматическая раскладка по связям"))}
+            {!readOnly&&tb(false,autoConnect,<>{isMobile?"🔗":t("ai_links","🔗 AI-связи")}</>,t("ai_links_hint","AI предложит связи между шагами"))}
           </div>
 
           {sep}
 
           {/* Canvas bg */}
           <div style={{display:"flex",alignItems:"center",gap:2,flexShrink:0}}>
+            {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>{t("bg_label","Фон")}</span>}
             {[["grid","⊞","Сетка"],["stars","✦","Звёзды"],["none","○","Чисто"]].map(([m,icon,label])=>(
               <button key={m} onClick={()=>setBgMode(m)} title={`Фон: ${label}`}
                 style={{height:30,padding:"0 10px",borderRadius:8,border:"none",background:bgMode===m?"rgba(99,102,241,.15)":"transparent",color:bgMode===m?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:14,fontWeight:600,flexShrink:0,transition:"all .2s"}}>
@@ -5215,7 +5300,7 @@ ${ctx}
               onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               ⬇ JSON
             </button>
-            <button onClick={exportPDF} title={t("export_pdf","Скачать PDF")}
+            <button onClick={exportPDF} title={t("export_pdf_hint","PDF через печать браузера (Ctrl+P → Сохранить как PDF)")}
               style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
               onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               ⬇ PDF
@@ -5227,11 +5312,16 @@ ${ctx}
             </button>
             {/* Версии */}
             {API_BASE&&mapData?.id&&(
-              <button onClick={()=>setShowVersions(true)} title={t("version_history","История версий")}
-                style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.08)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-                onMouseOver={e=>{e.currentTarget.style.background="rgba(99,102,241,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(99,102,241,.08)";}}>
-                📜
-              </button>
+              <>
+                {!readOnly&&<button onClick={saveVersion} title={t("save_version_btn","Сохранить версию")}
+                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.08)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+                  onMouseOver={e=>{e.currentTarget.style.background="rgba(99,102,241,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(99,102,241,.08)";}}>📸 {t("save_version_short","Версия")}</button>}
+                <button onClick={()=>setShowVersions(true)} title={t("version_history","История версий")}
+                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.08)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+                  onMouseOver={e=>{e.currentTarget.style.background="rgba(99,102,241,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(99,102,241,.08)";}}>
+                  📜 {!isMobile&&t("version_history_short","История")}
+                </button>
+              </>
             )}
             {/* Онлайн-пользователи */}
             {onlineUsers.length>0&&(
@@ -5404,7 +5494,7 @@ ${ctx}
         )}
         {showVersions&&mapData?.id&&(
           <VersionHistoryModal
-            mapId={mapData.id} projectId={project?.id||""} theme={theme}
+            mapId={mapData.id} projectId={project?.id||""} theme={theme} isMobile={isMobile}
             onRestore={(v:any)=>{pushUndo(nodes,edges);const es=v.edges||[];setNodes(v.nodes||[]);setEdges(es);emitEdgeUpdate(es);addToast(t("version_restored","Версия восстановлена"),"success");}}
             onError={(msg)=>addToast(msg,"error")}
             onClose={()=>setShowVersions(false)}
@@ -5425,13 +5515,13 @@ ${ctx}
           </div>
         ))}
         {showShortcuts&&(
-          <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={()=>setShowShortcuts(false)}>
-            <div className="glass-panel" style={{borderRadius:24,border:"1px solid var(--glass-border-accent,var(--border))",padding:"32px 36px",maxWidth:440,width:"90%",animation:"scaleIn .2s ease",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+          <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={()=>setShowShortcuts(false)}>
+            <div className="glass-panel" style={{borderRadius:isMobile?"18px 18px 0 0":24,border:"1px solid var(--glass-border-accent,var(--border))",padding:"32px 36px",maxWidth:440,width:isMobile?"100%":"90%",maxHeight:isMobile?"78vh":"none",overflowY:isMobile?"auto":"visible",animation:"scaleIn .2s ease",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:16}}>⌨️ Горячие клавиши</div>
-              <p style={{fontSize:12,color:"var(--text4)",marginBottom:12}}>💡 Ctrl+C / Ctrl+V работают и в этой модалке — можно скопировать комбинацию.</p>
+              <p style={{fontSize:12,color:"var(--text4)",marginBottom:12}}>💡 {t("shortcuts_copy_hint","Выделите узел, Ctrl+C — копировать, Ctrl+V — вставить. Комбинации можно копировать из этой подсказки.")}</p>
               {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+Shift+A","Открыть AI-советник"],["Ctrl+F","Поиск шагов"],["Ctrl+A","Выбрать все узлы"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Shift+клик","Мультивыбор узлов"],["Двойной клик на фон","Добавить шаг в точке"],["ПКМ на узле/фоне","Контекстное меню"],["Escape","Снять выбор / закрыть меню"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Перетащить фон","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
                 <div key={row[0]} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--border)"}}>
-                  <code style={{fontSize:13,background:"var(--surface)",padding:"2px 7px",borderRadius:5,color:"#818cf8",fontFamily:"'JetBrains Mono',monospace"}}>{row[0]}</code>
+                  <code style={{fontSize:13,background:"var(--surface)",padding:"2px 7px",borderRadius:5,color:"var(--accent-1)",fontFamily:"'JetBrains Mono',monospace"}}>{row[0]}</code>
                   <span style={{fontSize:13,color:"var(--text3)"}}>{row[1]}</span>
                 </div>
               ))}
@@ -5510,6 +5600,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const ROLES=getROLES(t);
   const[projects,setProjects]=useState([]);
   const[maps,setMaps]=useState({});
+  const[toast,setToast]=useState<{msg:string;type:string}|null>(null);
   const[loading,setLoading]=useState(true);
   const[search,setSearch]=useState("");
   const[searching,setSearching]=useState(false);
@@ -5524,12 +5615,18 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const[showAIHub,setShowAIHub]=useState(false);
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
 
-  useEffect(()=>{(async()=>{
-    const ps=await getProjects(user.email);setProjects(ps);
-    const mm={};
-    for(const p of ps){mm[p.id]=await getMaps(p.id);}
-    setMaps(mm);setLoading(false);
-  })();},[]);
+  const[loadErr,setLoadErr]=useState<string|null>(null);
+  async function loadProjects(){
+    setLoadErr(null);setLoading(true);
+    try{
+      const ps=await getProjects(user.email);setProjects(ps);
+      const mm={};
+      for(const p of ps){mm[p.id]=await getMaps(p.id);}
+      setMaps(mm);
+    }catch(e:any){setLoadErr(e?.message||t("load_error","Ошибка загрузки"));setProjects([]);setMaps({});}
+    finally{setLoading(false);}
+  }
+  useEffect(()=>{loadProjects();},[]);
 
   async function loadNotifications(){
     if(!API_BASE)return;
@@ -5568,20 +5665,22 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
 
   async function createProject(){
     if(!newName.trim())return;
-    if(projects.filter(p=>p.owner===user.email).length>=tier.projects){return;}
+    if(projects.filter(p=>p.owner===user.email).length>=tier.projects){setToast({msg:t("project_limit","Лимит проектов"),type:"error"});setTimeout(()=>setToast(null),3000);return;}
     const p={id:uid(),name:newName.trim(),owner:user.email,members:[{email:user.email,role:"owner"}],createdAt:Date.now()};
-    const saved=await saveProject(p);
-    // Если сервер вернул проект с серверным ID — используем его, иначе локальный
-    const finalP=saved||p;
-    setProjects(ps=>[...ps,finalP]);
-    setMaps(m=>({...m,[finalP.id]:[]}));
-    setNewName("");setCreating(false);
+    try{
+      const saved=await saveProject(p);
+      const finalP=saved||p;
+      setProjects(ps=>[...ps,finalP]);
+      setMaps(m=>({...m,[finalP.id]:[]}));
+      setNewName("");setCreating(false);
+      setToast({msg:t("project_created","Проект создан"),type:"success"});setTimeout(()=>setToast(null),3000);
+    }catch(e:any){setToast({msg:e?.message||t("save_error","Ошибка сохранения"),type:"error"});setTimeout(()=>setToast(null),4000);}
   }
   async function deleteProj(id){
     try{
       await deleteProject(id);setProjects(ps=>ps.filter(p=>p.id!==id));
       const nm={...maps};delete nm[id];setMaps(nm);setDelId(null);
-    }catch(e:any){setDelId(null);/* toast would need to be added to ProjectsPage */console.warn("Delete project failed:",e?.message);}
+    }catch(e:any){setDelId(null);setToast({msg:e?.message||t("delete_project_err","Ошибка при удалении проекта"),type:"error"});setTimeout(()=>setToast(null),4000);}
   }
 
   const filtered=projects.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
@@ -5597,6 +5696,11 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <style>{CSS}</style>
+      {toast&&(
+        <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"14px 24px",borderRadius:14,border:`1px solid ${toast.type==="error"?"rgba(239,68,68,.4)":"rgba(16,185,129,.4)"}`,background:toast.type==="error"?"rgba(239,68,68,.15)":"rgba(16,185,129,.15)",color:toast.type==="error"?"#f87171":"#34d399",fontSize:14,fontWeight:700,boxShadow:"0 8px 32px rgba(0,0,0,.3)",animation:"slideUp .3s ease",backdropFilter:"blur(12px)"}}>
+          {toast.type==="error"?"⚠ ":"✓ "}{toast.msg}
+        </div>
+      )}
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:0}}>
@@ -5610,7 +5714,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           </button>
           {API_BASE&&(
             <button className="btn-interactive" onClick={()=>setShowNotifs(true)} title={t("notifications_title","🔔 Уведомления")} style={{position:"relative",padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,fontWeight:800}}>
-              •
+              🔔
               {notifUnread>0&&(
                 <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
                   {notifUnread>99?"99+":notifUnread}
@@ -5635,7 +5739,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             {!isMobile&&<div style={{flex:1}}/>}
             <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
               <div style={{position:"relative",flex:isMobile?1:undefined}}>
-                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search","Поиск…")} className="input-smooth" style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit"}}/>
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search_projects_hint","Поиск по проектам и картам…")} className="input-smooth" style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit"}}/>
                 {API_BASE&&((search||"").trim().length>=2)&&(searching||searchResults.length>0)&&(
                   <div className="glass-panel drop-panel" style={{position:"absolute",top:"calc(100% + 8px)",left:0,right:0,zIndex:50,borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",overflow:"hidden",boxShadow:"var(--glass-shadow-accent,none),0 22px 60px rgba(0,0,0,.35)"}}>
                     <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,background:"var(--surface)"}}>
@@ -5682,7 +5786,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           </div>
           {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
           {lastProj&&!loading&&onOpenMap&&(
-            <div style={{marginBottom:16,padding:"14px 18px",borderRadius:14,border:"1px solid rgba(99,102,241,.25)",background:"rgba(99,102,241,.06)",display:"flex",alignItems:"center",gap:12}}>
+            <div className="glass-card" style={{marginBottom:16,padding:"16px 20px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",display:"flex",alignItems:"center",gap:12}}>
               <span style={{fontSize:13,color:"var(--text3)"}}>{t("continue_last","Продолжить с")}</span>
               <button onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"8px 16px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>
                 {lastMapData?`${lastProj.name} → ${lastMapData.name}`:lastProj.name}
@@ -5691,14 +5795,30 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           )}
           {creating&&(
             <div style={{padding:"16px 18px",borderRadius:14,background:"var(--surface)",border:"1px solid var(--border2)",marginBottom:16,display:"flex",gap:10,alignItems:"center",animation:"slideUp .2s ease"}}>
-              <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")createProject();if(e.key==="Escape"){setCreating(false);setNewName("");}}} placeholder="Название проекта…" style={{flex:1,padding:"9px 13px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
+              <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")createProject();if(e.key==="Escape"){setCreating(false);setNewName("");}}} placeholder={t("new_project_name_ph","Название проекта…")} style={{flex:1,padding:"9px 13px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
               <button onClick={createProject} disabled={!newName.trim()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:newName.trim()?"pointer":"not-allowed",fontSize:13,fontWeight:700,opacity:newName.trim()?1:.5}}>{t("create_map_btn","Создать")}</button>
               <button onClick={()=>{setCreating(false);setNewName("");}} style={{padding:"9px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{t("cancel","Отмена")}</button>
             </div>
           )}
-          {loading?(
+          {loadErr?(
+            <div style={{padding:"32px 24px",textAlign:"center",background:"var(--surface)",borderRadius:18,border:"1px solid var(--border)"}}>
+              <div style={{fontSize:15,color:"var(--text3)",marginBottom:12}}>{loadErr}</div>
+              <button onClick={loadProjects} className="btn-interactive" style={{padding:"12px 24px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:14,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>
+            </div>
+          ):loading?(
             <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:20}}>
-              {[1,2,3].map(i=><div key={i} style={{height:120,borderRadius:14,background:"var(--surface)",animation:"pulse 1.5s ease infinite"}}/>)}
+              {[1,2,3,4].map(i=>(
+                <div key={i} className="glass-card" style={{padding:"22px 22px 18px",borderRadius:18,border:"1px solid var(--border)",display:"flex",flexDirection:"column",gap:14}}>
+                  <div style={{display:"flex",gap:14}}>
+                    <div style={{width:40,height:40,borderRadius:12,background:"var(--surface2)",animation:"pulse 1.5s ease infinite"}}/>
+                    <div style={{flex:1}}>
+                      <div style={{height:16,borderRadius:8,background:"var(--surface2)",width:"70%",marginBottom:8,animation:"pulse 1.5s ease infinite"}}/>
+                      <div style={{height:12,borderRadius:6,background:"var(--surface2)",width:"40%",animation:"pulse 1.5s ease infinite"}}/>
+                    </div>
+                  </div>
+                  <div style={{height:32,borderRadius:8,background:"var(--surface2)",animation:"pulse 1.5s ease infinite"}}/>
+                </div>
+              ))}
             </div>
           ):(
             <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:20}}>
@@ -5912,10 +6032,11 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
   const [loading,setLoading]=useState(true);
   const [editId,setEditId]=useState<string|null>(null);
   const [filterStatus,setFilterStatus]=useState<string>("all");
-  const [viewMode,setViewMode]=useState<"list"|"tree">("tree");
+  const [viewMode,setViewMode]=useState<"calendar"|"map"|"list"|"tree">("calendar");
   const [aiSuggesting,setAiSuggesting]=useState(false);
   const isMobile=useIsMobile();
   const treePrefsKey=`sa_cp_tree_${projectId}`;
+  const [treeExpandedAll,setTreeExpandedAll]=useState<Record<string,boolean>>({});
   const [treeCollapsed,setTreeCollapsed]=useState<{channels:Record<string,boolean>,statuses:Record<string,boolean>}>(()=>{
     try{
       const raw=localStorage.getItem(treePrefsKey);
@@ -5933,7 +6054,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
   const allNodes=maps.flatMap((m:any)=>(m.nodes||[]).map((n:any)=>({...n,mapName:m.name})));
   const filtered=filterStatus==="all"?items:items.filter((x:any)=>x.status===filterStatus);
 
-  const CHANNEL_LABEL:any={blog:t("content_channel_blog","Блог"),telegram:t("content_channel_telegram","Telegram"),instagram:t("content_channel_instagram","Instagram"),youtube:t("content_channel_youtube","YouTube"),email:t("content_channel_email","Email")};
+  const CHANNEL_LABEL:any={blog:t("content_channel_blog","Блог"),telegram:t("content_channel_telegram","Telegram"),instagram:t("content_channel_instagram","Instagram"),vk:t("content_channel_vk","ВКонтакте"),youtube:t("content_channel_youtube","YouTube"),email:t("content_channel_email","Email")};
   const STATUS_LABEL:any={
     draft:t("content_status_draft","Черновик"),
     scheduled:t("content_status_scheduled","Запланировано"),
@@ -5979,6 +6100,96 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
 
   const editingItem=editId?items.find((x:any)=>x.id===editId):null;
 
+  function ContentMap({filtered,CHANNEL_LABEL,CONTENT_TYPES,CONTENT_STATUSES,setEditId,removeItem,t,isMobile}:any){
+    return(
+      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(280px,1fr))",gap:20,padding:"4px 0"}}>
+        {filtered.map((it:any)=>(
+          <div key={it.id} className="glass-card btn-interactive" onClick={()=>setEditId(it.id)} style={{padding:"20px 18px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",cursor:"pointer",display:"flex",flexDirection:"column",gap:10,minHeight:120,transition:"all .2s",position:"relative"}}
+            onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 12px 32px var(--accent-glow)";}}
+            onMouseOut={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
+            <div style={{fontSize:14,fontWeight:800,color:"var(--text)",lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}} title={it.title}>{it.title||t("untitled","Без названия")}</div>
+            <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap",marginTop:"auto"}}>
+              <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+              <span>·</span>
+              <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4}}>
+              <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:11.5,fontWeight:700}}>
+                {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
+              </div>
+              <button onClick={e=>{e.stopPropagation();removeItem(it.id);}} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function ContentCalendar({filtered,CHANNEL_LABEL,STATUS_LABEL,CONTENT_TYPES,CONTENT_CHANNELS,CONTENT_STATUSES,setEditId,removeItem,t,isMobile}:any){
+    const byDate:Record<string,any[]>= {};
+    filtered.forEach((it:any)=>{
+      const d=it.scheduledDate||"";
+      const key=d||"_nodate";
+      if(!byDate[key])byDate[key]=[];
+      byDate[key].push(it);
+    });
+    const dates=Object.keys(byDate).filter(k=>k!=="_nodate").sort();
+    const nodate=byDate["_nodate"]||[];
+    const fmtDate=(s:string)=>s?new Date(s+"T12:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"}):"";
+    return(
+      <div style={{display:"flex",flexDirection:"column",gap:16}}>
+        {nodate.length>0&&(
+          <div className="glass-card" style={{padding:isMobile?"14px 14px":"18px 20px"}}>
+            <div style={{fontSize:13,fontWeight:800,color:"var(--text4)",marginBottom:12,textTransform:"uppercase",letterSpacing:.5}}>📋 {t("content_no_date","Без даты")}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {nodate.map((it:any)=>(
+                <div key={it.id} className="btn-interactive" style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}} onClick={()=>setEditId(it.id)}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
+                    <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
+                      <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+                      <span>·</span>
+                      <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
+                      {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
+                    </div>
+                  </div>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
+                    {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
+                  </div>
+                  <button onClick={e=>{e.stopPropagation();removeItem(it.id);}} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {dates.map((d:string)=>(
+          <div key={d} className="glass-card" style={{padding:isMobile?"14px 14px":"18px 20px"}}>
+            <div style={{fontSize:13,fontWeight:800,color:"var(--accent-1)",marginBottom:12}}>📅 {fmtDate(d)}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {byDate[d].map((it:any)=>(
+                <div key={it.id} className="btn-interactive" style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}} onClick={()=>setEditId(it.id)}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
+                    <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
+                      <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+                      <span>·</span>
+                      <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
+                      {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
+                    </div>
+                  </div>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
+                    {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
+                  </div>
+                  <button onClick={e=>{e.stopPropagation();removeItem(it.id);}} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   function ContentTree(){
     // root → channel → status → items
     const byChannel:any = {};
@@ -5989,7 +6200,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
       byChannel[ch][st] ||= [];
       byChannel[ch][st].push(it);
     });
-    const channelOrder=["blog","telegram","instagram","youtube","email"];
+    const channelOrder=["blog","telegram","instagram","vk","youtube","email"];
     const statusOrder=["draft","scheduled","published"];
     const channels = channelOrder.filter(ch=>byChannel[ch]).concat(Object.keys(byChannel).filter(ch=>!channelOrder.includes(ch)));
     if(channels.length===0) return null;
@@ -6039,7 +6250,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                       </div>
                       {!collapsed&&(
                         <div className="collapse-wrap collapse-in" style={{display:"flex",flexDirection:"column",gap:8}}>
-                          {byChannel[ch][st].slice(0,isMobile?6:8).map((it:any,ii:number)=>(
+                          {byChannel[ch][st].slice(0,treeExpandedAll[statusKey]?999:(isMobile?6:8)).map((it:any,ii:number)=>(
                             <button key={it.id} className="btn-interactive" onClick={()=>setEditId(it.id)} style={{textAlign:"left",padding:"10px 12px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer"}}>
                               <div style={{fontSize:12.5,fontWeight:900,marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.title||t("untitled","Без названия")}</div>
                               <div style={{fontSize:11.5,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap",lineHeight:1.4}}>
@@ -6049,8 +6260,10 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                               </div>
                             </button>
                           ))}
-                          {byChannel[ch][st].length>(isMobile?6:8)&&(
-                            <div style={{fontSize:12,color:"var(--text5)",padding:"2px 6px"}}>{t("content_more","Ещё")}: +{byChannel[ch][st].length-(isMobile?6:8)}</div>
+                          {byChannel[ch][st].length>(isMobile?6:8)&&!treeExpandedAll[statusKey]&&(
+                            <button onClick={(e)=>{e.stopPropagation();setTreeExpandedAll(p=>({...p,[statusKey]:true}));}} style={{fontSize:12,color:"var(--accent-1)",padding:"6px 10px",border:"none",background:"transparent",cursor:"pointer",fontWeight:700,textAlign:"left"}}>
+                              {t("content_show_all","Показать все")} (+{byChannel[ch][st].length-(isMobile?6:8)})
+                            </button>
                           )}
                         </div>
                       )}
@@ -6070,9 +6283,19 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
 
   return(
     <div>
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:4}}>✍️ {t("content_plan","Контент-план")}</div>
+        <div style={{fontSize:13,color:"var(--text4)"}}>{t("content_plan_intro","Планируйте посты, видео и рассылки. Переключайте вид: календарь по датам, по каналам или список.")}</div>
+      </div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
-        <div style={{flex:1,fontSize:13,fontWeight:700,color:"var(--text)"}}>✍️ {t("content_plan","Контент-план")}</div>
+        <div style={{flex:1}}/>
         <div style={{display:"flex",gap:6,padding:4,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface2)"}}>
+          <button onClick={()=>setViewMode("calendar")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="calendar"?"var(--accent-soft)":"transparent",color:viewMode==="calendar"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+            📅 {t("content_view_calendar","Календарь")}
+          </button>
+          <button onClick={()=>setViewMode("map")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="map"?"var(--accent-soft)":"transparent",color:viewMode==="map"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+            🗺 {t("content_view_map","Карта")}
+          </button>
           <button onClick={()=>setViewMode("tree")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="tree"?"var(--accent-soft)":"transparent",color:viewMode==="tree"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
             🌳 {t("content_view_tree","Дерево")}
           </button>
@@ -6101,12 +6324,16 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
       ):filtered.length===0?(
         <div className="glass-card" style={{textAlign:"center",padding:"44px 24px",border:"1px dashed var(--border2)"}}>
           <div style={{fontSize:36,marginBottom:10}}>✍️</div>
-          <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_empty","Планируйте посты и публикации")}</div>
-          <div style={{fontSize:13,color:"var(--text5)",marginBottom:16}}>{t("content_plan_empty","Планируйте посты, рассылки и публикации. AI подскажет идеи по шагам стратегии.")}</div>
+          <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_empty_title","Планируйте публикации")}</div>
+          <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:320,margin:"0 auto 16px"}}>{t("content_plan_empty_desc","Добавьте посты, видео и рассылки. AI предложит идеи на основе шагов вашей стратегии.")}</div>
           <button onClick={()=>setEditId("new")} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add_content_item","+ Публикация")}</button>
         </div>
       ):(
-        viewMode==="tree"
+        viewMode==="calendar"
+          ? <ContentCalendar filtered={filtered} CHANNEL_LABEL={CHANNEL_LABEL} STATUS_LABEL={STATUS_LABEL} CONTENT_TYPES={CONTENT_TYPES} CONTENT_CHANNELS={CONTENT_CHANNELS} CONTENT_STATUSES={CONTENT_STATUSES} setEditId={setEditId} removeItem={removeItem} t={t} isMobile={isMobile}/>
+          : viewMode==="map"
+          ? <ContentMap filtered={filtered} CHANNEL_LABEL={CHANNEL_LABEL} CONTENT_TYPES={CONTENT_TYPES} CONTENT_STATUSES={CONTENT_STATUSES} setEditId={setEditId} removeItem={removeItem} t={t} isMobile={isMobile}/>
+          : viewMode==="tree"
           ? <ContentTree/>
           : (
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -6167,19 +6394,19 @@ function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
       <div className="glass-panel" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"24px"}} onClick={e=>e.stopPropagation()}>
         <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:18}}>✍️ {item.id?t("edit","Редактировать"):t("add_content_item","Публикация")}</div>
         <input placeholder={t("title","Название")} value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:10,outline:"none",fontFamily:"inherit"}}/>
-        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_type_post","Тип")}</div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_type","Тип контента")}</div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
           {CONTENT_TYPES.map(x=>(<button key={x.id} onClick={()=>setType(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${type===x.id?"var(--accent-1)":"var(--border)"}`,background:type===x.id?"var(--accent-soft)":"var(--surface)",color:type===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
         </div>
-        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_channel_blog","Канал")}</div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_channel","Канал публикации")}</div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
           {CONTENT_CHANNELS.map(x=>(<button key={x.id} onClick={()=>setChannel(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${channel===x.id?"var(--accent-1)":"var(--border)"}`,background:channel===x.id?"var(--accent-soft)":"var(--surface)",color:channel===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
         </div>
-        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_status_draft","Статус")}</div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_status","Статус")}</div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
           {CONTENT_STATUSES.map(x=>(<button key={x.id} onClick={()=>setStatus(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${status===x.id?"var(--accent-1)":"var(--border)"}`,background:status===x.id?"var(--accent-soft)":"var(--surface)",color:status===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
         </div>
-        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("scheduled_date_short","Дата")}</div>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("scheduled_date_short","Дата публикации")}</div>
         <input type="date" value={scheduledDate} onChange={e=>setScheduledDate(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}/>
         {stepOptions.length>0&&(
           <>
@@ -6191,7 +6418,7 @@ function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
           </>
         )}
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("brief","Тезис / описание")}</div>
-        <textarea placeholder={t("brief","Краткое описание или тезис")} value={brief} onChange={e=>setBrief(e.target.value)} rows={3} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:18,outline:"none",resize:"vertical",fontFamily:"inherit"}}/>
+        <textarea placeholder={t("brief","Краткое описание или тезис публикации")} value={brief} onChange={e=>setBrief(e.target.value)} rows={3} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:18,outline:"none",resize:"vertical",fontFamily:"inherit"}}/>
         <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
           <button onClick={onClose} style={{padding:"10px 20px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("cancel","Отмена")}</button>
           <button onClick={handleSave} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("save","Сохранить")}</button>
@@ -6420,7 +6647,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
         ))}
       </div>
 
-      <div style={{maxWidth:960,margin:"0 auto",padding:isMobile?"20px 16px":"28px 24px"}}>
+      <div style={{maxWidth:1000,margin:"0 auto",padding:isMobile?"24px 20px":"36px 32px"}}>
         {/* Maps Tab */}
         {tab==="maps"&&(
           <div>
@@ -6437,7 +6664,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               <div style={{textAlign:"center",padding:"50px 20px",border:"1px dashed var(--border2)",borderRadius:16}}>
                 <div style={{fontSize:36,marginBottom:10}}>🗺️</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("no_maps","Нет карт")}</div>
-                <div style={{fontSize:13,color:"var(--text5)",marginBottom:16}}>{t("create_first_map","Создайте первую стратегическую карту")}</div>
+                <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:320,margin:"0 auto 16px"}}>{t("create_first_map","Создайте первую стратегическую карту")}. {t("create_first_map_hint","Добавьте шаги, свяжите их — AI подскажет следующий ход.")}</div>
                 {canEdit&&<button className="btn-interactive" onClick={()=>createMap()} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>+ {t("create_map","Создать карту")}</button>}
               </div>
             ):(
@@ -6872,6 +7099,7 @@ const SC_MAP_SYS=`Ты — эксперт по стратегическому п
 // ── ScenarioTemplatesModal ──
 function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
   const{t}=useLang();
+  const isMobile=useIsMobile();
   const[selected,setSelected]=useState(null);
   const[fields,setFields]=useState({});
   const[generating,setGenerating]=useState(false);
@@ -6902,9 +7130,9 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
   const iS={width:"100%",padding:"8px 11px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:9,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"};
 
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.82)",display:"flex",zIndex:200,backdropFilter:"blur(12px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.82)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",animation:"fadeIn .2s ease",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
       <style>{CSS}</style>
-      <div style={{width:"min(95vw,860px)",maxHeight:"90vh",margin:"auto",background:"var(--bg2)",borderRadius:22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.7)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
+      <div style={{width:isMobile?"100%":"min(95vw,860px)",maxHeight:isMobile?"88vh":"90vh",margin:isMobile?0:"auto",background:"var(--bg2)",borderRadius:isMobile?"18px 18px 0 0":22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.7)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{width:32,height:32,borderRadius:9,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>⎇</div>
@@ -6975,13 +7203,14 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
 // ── TemplateModal ──
 function TemplateModal({tier,onSelect,onClose,theme="dark"}){
   const{t}=useLang();
+  const isMobile=useIsMobile();
   const tierData=TIERS[tier||"free"]||TIERS.free;
   const canUse=tierData.templates;
   const[selected,setSelected]=useState(null);
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
       <style>{CSS}</style>
-      <div className="glass-panel" style={{width:"min(95vw,760px)",maxHeight:"86vh",borderRadius:22,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.5)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
+      <div className="glass-panel" style={{width:isMobile?"100%":"min(95vw,760px)",maxHeight:isMobile?"88vh":"86vh",borderRadius:isMobile?"18px 18px 0 0":22,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.5)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         <div style={{padding:"18px 22px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{flex:1}}>
             <div style={{fontSize:15,fontWeight:900,color:"var(--text)"}}>📋 Шаблоны карт</div>
@@ -8479,12 +8708,15 @@ export default function App(){
 
   if(loadError)return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
-      <div data-theme={theme} data-palette={palette} className="screen-enter" style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:20}}>
+      <div data-theme={theme} data-palette={palette} className="screen-enter" style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,gap:24}}>
         <style>{CSS}</style>
-        <div style={{fontSize:18,fontWeight:700,color:"var(--text)",textAlign:"center"}}>{loadError}</div>
-        <button className="btn-interactive" onClick={()=>{setLoadError(null);initApp();}} style={{padding:"14px 28px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:700,cursor:"pointer",boxShadow:"0 4px 20px var(--accent-glow)",transition:"transform .2s ease, box-shadow .25s ease"}}>{t("retry","Повторить")}</button>
-        <div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",maxWidth:520,lineHeight:1.5}}>
-          {t("load_error_hint","Если это происходит снова — проверьте подключение к интернету и доступность API. В офлайн‑режиме можно войти в демо‑аккаунт без сервера.")}
+        <div className="glass-card" style={{padding:"32px 40px",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.3)",display:"flex",flexDirection:"column",alignItems:"center",gap:20,maxWidth:480}}>
+          <div style={{fontSize:36,marginBottom:4}}>⚠️</div>
+          <div style={{fontSize:18,fontWeight:800,color:"var(--text)",textAlign:"center"}}>{loadError}</div>
+          <button className="btn-interactive" onClick={()=>{setLoadError(null);initApp();}} style={{padding:"16px 32px",borderRadius:14,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 24px var(--accent-glow)",transition:"transform .2s ease, box-shadow .25s ease"}}>{t("retry","Повторить")}</button>
+          <div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",lineHeight:1.6}}>
+            {t("load_error_hint","Если это происходит снова — проверьте подключение к интернету и доступность API. В офлайн‑режиме можно войти в демо‑аккаунт без сервера.")}
+          </div>
         </div>
       </div>
     </LangCtx.Provider>

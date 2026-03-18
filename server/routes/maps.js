@@ -2,15 +2,7 @@ const router = require('express').Router();
 const { pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { createNotification } = require('./notifications');
-
-// Лимиты карт по тарифу
-const MAP_LIMITS = {
-  free:       1,
-  starter:    3,
-  pro:        5,
-  team:       15,
-  enterprise: Infinity,
-};
+const { TIERS } = require('./tiers');
 
 // Проверка доступа к проекту
 async function getProjectAccess(projectId, userEmail) {
@@ -45,22 +37,49 @@ router.post('/:projectId/maps', requireAuth, async (req, res, next) => {
     if (!role || role === 'viewer') return res.status(403).json({ error: 'Нет прав для создания карты' });
 
     const tier = req.user.tier || 'free';
-    const limit = MAP_LIMITS[tier] ?? 1;
+    const tierCfg = TIERS[tier] || TIERS.free;
+    const isScenario = !!req.body.is_scenario;
 
-    const { rows: existing } = await pool.query(
-      `SELECT count(*) FROM maps m
-       JOIN projects p ON m.project_id = p.id
-       WHERE m.is_scenario = false
-         AND (p.owner_email = $1 OR p.members @> $2::jsonb)`,
-      [req.user.email, JSON.stringify([{ email: req.user.email }])]
-    );
-    if (parseInt(existing[0].count) >= limit) {
-      return res.status(403).json({
-        error: `Лимит карт для тарифа ${tier}: ${limit}. Улучшите тариф.`,
-        code: 'MAP_LIMIT',
-        tierLabel: tier,
-        limit,
-      });
+    if (isScenario) {
+      if ((tierCfg.scenarios || 0) === 0) {
+        return res.status(403).json({
+          error: 'Сценарии доступны с тарифа Starter. Улучшите тариф.',
+          code: 'SCENARIO_TIER',
+        });
+      }
+      const { rows: scRows } = await pool.query(
+        `SELECT count(*) FROM maps m
+         JOIN projects p ON m.project_id = p.id
+         WHERE m.is_scenario = true
+           AND (p.owner_email = $1 OR p.members @> $2::jsonb)`,
+        [req.user.email, JSON.stringify([{ email: req.user.email }])]
+      );
+      const scLimit = tierCfg.scenarios >= 999999 ? 999999 : tierCfg.scenarios;
+      if (parseInt(scRows[0].count) >= scLimit) {
+        return res.status(403).json({
+          error: `Лимит сценариев для тарифа ${tier}: ${scLimit}. Улучшите тариф.`,
+          code: 'SCENARIO_LIMIT',
+          tierLabel: tier,
+          limit: scLimit,
+        });
+      }
+    } else {
+      const mapsLimit = tierCfg.maps >= 999999 ? 999999 : tierCfg.maps;
+      const { rows: existing } = await pool.query(
+        `SELECT count(*) FROM maps m
+         JOIN projects p ON m.project_id = p.id
+         WHERE m.is_scenario = false
+           AND (p.owner_email = $1 OR p.members @> $2::jsonb)`,
+        [req.user.email, JSON.stringify([{ email: req.user.email }])]
+      );
+      if (parseInt(existing[0].count) >= mapsLimit) {
+        return res.status(403).json({
+          error: `Лимит карт для тарифа ${tier}: ${mapsLimit}. Улучшите тариф.`,
+          code: 'MAP_LIMIT',
+          tierLabel: tier,
+          limit: mapsLimit,
+        });
+      }
     }
 
     const { name, nodes, edges, ctx, is_scenario } = req.body;
