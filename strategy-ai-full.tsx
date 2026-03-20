@@ -3390,7 +3390,7 @@ ${ctx}
 
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
   const rightPanelOpen=selNode||showAI;
-  const[bgMode,setBgMode]=useState("stars"); // grid | stars | none — по умолчанию космос как на лендинге
+  const[bgMode,setBgMode]=useState("grid"); // grid = точки + --map-canvas (strategy-reference.html) | stars | none
   const toolbarStyle={display:"flex",alignItems:"center",gap:5};
   const btnStyle=(active)=>({padding:"6px 12px",borderRadius:10,border:`1px solid ${active?"var(--accent-1)":"var(--border)"}`,background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",transition:"all .2s"});
   const sep=<div style={{width:1,height:24,background:"var(--border)",margin:"0 6px",flexShrink:0,borderRadius:1}}/>;
@@ -3520,7 +3520,7 @@ ${ctx}
           {/* Canvas bg */}
           <div style={{display:"flex",alignItems:"center",gap:2,flexShrink:0}}>
             {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>{t("bg_label","Фон")}</span>}
-            {[["grid","⊞","Сетка"],["stars","✦","Звёзды"],["none","○","Чисто"]].map(([m,icon,label])=>(
+            {[["grid","⊞","Точки"],["stars","✦","Звёзды"],["none","○","Чисто"]].map(([m,icon,label])=>(
               <button key={m} onClick={()=>setBgMode(m)} title={`Фон: ${label}`}
                 style={{height:30,padding:"0 10px",borderRadius:8,border:"none",background:bgMode===m?"rgba(99,102,241,.15)":"transparent",color:bgMode===m?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:14,fontWeight:600,flexShrink:0,transition:"all .2s"}}>
                 {icon}
@@ -3626,14 +3626,17 @@ ${ctx}
 
         </div>
       </div>
-      {/* canvas */}
-      <div style={{
-        flex:1,
-        position:"relative",
-        overflow:"hidden",
-        ...(bgMode==="stars"&&theme==="dark"?{background:"#03030a"}:{}),
-      }}>
-        {/* stars bg — только тёмная тема; rect SVG иначе непрозрачный и звёзды не видны */}
+      {/* canvas — фон канваса и точки как в strategy-reference.html (#canvas-wrap) */}
+      <div
+        className={"sa-map-canvas-wrap"+(bgMode==="grid"?" sa-map-dots":"")}
+        style={{
+          flex:1,
+          position:"relative",
+          overflow:"hidden",
+          ...(bgMode==="grid"?{background:"var(--map-canvas, var(--bg))"}:{}),
+          ...(bgMode==="stars"&&theme==="dark"?{background:"var(--map-canvas, #08061a)"}:{}),
+        }}>
+        {/* stars — только тёмная тема; SVG rect прозрачный иначе звёзды не видны */}
         {bgMode==="stars"&&theme==="dark"&&(
           <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
             <SparklesCanvas density={175} speed={0.35} minSz={0.3} maxSz={1.0} color="#ffffff" style={{opacity:.4}}/>
@@ -3662,7 +3665,7 @@ ${ctx}
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--grid)" strokeWidth="1"/>
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill={bgMode==="grid"?"url(#grid)":bgMode==="stars"&&theme==="dark"?"transparent":"var(--bg)"} data-canvas-bg="1"/>
+          <rect width="100%" height="100%" fill={bgMode==="grid"||(bgMode==="stars"&&theme==="dark")?"transparent":"var(--bg)"} data-canvas-bg="1"/>
           <g transform={`translate(${view.x},${view.y}) scale(${view.zoom})`}>
             {edges.filter(e=>!hiddenIds.has(e.source)&&!hiddenIds.has(e.target)).map(e=>(
               <EdgeLine key={e.id} edge={e} nodes={nodes} selected={selEdge?.id===e.id} etypeMap={ETYPE} onClick={ed=>{setSelEdge(ed);setSelNode(null);}}/>
