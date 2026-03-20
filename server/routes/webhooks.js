@@ -1,14 +1,62 @@
 const router = require('express').Router();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { getStripe } = require('../stripeClient');
 const { pool } = require('../db');
 const { sendEmail, paymentSuccessEmail } = require('./email');
 const { createNotification } = require('./notifications');
 
+async function syncUserFromSubscription(sub) {
+  const tierKey = sub.metadata?.tier_key;
+  const userEmail = sub.metadata?.user_email;
+  if (!userEmail || !tierKey) return;
+
+  const isActive = ['active', 'trialing'].includes(sub.status);
+  const isCancelingAtPeriodEnd = sub.cancel_at_period_end === true;
+
+  const validUntil = isActive
+    ? new Date(sub.current_period_end * 1000).toISOString()
+    : null;
+
+  await pool.query(
+    `UPDATE users SET
+       tier = $1,
+       stripe_subscription_id = $2,
+       tier_valid_until = $3,
+       trial_ends_at = NULL,
+       subscription_cancel_at = $4,
+       updated_at = now()
+     WHERE email = $5`,
+    [
+      isActive ? tierKey : 'free',
+      sub.id,
+      validUntil,
+      isCancelingAtPeriodEnd ? new Date(sub.current_period_end * 1000).toISOString() : null,
+      userEmail,
+    ]
+  );
+
+  if (isCancelingAtPeriodEnd) {
+    const cancelDate = new Date(sub.current_period_end * 1000).toLocaleDateString('ru');
+    await createNotification(userEmail, {
+      type: 'warning',
+      title: 'Подписка будет отменена',
+      body: `Ваша подписка ${tierKey} активна до ${cancelDate}. После этого перейдёте на Free.`,
+    }).catch(() => {});
+  }
+
+  console.log(`✅ User ${userEmail} tier → ${isActive ? tierKey : 'free'}${isCancelingAtPeriodEnd ? ' (canceling)' : ''}`);
+}
+
 // ВАЖНО: этот роут должен получать raw body — настраивается в index.js
 // POST /api/webhooks/stripe
 router.post('/stripe', async (req, res) => {
-  const sig = req.headers['stripe-signature'];
+  const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!stripe || !webhookSecret) {
+    console.warn('Stripe webhook: STRIPE_SECRET_KEY или STRIPE_WEBHOOK_SECRET не заданы');
+    return res.status(503).json({ error: 'Stripe не настроен' });
+  }
+
+  const sig = req.headers['stripe-signature'];
 
   let event;
   try {
@@ -20,56 +68,30 @@ router.post('/stripe', async (req, res) => {
 
   console.log(`⚡ Stripe event: ${event.type}`);
 
+  let eventRowInserted = false;
+  try {
+    const ins = await pool.query(
+      `INSERT INTO stripe_webhook_events (id) VALUES ($1) ON CONFLICT (id) DO NOTHING RETURNING id`,
+      [event.id]
+    );
+    if (ins.rows.length === 0) {
+      console.log(`ℹ️ Stripe event ${event.id} already processed — skip`);
+      return res.json({ received: true, duplicate: true });
+    }
+    eventRowInserted = true;
+  } catch (e) {
+    console.error('stripe_webhook_events insert:', e.message);
+    return res.status(500).json({ error: 'DB error' });
+  }
+
   try {
     switch (event.type) {
-      // ── Подписка активирована / обновлена ────────────────────────────────
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
-        const sub = event.data.object;
-        const tierKey = sub.metadata?.tier_key;
-        const userEmail = sub.metadata?.user_email;
-
-        if (!userEmail || !tierKey) break;
-
-        const isActive = ['active', 'trialing'].includes(sub.status);
-        const isCancelingAtPeriodEnd = sub.cancel_at_period_end === true;
-
-        const validUntil = isActive
-          ? new Date(sub.current_period_end * 1000).toISOString()
-          : null;
-
-        await pool.query(
-          `UPDATE users SET
-             tier = $1,
-             stripe_subscription_id = $2,
-             tier_valid_until = $3,
-             trial_ends_at = NULL,
-             subscription_cancel_at = $4,
-             updated_at = now()
-           WHERE email = $5`,
-          [
-            isActive ? tierKey : 'free',
-            sub.id,
-            validUntil,
-            isCancelingAtPeriodEnd ? new Date(sub.current_period_end * 1000).toISOString() : null,
-            userEmail,
-          ]
-        );
-
-        if (isCancelingAtPeriodEnd) {
-          const cancelDate = new Date(sub.current_period_end * 1000).toLocaleDateString('ru');
-          await createNotification(userEmail, {
-            type: 'warning',
-            title: 'Подписка будет отменена',
-            body: `Ваша подписка ${tierKey} активна до ${cancelDate}. После этого перейдёте на Free.`,
-          }).catch(() => {});
-        }
-
-        console.log(`✅ User ${userEmail} tier → ${isActive ? tierKey : 'free'}${isCancelingAtPeriodEnd ? ' (canceling)' : ''}`);
+        await syncUserFromSubscription(event.data.object);
         break;
       }
 
-      // ── Подписка отменена ────────────────────────────────────────────────
       case 'customer.subscription.deleted': {
         const sub = event.data.object;
         const userEmail = sub.metadata?.user_email;
@@ -82,7 +104,6 @@ router.post('/stripe', async (req, res) => {
           [userEmail]
         );
 
-        // In-app уведомление
         await createNotification(userEmail, {
           type: 'warning',
           title: 'Подписка отменена',
@@ -93,7 +114,6 @@ router.post('/stripe', async (req, res) => {
         break;
       }
 
-      // ── Успешный платёж ──────────────────────────────────────────────────
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
         const sub = invoice.subscription
@@ -110,7 +130,6 @@ router.post('/stripe', async (req, res) => {
               [tierKey, validUntil, userEmail]
             );
 
-            // Email + in-app уведомление
             const { rows } = await pool.query('SELECT name FROM users WHERE email = $1', [userEmail]);
             const userName = rows[0]?.name || userEmail;
             const amount = invoice.amount_paid ? (invoice.amount_paid / 100).toFixed(0) : '?';
@@ -129,7 +148,6 @@ router.post('/stripe', async (req, res) => {
         break;
       }
 
-      // ── Платёж не прошёл ─────────────────────────────────────────────────
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         console.warn(`⚠️ Payment failed for invoice ${invoice.id}`);
@@ -143,13 +161,12 @@ router.post('/stripe', async (req, res) => {
         break;
       }
 
-      // ── Завершение Checkout Session ──────────────────────────────────────
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const tierKey = session.metadata?.tier_key;
-        const userEmail = session.metadata?.user_email;
-        if (session.mode === 'subscription' && userEmail && tierKey) {
-          console.log(`✅ Checkout completed: ${userEmail} → ${tierKey}`);
+        if (session.mode === 'subscription' && session.subscription) {
+          const sub = await stripe.subscriptions.retrieve(session.subscription);
+          await syncUserFromSubscription(sub);
+          console.log(`✅ Checkout session → subscription synced`);
         }
         break;
       }
@@ -159,7 +176,9 @@ router.post('/stripe', async (req, res) => {
     }
   } catch (dbErr) {
     console.error('❌ DB error in webhook:', dbErr.message);
-    // Возвращаем 500 чтобы Stripe повторил доставку события
+    if (eventRowInserted) {
+      await pool.query('DELETE FROM stripe_webhook_events WHERE id = $1', [event.id]).catch(() => {});
+    }
     return res.status(500).json({ error: 'Internal error processing webhook' });
   }
 

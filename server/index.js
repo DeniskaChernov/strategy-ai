@@ -1,11 +1,12 @@
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const http = require('http');
 const { Server: SocketIO } = require('socket.io');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-const { pool, initDB, seedDB } = require('./db');
+const { pool, initDB, seedDB, cleanupStripeWebhookEvents } = require('./db');
 
 // ── Sentry (опционально, если SENTRY_DSN задан) ──────────────────────────────
 let Sentry = null;
@@ -73,14 +74,45 @@ io.use((socket, next) => {
   }
 });
 
-// Комнаты: map:{mapId} — все редакторы одной карты
+// Комнаты: map:{mapId} — все редакторы одной карты (доступ только при членстве в проекте)
 io.on('connection', (socket) => {
-  socket.on('join-map', ({ mapId, userName }) => {
-    // userEmail уже верифицирован из JWT — не доверяем клиенту
+  socket.on('join-map', async ({ mapId, userName }) => {
     const userEmail = socket.data.userEmail;
-    socket.join(`map:${mapId}`);
-    socket.data = { ...socket.data, mapId, userName };
-    socket.to(`map:${mapId}`).emit('user-joined', { email: userEmail, name: userName });
+    if (!mapId) {
+      socket.emit('join-error', { message: 'Некорректный идентификатор карты' });
+      return;
+    }
+    try {
+      const { rows } = await pool.query(
+        `SELECT p.owner_email, p.members
+         FROM maps m
+         INNER JOIN projects p ON p.id = m.project_id
+         WHERE m.id = $1`,
+        [mapId]
+      );
+      if (!rows[0]) {
+        socket.emit('join-error', { message: 'Карта не найдена' });
+        return;
+      }
+      const p = rows[0];
+      const members = p.members || [];
+      const isMember =
+        p.owner_email === userEmail ||
+        members.some(m => m && m.email === userEmail);
+      if (!isMember) {
+        socket.emit('join-error', { message: 'Нет доступа к этой карте' });
+        return;
+      }
+      if (socket.data.mapId && socket.data.mapId !== mapId) {
+        socket.leave(`map:${socket.data.mapId}`);
+      }
+      socket.join(`map:${mapId}`);
+      socket.data = { ...socket.data, mapId, userName };
+      socket.to(`map:${mapId}`).emit('user-joined', { email: userEmail, name: userName });
+    } catch (e) {
+      console.error('join-map:', e.message);
+      socket.emit('join-error', { message: 'Ошибка проверки доступа' });
+    }
   });
 
   // Синхронизация перемещения узла
@@ -158,6 +190,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── Gzip (compression) — меньше трафика для JSON и статики ───────────────────
+app.use(
+  compression({
+    threshold: 1024,
+    filter: (req, res) => {
+      if (req.path === '/api/webhooks/stripe') return false;
+      return compression.filter(req, res);
+    },
+  })
+);
+
 // ── Logging ───────────────────────────────────────────────────────────────────
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
@@ -220,12 +263,26 @@ app.use('/api/search',       searchRoutes);
 app.use('/api/notifications', notifRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
+app.get('/api/health', async (req, res) => {
+  let database = 'unknown';
+  try {
+    await pool.query('SELECT 1');
+    database = 'ok';
+  } catch (e) {
+    database = 'error';
+  }
+  const dbOk = database === 'ok';
+  const strict =
+    req.query.strict === '1' ||
+    req.query.strict === 'true' ||
+    req.query.readiness === '1';
+  const httpOk = dbOk || !strict;
+  res.status(httpOk ? 200 : 503).json({
+    status: dbOk ? 'ok' : 'degraded',
     version: '1.1.0',
     time: new Date().toISOString(),
     aiReady: !!process.env.OPENAI_KEY,
+    database,
   });
 });
 
@@ -332,8 +389,12 @@ async function start() {
     console.error('❌ DATABASE_URL is not set! Add PostgreSQL to your Railway project and link DATABASE_URL.');
     process.exit(1);
   }
+  if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET is required in production. Set a strong random secret.');
+    process.exit(1);
+  }
   if (!process.env.JWT_SECRET) {
-    console.warn('⚠️  JWT_SECRET not set — using default (change in production!)');
+    console.warn('⚠️  JWT_SECRET not set — using default (development only)');
   }
 
   console.log('🔄 Connecting to database...');
@@ -347,6 +408,13 @@ async function start() {
     console.log(`   WS:  enabled`);
     startCron();
     console.log(`   CRON: deadline reminders scheduled`);
+    cleanupStripeWebhookEvents().catch((e) =>
+      console.warn('stripe_webhook_events cleanup:', e.message)
+    );
+    setInterval(
+      () => cleanupStripeWebhookEvents().catch((e) => console.warn('stripe_webhook_events cleanup:', e.message)),
+      24 * 60 * 60 * 1000
+    );
   });
 }
 

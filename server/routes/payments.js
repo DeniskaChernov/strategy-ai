@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { getStripe } = require('../stripeClient');
 const { pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { TIERS } = require('./tiers');
@@ -7,6 +7,11 @@ const { TIERS } = require('./tiers');
 // POST /api/payments/checkout — создать Stripe Checkout Session
 router.post('/checkout', requireAuth, async (req, res, next) => {
   try {
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(503).json({ error: 'Платежи не настроены (нет STRIPE_SECRET_KEY)' });
+    }
+
     const { tierKey } = req.body;
     if (!TIERS[tierKey] || tierKey === 'free') {
       return res.status(400).json({ error: 'Недопустимый тариф' });
@@ -60,6 +65,10 @@ router.post('/checkout', requireAuth, async (req, res, next) => {
 // POST /api/payments/portal — Stripe Customer Portal (управление подпиской)
 router.post('/portal', requireAuth, async (req, res, next) => {
   try {
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(503).json({ error: 'Платежи не настроены (нет STRIPE_SECRET_KEY)' });
+    }
     if (!req.user.stripe_customer_id) {
       return res.status(400).json({ error: 'Нет привязанной подписки' });
     }
@@ -91,6 +100,10 @@ router.get('/status', requireAuth, async (req, res, next) => {
 // POST /api/payments/cancel — отменить подписку
 router.post('/cancel', requireAuth, async (req, res, next) => {
   try {
+    const stripe = getStripe();
+    if (!stripe) {
+      return res.status(503).json({ error: 'Платежи не настроены (нет STRIPE_SECRET_KEY)' });
+    }
     const { rows } = await pool.query(
       'SELECT stripe_subscription_id FROM users WHERE email = $1',
       [req.user.email]

@@ -172,7 +172,7 @@ router.patch('/profile', requireAuth, async (req, res, next) => {
     const ALLOWED_VIEWS = ['canvas', 'list', 'gantt'];
     const ALLOWED_TIERS = ['free', 'starter', 'pro', 'team', 'enterprise'];
     const ALLOWED_THEMES = ['dark', 'light'];
-    const ALLOWED_PALETTES = ['indigo', 'ocean', 'forest', 'sunset', 'mono'];
+    const ALLOWED_PALETTES = ['indigo', 'ocean', 'forest', 'sunset', 'mono', 'orange'];
     if (default_view && !ALLOWED_VIEWS.includes(default_view)) {
       return res.status(400).json({ error: 'Недопустимое значение default_view' });
     }

@@ -3,16 +3,8 @@ const { pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { createNotification } = require('./notifications');
 const { TIERS } = require('./tiers');
-
-// Проверка доступа к проекту
-async function getProjectAccess(projectId, userEmail) {
-  const { rows } = await pool.query('SELECT * FROM projects WHERE id = $1', [projectId]);
-  if (!rows[0]) return { project: null, role: null };
-  const project = rows[0];
-  if (project.owner_email === userEmail) return { project, role: 'owner' };
-  const member = (project.members || []).find(m => m.email === userEmail);
-  return { project, role: member?.role || null };
-}
+const { getProjectAccess } = require('../lib/projectAccess');
+const { validateMapBody } = require('../lib/mapPayload');
 
 // GET /api/projects/:projectId/maps
 router.get('/:projectId/maps', requireAuth, async (req, res, next) => {
@@ -83,6 +75,14 @@ router.post('/:projectId/maps', requireAuth, async (req, res, next) => {
     }
 
     const { name, nodes, edges, ctx, is_scenario } = req.body;
+    const v = validateMapBody({
+      name,
+      ctx,
+      nodes: nodes !== undefined ? nodes : [],
+      edges: edges !== undefined ? edges : [],
+    });
+    if (v) return res.status(400).json({ error: v, code: 'MAP_PAYLOAD_LIMIT' });
+
     const { rows } = await pool.query(
       `INSERT INTO maps (project_id, name, nodes, edges, ctx, is_scenario)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -123,6 +123,9 @@ router.put('/:projectId/maps/:mapId', requireAuth, async (req, res, next) => {
     if (!role || role === 'viewer') return res.status(403).json({ error: 'Нет прав для сохранения' });
 
     const { name, nodes, edges, ctx, is_scenario } = req.body;
+    const vPut = validateMapBody({ name, ctx, nodes, edges });
+    if (vPut) return res.status(400).json({ error: vPut, code: 'MAP_PAYLOAD_LIMIT' });
+
     const { rows } = await pool.query(
       `UPDATE maps SET
          name        = COALESCE($1, name),

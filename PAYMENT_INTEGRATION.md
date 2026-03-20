@@ -1,101 +1,56 @@
-# Подключение реальной оплаты (Strategy AI)
+# Оплата и Stripe (Strategy AI)
 
-Сейчас оплата **симулирована**: при нажатии «Оплатить» данные карты проверяются, но никуда не отправляются; тариф меняется локально через `patchUser(user.email, { tier: selected })`.
+## Текущее состояние
 
-Чтобы выйти на рынок с реальными платежами, нужно заменить этот поток на интеграцию с платёжным провайдером.
+В проекте уже есть **реальная интеграция со Stripe** (не только симуляция):
 
----
+- **POST `/api/payments/checkout`** — создаёт Stripe Checkout Session (подписка), возвращает `checkoutUrl` и `sessionId`. Требуется JWT (`requireAuth`).
+- **POST `/api/payments/portal`** — ссылка в Stripe Customer Portal для смены карты / отмены.
+- **POST `/api/webhooks/stripe`** — подпись Stripe, идемпотентность по `event.id` (таблица `stripe_webhook_events`), обработка подписок и инвойсов.
 
-## Рекомендуемые провайдеры
+Фронтенд: редирект на `checkoutUrl`, после успеха — query `?payment=success` и опрос `/api/auth/me` до совпадения тарифа (см. `strategy-ai-full.tsx`).
 
-- **Stripe** — подписки, карты, инвойсы, вебхуки. Документация: https://stripe.com/docs
-- **Paddle** — мерчант оф рекорд (продавец — Paddle), упрощённые налоги и комплаенс в ЕС/мире. Документация: https://developer.paddle.com
-
----
-
-## Общая схема
-
-1. **Фронт** не хранит и не отправляет полные данные карты на свой бэкенд.
-2. Провайдер даёт **Checkout / Payment Element**: пользователь вводит карту на странице Stripe/Paddle (iframe или редирект).
-3. После успешной оплаты провайдер шлёт **webhook** на ваш бэкенд (например `payment_intent.succeeded`, `subscription.created`).
-4. **Бэкенд** по webhook обновляет тариф пользователя в БД и при необходимости создаёт/продлевает подписку.
-5. Фронт узнаёт о новом тарифе через повторный запрос профиля или через WebSocket/SSE.
+Для **dev-аккаунта** (например email из `DEV_EMAIL` / специальная логика в UI) может оставаться мгновенная смена тарифа без редиректа — это отдельная ветка в клиенте.
 
 ---
 
-## Где в коде менять (Strategy AI)
+## Переменные окружения
 
-### 1. Точка входа оплаты
+| Переменная | Назначение |
+|------------|------------|
+| `STRIPE_SECRET_KEY` | Secret key Stripe; без неё сервер стартует, но платежи отдают **503**. |
+| `STRIPE_WEBHOOK_SECRET` | Подпись вебхука из Dashboard → Webhooks. |
+| `APP_URL` | Базовый URL приложения для `success_url` / `cancel_url` и портала (по умолчанию `http://localhost:3000`). |
+| Цены тарифов | Задаются в `server/routes/tiers.js` как `stripe_price_id` для каждого платного тарифа. |
+| `STRIPE_WEBHOOK_EVENTS_RETENTION_DAYS` | Опционально: сколько дней хранить `stripe_webhook_events` для идемпотентности (по умолчанию **90**, мин. 30, макс. 365). Раз в сутки + при старте сервера выполняется очистка. |
 
-**Файл:** `strategy-ai-full.tsx`  
-**Компонент:** `ProfileModal`, вкладка «Тариф» (tab `"tier"`).
-
-- Сейчас при апгрейде и нажатии кнопки вызывается `executeBuy()` (примерно строки 1447–1458).
-- Нужно заменить логику так:
-  - для **dev-аккаунта** (`user.email === "denisblackman2@gmail.com"`) оставить текущее поведение (мгновенная смена тарифа без оплаты);
-  - для остальных пользователей вместо симуляции:
-    - вызвать **ваш бэкенд** `POST /api/create-checkout` (или аналог), передав `tier`, `user.email`, `successUrl`, `cancelUrl`;
-    - бэкенд создаёт сессию Stripe Checkout / Paddle Checkout и возвращает `{ url }`;
-    - фронт делает `window.location.href = url` (редирект на страницу оплаты провайдера).
-
-### 2. После возврата с оплаты
-
-- Stripe Checkout по умолчанию редиректит на ваш `success_url`, например:  
-  `https://yourdomain.com/app?session_id={CHECKOUT_SESSION_ID}`.
-- На этой же странице приложения при загрузке (или в отдельном route) проверять `session_id` в query:
-  - вызвать бэкенд `GET /api/session?session_id=...`;
-  - бэкенд проверяет сессию у Stripe, возвращает обновлённого пользователя с новым `tier`;
-  - фронт обновляет `user` (например через тот же `onUpdate(u)` / setUser) и закрывает модалку тарифа.
-
-### 3. Webhook на бэкенде (обязательно)
-
-- Stripe: например события `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
-- В обработчике:
-  - по `metadata.email` или `client_reference_id` найти пользователя в БД;
-  - записать новый `tier` и при необходимости `stripeCustomerId` / `stripeSubscriptionId`;
-  - для отмен/даунгрейдов — обновить тариф или пометить подписку как отменённую.
-
-Так тариф всегда будет соответствовать реальной подписке, даже если пользователь закроет вкладку до редиректа.
-
-### 4. Данные карты на фронте
-
-- Поля «Номер карты», «Имя», «ММ/ГГ», «CVV» в `ProfileModal` при реальной оплате **не должны** отправляться на ваш сервер.
-- Их нужно либо убрать и оставить только редирект в Checkout, либо заменить на Stripe Payment Element / Paddle форму на вашей странице (данные карты идут только в Stripe/Paddle).
-- Сейчас карта никуда не уходит — это правильно с точки зрения PCI; при интеграции просто не добавляйте отправку этих полей на свой бэкенд.
+Дополнительно: `SENTRY_DSN`, `JWT_SECRET` (обязателен в **production**), `DATABASE_URL`.
 
 ---
 
-## Минимальный бэкенд для Stripe (пример)
+## Webhook в Stripe Dashboard
 
-```text
-POST /api/create-checkout
-Body: { email, tier }   // tier: "starter" | "pro" | "team" | "enterprise"
-Response: { url }       // Stripe Checkout Session url
+1. Endpoint: `https://<ваш-домен>/api/webhooks/stripe`.
+2. События (минимум): `checkout.session.completed`, `customer.subscription.*`, `invoice.payment_succeeded`, `invoice.payment_failed` — см. фактический `switch` в `server/routes/webhooks.js`.
+3. Скопировать **Signing secret** в `STRIPE_WEBHOOK_SECRET`.
 
-GET /api/session?session_id=...
-Response: { user }     // обновлённый user с tier
-
-POST /api/webhooks/stripe   // webhook secret из Stripe Dashboard
-```
-
-- В Stripe Dashboard создать продукты/цены для каждого тарифа ($9, $29, $59, $149+).
-- При создании Checkout Session передать в `metadata` или `client_reference_id` email пользователя.
-- В webhook по событию `checkout.session.completed` обновить в БД запись пользователя (тариф, subscription_id и т.д.).
+Важно: для этого роута в `server/index.js` должен передаваться **raw body** (как сейчас настроено для пути вебхука).
 
 ---
 
-## Переменные окружения (бэкенд)
+## Health / деплой (Railway и аналоги)
 
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PRO`, … (price id для каждого тарифа) — по желанию, можно захардкодить в коде бэкенда.
+- **`GET /api/health`** — JSON с полем `database`: `ok` | `error`, `status`: `ok` | `degraded`. По умолчанию **HTTP 200**, чтобы простой health-check платформы не падал при временных сбоях БД.
+- Для **readiness** (Kubernetes / строгая проверка): **`GET /api/health?readiness=1`** или **`?strict=1`** — при ошибке БД ответ **503**.
 
 ---
 
-## Итог
+## PCI и поля карты на фронте
 
-- **Сейчас:** оплата только симуляция, тариф меняется локально.
-- **Для выхода на рынок:** редирект на Stripe/Paddle Checkout, обновление тарифа по webhook на бэкенде, обновление `user` на фронте после возврата с оплаты.
-- Dev-аккаунт можно оставить с мгновенной сменой тарифа без редиректа.
+Данные карты не должны отправляться на ваш бэкенд: пользователь платит на странице Stripe Checkout (или Payment Element, если позже добавите). Поля карты в профиле при живой оплате — только UI-наследие; не прокидывайте их в API.
 
-После реализации бэкенда и замены `executeBuy()` на редирект в Checkout продукт будет готов к приёму реальных платежей.
+---
+
+## История документа
+
+Ранее здесь было описание «только симуляция». Сейчас документ отражает **фактическую** схему с Checkout, webhooks и очисткой `stripe_webhook_events`.

@@ -25,7 +25,7 @@
 
 | Слой | Технологии |
 |------|-----------|
-| Frontend | React (TSX), inline styles, Socket.IO client |
+| Frontend | React (TSX), `client/api.ts`, `client/i18n/`, `lib/util.ts`, CSS → `public/`, Socket.IO |
 | Backend | Node.js, Express, Socket.IO |
 | Database | PostgreSQL (Railway) |
 | AI | Anthropic Claude API |

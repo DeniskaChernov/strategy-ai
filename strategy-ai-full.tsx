@@ -1,13 +1,35 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import { io as ioClient } from "socket.io-client";
 import pptxgen from "pptxgenjs";
-
-const NW=240,NH=128;
-
-const fmt=n=>n>=999?"∞":String(n);
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const uid=()=>Math.random().toString(36).slice(2,9);
-const snap=v=>Math.round(v/20)*20;
+import { NW, NH, fmt, sleep, uid, snap } from "./client/lib/util";
+import {
+  API_BASE,
+  apiFetch,
+  store,
+  refreshUserAfterPayment,
+  getJWT,
+  clearJWT,
+  clearRefreshToken,
+  getSession,
+  setSession,
+  clearSession,
+  seedDefault,
+  normalizeUser,
+  register,
+  login,
+  patchUser,
+  normalizeProject,
+  getProjects,
+  saveProject,
+  addProjectMember,
+  removeProjectMember,
+  deleteProject,
+  getNotifications,
+  readAllNotifications,
+  readNotification,
+  deleteNotification,
+} from "./client/api";
+import { makeTfn } from "./client/i18n/makeTfn";
 
 const TIERS={
   free:    {label:"Free",    price:"Бесплатно",  color:"#64748b",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
@@ -28,298 +50,6 @@ const getPRIORITIES=(t)=>[{v:"low",label:"🟢 "+t("priority_low","Низкий"
 const getETYPE=(t)=>({requires:{c:"#6366f1",label:t("etype_requires","Требует"),d:"none"},affects:{c:"#8b5cf6",label:t("etype_affects","Влияет"),d:"8,4"},blocks:{c:"#ef4444",label:t("etype_blocks","Блокирует"),d:"4,3"},follows:{c:"#10b981",label:t("etype_follows","Следует"),d:"12,4"}});
 const getTierPrice=(k,t)=>{const prices={free:t("free_plan","Бесплатно"),starter:"$9"+t("per_month_short","/мес"),pro:"$29"+t("per_month_short","/мес"),team:"$59"+t("per_month_short","/мес"),enterprise:"$149+"+t("per_month_short","/мес")};return prices[k]||"";};
 
-const CSS=`
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;}
-input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
-:root{
-  /* ── Spacing scale (премиальный минимализм, больше воздуха) ── */
-  --sp-xs:8px;--sp-sm:12px;--sp-md:18px;--sp-lg:24px;--sp-xl:32px;--sp-2xl:48px;--sp-3xl:64px;
-  /* ── Border radius ── */
-  --r-xs:6px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-2xl:28px;--r-full:9999px;
-  /* ── Brand palette ── */
-  --brand:#6366f1;--brand2:#8b5cf6;--brand3:#06b6d4;
-  --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#0ea5e9;
-  /* ── Font sizes ── */
-  --fz-xs:11px;--fz-sm:12px;--fz-md:13px;--fz-lg:15px;--fz-xl:18px;
-  /* ── Transitions ── */
-  --tr-fast:all .1s ease;--tr:all .2s ease;--tr-slow:all .35s ease;
-}
-/* ── Accent variables (override by data-palette) ── */
-[data-theme="dark"]{
-  --bg:#060a12;--bg2:#0a0f1a;--bg3:#0e1422;
-  --surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);
-  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);
-  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;
-  --input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);
-  --card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);
-  --grid:var(--accent-grid);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;
-  --divider:rgba(255,255,255,.08);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);
-  --shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);
-  --node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;
-  --accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);
-  --gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;
-}
-[data-theme="light"]{
-  --bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;
-  --surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);
-  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);
-  --text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;
-  --input-bg:#ffffff;--input-border:rgba(0,0,0,.18);
-  --card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);
-  --grid:var(--accent-grid);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;
-  --divider:rgba(0,0,0,.1);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);
-  --shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);
-  --node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;
-  --accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);
-  --gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;
-}
-/* ── Palettes: переопределяют --accent-* и переменные стекла (граница/тень в тон палитры) ── */
-[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-rgb:91,107,192;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
-[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--glass-border-accent:rgba(91,107,192,.12);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.06);}
-[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-rgb:91,143,185;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
-[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);--glass-border-accent:rgba(91,143,185,.12);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.06);}
-[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-rgb:90,140,123;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
-[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);--glass-border-accent:rgba(90,140,123,.12);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.06);}
-[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-rgb:184,138,106;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
-[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
-[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-rgb:107,122,138;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
-[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
-[data-palette="orange"]{--accent-1:#ea580c;--accent-2:#f97316;--accent-rgb:234,88,12;--accent-soft:rgba(234,88,12,.12);--accent-grid:rgba(234,88,12,.05);--accent-glow:rgba(234,88,12,.25);--glass-border-accent:rgba(234,88,12,.2);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.1);}
-[data-theme="light"][data-palette="orange"]{--accent-soft:rgba(234,88,12,.1);--accent-grid:rgba(234,88,12,.08);--glass-border-accent:rgba(234,88,12,.16);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.08);}
-/* ── Синхронизация с body: тема и палитра применяются ко всему документу ── */
-body[data-theme="dark"]{--bg:#060a12;--bg2:#0a0f1a;--bg3:#0e1422;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);--border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.12);--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--text4:#475569;--text5:#334155;--text6:#1e3358;--input-bg:rgba(255,255,255,.05);--input-border:rgba(255,255,255,.1);--card:rgba(255,255,255,.035);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#0a1020;--scrollbar-thumb:#1e335a;--divider:rgba(255,255,255,.08);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);--node-bg:#0d1829;--node-stroke:rgba(255,255,255,.1);--modal-bg:#0b1120;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
-body[data-theme="light"]{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);--border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);--text:#0f172a;--text2:#1e293b;--text3:#334155;--text4:#64748b;--text5:#94a3b8;--text6:#cbd5e1;--input-bg:#ffffff;--input-border:rgba(0,0,0,.18);--card:rgba(255,255,255,.9);--card-hover:var(--accent-soft);--grid:var(--accent-grid);--scrollbar-track:#e2e8f0;--scrollbar-thumb:#94a3b8;--divider:rgba(0,0,0,.1);--tag-bg:var(--accent-soft);--tag-color:var(--accent-1);--shadow:0 4px 24px rgba(0,0,0,.12);--shadow-lg:0 16px 48px rgba(0,0,0,.18);--node-bg:#ffffff;--node-stroke:rgba(0,0,0,.15);--modal-bg:#ffffff;--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--accent-glow:rgba(91,107,192,.18);--gradient-accent:linear-gradient(135deg,var(--accent-1),var(--accent-2));--accent-on-bg:#fff;background:var(--bg);color:var(--text);}
-body[data-palette="indigo"]{--accent-1:#5b6bc0;--accent-2:#7c8dd9;--accent-rgb:91,107,192;--accent-soft:rgba(91,107,192,.1);--accent-grid:rgba(91,107,192,.04);--accent-glow:rgba(91,107,192,.22);--glass-border-accent:rgba(91,107,192,.18);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.08);}
-body[data-theme="light"][data-palette="indigo"]{--accent-soft:rgba(91,107,192,.08);--accent-grid:rgba(91,107,192,.08);--glass-border-accent:rgba(91,107,192,.12);--glass-shadow-accent:0 0 0 1px rgba(91,107,192,.06);}
-body[data-palette="ocean"]{--accent-1:#5b8fb9;--accent-2:#7ab8d4;--accent-rgb:91,143,185;--accent-soft:rgba(91,143,185,.1);--accent-grid:rgba(91,143,185,.04);--accent-glow:rgba(91,143,185,.2);--glass-border-accent:rgba(91,143,185,.18);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.08);}
-body[data-theme="light"][data-palette="ocean"]{--accent-soft:rgba(91,143,185,.08);--accent-grid:rgba(91,143,185,.08);--glass-border-accent:rgba(91,143,185,.12);--glass-shadow-accent:0 0 0 1px rgba(91,143,185,.06);}
-body[data-palette="forest"]{--accent-1:#5a8c7b;--accent-2:#6ba881;--accent-rgb:90,140,123;--accent-soft:rgba(90,140,123,.1);--accent-grid:rgba(90,140,123,.04);--accent-glow:rgba(90,140,123,.2);--glass-border-accent:rgba(90,140,123,.18);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.08);}
-body[data-theme="light"][data-palette="forest"]{--accent-soft:rgba(90,140,123,.08);--accent-grid:rgba(90,140,123,.08);--glass-border-accent:rgba(90,140,123,.12);--glass-shadow-accent:0 0 0 1px rgba(90,140,123,.06);}
-body[data-palette="sunset"]{--accent-1:#b88a6a;--accent-2:#c9a088;--accent-rgb:184,138,106;--accent-soft:rgba(184,138,106,.1);--accent-grid:rgba(184,138,106,.04);--accent-glow:rgba(184,138,106,.18);--glass-border-accent:rgba(184,138,106,.2);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.1);}
-body[data-theme="light"][data-palette="sunset"]{--accent-soft:rgba(184,138,106,.08);--accent-grid:rgba(184,138,106,.08);--glass-border-accent:rgba(184,138,106,.14);--glass-shadow-accent:0 0 0 1px rgba(184,138,106,.08);}
-body[data-palette="mono"]{--accent-1:#6b7a8a;--accent-2:#8a9baa;--accent-rgb:107,122,138;--accent-soft:rgba(107,122,138,.12);--accent-grid:rgba(107,122,138,.05);--accent-glow:rgba(107,122,138,.2);--glass-border-accent:rgba(107,122,138,.2);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.1);}
-body[data-theme="light"][data-palette="mono"]{--accent-soft:rgba(107,122,138,.1);--accent-grid:rgba(107,122,138,.08);--glass-border-accent:rgba(107,122,138,.14);--glass-shadow-accent:0 0 0 1px rgba(107,122,138,.08);}
-body[data-palette="orange"]{--accent-1:#ea580c;--accent-2:#f97316;--accent-rgb:234,88,12;--accent-soft:rgba(234,88,12,.12);--accent-grid:rgba(234,88,12,.05);--accent-glow:rgba(234,88,12,.25);--glass-border-accent:rgba(234,88,12,.2);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.1);}
-body[data-theme="light"][data-palette="orange"]{--accent-soft:rgba(234,88,12,.1);--accent-grid:rgba(234,88,12,.08);--glass-border-accent:rgba(234,88,12,.16);--glass-shadow-accent:0 0 0 1px rgba(234,88,12,.08);}
-[data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{
-  background:var(--input-bg) !important;border-color:var(--input-border) !important;
-  color:var(--text) !important;color-scheme:light;
-}
-[data-theme="light"] input::placeholder,[data-theme="light"] textarea::placeholder{color:var(--text5);}
-[data-theme="light"] option{background:#fff;color:#0f172a;}
-/* Light theme specific overrides */
-[data-theme="light"] body{background:var(--bg);color:var(--text);}
-[data-theme="light"] .icard{box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);}
-[data-theme="dark"] select{color-scheme:dark;background:#0d1829;color:#e2e8f0;border-color:rgba(255,255,255,.1);}
-[data-theme="dark"] option{background:#0d1829;color:#e2e8f0;}
-select{appearance:none;-webkit-appearance:none;}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--scrollbar-track)}
-::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--text4)}
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:2px solid var(--accent-1);outline-offset:2px}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideDownOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(18px)}}
-@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes dropIn{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes dropOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-6px) scale(.985)}}
-@keyframes softExpand{from{max-height:0;opacity:0;transform:translateY(-4px)}to{max-height:1200px;opacity:1;transform:translateY(0)}}
-@keyframes softCollapse{from{max-height:1200px;opacity:1;transform:translateY(0)}to{max-height:0;opacity:0;transform:translateY(-4px)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes nodeHover{from{filter:brightness(1)}to{filter:brightness(1.15)}}
-@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.node-card{transition:filter .2s ease,transform .25s cubic-bezier(.25,.46,.45,.94);}
-.zoom-ctrl-btn{transition:background .2s ease,color .2s ease,transform .15s ease;}
-.zoom-ctrl-btn:hover{background:var(--surface2) !important;color:var(--text) !important;}
-
-/* ── Info card hover system ── */
-.icard{
-  transition:transform .2s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;
-  cursor:default;
-  border-radius:var(--r-lg);
-}
-.icard:hover{
-  transform:translateY(-3px);
-  box-shadow:0 12px 40px var(--accent-glow);
-  border-color:var(--accent-1) !important;
-  background:var(--accent-soft) !important;
-}
-.icard .icard-title{
-  transition:background-size .3s ease, opacity .2s;
-}
-.icard:hover .icard-title{
-  background:linear-gradient(90deg,var(--accent-1),var(--accent-2),var(--accent-1));
-  background-size:300% 100%;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-  animation:gradShift 5s ease infinite;
-}
-.icard .icard-desc{
-  color:var(--text3);
-  transition:color .2s ease;
-  line-height:1.55;
-}
-.icard:hover .icard-desc{
-  color:var(--text) !important;
-}
-/* Colored variant - uses tier/accent color */
-.icard-accent:hover{
-  box-shadow:0 8px 28px var(--icard-glow,var(--accent-glow));
-  border-color:var(--icard-color,var(--accent-1)) !important;
-  background:var(--icard-bg,var(--accent-soft)) !important;
-}
-.icard-accent:hover .icard-title{
-  background:linear-gradient(90deg,var(--icard-color,var(--accent-1)),var(--accent-2),var(--icard-color,var(--accent-1)));
-  background-size:300% 100%;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-  animation:gradShift 4s ease infinite;
-}
-/* Stats card variant */
-.icard-stat .icard-val{
-  transition:transform .2s ease, filter .2s ease;
-}
-.icard-stat:hover .icard-val{
-  transform:scale(1.08);
-  filter:brightness(1.2);
-}
-/* Feature row hover */
-.feat-row{
-  transition:background .18s ease,padding-left .18s ease;
-  border-radius:8px;
-  padding:5px 8px;
-}
-.feat-row:hover{
-  background:var(--accent-soft);
-  padding-left:12px;
-}
-.feat-row:hover .feat-icon{
-  filter:brightness(1.3);
-}
-[data-theme="light"] .icard:hover{
-  box-shadow:0 8px 28px var(--accent-glow);
-  background:var(--accent-soft) !important;
-}
-[data-theme="light"] .icard:hover .icard-desc{
-  color:var(--text) !important;
-}
-.node-card:hover{filter:brightness(1.12);cursor:pointer;}
-@keyframes glow{0%,100%{box-shadow:0 0 20px var(--accent-glow)}50%{box-shadow:0 0 40px var(--accent-glow)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes nodeBlink{0%,100%{opacity:1}50%{opacity:.45}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes tierPop{0%{transform:translateY(0) scale(1)}60%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(-8px) scale(1)}}
-@keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes badgePulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.06)}}
-@keyframes borderGlow{0%,100%{opacity:.6}50%{opacity:1}}
-@keyframes priceCount{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes scrollPulse{0%,100%{opacity:.4}50%{opacity:1}}
-@keyframes slideRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
-@keyframes slideRightOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(40px)}}
-@keyframes slideLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}
-@keyframes scaleIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
-@keyframes scaleOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(0.97)}}
-@keyframes backdropOut{from{opacity:1}to{opacity:0}}
-.panel-slide{animation:slideRight .4s cubic-bezier(0.22,1,0.36,1) forwards;}
-.panel-slide-out{animation:slideRightOut .32s cubic-bezier(0.32,0,0.67,0) forwards;pointer-events:none;}
-.panel-slide-fast{animation:slideRight .28s cubic-bezier(0.22,1,0.36,1) forwards;}
-.modal-backdrop-out{animation:backdropOut .22s ease forwards;pointer-events:none;}
-.modal-content-out{animation:scaleOut .22s ease forwards;}
-.panel-slide-down-out{animation:slideDownOut .28s ease forwards;pointer-events:none;}
-@keyframes slideDownOutGantt{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(100%)}}
-.gantt-panel-out{animation:slideDownOutGantt .3s ease forwards;pointer-events:none;}
-.modal-scale{animation:scaleIn .28s cubic-bezier(.25,.46,.45,.94) forwards;}
-@keyframes ripple{from{transform:scale(0);opacity:.4}to{transform:scale(2.5);opacity:0}}
-@keyframes checkmark{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
-@keyframes successPop{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
-@keyframes particleFloat{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-60px) scale(0);opacity:0}}
-@keyframes profileIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-@keyframes thinkDot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1.2)}}
-@keyframes edgePulse{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-24}}
-@keyframes nodeSelect{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
-@keyframes statusFlash{0%{opacity:0.5}50%{opacity:1}100%{opacity:0.5}}
-@keyframes slideInPanel{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
-@keyframes tourStep{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
-@keyframes statsReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes hoverLift{to{transform:translateY(-2px)}}
-@keyframes softPulse{0%,100%{opacity:1}50%{opacity:.92}}
-.node-selected{animation:nodeSelect .25s ease;}
-.tour-card{animation:tourStep .25s ease;}
-.stats-card{animation:statsReveal .3s ease both;}
-.animate-fade-in-up{animation:fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards;}
-.animate-hover-lift{transition:transform .25s ease,box-shadow .25s ease;}
-.animate-hover-lift:hover{animation:hoverLift .25s ease forwards;}
-/* Интерактив: кнопки и карточки */
-.btn-interactive{transition:transform .12s ease,box-shadow .2s ease,background .2s ease;}
-.btn-interactive:hover{transform:translateY(-1px);}
-.btn-interactive:active{transform:translateY(0) scale(0.98);}
-.card-interactive{transition:transform .28s cubic-bezier(0.22,1,0.36,1),box-shadow .28s ease,border-color .2s ease;}
-.card-interactive:hover{transform:translateY(-3px);}
-.input-focus-ring:focus{box-shadow:0 0 0 3px var(--accent-glow);outline:none;}
-
-/* ── Плавные анимации экранов и списков ── */
-.drop-panel{animation:dropIn .16s cubic-bezier(0.22,1,0.36,1) both;transform-origin:top center;}
-.drop-panel-out{animation:dropOut .14s cubic-bezier(0.32,0,0.67,0) both;transform-origin:top center;pointer-events:none;}
-.collapse-wrap{overflow:hidden;will-change:max-height,opacity,transform;}
-.collapse-in{animation:softExpand .22s cubic-bezier(0.22,1,0.36,1) both;}
-.collapse-out{animation:softCollapse .18s cubic-bezier(0.32,0,0.67,0) both;pointer-events:none;}
-@keyframes screenEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes screenEnterLeft{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
-@keyframes listItemIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeScaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
-@keyframes backdropIn{from{opacity:0;backdrop-filter:blur(0)}to{opacity:1;backdrop-filter:blur(16px)}}
-/* ── Glass (glassmorphism): малопрозрачный фон, размытие, граница/тень в тон палитры ── */
-.glass{background:var(--glass-bg,rgba(12,18,30,.92));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border-accent,var(--glass-border,rgba(255,255,255,.1)));box-shadow:var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4);}
-[data-theme="light"] .glass{--glass-bg:rgba(255,255,255,.92);--glass-border:rgba(0,0,0,.08);box-shadow:var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.1);}
-.glass-panel{background:var(--glass-panel-bg,rgba(12,18,30,.96));backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid var(--glass-border-accent,var(--glass-panel-border,rgba(255,255,255,.12)));box-shadow:var(--glass-shadow-accent,none),0 16px 48px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.05);}
-[data-theme="light"] .glass-panel{--glass-panel-bg:rgba(255,255,255,.97);--glass-panel-border:rgba(0,0,0,.1);box-shadow:var(--glass-shadow-accent,none),0 16px 48px rgba(0,0,0,.12);}
-.glass-card{background:var(--glass-card-bg,var(--surface));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--glass-border-accent,var(--border));border-radius:var(--r-lg);box-shadow:var(--glass-shadow-accent,none);}
-@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
-@keyframes toastOut{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,8px)}}
-.toast-out{animation:toastOut .25s ease forwards;pointer-events:none;}
-.screen-enter{animation:screenEnter .4s cubic-bezier(0.22,1,0.36,1) forwards;}
-.screen-enter-left{animation:screenEnterLeft .35s cubic-bezier(0.22,1,0.36,1) forwards;}
-.list-item-in{animation:listItemIn .35s cubic-bezier(0.22,1,0.36,1) forwards;}
-.fade-scale-in{animation:fadeScaleIn .3s cubic-bezier(0.22,1,0.36,1) forwards;}
-.backdrop-in{animation:backdropIn .25s ease forwards;}
-.toast-in{animation:toastIn .3s cubic-bezier(0.22,1,0.36,1) forwards;}
-/* Плавные переходы для кнопок и инпутов */
-.btn-smooth{transition:transform .18s ease,box-shadow .25s ease,background .2s ease,color .2s ease,border-color .2s ease,opacity .2s ease;}
-.btn-smooth:hover{transform:translateY(-1px);}
-.btn-smooth:active{transform:translateY(0);}
-.input-smooth{transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;}
-.input-smooth:focus{box-shadow:0 0 0 3px var(--accent-glow);}
-/* Карточки проектов и карт — плавное появление */
-.card-stagger{opacity:0;animation:listItemIn .4s cubic-bezier(0.22,1,0.36,1) forwards;}
-/* Контейнер экрана с плавной сменой */
-.screen-wrap{transition:opacity .2s ease;}
-/* Модалки — более мягкое появление */
-.modal-backdrop{animation:backdropIn .28s ease forwards;}
-.modal-content-pop{animation:fadeScaleIn .32s cubic-bezier(0.22,1,0.36,1) forwards;}
-/* Панели (боковые) — плавный slide */
-.panel-enter{animation:slideRight .4s cubic-bezier(0.22,1,0.36,1) forwards;}
-/* Вкладки — лёгкий fade контента */
-.tab-content{animation:fadeScaleIn .28s cubic-bezier(0.22,1,0.36,1) forwards;}
-
-/* ── Мобильная адаптация (max-width: 640px) ── */
-@media (max-width: 640px){
-  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
-  .btn-smooth{min-height:44px;}
-  .input-smooth{min-height:44px;font-size:16px;}
-  .screen-enter{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);}
-}
-@media (max-width: 480px){
-  .card-stagger{animation-duration:.3s;}
-}
-`;
 const {createContext,useContext}=React;
 const LangCtx=createContext({lang:'ru',setLang:()=>{},t:(k,fb)=>fb||k});
 const useLang=()=>useContext(LangCtx);
@@ -373,1494 +103,6 @@ function CustomSelect({value,onChange,options,style={},disabled=false}){
   );
 }
 
-const LANGS={
-  ru:{
-    save:'Сохранить',cancel:'Отмена',delete:'Удалить',add:'Добавить',
-    edit:'Редактировать',close:'Закрыть',confirm:'Подтвердить',back:'Назад',
-    all:'Все',yes:'Да',no:'Нет',loading:'Загрузка…',search:'Поиск',
-    login:'Войти',register:'Регистрация',email:'Email',password:'Пароль',name:'Имя',
-    fill_fields:'Заполните все поля',welcome:'Добро пожаловать',
-    create_account:'Создать аккаунт',no_account:'Нет аккаунта?',
-    have_account:'Уже есть аккаунт?',sign_in:'Войти',sign_up:'Зарегистрироваться',
-    status:'Статус',status_planning:'Планирование',status_active:'В работе',
-    status_completed:'Выполнено',status_blocked:'Заблокировано',status_paused:'Приостановлено',
-    priority:'Приоритет',priority_low:'Низкий',priority_medium:'Средний',
-    priority_high:'Высокий',priority_critical:'Критический',
-    etype_requires:'Требует',etype_affects:'Влияет',etype_follows:'Следует',etype_blocks:'Блокирует',
-    role_owner:'Владелец',role_editor:'Редактор',role_viewer:'Зритель',
-    undo:'Отменить',redo:'Повторить',new_step:'+ Шаг',connect_btn:'⇒ Связать',
-    fit:'Вписать',fit_view:'Вписать',fit_view_hint:'Вписать карту в экран',center_on_hint:'Центрировать на выбранном шаге',auto_layout_hint:'Автоматическая раскладка по связям',ai_links_hint:'AI предложит связи между шагами',bg_label:'Фон',
-    bg_btn:'Фон',simulation:'▶ Симуляция',gantt:'Gantt',
-    export_png:'PNG',export_json:'JSON↓',import_json:'JSON↑',
-    ai_advisor:'✦ AI',shortcuts_btn:'?',
-    dark_mode:'🌙 Тень',light_mode:'☀️ Свет',layout_btn:'⌥ Авто-раскладка',
-    all_statuses:'Все',filtered_count:'отфильтровано',clear_filter:'✕ Сбросить',
-    step:'Шаг',steps:'Шагов',new_step_title:'Новый шаг',
-    step_title:'Название шага',description:'Описание (зачем?)',
-    metric:'Метрика успеха',progress:'Прогресс',
-    deadline:'Дедлайн',tags_label:'Теги',comments_label:'Комментарии',
-    history_label:'История изменений',color_label:'Цвет',
-    step_deleted:'удалён',undo_action:'↩ Отменить',
-    saved:'Сохранено ✓',saved_short:'Сохранено',saving:'Сохраняю…',save_error:'Ошибка сохранения',retry:'Повторить',use_template:'Использовать шаблон',connect_select_source:'⇒ выберите источник',
-    connect_select_target:'→ выберите цель',
-    ai_title:'AI Советник',clear_chat:'Очистить чат',
-    ask_placeholder:'Спросите о стратегии…',analyzing:'анализирую…',
-    ai_online:'онлайн',ai_offline:'нет связи',
-    shortcuts_title:'⌨️ Горячие клавиши',shortcuts_copy_hint:"Выделите узел, Ctrl+C — копировать, Ctrl+V — вставить. Комбинации можно копировать из этой подсказки.",
-    sc_nav:'— НАВИГАЦИЯ —',sc_fit:'Вписать карту',sc_next:'Следующий шаг',
-    sc_zoom:'Сброс зума',sc_pan:'Панорамировать',
-    sc_edit:'— РЕДАКТИРОВАНИЕ —',sc_new:'Добавить шаг',sc_dup:'Дублировать',
-    sc_open:'Открыть редактор',sc_focus:'Фокус на названии',sc_del:'Удалить',
-    sc_undo:'Отменить',sc_save:'Сохранить',
-    sc_search:'— ПОИСК —',sc_search_action:'Поиск шагов',sc_esc:'Закрыть/Сбросить',
-    sc_ui:'— ИНТЕРФЕЙС —',
-    free_forever:'Бесплатно',per_month:'/мес',current_plan:'Текущий план',
-    upgrade:'Улучшить',downgrade:'Понизить',
-    projects:'Проекты',new_project:'+ Новый проект',maps:'Карт',
-    members:'Участников',settings:'Настройки',my_projects:'Мои проекты',
-    connect_all:'🔗 Авто-связи',analyzing_map:'Анализирую связи карты…',
-    no_steps:'Нет шагов',
-    stats_title:'Статистика карты',total_steps:'Всего шагов',
-    done_steps:'Выполнено',in_progress_steps:'В работе',
-    avg_progress:'Средний прогресс',critical_count:'Критических',
-    blocked_count:'Заблокировано',edges_count:'Связей',
-    ai_rephrase:'✨ Перефразировать',auto_connect:'🔗 Связать',
-    delete_step:'Удалить шаг',add_comment:'Добавить комментарий',
-    comments_empty:'Нет комментариев',history_empty:'Нет изменений',
-    scroll_to:'↗ Перейти',read_only:'Только просмотр',read_only_banner:'Режим просмотра — вы можете просматривать карту, но не редактировать',
-    connections:'Связи',incoming:'входящих',outgoing:'исходящих',
-    // ProjectsPage
-    hello:'Привет',your_projects:'Мои проекты',create_first:'Создайте первый проект',
-    no_projects_hint:'Создайте проект для стратегического планирования',
-    new_project_name:'Название нового проекта',new_project_name_ph:'Название проекта…',create_project:'Создать проект',
-    open_project:'Открыть',delete_project:'Удалить',project_created:'Проект создан',delete_project_err:'Ошибка при удалении проекта',
-    last_updated:'Обновлён',maps_count:'карт',
-    // MapEditor toolbar
-    back_btn:'← Назад',back_to_project:'Вернуться в проект',version_history_short:'История',search_projects_hint:'Поиск по проектам и картам…',
-    add_step:'+ Шаг',link_btn:'⇒ Связать',
-    auto_layout:'⌥ Авто-раскладка',
-    ai_links:'🔗 AI-связи',bg_grid:'⊞',bg_stars:'✦',bg_none:'○',
-    map_tour:'🗺 Тур',show_stats:'📊',shortcuts:'⌨️',
-    simulate:'⎇ Симуляция',templates:'📋 Шаблоны',
-    export_png2:'⬇PNG',export_json2:'⬇JSON',import_json2:'⬆JSON',
-    // NodeEditor
-    edit_step:'Редактирование шага',node_title:'Название',node_reason:'Причина / описание',
-    node_metric:'Метрика успеха',node_progress:'Прогресс %',
-    node_deadline:'Дедлайн',node_tags:'Теги (через запятую)',
-    node_color:'Цвет',node_status:'Статус',node_priority:'Приоритет',
-    node_comments:'Комментарии',node_history:'История',
-    add_comment_ph:'Написать комментарий…',save_changes:'Сохранить',
-    no_comments:'Нет комментариев',no_history:'Нет истории',
-    // StatsPopup
-    map_health:'Здоровье карты',health_score:'Health Score',
-    stats_empty:'Добавьте шаги на карту, чтобы увидеть аналитику.',
-    add_step_hint:'Добавить шаг (клик на пустое место)',link_mode_hint:'Режим связи: клик на источник, затем на цель',
-    ai_consultant_hint:'AI-консультант (Ctrl+Shift+A)',minimap_hint:'Миникарта',
-    simulation_hint:'Симуляция выполнения стратегии',templates_hint:'Шаблоны карт',gantt_title:'Диаграмма Ганта',
-    dismiss:'Скрыть',map_empty_title:'Карта пуста',map_empty_hint:'Нажмите + Шаг, дважды кликните на фон или кликните на пустое место.',
-    search_no_results:'Ничего не найдено',search_no_results_hint:'Сбросьте поиск или фильтр статусов.',
-    zoom_in:'Увеличить',zoom_out:'Уменьшить',
-    center_on:'К узлу',center_on_node:'Центрировать',add_step_here:'Добавить шаг здесь',duplicate:'Дублировать',copy_short:'Копировать',delete_selected:'Удалить выбранные',
-    completed:'Выполнено',in_progress:'В работе',planning:'Планирование',
-    blocked:'Заблокировано',critical:'Критических',avg_prog:'Средний прогресс',
-    total_connections:'Связей',
-    // AiPanel
-    ai_consultant:'AI Советник',ai_quick_questions:'Быстрые вопросы',clear_chat2:'Очистить',
-    type_question:'Спросите о стратегии…',send_btn:'Отправить',
-    quick_actions:'Быстрые действия',
-    // GanttView
-    no_deadlines:'Нет дедлайнов',
-    gantt_hint:'Добавьте дедлайны к шагам в редакторе',
-    today:'Сегодня',overdue:'Просрочено',
-    // ProfileModal
-    profile_title:'Профиль',security_title:'Безопасность',
-    login_methods:'Вход в аккаунт',email_verified:'Email подтверждён',email_not_verified:'Подтвердите email',google_login_coming:'Вход через Google — скоро',
-    settings_title:'Настройки',stats_tab:'Статистика',billing_title:'Тариф',
-    display_name:'Имя',bio_label:'О себе',change_password:'Сменить пароль',
-    current_password:'Текущий пароль',new_password:'Новый пароль',
-    confirm_password:'Подтвердить пароль',save_password:'Сохранить',
-    danger_zone:'Опасная зона',delete_account:'Удалить аккаунт',
-    theme_label:'Тема',dark_theme:'Тёмная',light_theme:'Светлая',
-    compact_mode:'Компактный режим',default_view:'Вид по умолчанию',
-    auto_save:'Автосохранение',ai_language:'Язык AI',
-    email_notifications:'Email уведомления',push_notifications:'Push уведомления',
-    // WelcomeScreen
-    welcome_title:'Постройте стратегию',welcome_sub:'От целей до результатов — с AI',
-    get_started:'Начать →',sign_in_btn:'Войти',
-    // Misc
-    version_history:'История версий',restore:'Восстановить',snapshot:'Снимок',
-    no_maps:'Нет карт',create_map:'Создать карту',
-    map_name:'Название карты',create_map_btn:'Создать',
-    email_no_change:'Email нельзя изменить',account_created:'Аккаунт создан',pw_hint:'Пароль не менее 6 символов',pw_strength:'Надёжность пароля',delete_warning:'Все данные будут удалены',processing_payment:'Обрабатываем платёж…',edge_type:'Тип связи:',logout:'Выйти',no_edges:'Нет связей',map_limit:'Лимит карт исчерпан',author:'Автор:',
-    share_btn:'Поделиться',share_map:'Поделиться картой',share_copied:'Ссылка скопирована. Откройте её для просмотра карты.',
-    select_language:'Язык',
-    free_plan:"Бесплатно",
-    per_month_short:"/мес",
-    choose_plan:"Выберите свой тариф",
-    your_plan:"● Ваш тариф",
-    selected:"✓ Выбрано",
-    choose_btn:"Выбрать →",
-    saving_map:"Сохраняю карту",
-    preparing:"Подготавливаю ваше стратегическое пространство…",
-    new_password_label:"Новый пароль",
-    all_data_deleted:"Все данные будут удалены безвозвратно",
-    change_pw_btn:"Изменить пароль",
-    chars_6plus:"6+ символов",
-    uppercase_chars:"Заглавные",
-    choose_template:"Выберите готовую стратегическую карту или начните с нуля",
-    choose_template_left:"Выберите шаблон слева",
-    start_from_scratch:"Начать с нуля",
-    ai_generating_map:"AI генерирует карту…",
-    tour_start_work:"Начать работу ✓",tour_nav_hint:"← → или пробел для навигации • Esc — закрыть",
-    empty_scenario:"Пустой сценарий",
-    new_scenario:"Новый сценарий",
-    scenarios:"Сценарии",
-    no_scenarios:"Нет сценариев",
-    scenarios_pro:"Сценарии доступны с Pro",
-    new_map:"Новая карта",create_scenario:"Создать сценарий",
-    content_plan:"Контент-план",
-    content_plan_tab:"Контент-план",
-    content_plan_locked_title:"Контент-план доступен на Pro",
-    content_plan_pro_only:"Приложение использует знания о вашем бизнесе и стратегии для планирования постов.",
-    content_plan_empty_title:"Планируйте публикации",
-    content_plan_empty_desc:"Добавьте посты, видео и рассылки. AI предложит идеи на основе шагов вашей стратегии.",
-    add_content_item:"+ Публикация",
-    content_status_draft:"Черновик",content_status_scheduled:"Запланировано",content_status_published:"Опубликовано",
-    content_type_post:"Пост",content_type_story:"Сторис",content_type_email:"Рассылка",content_type_video:"Видео",
-    content_channel_blog:"Блог",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"ВКонтакте",content_channel_youtube:"YouTube",content_channel_email:"Email",
-    content_link_step:"Связать с шагом стратегии",content_ai_suggest:"✨ Предложить по стратегии",
-    content_label_type:"Тип контента",content_label_channel:"Канал публикации",content_label_status:"Статус",
-    content_view_calendar:"Календарь",content_view_map:"Карта",content_view_tree:"Дерево",content_view_list:"Список",
-    content_plan_intro:"Планируйте посты, видео и рассылки. Переключайте вид: календарь по датам, по каналам или список.",
-    content_tree_title:"Публикации по каналам",content_tree_hint:"Канал → статус → публикации. Кликните карточку для редактирования.",
-    content_more:"Ещё",content_show_all:"Показать все",content_no_date:"Без даты",untitled:"Без названия",
-    scheduled_date_short:"Дата публикации",brief:"Тезис / описание",
-    project_ai_tab:"AI",project_ai_title:"AI по проекту",project_ai_hint:"Один и тот же чат, доступен и в карте. Здесь AI видит контекст всех карт проекта.",project_scope:"Проект",
-    scenario_templates:"Шаблоны сценариев",
-    no_limits:"Без лимитов.",
-    no_comparison:"Без сравнения",
-    view_label:"Вид",
-    login_or_register:"Войдите или создайте аккаунт бесплатно",
-    loading_short:"Загрузка…",
-    load_error:"Ошибка загрузки",load_error_hint:"Если это происходит снова — проверьте подключение к интернету и доступность API. В офлайн‑режиме можно войти в демо‑аккаунт без сервера.",
-    why_label:"Зачем?",
-    why_placeholder:"Зачем этот шаг, какой результат нужен",
-    action_label:"Что сделать",
-    action_placeholder:"Напр.: Провести 15 интервью с ЦА до пятницы",
-    tools_label:"Инструментарий",
-    use_ai_comment:"Используйте @AI чтобы задать вопрос AI.",
-    use_connect:"Используйте ⇒ Связать или ✦ AI-связи.",
-    history_empty2:"История изменений пуста.",
-    metric_label:"Метрика успеха",
-    observer:"Наблюдатель",
-    click_new_project:"Нажмите «+ Проект» чтобы начать",continue_last:"Продолжить с",
-    project_name:"Название проекта",
-    start_free:"Начать бесплатно",
-    start_free_arrow:"Начать бесплатно →",
-    start_work:"Начать работу →",
-    start_ai_interview:"Начать с чистой карты и AI-интервью",
-    begin:"Начните",
-    no_comments2:"Нет комментариев.",
-    no_projects:"Нет проектов",
-    upgrade_to_pro:"Перейти на Pro",
-    ai_free_upgrade:"AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.",
-    ai_free_placeholder:"Доступно с тарифа Starter",
-    by_priority:"По приоритетам",
-    by_status:"По статусам",
-    continue_btn:"Продолжить",
-    continue_arrow:"Продолжить →",
-    skip:"Пропустить",
-    skip_interview:"Пропустить интервью?",
-    editor_role:"Редактор",
-    watch_demo:"Смотреть демо →",
-    create_first_map:"Создайте первую стратегическую карту",create_first_map_hint:"Добавьте шаги, свяжите их — AI подскажет следующий ход.",
-    create_first_scenario:"Создайте первый сценарий вручную или с помощью AI шаблонов",
-    create_map_free:"Создать карту бесплатно ✦",
-    strategy_maps:"Стратегические карты",
-    tariff:"Тариф",
-    upgrade_tier_arrow:"Улучшить тариф →",
-    node_color_label:"Цвет узла",
-    export_label:"Экспорт",
-    analyzing_short:"анализ…",
-    demo_payment_skipped:"Демо — оплата пропущена",
-    add_deadlines_hint:"Добавьте дедлайны к шагам — они появятся здесь",
-    three_steps:"Три шага",
-    strategy_hero:"Стратегия,",
-    which_word:"которая",
-    who_word:"кто",
-    wins_word:"побеждает",
-    speaks_word:"Говорят те,",
-    for_free:"бесплатно.",
-    included_free:"ВКЛЮЧЕНО БЕСПЛАТНО",
-    upgrade_plan:"Улучшить",
-    user_word:"Пользователь",
-    your_plan_word:"свой тариф",
-    strategic_word:"стратегического",
-    activate_btn:"Активировать",
-    downgrade_to:"Перейти на ",
-    replacing:"Заменяю…",
-    replace_btn:"🗑 Заменить",
-    upgrade_tier:"✦ Расширить тариф",
-    // Landing page nav
-    nav_features:"Возможности",nav_process:"Процесс",nav_pricing:"Тарифы",
-    // Landing hero
-    hero_sub:"AI анализирует ваш бизнес, строит стратегическую карту и даёт консультацию уровня McKinsey. Для тех, кто принимает решения с последствиями.",
-    // Landing features section
-    tag_features:"Возможности",feat_sub:"Каждый инструмент создан для людей, которые принимают решения с последствиями. Не для экспериментов — для результата.",
-    feat_leader_word:"лидера",
-    lf1_title:"Стратегические карты",lf1_desc:"Причинно-следственные связи между решениями и результатами. Drag-and-drop узлы, зависимости, метрики, дедлайны на одном интерактивном canvas.",
-    lf2_title:"AI-консультант",lf2_desc:"SWOT, OKR, First Principles, BCG-матрица, Porter's Five Forces. AI задаёт правильные вопросы и вскрывает системные ограничения вашего бизнеса.",
-    lf3_title:"Симуляция сценариев",lf3_desc:"Три версии будущего до принятия решения. Каскадный анализ последствий. Видьте узкие места прежде, чем они станут кризисом.",
-    lf4_title:"Gantt-таймлайн",lf4_desc:"Временная шкала, критический путь, роли и зоны ответственности. Стратегия не как идея, а как план с конкретными дедлайнами.",
-    lf5_title:"Командная работа",lf5_desc:"Роли, комментарии, история изменений, автосохранение. Стратегия как живой командный документ, а не PDF в чьей-то папке.",
-    lf6_title:"Health Score аналитика",lf6_desc:"Сводная оценка здоровья стратегии в одном числе. Приоритеты, риски, прогресс по узлам. Управляйте через данные.",
-    // Landing process section
-    tag_process:"Процесс",proc_heading_end:"стратегии",to_working:"до рабочей",proc_sub:"Никаких шаблонов. AI строит карту с нуля, опираясь исключительно на контекст вашего бизнеса.",
-    lstep1_tag:"Шаг первый",lstep1_title:"AI-интервью",lstep1_desc:"Шесть точных вопросов. AI выявляет цели, скрытые риски и системные ограничения — то, что консалтинг находит за неделю и $50 000.",
-    lstep2_tag:"Шаг второй",lstep2_title:"Построение карты",lstep2_desc:"Персональная стратегическая карта с причинно-следственными узлами, метриками, приоритетами и временными горизонтами. За 30 секунд.",
-    lstep3_tag:"Шаг третий",lstep3_title:"Консультация",lstep3_desc:"Конкретные следующие шаги, расчёт рисков, альтернативные сценарии. Без воды — только применимые к вашей ситуации решения.",
-    // Landing testimonials section
-    tag_testimonials:"Отзывы",testi_checked:"проверил",
-    lt1_q:"Strategy AI структурировал хаос из идей в чёткий план за двадцать минут. Раньше это стоило консалтинга на десятки тысяч долларов и занимало месяц.",lt1_role:"CEO, Series A стартап",
-    lt2_q:"Инструмент, который мыслит как McKinsey. Карты, сценарии и Gantt в одном месте изменили наш product-процесс фундаментально.",lt2_role:"CPO, B2B SaaS",
-    lt3_q:"Симуляция сценариев — это отдельный класс. Мы теперь входим в любые переговоры с тремя готовыми исходами вместо одного.",lt3_role:"Управляющий партнёр",
-    // Landing pricing section
-    tag_pricing_label:"Тарифы",pricing_start_word:"Начните",pricing_sub:"Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.",
-    pricing_hot_badge:"★ ТОП",
-    lpr1_desc:"Для знакомства с инструментом",lpr1_f1:"1 проект и 1 стратегическая карта",lpr1_f2:"AI-интервью и генерация карты",lpr1_f3:"Gantt-таймлайн",lpr1_f4:"PNG / JSON экспорт",start_free_cta:"Начать бесплатно",
-    lpr_starter_desc:"Мягкий вход в стратегическое планирование",lpr_starter_f1:"3 проекта, 3 карты каждый",lpr_starter_f2:"2 сценария + AI анализ рисков",lpr_starter_f3:"Полный Gantt + приоритеты",lpr_starter_f4:"1 500 AI-сообщений / мес",lpr_starter_cta:"Начать за $9 →",
-    lpr2_desc:"Для профессионалов и команд",lpr2_f1:"10 проектов, 5 карт каждая",lpr2_f2:"SWOT, OKR, BCG, Porter AI-анализ",lpr2_f3:"5 сценариев + симуляция последствий",lpr2_f4:"Клонирование и версионирование карт",lpr2_f5:"Командная работа до 3 человек",lpr2_cta:"Перейти на Pro →",
-    lpr_team_desc:"Для команд до 10 человек",lpr_team_f1:"25 проектов, 15 карт каждая",lpr_team_f2:"Шаблоны и 15 сценариев",lpr_team_f3:"Командная работа до 10 человек",lpr_team_f4:"Полный AI + приоритетная поддержка",lpr_team_cta:"Перейти на Team →",
-    lpr3_desc:"Для организаций с системным подходом",lpr3_f1:"Без ограничений: проекты, карты, сценарии",lpr3_f2:"C-level AI коллегиум (5 экспертных ролей)",lpr3_f3:"PPTX-отчёты для совета директоров",lpr3_f4:"White-label и API-интеграции",lpr3_f5:"Выделенный менеджер поддержки",lpr3_cta:"Связаться",
-    // Landing CTA section
-    cta_h1:"Первый шаг",cta_h2:"занимает",cta_h3:"две минуты",
-    cta_sub:"Создайте первую стратегическую карту прямо сейчас. Без кредитной карты. Без шаблонов — только ваш бизнес и AI.",
-    cta_trust1:"Бесплатно навсегда",cta_trust2:"Без кредитной карты",cta_trust3:"Данные только ваши",
-    // Landing metrics
-    lm1_sfx:"мин",lm1_lbl:"от вопроса до первой стратегической карты",
-    lm2_lbl:"точность AI-анализа на тестовых кейсах McKinsey",
-    lm3_lbl:"уровней экспертной глубины — от Free до Enterprise",
-    lm4_lbl:"сценариев для анализа альтернативных исходов",
-    // Cookie consent
-    cookie_text:"🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей",cookie_policy:"Политикой конфиденциальности",cookie_accept:"Принять",
-    // Footer columns
-    footer_product:"Продукт",footer_company:"Компания",footer_legal:"Правовое",
-    footer_features:"Возможности",footer_pricing_link:"Тарифы",footer_templates:"Шаблоны",footer_changelog:"Changelog",
-    footer_about:"О нас",footer_blog:"Блог",footer_careers:"Карьера",footer_contact:"Контакты",
-    footer_privacy:"Политика конфиденциальности",footer_terms:"Условия использования",footer_cookies:"Cookies",footer_gdpr:"GDPR",
-    footer_tagline:"Визуальное стратегическое планирование с AI-советником уровня McKinsey.",
-    footer_rights:"© 2026 Strategy AI. Все права защищены.",
-    // App misc
-    delete_forever:"Удалить навсегда",
-    by_statuses:"По статусам",by_priorities:"По приоритетам",
-    member_limit:"Лимит участников для {plan}: {n}.",
-    project_name_label:"Название проекта",saved_ok:"Сохранено",
-    // WelcomeScreen
-    ws_start_btn:"Начать бесплатно ✦",ws_login_btn:"Уже есть аккаунт — Войти →",
-    ws_feat1:"Карты целей",ws_feat2:"AI советник",ws_feat3:"Gantt-план",
-    ws_feat4:"PNG/JSON экспорт",ws_feat5:"1 сценарий",ws_feat6:"До 5 шагов",
-    ws_terms:"Нажимая «Начать», вы соглашаетесь с условиями использования",
-    // VersionHistoryModal
-    trial_active:"Пробный период активен",trial_days_left:"дней осталось",
-    deadline_reminder:"Напоминания о дедлайнах",
-    notif_email_desc:"Важные обновления на почту",notif_push_desc:"Уведомления в браузере",
-    restore_confirm:"Восстановить эту версию? Текущие данные будут заменены.",
-    versions_empty:"Нет сохранённых версий",restore_version:"Восстановить",version_saved:"Версия сохранена ✓",save_version_btn:"Сохранить версию",save_version_short:"Версия",version_save_label:"Промежуточная версия",
-    version_restored:"Версия восстановлена ✓",
-    // WeeklyBriefingModal
-    weekly_briefing:"Еженедельный брифинг",
-    weekly_briefing_date:"Неделя",
-    weekly_briefing_gen:"Анализирую карту…",
-    weekly_briefing_err:"Не удалось получить AI-анализ.",
-    // AI/export
-    ai_error:"Ошибка AI-анализа",ai_rate_limit_hint:"Превышен лимит запросов. Подождите минуту.",
-    ai_comment_error:"Ошибка AI. Попробуйте ещё раз.",
-    ai_network_err:"Не удалось получить ответ AI. Проверьте сеть и ключ API. Попробуйте ещё раз.",
-    ai_map_fallback:"AI не удалось создать карту. Используем базовый шаблон — вы можете отредактировать его.",
-    ai_generation_error:"Ошибка генерации. Попробуйте ещё раз.",
-    ai_sim_error:"Ошибка AI-консультанта",
-    export_pdf:"Скачать PDF",export_pdf_hint:"PDF через печать браузера (Ctrl+P → Сохранить как PDF)",export_pptx:"Скачать PPTX",
-    // MapEditor toasts & misc
-    imported_steps:"✅ Импортировано: {n} шагов",
-    json_invalid:"Некорректный формат JSON",
-    file_read_err:"Ошибка чтения файла",
-    png_exported:"PNG экспортирован ✓",
-    json_exported:"JSON экспортирован ✓",
-    share_create_err:"Ошибка создания ссылки",
-    popup_blocked:"Разрешите всплывающие окна для экспорта",
-    layout_applied:"⌥ Авто-раскладка применена",
-    min_2_steps:"Нужно минимум 2 шага",
-    ai_analyzing_links:"🔗 AI анализирует логику карты…",
-    links_added:"🔗 Добавлено: {n} связей",
-    links_optimal:"Связи уже оптимальны — добавить нечего",
-    copied:"📋 Скопировано",pasted:"📋 Вставлено",
-    confirm_restore:"Восстановить?",
-    confirm_delete_map:"Удалить карту?",confirm_delete_map_desc:"Карта будет удалена без возможности восстановления.",
-    confirm_delete_proj:"Все карты и данные проекта будут удалены безвозвратно.",
-    // ProfileModal messages
-    profile_saved:"Профиль обновлён ✓",
-    fill_all_fields:"Заполните все поля",
-    min_6_chars:"Минимум 6 символов",
-    pw_mismatch:"Пароли не совпадают",
-    pw_changed:"Пароль изменён ✓",
-    pw_change_err:"Ошибка смены пароля",
-    wrong_pw:"Неверный текущий пароль",
-    delete_err:"Ошибка при удалении",
-    settings_saved:"Настройки сохранены ✓",
-    appearance:"Внешний вид",
-    light_theme_label:"☀️ Светлая",dark_theme_label:"🌙 Тёмная",
-    palette_label:"Цветовая палитра",palette_hint:"Цвет кнопок и акцентов. Сохраняется автоматически.",
-    compact_desc:"Уменьшенные карточки узлов",
-    autosave_desc:"Сохранять карту при каждом изменении",
-    canvas_view:"🗺 Канвас",gantt_view:"📅 Gantt",list_view:"📋 Список",
-    ai_assistant_title:"🤖 AI-ассистент",notifications_title:"🔔 Уведомления",
-    ai_hub_title:"✦ AI (единый чат)",
-    ai_hub_hint:"Этот чат общий для всего приложения. Здесь AI видит портфель проектов и загруженные карты.",
-    all_projects:"Все проекты",
-    notif_center:"Уведомления",
-    notif_unread_n:"Непрочитанных: {n}",
-    notif_all_read:"Все прочитано",
-    notif_read_all:"Прочитать все",
-    notif_empty:"Пока нет уведомлений",
-    notification:"Уведомление",
-    save_settings:"Сохранить настройки",
-    maps_available:"Карт доступно",scenarios_available:"Сценариев",
-    projects_available:"Проектов",ai_level:"AI уровень",
-    // ProjectsPage/ProjectDetail
-    projects_of:"{n} из {max} проектов",
-    search_results:"Результаты поиска",
-    search_empty:"Ничего не найдено",
-    project_limit:"Лимит проектов для тарифа",
-    new_project_btn:"+ Проект",
-    scenarios_label:"Сценарии",
-    overdue_label:"просрочено",
-    updated_label:"обновлено",
-    steps_label:"шагов",
-    maps_label:"карт",
-    scenarios_count:"сцен.",
-    map_limit_tier:"Лимит карт для {tier}: {n}",
-    template_applied:"Шаблон применён ✓",
-    ai_customize_template_offer:"Я применил шаблон. Хотите подстроить его под ваш бизнес? Напишите, чем вы занимаетесь и какая цель — я адаптирую шаги и формулировки под вас.",
-    scenario_created:"Сценарий создан ✓",
-    scenario_limit:"Лимит сценариев для тарифа",
-    members_limit:"Лимит участников: {n}",
-    member_added:"Участник добавлен",
-    member_added_already:"Участник уже добавлен",
-    member_add_err:"Ошибка добавления участника",
-    payment_success:"✅ Оплата прошла успешно! Тариф обновлён.",
-    // GanttView
-    steps_with_deadlines:"{n} шагов с дедлайнами",
-    days_overdue:"просрочено {n}д.",
-    days_left:"{n}д.",
-    tomorrow_label:"завтра",
-    // Onboarding / interview
-    analyzing_answers:"Анализирую ваши ответы и строю персональную карту…",
-    create_map_btn2:"Создать карту ✦",answer_btn:"Ответить →",
-    interview_count:"AI-интервью · {n}/{max} вопросов",
-    skip_interview_confirm:"Пропустить интервью и начать с пустой карты?",
-    // Simulation
-    sim_goal:"🎯 Желаемый результат",sim_metric:"📊 Целевая метрика",
-    sim_budget:"💰 Бюджет ($)",sim_team:"👥 Команда (чел)",
-    sim_revenue:"💵 Целевая выручка ($)",sim_timeline:"⏱ Срок",
-    sim_run:"▶ Запустить симуляцию",sim_stop:"⏹ Остановить",sim_reset:"↺ Сбросить",
-    sim_ask_ai:"✦ Спросить AI",sim_q_ph:"Вопрос о симуляции…",
-    // Tier-related
-    tier_activated:"Тариф {tier} активирован ✓",
-    stay_on_plan:"Остаться на {plan}",
-    go_to_plan:"Перейти на {plan} — {price}",
-    card_number_ph:"Номер карты…",card_holder_ph:"Имя держателя…",
-    card_expiry_ph:"ММ/ГГ",card_cvv_ph:"CVV",
-    card_data_title:"💳 Данные карты",
-    downgrade_warning:"После смены тарифа часть данных может быть ограничена.",downgrade_you_have:"У вас",downgrade_maps_unit:"карт",downgrade_projects_unit:"проектов",
-    downgrade_limit_maps:"Карт на новом тарифе",
-    downgrade_limit_projects:"Проектов на новом тарифе",
-    downgrade_excess:"Данные сверх лимита станут доступны только для чтения.",
-    current_tier_badge:"✓ Текущий тариф",
-    alt_strategies:"Альтернативные стратегии сценария",
-    done:"Выполнено",
-    verify_email_banner:"Подтвердите ваш email для полного доступа.",
-    verify_email_resend:"Отправить письмо повторно",
-    verify_email_sent:"Письмо отправлено! Проверьте почту.",
-    verify_email_done:"✓ Email подтверждён"},
-  en:{
-    save:'Save',cancel:'Cancel',delete:'Delete',add:'Add',
-    edit:'Edit',close:'Close',confirm:'Confirm',back:'Back',
-    all:'All',yes:'Yes',no:'No',loading:'Loading…',search:'Search',
-    login:'Log In',register:'Register',email:'Email',password:'Password',name:'Name',
-    fill_fields:'Please fill all fields',welcome:'Welcome back',
-    create_account:'Create Account',no_account:"Don't have an account?",
-    have_account:'Already have an account?',sign_in:'Sign In',sign_up:'Sign Up',
-    status:'Status',status_planning:'Planning',status_active:'In Progress',
-    status_completed:'Completed',status_blocked:'Blocked',status_paused:'Paused',
-    priority:'Priority',priority_low:'Low',priority_medium:'Medium',
-    priority_high:'High',priority_critical:'Critical',
-    etype_requires:'Requires',etype_affects:'Affects',etype_follows:'Follows',etype_blocks:'Blocks',
-    role_owner:'Owner',role_editor:'Editor',role_viewer:'Viewer',
-    undo:'Undo',redo:'Redo',new_step:'+ Step',connect_btn:'⇒ Connect',
-    fit:'Fit',bg_btn:'Grid',simulation:'▶ Simulate',gantt:'Gantt',
-    export_png:'PNG',export_json:'JSON↓',import_json:'JSON↑',
-    ai_advisor:'✦ AI',shortcuts_btn:'?',
-    dark_mode:'🌙 Dark',light_mode:'☀️ Light',layout_btn:'⌥ Auto-layout',
-    all_statuses:'All',filtered_count:'filtered',clear_filter:'✕ Clear',
-    step:'Step',steps:'Steps',new_step_title:'New Step',
-    step_title:'Step title',description:'Description (why?)',
-    metric:'Success metric',progress:'Progress',
-    deadline:'Deadline',tags_label:'Tags',comments_label:'Comments',
-    history_label:'Change history',color_label:'Color',
-    step_deleted:'deleted',undo_action:'↩ Undo',
-    saved:'Saved ✓',saved_short:'Saved',saving:'Saving…',save_error:'Save failed',retry:'Retry',use_template:'Use template',connect_select_source:'⇒ select source',
-    connect_select_target:'→ select target',
-    ai_title:'AI Advisor',clear_chat:'Clear chat',
-    ask_placeholder:'Ask about strategy…',analyzing:'analyzing…',
-    ai_online:'online',ai_offline:'offline',
-    shortcuts_title:'⌨️ Keyboard Shortcuts',shortcuts_copy_hint:"Select a node, Ctrl+C to copy, Ctrl+V to paste. You can copy shortcuts from this hint.",
-    sc_nav:'— NAVIGATION —',sc_fit:'Fit map to screen',sc_next:'Next step',
-    sc_zoom:'Reset zoom',sc_pan:'Pan canvas',
-    sc_edit:'— EDITING —',sc_new:'Add step',sc_dup:'Duplicate step',
-    sc_open:'Open editor',sc_focus:'Focus title field',sc_del:'Delete',
-    sc_undo:'Undo',sc_save:'Save',
-    sc_search:'— SEARCH —',sc_search_action:'Search steps',sc_esc:'Close/Reset',
-    sc_ui:'— INTERFACE —',
-    free_forever:'Free',per_month:'/mo',current_plan:'Current Plan',
-    upgrade:'Upgrade',downgrade:'Downgrade',
-    projects:'Projects',new_project:'+ New Project',maps:'Maps',
-    members:'Members',settings:'Settings',my_projects:'My Projects',
-    connect_all:'🔗 Auto-connect',analyzing_map:'Analyzing map connections…',
-    no_steps:'No steps',
-    stats_title:'Map Statistics',total_steps:'Total steps',
-    done_steps:'Completed',in_progress_steps:'In progress',
-    avg_progress:'Avg progress',critical_count:'Critical',
-    blocked_count:'Blocked',edges_count:'Connections',
-    ai_rephrase:'✨ Rephrase',auto_connect:'🔗 Connect',
-    delete_step:'Delete step',add_comment:'Add comment',
-    comments_empty:'No comments yet',history_empty:'No changes yet',
-    scroll_to:'↗ Go to',read_only:'Read only',read_only_banner:'View mode — you can view the map but not edit it',
-    connections:'Connections',incoming:'incoming',outgoing:'outgoing',
-    // ProjectsPage
-    hello:'Hello',your_projects:'My Projects',create_first:'Create your first project',
-    no_projects_hint:'Create a project to start strategic planning',
-    new_project_name:'New project name',new_project_name_ph:'Project name…',create_project:'Create project',
-    open_project:'Open',delete_project:'Delete',project_created:'Project created',delete_project_err:'Error deleting project',
-    last_updated:'Updated',maps_count:'maps',
-    // MapEditor toolbar
-    back_btn:'← Back',back_to_project:'Back to project',version_history_short:'History',search_projects_hint:'Search projects and maps…',
-    add_step:'+ Step',link_btn:'⇒ Connect',
-    fit_view:'Fit',fit_view_hint:'Fit map to screen',center_on_hint:'Center on selected step',auto_layout_hint:'Auto layout by connections',ai_links_hint:'AI will suggest links between steps',bg_label:'Background',
-    auto_layout:'⌥ Auto-layout',
-    ai_links:'🔗 AI-links',bg_grid:'⊞',bg_stars:'✦',bg_none:'○',
-    map_tour:'🗺 Tour',show_stats:'📊',shortcuts:'⌨️',
-    simulate:'⎇ Simulate',templates:'📋 Templates',
-    export_png2:'⬇PNG',export_json2:'⬇JSON',import_json2:'⬆JSON',
-    // NodeEditor
-    edit_step:'Edit Step',node_title:'Title',node_reason:'Reason / description',
-    node_metric:'Success metric',node_progress:'Progress %',
-    node_deadline:'Deadline',node_tags:'Tags (comma separated)',
-    node_color:'Color',node_status:'Status',node_priority:'Priority',
-    node_comments:'Comments',node_history:'History',
-    add_comment_ph:'Write a comment…',save_changes:'Save',
-    no_comments:'No comments',no_history:'No history',
-    // StatsPopup
-    map_health:'Map Health',health_score:'Health Score',
-    stats_empty:'Add steps to the map to see analytics.',
-    add_step_hint:'Add step (click on empty area)',link_mode_hint:'Link mode: click source, then target',
-    ai_consultant_hint:'AI advisor (Ctrl+Shift+A)',minimap_hint:'Minimap',
-    simulation_hint:'Strategy execution simulation',templates_hint:'Map templates',gantt_title:'Gantt chart',
-    dismiss:'Dismiss',map_empty_title:'Map is empty',map_empty_hint:'Click + Step, double-click on canvas, or click on empty area.',
-    search_no_results:'No results found',search_no_results_hint:'Clear search or status filter.',
-    zoom_in:'Zoom in',zoom_out:'Zoom out',
-    center_on:'To node',center_on_node:'Center',add_step_here:'Add step here',duplicate:'Duplicate',copy_short:'Copy',delete_selected:'Delete selected',
-    completed:'Completed',in_progress:'In Progress',planning:'Planning',
-    blocked:'Blocked',critical:'Critical',avg_prog:'Avg progress',
-    total_connections:'Connections',
-    // AiPanel
-    ai_consultant:'AI Advisor',ai_quick_questions:'Quick questions',clear_chat2:'Clear',
-    type_question:'Ask about strategy…',send_btn:'Send',
-    quick_actions:'Quick actions',
-    // GanttView
-    no_deadlines:'No deadlines',
-    gantt_hint:'Add deadlines to steps in the editor',
-    today:'Today',overdue:'Overdue',
-    // ProfileModal
-    profile_title:'Profile',security_title:'Security',
-    login_methods:'Account sign-in',email_verified:'Verified',email_not_verified:'Not verified',google_login_coming:'Google sign-in coming soon',
-    settings_title:'Settings',stats_tab:'Statistics',billing_title:'Billing',
-    display_name:'Name',bio_label:'Bio',change_password:'Change password',
-    current_password:'Current password',new_password:'New password',
-    confirm_password:'Confirm password',save_password:'Save',
-    danger_zone:'Danger zone',delete_account:'Delete account',
-    theme_label:'Theme',dark_theme:'Dark',light_theme:'Light',
-    compact_mode:'Compact mode',default_view:'Default view',
-    auto_save:'Auto-save',ai_language:'AI language',
-    email_notifications:'Email notifications',push_notifications:'Push notifications',
-    // WelcomeScreen
-    welcome_title:'Build your strategy',welcome_sub:'From goals to results — with AI',
-    get_started:'Get started →',sign_in_btn:'Sign In',
-    // Misc
-    version_history:'Version history',restore:'Restore',snapshot:'Snapshot',
-    no_maps:'No maps',create_map:'Create map',
-    map_name:'Map name',create_map_btn:'Create',
-    email_no_change:'Email cannot be changed',account_created:'Account created',pw_hint:'Password min 6 characters',pw_strength:'Password strength',delete_warning:'All data will be deleted permanently',processing_payment:'Processing payment…',edge_type:'Connection type:',logout:'Log out',no_edges:'No connections',map_limit:'Map limit reached',author:'Author:',
-    share_btn:'Share',share_map:'Share map',share_copied:'Link copied. Open it to view the map.',
-    select_language:'Language',
-    free_plan:"Free",
-    per_month_short:"/mo",
-    choose_plan:"Choose your plan",
-    your_plan:"● Your plan",
-    selected:"✓ Selected",
-    choose_btn:"Choose →",
-    saving_map:"Saving map",
-    preparing:"Preparing your strategic workspace…",
-    new_password_label:"New password",
-    all_data_deleted:"All data will be permanently deleted",
-    change_pw_btn:"Change password",
-    chars_6plus:"6+ chars",
-    uppercase_chars:"Uppercase",
-    choose_template:"Choose a ready-made strategy map or start from scratch",
-    choose_template_left:"Choose a template on the left",
-    start_from_scratch:"Start from scratch",
-    ai_generating_map:"AI is generating a map…",
-    tour_start_work:"Start working ✓",tour_nav_hint:"← → or Space to navigate • Esc — close",
-    empty_scenario:"Empty scenario",
-    new_scenario:"New scenario",
-    scenarios:"Scenarios",
-    no_scenarios:"No scenarios",
-    scenarios_pro:"Scenarios available with Pro",
-    new_map:"New map",create_scenario:"Create scenario",
-    content_plan:"Content plan",
-    content_plan_tab:"Content plan",
-    content_plan_locked_title:"Content plan available on Pro",
-    content_plan_pro_only:"The app uses your business and strategy context to plan content.",
-    content_plan_empty_title:"Plan your publications",
-    content_plan_empty_desc:"Add posts, videos and newsletters. AI will suggest ideas based on your strategy steps.",
-    add_content_item:"+ Add post",
-    content_status_draft:"Draft",content_status_scheduled:"Scheduled",content_status_published:"Published",
-    content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
-    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",content_channel_email:"Email",
-    content_link_step:"Link to strategy step",content_ai_suggest:"✨ Suggest from strategy",
-    content_label_type:"Content type",content_label_channel:"Publication channel",content_label_status:"Status",
-    content_view_calendar:"Calendar",content_view_map:"Map",content_view_tree:"Tree",content_view_list:"List",
-    content_plan_intro:"Plan posts, videos and newsletters. Switch view: calendar by date, by channel, or list.",
-    content_tree_title:"Publications by channel",content_tree_hint:"Channel → status → publications. Click a card to edit.",
-    content_more:"More",content_show_all:"Show all",content_no_date:"No date",untitled:"Untitled",
-    scheduled_date_short:"Publication date",brief:"Brief / description",
-    project_ai_tab:"AI",project_ai_title:"Project AI",project_ai_hint:"Same chat as in the map. Here AI can see the context of all project maps.",project_scope:"Project",
-    scenario_templates:"Scenario Templates",
-    no_limits:"No limits.",
-    no_comparison:"No comparison",
-    view_label:"View",
-    login_or_register:"Sign in or create a free account",
-    loading_short:"Loading…",
-    load_error:"Load error",load_error_hint:"If this keeps happening, check your internet connection and API availability. In offline mode you can use the demo account without the server.",
-    why_label:"Why?",
-    why_placeholder:"Why this step, what outcome is needed",
-    action_label:"What to do",
-    action_placeholder:"E.g.: Run 15 customer interviews by Friday",
-    tools_label:"Toolkit",
-    use_ai_comment:"Use @AI to ask the AI a question.",
-    use_connect:"Use ⇒ Connect or ✦ AI-links.",
-    history_empty2:"Change history is empty.",
-    metric_label:"Success metric",
-    observer:"Observer",
-    click_new_project:"Click «+ Project» to get started",continue_last:"Continue with",
-    project_name:"Project name",
-    start_free:"Start free",
-    start_free_arrow:"Start free →",
-    start_work:"Get started →",
-    start_ai_interview:"Start with blank map and AI interview",
-    begin:"Begin",
-    no_comments2:"No comments.",
-    no_projects:"No projects",
-    upgrade_to_pro:"Upgrade to Pro",
-    ai_free_upgrade:"AI chat is available on Starter plan. Upgrade in profile.",
-    ai_free_placeholder:"Available on Starter plan",
-    by_priority:"By priority",
-    by_status:"By status",
-    continue_btn:"Continue",
-    continue_arrow:"Continue →",
-    skip:"Skip",
-    skip_interview:"Skip interview?",
-    editor_role:"Editor",
-    watch_demo:"Watch demo →",
-    create_first_map:"Create your first strategy map",create_first_map_hint:"Add steps, connect them — AI will suggest the next move.",
-    create_first_scenario:"Create your first scenario manually or with AI templates",
-    create_map_free:"Create map free ✦",
-    strategy_maps:"Strategy Maps",
-    tariff:"Plan",
-    upgrade_tier_arrow:"Upgrade plan →",
-    node_color_label:"Node color",
-    export_label:"Export",
-    analyzing_short:"analyzing…",
-    demo_payment_skipped:"Demo — payment skipped",
-    add_deadlines_hint:"Add deadlines to steps — they will appear here",
-    three_steps:"Three steps",
-    strategy_hero:"Strategy,",
-    which_word:"that",
-    who_word:"who",
-    wins_word:"wins",
-    speaks_word:"From those who",
-    for_free:"for free.",
-    included_free:"INCLUDED FREE",
-    upgrade_plan:"Upgrade",
-    user_word:"User",
-    your_plan_word:"your plan",
-    strategic_word:"strategic",
-    activate_btn:"Activate",
-    downgrade_to:"Switch to ",
-    replacing:"Replacing…",
-    replace_btn:"🗑 Replace",
-    upgrade_tier:"✦ Upgrade plan",
-    // Landing page nav
-    nav_features:"Features",nav_process:"Process",nav_pricing:"Pricing",
-    // Landing hero
-    hero_sub:"AI analyzes your business, builds a strategic map and delivers McKinsey-level consultation. For those who make decisions with consequences.",
-    // Landing features section
-    tag_features:"Features",feat_sub:"Every tool is built for people who make decisions with real consequences. Not for experimentation — for results.",
-    feat_leader_word:"leader",
-    lf1_title:"Strategy Maps",lf1_desc:"Cause-and-effect relationships between decisions and outcomes. Drag-and-drop nodes, dependencies, metrics, and deadlines on one interactive canvas.",
-    lf2_title:"AI Consultant",lf2_desc:"SWOT, OKR, First Principles, BCG matrix, Porter's Five Forces. AI asks the right questions and uncovers systemic constraints in your business.",
-    lf3_title:"Scenario Simulation",lf3_desc:"Three versions of the future before making a decision. Cascading analysis of consequences. See bottlenecks before they become a crisis.",
-    lf4_title:"Gantt Timeline",lf4_desc:"Timeline, critical path, roles and responsibility areas. Strategy not as an idea, but as a plan with concrete deadlines.",
-    lf5_title:"Team Collaboration",lf5_desc:"Roles, comments, change history, auto-save. Strategy as a living team document, not a PDF in someone's folder.",
-    lf6_title:"Health Score Analytics",lf6_desc:"A single number that summarizes the health of your strategy. Priorities, risks, node progress. Manage through data.",
-    // Landing process section
-    tag_process:"Process",proc_heading_end:"strategy",to_working:"to a working",proc_sub:"No templates. AI builds the map from scratch based exclusively on the context of your business.",
-    lstep1_tag:"Step one",lstep1_title:"AI Interview",lstep1_desc:"Six precise questions. AI identifies goals, hidden risks and systemic constraints — what consulting takes a week and $50,000 to find.",
-    lstep2_tag:"Step two",lstep2_title:"Map Building",lstep2_desc:"A personal strategy map with cause-and-effect nodes, metrics, priorities and time horizons. In 30 seconds.",
-    lstep3_tag:"Step three",lstep3_title:"Consultation",lstep3_desc:"Concrete next steps, risk assessment, alternative scenarios. No fluff — only solutions applicable to your specific situation.",
-    // Landing testimonials section
-    tag_testimonials:"Reviews",testi_checked:"tested it",
-    lt1_q:"Strategy AI structured the chaos of ideas into a clear plan in twenty minutes. Previously this cost tens of thousands in consulting and took a month.",lt1_role:"CEO, Series A startup",
-    lt2_q:"A tool that thinks like McKinsey. Maps, scenarios and Gantt in one place fundamentally changed our product process.",lt2_role:"CPO, B2B SaaS",
-    lt3_q:"Scenario simulation is a class of its own. We now enter any negotiation with three prepared outcomes instead of one.",lt3_role:"Managing Partner",
-    // Landing pricing section
-    tag_pricing_label:"Pricing",pricing_start_word:"Start",pricing_sub:"Your first map and first AI analysis are free. Pay only when you're convinced of the tool's value.",
-    pricing_hot_badge:"★ TOP",
-    lpr1_desc:"To get acquainted with the tool",lpr1_f1:"1 project and 1 strategy map",lpr1_f2:"AI interview and map generation",lpr1_f3:"Gantt timeline",lpr1_f4:"PNG / JSON export",start_free_cta:"Start free",
-    lpr_starter_desc:"A gentle entry into strategic planning",lpr_starter_f1:"3 projects, 3 maps each",lpr_starter_f2:"2 scenarios + AI risk analysis",lpr_starter_f3:"Full Gantt + priorities",lpr_starter_f4:"1,500 AI messages / month",lpr_starter_cta:"Start for $9 →",
-    lpr2_desc:"For professionals and teams",lpr2_f1:"10 projects, 5 maps each",lpr2_f2:"SWOT, OKR, BCG, Porter AI-analysis",lpr2_f3:"5 scenarios + consequence simulation",lpr2_f4:"Map cloning and versioning",lpr2_f5:"Team collaboration up to 3 people",lpr2_cta:"Go Pro →",
-    lpr_team_desc:"For teams up to 10 people",lpr_team_f1:"25 projects, 15 maps each",lpr_team_f2:"Templates and 15 scenarios",lpr_team_f3:"Team collaboration up to 10 people",lpr_team_f4:"Full AI + priority support",lpr_team_cta:"Go Team →",
-    lpr3_desc:"For organizations with a systematic approach",lpr3_f1:"Unlimited: projects, maps, scenarios",lpr3_f2:"C-level AI collegium (5 expert roles)",lpr3_f3:"PPTX reports for board of directors",lpr3_f4:"White-label and API integrations",lpr3_f5:"Dedicated support manager",lpr3_cta:"Contact us",
-    // Landing CTA section
-    cta_h1:"The first step",cta_h2:"takes only",cta_h3:"two minutes",
-    cta_sub:"Create your first strategy map right now. No credit card. No templates — just your business and AI.",
-    cta_trust1:"Free forever",cta_trust2:"No credit card",cta_trust3:"Your data only",
-    // Landing metrics
-    lm1_sfx:"min",lm1_lbl:"from question to first strategy map",
-    lm2_lbl:"AI analysis accuracy on McKinsey test cases",
-    lm3_lbl:"levels of expert depth — from Free to Enterprise",
-    lm4_lbl:"scenarios for analyzing alternative outcomes",
-    // Cookie consent
-    cookie_text:"🍪 We use cookies for analytics and service improvement. By continuing, you agree to our",cookie_policy:"Privacy Policy",cookie_accept:"Accept",
-    // Footer columns
-    footer_product:"Product",footer_company:"Company",footer_legal:"Legal",
-    footer_features:"Features",footer_pricing_link:"Pricing",footer_templates:"Templates",footer_changelog:"Changelog",
-    footer_about:"About",footer_blog:"Blog",footer_careers:"Careers",footer_contact:"Contact",
-    footer_privacy:"Privacy Policy",footer_terms:"Terms of Service",footer_cookies:"Cookies",footer_gdpr:"GDPR",
-    footer_tagline:"Visual strategic planning with a McKinsey-level AI advisor.",
-    footer_rights:"© 2026 Strategy AI. All rights reserved.",
-    // App misc
-    delete_forever:"Delete permanently",
-    by_statuses:"By statuses",by_priorities:"By priorities",
-    member_limit:"Member limit for {plan}: {n}.",
-    project_name_label:"Project name",saved_ok:"Saved",
-    // WelcomeScreen
-    ws_start_btn:"Start free ✦",ws_login_btn:"Already have an account — Sign in →",
-    ws_feat1:"Goal maps",ws_feat2:"AI advisor",ws_feat3:"Gantt plan",
-    ws_feat4:"PNG/JSON export",ws_feat5:"1 scenario",ws_feat6:"Up to 5 steps",
-    ws_terms:"By clicking «Start», you agree to the Terms of Service",
-    // VersionHistoryModal
-    trial_active:"Trial period active",trial_days_left:"days left",
-    deadline_reminder:"Deadline reminders",
-    notif_email_desc:"Important updates by email",notif_push_desc:"Browser notifications",
-    restore_confirm:"Restore this version? Current data will be replaced.",
-    versions_empty:"No saved versions",restore_version:"Restore",version_saved:"Version saved ✓",save_version_btn:"Save version",save_version_short:"Version",version_save_label:"Checkpoint",
-    version_restored:"Version restored ✓",
-    // WeeklyBriefingModal
-    weekly_briefing:"Weekly briefing",
-    weekly_briefing_date:"Week",
-    weekly_briefing_gen:"Analyzing map…",
-    weekly_briefing_err:"Failed to get AI analysis.",
-    // AI/export
-    ai_error:"AI analysis error",ai_rate_limit_hint:"Rate limit exceeded. Wait a minute.",
-    ai_comment_error:"AI error. Please try again.",
-    ai_network_err:"Failed to get AI response. Check network and API key. Try again.",
-    ai_map_fallback:"AI couldn't create the map. Using a basic template — you can edit it.",
-    ai_generation_error:"Generation error. Please try again.",
-    ai_sim_error:"AI consultant error",
-    export_pdf:"Download PDF",export_pdf_hint:"PDF via browser print (Ctrl+P → Save as PDF)",export_pptx:"Download PPTX",export_pptx_print_hint:"print window will open",
-    // MapEditor toasts & misc
-    imported_steps:"✅ Imported: {n} steps",
-    json_invalid:"Invalid JSON format",
-    file_read_err:"File read error",
-    png_exported:"PNG exported ✓",
-    json_exported:"JSON exported ✓",
-    share_create_err:"Failed to create share link",
-    popup_blocked:"Allow pop-ups for export",
-    layout_applied:"⌥ Auto-layout applied",
-    min_2_steps:"At least 2 steps required",
-    ai_analyzing_links:"🔗 AI is analyzing map logic…",
-    links_added:"🔗 Added: {n} connections",
-    links_optimal:"Connections are already optimal — nothing to add",
-    copied:"📋 Copied",pasted:"📋 Pasted",
-    confirm_restore:"Restore?",
-    confirm_delete_map:"Delete this map?",confirm_delete_map_desc:"The map will be permanently deleted.",
-    confirm_delete_proj:"All maps and project data will be permanently deleted.",
-    // ProfileModal messages
-    profile_saved:"Profile updated ✓",
-    fill_all_fields:"Please fill all fields",
-    min_6_chars:"Minimum 6 characters",
-    pw_mismatch:"Passwords do not match",
-    pw_changed:"Password changed ✓",
-    pw_change_err:"Password change error",
-    wrong_pw:"Incorrect current password",
-    delete_err:"Error deleting account",
-    settings_saved:"Settings saved ✓",
-    appearance:"Appearance",
-    light_theme_label:"☀️ Light",dark_theme_label:"🌙 Dark",
-    palette_label:"Color palette",palette_hint:"Color of buttons and accents. Saves automatically.",
-    compact_desc:"Smaller node cards",
-    autosave_desc:"Save map on every change",
-    canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 List",
-    ai_assistant_title:"🤖 AI Assistant",notifications_title:"🔔 Notifications",
-    ai_hub_title:"✦ AI (unified chat)",
-    ai_hub_hint:"This chat is shared across the app. Here AI can see your project portfolio and loaded maps.",
-    all_projects:"All projects",
-    notif_center:"Notifications",
-    notif_unread_n:"Unread: {n}",
-    notif_all_read:"All caught up",
-    notif_read_all:"Mark all read",
-    notif_empty:"No notifications yet",
-    notification:"Notification",
-    save_settings:"Save settings",
-    maps_available:"Maps available",scenarios_available:"Scenarios",
-    projects_available:"Projects",ai_level:"AI level",
-    // ProjectsPage/ProjectDetail
-    projects_of:"{n} of {max} projects",
-    search_results:"Search results",
-    search_empty:"No results",
-    project_limit:"Project limit for plan",
-    new_project_btn:"+ Project",
-    scenarios_label:"Scenarios",
-    overdue_label:"overdue",
-    updated_label:"updated",
-    steps_label:"steps",
-    maps_label:"maps",
-    scenarios_count:"scen.",
-    map_limit_tier:"Map limit for {tier}: {n}",
-    template_applied:"Template applied ✓",
-    ai_customize_template_offer:"I've applied the template. Want to adapt it to your business? Describe what you do and your goal — I'll adjust the steps and wording for you.",
-    scenario_created:"Scenario created ✓",
-    scenario_limit:"Scenario limit for plan",
-    members_limit:"Member limit: {n}",
-    member_added:"Member added",
-    member_added_already:"Member already added",
-    member_add_err:"Failed to add member",
-    payment_success:"✅ Payment successful! Plan updated.",
-    // GanttView
-    steps_with_deadlines:"{n} steps with deadlines",
-    days_overdue:"overdue {n}d.",
-    days_left:"{n}d.",
-    tomorrow_label:"tomorrow",
-    // Onboarding / interview
-    analyzing_answers:"Analyzing your answers and building a personal map…",
-    create_map_btn2:"Create map ✦",answer_btn:"Answer →",
-    interview_count:"AI interview · {n}/{max} questions",
-    skip_interview_confirm:"Skip interview and start with blank map?",
-    // Simulation
-    sim_goal:"🎯 Desired outcome",sim_metric:"📊 Target metric",
-    sim_budget:"💰 Budget ($)",sim_team:"👥 Team (people)",
-    sim_revenue:"💵 Target revenue ($)",sim_timeline:"⏱ Timeline",
-    sim_run:"▶ Run simulation",sim_stop:"⏹ Stop",sim_reset:"↺ Reset",
-    sim_ask_ai:"✦ Ask AI",sim_q_ph:"Question about simulation…",
-    // Tier-related
-    tier_activated:"Plan {tier} activated ✓",
-    stay_on_plan:"Stay on {plan}",
-    go_to_plan:"Switch to {plan} — {price}",
-    card_number_ph:"Card number…",card_holder_ph:"Cardholder name…",
-    card_expiry_ph:"MM/YY",card_cvv_ph:"CVV",
-    card_data_title:"💳 Card details",
-    downgrade_warning:"After downgrading, some data may be restricted.",downgrade_you_have:"You have",downgrade_maps_unit:"maps",downgrade_projects_unit:"projects",
-    downgrade_limit_maps:"Maps on new plan",
-    downgrade_limit_projects:"Projects on new plan",
-    downgrade_excess:"Data exceeding limits will become read-only.",
-    current_tier_badge:"✓ Current plan",
-    alt_strategies:"Alternative scenario strategies",
-    done:"Completed",
-    verify_email_banner:"Please verify your email for full access.",
-    verify_email_resend:"Resend verification email",
-    verify_email_sent:"Email sent! Check your inbox.",
-    verify_email_done:"✓ Email verified"},
-  uz:{
-    save:"Saqlash",cancel:"Bekor",delete:"O'chirish",add:"Qo'shish",
-    edit:"Tahrirlash",close:"Yopish",confirm:"Tasdiqlash",back:"Orqaga",
-    all:"Barchasi",yes:"Ha",no:"Yo'q",loading:"Yuklanmoqda…",search:"Qidirish",
-    login:"Kirish",register:"Ro'yxatdan o'tish",email:"Email",password:"Parol",name:"Ism",
-    fill_fields:"Barcha maydonlarni to'ldiring",welcome:"Xush kelibsiz",
-    create_account:"Hisob yaratish",no_account:"Hisobingiz yo'qmi?",
-    have_account:"Hisobingiz bormi?",sign_in:"Kirish",sign_up:"Ro'yxatdan o'tish",
-    status:"Holat",status_planning:"Rejalashtirish",status_active:"Jarayonda",
-    status_completed:"Bajarildi",status_blocked:"Bloklangan",status_paused:"To'xtatildi",
-    priority:"Muhimlik",priority_low:"Past",priority_medium:"O'rta",
-    priority_high:"Yuqori",priority_critical:"Kritik",
-    etype_requires:"Talab qiladi",etype_affects:"Ta'sir qiladi",
-    etype_follows:"Keyingi",etype_blocks:"Bloklaydi",
-    role_owner:"Egasi",role_editor:"Muharrir",role_viewer:"Ko'ruvchi",
-    undo:"Bekor qilish",redo:"Qaytarish",new_step:"+ Qadam",connect_btn:"⇒ Bog'lash",
-    fit:"Moslashtirish",bg_btn:"Fon",simulation:"▶ Simulyatsiya",gantt:"Gantt",
-    export_png:"PNG",export_json:"JSON↓",import_json:"JSON↑",
-    ai_advisor:"✦ AI",shortcuts_btn:"?",
-    dark_mode:"🌙 Qorong'u",light_mode:"☀️ Yorug'",layout_btn:"⌥ Avto-joylashtirish",
-    all_statuses:"Barchasi",filtered_count:"filtrlangan",clear_filter:"✕ Tozalash",
-    step:"Qadam",steps:"Qadam",new_step_title:"Yangi qadam",
-    step_title:"Qadam nomi",description:"Tavsif (nima uchun?)",
-    metric:"Muvaffaqiyat metrikasi",progress:"Jarayon",
-    deadline:"Muddat",tags_label:"Teglar",comments_label:"Izohlar",
-    history_label:"O'zgarishlar tarixi",color_label:"Rang",
-    step_deleted:"o'chirildi",undo_action:"↩ Bekor qilish",
-    saved:"Saqlandi ✓",saved_short:"Saqlandi",saving:"Saqlanmoqda…",save_error:"Saqlashda xato",retry:"Qayta urinish",use_template:"Shablonni ishlatish",
-    connect_select_source:"⇒ manba tanlang",connect_select_target:"→ maqsad tanlang",
-    ai_title:"AI Maslahatchi",clear_chat:"Chatni tozalash",
-    ask_placeholder:"Strategiya haqida so'rang…",analyzing:"tahlil qilinmoqda…",
-    ai_online:"onlayn",ai_offline:"aloqa yo'q",
-    shortcuts_title:"⌨️ Tezkor tugmalar",shortcuts_copy_hint:"Tugunni tanlang, Ctrl+C — nusxalash, Ctrl+V — joylashtirish.",
-    sc_nav:"— NAVIGATSIYA —",sc_fit:"Xaritani moslashtirish",sc_next:"Keyingi qadam",
-    sc_zoom:"Zoomni tiklash",sc_pan:"Kanvada harakatlanish",
-    sc_edit:"— TAHRIRLASH —",sc_new:"Qadam qo'shish",sc_dup:"Nusxa ko'chirish",
-    sc_open:"Muharrir ochish",sc_focus:"Sarlavhaga fokus",sc_del:"O'chirish",
-    sc_undo:"Bekor qilish",sc_save:"Saqlash",
-    sc_search:"— QIDIRISH —",sc_search_action:"Qadamlarni qidirish",sc_esc:"Yopish/Tiklash",
-    sc_ui:"— INTERFEYS —",
-    free_forever:"Bepul",per_month:"/oy",current_plan:"Joriy reja",
-    upgrade:"Yaxshilash",downgrade:"Pasaytirish",
-    projects:"Loyihalar",new_project:"+ Yangi loyiha",maps:"Xaritalar",
-    members:"A'zolar",settings:"Sozlamalar",my_projects:"Mening loyihalarim",
-    connect_all:"🔗 Avto-bog'lash",analyzing_map:"Xarita bog'liqliklarini tahlil qilish…",
-    no_steps:"Qadamlar yo'q",
-    stats_title:"Xarita statistikasi",total_steps:"Jami qadamlar",
-    done_steps:"Bajarildi",in_progress_steps:"Jarayonda",
-    avg_progress:"O'rtacha jarayon",critical_count:"Kritik",
-    blocked_count:"Bloklangan",edges_count:"Bog'liqliklar",
-    ai_rephrase:"✨ Qayta yozish",auto_connect:"🔗 Bog'lash",
-    delete_step:"Qadamni o'chirish",add_comment:"Izoh qo'shish",
-    comments_empty:"Izohlar yo'q",history_empty:"O'zgarishlar yo'q",
-    scroll_to:"↗ O'tish",read_only:"Faqat ko'rish",read_only_banner:"Ko'rish rejimi — xaritani ko'rishingiz mumkin, lekin tahrirlab bo'lmaydi",
-    connections:"Bog'liqliklar",incoming:"kiruvchi",outgoing:"chiquvchi",
-    // ProjectsPage
-    hello:"Salom",your_projects:"Loyihalarim",create_first:"Birinchi loyihani yarating",
-    no_projects_hint:"Strategik rejalashtirish uchun loyiha yarating",
-    new_project_name:"Yangi loyiha nomi",new_project_name_ph:"Loyiha nomi…",create_project:"Loyiha yaratish",
-    open_project:"Ochish",delete_project:"O'chirish",project_created:"Loyiha yaratildi",delete_project_err:"Loyihani o'chirishda xato",
-    last_updated:"Yangilangan",maps_count:"xarita",
-    // MapEditor toolbar
-    back_btn:"← Orqaga",back_to_project:"Loyihaga qaytish",version_history_short:"Tarix",search_projects_hint:"Loyihalar va xaritalarni qidirish…",
-    add_step:"+ Qadam",link_btn:"⇒ Bog'lash",
-    fit_view:"Moslashtirish",fit_view_hint:"Xaritani ekranga moslashtirish",center_on_hint:"Tanlangan qadamga markazlash",auto_layout_hint:"Bog'lanishlar bo'yicha avto joylashtirish",ai_links_hint:"AI qadamlarni bog'lashni taklif qiladi",bg_label:"Fon",
-    auto_layout:"⌥ Joylashtirish",
-    ai_links:"🔗 AI-bog'liqliklar",bg_grid:"⊞",bg_stars:"✦",bg_none:"○",
-    map_tour:"🗺 Tur",show_stats:"📊",shortcuts:"⌨️",
-    simulate:"⎇ Simulyatsiya",templates:"📋 Shablonlar",
-    export_png2:'⬇PNG',export_json2:'⬇JSON',import_json2:'⬆JSON',
-    // NodeEditor
-    edit_step:"Qadam tahrirlash",node_title:"Sarlavha",node_reason:"Sabab / tavsif",
-    node_metric:"Muvaffaqiyat metrikasi",node_progress:"Jarayon %",
-    node_deadline:"Muddat",node_tags:"Teglar (vergul bilan)",
-    node_color:"Rang",node_status:"Holat",node_priority:"Muhimlik",
-    node_comments:"Izohlar",node_history:"Tarix",
-    add_comment_ph:"Izoh yozing…",save_changes:"Saqlash",
-    no_comments:"Izoh yo'q",no_history:"Tarix yo'q",
-    // StatsPopup
-    map_health:"Xarita salomatligi",health_score:"Salomatlik bali",
-    stats_empty:"Analitikani ko'rish uchun xaritaga qadamlar qo'shing.",
-    add_step_hint:"Qadam qo'shish (bo'sh joyga bosing)",link_mode_hint:"Bog'lash rejimi: manba, keyin maqsad",
-    ai_consultant_hint:"AI maslahatchi (Ctrl+Shift+A)",minimap_hint:"Minixarita",
-    simulation_hint:"Strategiya bajarilishi simulyatsiyasi",templates_hint:"Xarita shablonlari",gantt_title:"Gantt diagrammasi",
-    dismiss:"Yashirish",map_empty_title:"Xarita bo'sh",map_empty_hint:"+ Qadam, fonni ikki marta bosing yoki bo'sh joyni bosing.",
-    search_no_results:"Hech narsa topilmadi",search_no_results_hint:"Qidiruv yoki status filtriini tozalang.",
-    zoom_in:"Kattalashtirish",zoom_out:"Kichiklashtirish",
-    center_on:"Tugunga",center_on_node:"Markazlashtirish",add_step_here:"Qadam qo'shish",duplicate:"Nusxalash",copy_short:"Nusxalash",delete_selected:"Tanlanganlarni o'chirish",
-    completed:"Bajarildi",in_progress:"Jarayonda",planning:"Rejalashtirish",
-    blocked:"Bloklangan",critical:"Kritik",avg_prog:"O'rtacha jarayon",
-    total_connections:"Bog'liqliklar",
-    // AiPanel
-    ai_consultant:"AI Maslahatchi",clear_chat2:"Tozalash",
-    type_question:"Savol yozing…",send_btn:"Yuborish",
-    quick_actions:"Tezkor harakatlar",
-    // GanttView
-    no_deadlines:"Muddatlar yo'q",
-    gantt_hint:"Muddatlarni qadam muharririda qo'shing",
-    today:"Bugun",overdue:"Kechiktirilgan",
-    // ProfileModal
-    profile_title:"Profil",security_title:"Xavfsizlik",
-    login_methods:"Hisobga kirish",email_verified:"Tasdiqlangan",email_not_verified:"Tasdiqlanmagan",google_login_coming:"Google orqali kirish tez kunda",
-    settings_title:"Sozlamalar",stats_tab:"Statistika",billing_title:"Tarif",
-    display_name:"Ism",bio_label:"Bio",change_password:"Parolni o'zgartirish",
-    current_password:"Joriy parol",new_password:"Yangi parol",
-    confirm_password:"Parolni tasdiqlash",save_password:"Saqlash",
-    danger_zone:"Xavfli zona",delete_account:"Hisobni o'chirish",
-    theme_label:"Mavzu",dark_theme:"Qorong'u",light_theme:"Yorug'",
-    light_theme_label:"☀️ Yorug'",dark_theme_label:"🌙 Qorong'u",
-    palette_label:"Rang palitrasi",palette_hint:"Tugmalar va urg'u ranglari. Avtomatik saqlanadi.",
-    compact_mode:"Ixcham rejim",default_view:"Standart ko'rinish",
-    auto_save:"Avtomatik saqlash",ai_language:"AI tili",
-    email_notifications:"Email bildirishnomalar",push_notifications:"Push bildirishnomalar",
-    // WelcomeScreen
-    welcome_title:"Strategiyangizni quring",welcome_sub:"Maqsadlardan natijalargacha — AI bilan",
-    get_started:"Boshlash →",sign_in_btn:"Kirish",
-    // Misc
-    version_history:"Versiyalar tarixi",restore:"Tiklash",snapshot:"Snimok",
-    no_maps:"Xaritalar yo'q",create_map:"Xarita yaratish",
-    map_name:"Xarita nomi",create_map_btn:"Yaratish",
-    email_no_change:"Email o'zgartirib bo'lmaydi",account_created:"Hisob yaratilgan",pw_hint:"Parol kamida 6 belgi",pw_strength:"Parol kuchi",delete_warning:"Barcha ma'lumotlar o'chiriladi",processing_payment:"To'lov amalga oshirilmoqda…",edge_type:"Bog'liqlik turi:",logout:"Chiqish",no_edges:"Bog'liqliklar yo'q",map_limit:"Xarita limiti tugadi",author:"Muallif:",
-    share_btn:"Ulashish",share_map:"Xaritani ulashish",share_copied:"Link nusxalandi. Xaritani ko'rish uchun oching.",
-    select_language:"Til",
-    
-    free_plan:"Bepul",
-    per_month_short:"/oy",
-    choose_plan:"O'z tarifingizni tanlang",
-    your_plan:"● Sizning tarifingiz",
-    selected:"✓ Tanlangan",
-    choose_btn:"Tanlash →",
-    saving_map:"Xarita saqlanmoqda",
-    preparing:"Strategik ish maydoningiz tayyorlanmoqda…",
-    new_password_label:"Yangi parol",
-    all_data_deleted:"Barcha ma'lumotlar butunlay o'chiriladi",
-    change_pw_btn:"Parolni o'zgartirish",
-    chars_6plus:"6+ belgi",
-    uppercase_chars:"Bosh harflar",
-    choose_template:"Tayyor strategiya xaritasini tanlang yoki noldan boshlang",
-    choose_template_left:"Chapdan shablon tanlang",
-    start_from_scratch:"Noldan boshlash",
-    ai_generating_map:"AI xaritani yaratmoqda…",
-    tour_start_work:"Boshlash ✓",tour_nav_hint:"← → yoki Space • Esc — yopish",
-    empty_scenario:"Bo'sh stsenariy",
-    new_scenario:"Yangi stsenariy",
-    scenarios:"Stsenariylar",
-    no_scenarios:"Stsenariylar yo'q",
-    scenarios_pro:"Stsenariylar Pro bilan mavjud",
-    new_map:"Yangi xarita",create_scenario:"Stsenariy yaratish",
-    content_plan:"Kontent reja",
-    content_plan_tab:"Kontent reja",
-    content_plan_locked_title:"Kontent rejasi Pro da",
-    content_plan_pro_only:"Ilova biznesingiz va strategiyangiz bo'yicha kontentni rejalashtirishda yordam beradi.",
-    content_plan_empty_title:"Nashrlarni rejalashtiring",
-    content_plan_empty_desc:"Postlar, videolar va xatlarni qo'shing. AI strategiya qadamlaringiz bo'yicha takliflar beradi.",
-    add_content_item:"+ Post qo'shish",
-    content_status_draft:"Qoralama",content_status_scheduled:"Rejalashtirilgan",content_status_published:"Nashr qilindi",
-    content_type_post:"Post",content_type_story:"Story",content_type_email:"Email",content_type_video:"Video",
-    content_channel_blog:"Blog",content_channel_instagram:"Instagram",content_channel_telegram:"Telegram",content_channel_vk:"VK",content_channel_youtube:"YouTube",content_channel_email:"Email",
-    content_link_step:"Strategiya qadami bilan bog'lash",content_ai_suggest:"✨ Strategiyadan taklif",
-    content_view_tree:"Daraxt",content_view_list:"Ro‘yxat",content_tree_title:"Kontent‑reja daraxti",content_tree_hint:"Loyiha → kanal → status → nashrlar. Tahrirlash uchun kartani bosing.",content_more:"Yana",untitled:"Nomsiz",
-    project_ai_tab:"AI",project_ai_title:"Loyiha uchun AI",project_ai_hint:"Xuddi shu chat: xaritada ham mavjud. Bu yerda AI loyihadagi barcha xaritalar kontekstini ko‘radi.",project_scope:"Loyiha",
-    content_view_calendar:"Kalendar",content_view_map:"Xarita",content_no_date:"Sanasiz",content_show_all:"Barchasini ko'rsatish",ai_quick_questions:"Tez savollar",
-    content_label_type:"Kontent turi",content_label_channel:"Nashr kanali",content_label_status:"Status",
-    scheduled_date_short:"Nashr sanasi",brief:"Tezis",
-    scenario_templates:"Stsenariy shablonlari",
-    no_limits:"Cheksiz.",
-    no_comparison:"Taqqoslash yo'q",
-    view_label:"Ko'rinish",
-    login_or_register:"Kiring yoki bepul akkaunt yarating",
-    loading_short:"Yuklanmoqda…",
-    load_error:"Yuklash xatosi",load_error_hint:"Agar bu yana takrorlansa, internet va API ishlashini tekshiring. Oflayn rejimda server siz demo akkauntdan foydalanishingiz mumkin.",
-    why_label:"Nima uchun?",
-    why_placeholder:"Nima uchun bu qadam, qanday natija kerak",
-    action_label:"Nima qilish kerak",
-    action_placeholder:"Masalan: 15 ta mijoz suhbatini juma kuniga qadar o'tkazish",
-    tools_label:"Vositalar",
-    use_ai_comment:"AI ga savol berish uchun @AI dan foydalaning.",
-    use_connect:"Bog'lash yoki ✦ AI-bog'lanishlardan foydalaning.",
-    history_empty2:"O'zgartirish tarixi bo'sh.",
-    metric_label:"Muvaffaqiyat mezoni",
-    observer:"Kuzatuvchi",
-    click_new_project:"Boshlash uchun «+ Loyiha» tugmasini bosing",continue_last:"Davom etish",
-    project_name:"Loyiha nomi",
-    start_free:"Bepul boshlash",
-    start_free_arrow:"Bepul boshlash →",
-    start_work:"Boshlash →",
-    start_ai_interview:"Bo'sh xarita va AI intervyu bilan boshlash",
-    begin:"Boshlang",
-    no_comments2:"Izohlar yo'q.",
-    no_projects:"Loyihalar yo'q",
-    upgrade_to_pro:"Pro ga o'tish",
-    ai_free_upgrade:"AI chat Starter tarifida mavjud. Profilda yangilang.",
-    ai_free_placeholder:"Starter tarifida mavjud",
-    by_priority:"Muhimlik bo'yicha",
-    by_status:"Holat bo'yicha",
-    continue_btn:"Davom etish",
-    continue_arrow:"Davom etish →",
-    skip:"O'tkazib yuborish",
-    skip_interview:"Intervyuni o'tkazib yuborasizmi?",
-    editor_role:"Muharrir",
-    watch_demo:"Demo ko'rish →",
-    create_first_map:"Birinchi strategiya xaritangizni yarating",create_first_map_hint:"Qadamlarni qo'shing, bog'lang — AI keyingi harakatni taklif qiladi.",
-    create_first_scenario:"Birinchi stsenariyni qo'lda yoki AI shablonlari bilan yarating",
-    create_map_free:"Bepul xarita yaratish ✦",
-    strategy_maps:"Strategiya xaritalari",
-    tariff:"Tarif",
-    upgrade_tier_arrow:"Tarifni yaxshilash →",
-    node_color_label:"Tugun rangi",
-    export_label:"Eksport",
-    analyzing_short:"tahlil…",
-    demo_payment_skipped:"Demo — to'lov o'tkazib yuborildi",
-    add_deadlines_hint:"Qadamlarga muddat qo'shing — ular bu yerda paydo bo'ladi",
-    three_steps:"Uch qadam",
-    strategy_hero:"Strategiya,",
-    which_word:"qaysi",
-    who_word:"kim",
-    wins_word:"g'alaba qozonadi",
-    speaks_word:"Tekshirganlar aytadi,",
-    for_free:"bepul.",
-    included_free:"BEPUL KIRITILGAN",
-    upgrade_plan:"Yaxshilash",
-    user_word:"Foydalanuvchi",
-    your_plan_word:"o'z tarifingiz",
-    strategic_word:"strategik",
-    activate_btn:"Faollashtirish",
-    downgrade_to:"Ga o'tish ",
-    replacing:"Almashtirmoqda…",
-    replace_btn:"🗑 Almashtirish",
-    upgrade_tier:"✦ Tarifni yaxshilash",
-    // Landing page nav
-    nav_features:"Imkoniyatlar",nav_process:"Jarayon",nav_pricing:"Narxlar",
-    // Landing hero
-    hero_sub:"AI biznesingizni tahlil qiladi, strategik xarita tuzadi va McKinsey darajasida maslahat beradi. Oqibatli qarorlar qabul qiladiganlar uchun.",
-    // Landing features section
-    tag_features:"Imkoniyatlar",feat_sub:"Har bir vosita oqibatli qarorlar qabul qiladiganlar uchun yaratilgan. Tajriba uchun emas — natija uchun.",
-    feat_leader_word:"rahbar",
-    lf1_title:"Strategiya xaritalari",lf1_desc:"Qarorlar va natijalar o'rtasidagi sabab-oqibat munosabatlari. Bir interaktiv canvas'da drag-and-drop tugunlar, bog'liqliklar, metrikalar, muddatlar.",
-    lf2_title:"AI Maslahatchi",lf2_desc:"SWOT, OKR, First Principles, BCG matritsasi, Porter's Five Forces. AI to'g'ri savollar beradi va biznesingizdagi tizimli cheklovlarni ochib beradi.",
-    lf3_title:"Stsenariy simulyatsiyasi",lf3_desc:"Qaror qabul qilishdan oldin kelajakning uch versiyasi. Oqibatlarning kaskadli tahlili. Inqirozga aylanishidan oldin tor joylarni ko'ring.",
-    lf4_title:"Gantt taymlayn",lf4_desc:"Vaqt jadvali, kritik yo'l, rollar va mas'uliyat zonalari. Strategiya g'oya sifatida emas, balki aniq muddatli reja sifatida.",
-    lf5_title:"Jamoa hamkorligi",lf5_desc:"Rollar, izohlar, o'zgarishlar tarixi, avtosaqlash. Strategiya birovning papkasidagi PDF emas, balki jonli jamoa hujjati sifatida.",
-    lf6_title:"Health Score tahlili",lf6_desc:"Strategiyangiz salomatligini bitta raqamda. Ustuvorliklar, risklar, tugun bo'yicha progress. Ma'lumotlar orqali boshqaring.",
-    // Landing process section
-    tag_process:"Jarayon",proc_heading_end:"strategiyasi",to_working:"ishlaydigan",proc_sub:"Hech qanday shablon yo'q. AI xaritani noldan, faqat biznesingiz kontekstiga asoslanib tuzadi.",
-    lstep1_tag:"Birinchi qadam",lstep1_title:"AI suhbat",lstep1_desc:"Oltita aniq savol. AI maqsadlarni, yashirin risklarni va tizimli cheklovlarni aniqlaydi — konsalting bir haftada $50 000 ga topadigan narsani.",
-    lstep2_tag:"Ikkinchi qadam",lstep2_title:"Xarita qurilishi",lstep2_desc:"Sabab-oqibat tugunlari, metrikalar, ustuvorliklar va vaqt gorizontlari bilan shaxsiy strategiya xaritasi. 30 soniyada.",
-    lstep3_tag:"Uchinchi qadam",lstep3_title:"Maslahat",lstep3_desc:"Aniq keyingi qadamlar, risk hisob-kitobi, muqobil stsenariylar. Suvsiz — faqat sizning vaziyatingizga qo'llaniladigan echimlar.",
-    // Landing testimonials section
-    tag_testimonials:"Sharhlar",testi_checked:"tekshirdi",
-    lt1_q:"Strategy AI g'oyalar tartibsizligini yigirma daqiqada aniq rejaga tizimlashtirdi. Ilgari bu o'n minglab dollarlik konsalting va bir oy vaqtni olardi.",lt1_role:"CEO, Series A startap",
-    lt2_q:"McKinsey kabi o'ylaydigan vosita. Bir joyda xaritalar, stsenariylar va Gantt bizning mahsulot jarayonimizni tubdan o'zgartirdi.",lt2_role:"CPO, B2B SaaS",
-    lt3_q:"Stsenariy simulyatsiyasi alohida sinf. Endi biz har qanday muzokaralarga bitta o'rniga uchta tayyor natija bilan kiramiz.",lt3_role:"Boshqaruvchi hamkor",
-    // Landing pricing section
-    tag_pricing_label:"Narxlar",pricing_start_word:"Boshlang",pricing_sub:"Birinchi xarita va birinchi AI tahlil bepul. Faqat vosita qiymatiga ishonch hosil qilganingizdan keyin to'lang.",
-    pricing_hot_badge:"★ TOP",
-    lpr1_desc:"Vosita bilan tanishish uchun",lpr1_f1:"1 loyiha va 1 strategiya xaritasi",lpr1_f2:"AI suhbat va xarita generatsiyasi",lpr1_f3:"Gantt taymlayn",lpr1_f4:"PNG / JSON eksport",start_free_cta:"Bepul boshlash",
-    lpr_starter_desc:"Strategik rejalashtishga yumshoq kirish",lpr_starter_f1:"3 loyiha, har birida 3 xarita",lpr_starter_f2:"2 stsenariy + AI xavf tahlili",lpr_starter_f3:"To'liq Gantt + ustuvorliklar",lpr_starter_f4:"1 500 AI xabarlari / oy",lpr_starter_cta:"$9 dan boshlash →",
-    lpr2_desc:"Mutaxassislar va jamoalar uchun",lpr2_f1:"10 loyiha, har birida 5 xarita",lpr2_f2:"SWOT, OKR, BCG, Porter AI tahlili",lpr2_f3:"5 stsenariy + oqibatlar simulyatsiyasi",lpr2_f4:"Xaritani klonlash va versiyalash",lpr2_f5:"3 kishigacha jamoa hamkorligi",lpr2_cta:"Pro ga o'tish →",
-    lpr_team_desc:"10 kishigacha jamoalar uchun",lpr_team_f1:"25 loyiha, har birida 15 xarita",lpr_team_f2:"Shablonlar va 15 stsenariy",lpr_team_f3:"10 kishigacha jamoa hamkorligi",lpr_team_f4:"To'liq AI + ustuvor qo'llab-quvvatlash",lpr_team_cta:"Team ga o'tish →",
-    lpr3_desc:"Tizimli yondashuvga ega tashkilotlar uchun",lpr3_f1:"Cheksiz: loyihalar, xaritalar, stsenariylar",lpr3_f2:"C-level AI kollegium (5 ekspert rol)",lpr3_f3:"Direktorlar kengashi uchun PPTX hisobotlar",lpr3_f4:"White-label va API integratsiyalar",lpr3_f5:"Maxsus qo'llab-quvvatlash menejeri",lpr3_cta:"Bog'lanish",
-    // Landing CTA section
-    cta_h1:"Birinchi qadam",cta_h2:"faqat",cta_h3:"ikki daqiqa oladi",
-    cta_sub:"Birinchi strategiya xaritangizni hoziroq yarating. Kredit kartasisiz. Shablonsiz — faqat sizning biznesingiz va AI.",
-    cta_trust1:"Abadiy bepul",cta_trust2:"Kredit kartasi shart emas",cta_trust3:"Ma'lumotlar faqat sizniki",
-    // Landing metrics
-    lm1_sfx:"daq",lm1_lbl:"savoldan birinchi strategiya xaritasigacha",
-    lm2_lbl:"McKinsey test holatlarida AI tahlil aniqligi",
-    lm3_lbl:"ekspert chuqurligi darajalari — Free dan Enterprise gacha",
-    lm4_lbl:"muqobil natijalarni tahlil qilish stsenariylari",
-    // Cookie consent
-    cookie_text:"🍪 Biz analitika va xizmatni yaxshilash uchun cookies ishlatamiz. Davom etish orqali siz bizning",cookie_policy:"Maxfiylik siyosati",cookie_accept:"Qabul qilish",
-    // Footer columns
-    footer_product:"Mahsulot",footer_company:"Kompaniya",footer_legal:"Huquqiy",
-    footer_features:"Imkoniyatlar",footer_pricing_link:"Narxlar",footer_templates:"Shablonlar",footer_changelog:"Changelog",
-    footer_about:"Biz haqimizda",footer_blog:"Blog",footer_careers:"Karyera",footer_contact:"Aloqa",
-    footer_privacy:"Maxfiylik siyosati",footer_terms:"Foydalanish shartlari",footer_cookies:"Cookies",footer_gdpr:"GDPR",
-    footer_tagline:"McKinsey darajasidagi AI maslahatchi bilan vizual strategik rejalashtirish.",
-    footer_rights:"© 2026 Strategy AI. Barcha huquqlar himoyalangan.",
-    // App misc
-    delete_forever:"Butunlay o'chirish",
-    by_statuses:"Holat bo'yicha",by_priorities:"Muhimlik bo'yicha",
-    member_limit:"A'zo limiti {plan} uchun: {n}.",
-    project_name_label:"Loyiha nomi",saved_ok:"Saqlandi",
-    // WelcomeScreen
-    ws_start_btn:"Bepul boshlash ✦",ws_login_btn:"Hisobingiz bormi — Kirish →",
-    ws_feat1:"Maqsad xaritalari",ws_feat2:"AI maslahatchi",ws_feat3:"Gantt rejasi",
-    ws_feat4:"PNG/JSON eksport",ws_feat5:"1 stsenariy",ws_feat6:"5 tagacha qadam",
-    ws_terms:"«Boshlash» tugmasini bosish orqali foydalanish shartlariga rozisiz",
-    // VersionHistoryModal
-    trial_active:"Sinov davri faol",trial_days_left:"kun qoldi",
-    deadline_reminder:"Muddat eslatmalari",
-    notif_email_desc:"Muhim yangilanishlar email orqali",notif_push_desc:"Brauzer bildirishnomalari",
-    restore_confirm:"Bu versiyani tiklashni xohlaysizmi? Joriy ma'lumotlar almashtiriladi.",
-    versions_empty:"Saqlangan versiyalar yo'q",restore_version:"Tiklash",version_saved:"Versiya saqlandi ✓",save_version_btn:"Versiyani saqlash",save_version_short:"Versiya",version_save_label:"O'rta versiya",
-    version_restored:"Versiya tiklandi ✓",
-    // WeeklyBriefingModal
-    weekly_briefing:"Haftalik xisobot",
-    weekly_briefing_date:"Hafta",
-    weekly_briefing_gen:"Xarita tahlil qilinmoqda…",
-    weekly_briefing_err:"AI tahlilini olib bo'lmadi.",
-    // AI/export
-    ai_error:"AI tahlil xatosi",ai_rate_limit_hint:"So'rov limiti oshdi. Bir daqiqa kuting.",
-    ai_comment_error:"AI xatosi. Qayta urining.",
-    ai_network_err:"AI javob olish muvaffaqiyatsiz. Tarmoq va API kalitini tekshiring.",
-    ai_map_fallback:"AI xarita yarata olmadi. Asosiy shablon ishlatiladi.",
-    ai_generation_error:"Generatsiya xatosi. Qayta urining.",
-    ai_sim_error:"AI maslahatchi xatosi",
-    export_pdf:"PDF yuklab olish",export_pdf_hint:"PDF brauzer orqali chop etish (Ctrl+P → PDF sifatida saqlash)",export_pptx:"PPTX yuklab olish",export_pptx_print_hint:"bosish oynasi ochiladi",
-    // MapEditor toasts & misc
-    imported_steps:"✅ Yuklandi: {n} qadam",
-    json_invalid:"Noto'g'ri JSON formati",
-    file_read_err:"Fayl o'qish xatosi",
-    png_exported:"PNG eksport qilindi ✓",
-    json_exported:"JSON eksport qilindi ✓",
-    share_create_err:"Havola yaratishda xato",
-    popup_blocked:"Eksport uchun oynalarga ruxsat bering",
-    layout_applied:"⌥ Avto-joylashtirildi",
-    min_2_steps:"Kamida 2 qadam kerak",
-    ai_analyzing_links:"🔗 AI xarita mantiqini tahlil qilmoqda…",
-    links_added:"🔗 Qo'shildi: {n} bog'liqlik",
-    links_optimal:"Bog'liqliklar allaqachon optimal — qo'shish uchun hech narsa yo'q",
-    copied:"📋 Nusxalandi",pasted:"📋 Qo'yildi",
-    confirm_restore:"Tiklashni xohlaysizmi?",
-    confirm_delete_map:"Xaritani o'chirishni xohlaysizmi?",confirm_delete_map_desc:"Xarita butunlay o'chiriladi.",
-    confirm_delete_proj:"Loyihaning barcha xaritalari va ma'lumotlari butunlay o'chiriladi.",
-    // ProfileModal messages
-    profile_saved:"Profil yangilandi ✓",
-    fill_all_fields:"Barcha maydonlarni to'ldiring",
-    min_6_chars:"Kamida 6 belgi",
-    pw_mismatch:"Parollar mos kelmaydi",
-    pw_changed:"Parol o'zgartirildi ✓",
-    pw_change_err:"Parol o'zgartirishda xato",
-    wrong_pw:"Joriy parol noto'g'ri",
-    delete_err:"O'chirishda xato",
-    settings_saved:"Sozlamalar saqlandi ✓",
-    appearance:"Ko'rinish",
-    compact_desc:"Kichroq tugun kartalari",
-    autosave_desc:"Har bir o'zgarishda xaritani saqlash",
-    canvas_view:"🗺 Canvas",gantt_view:"📅 Gantt",list_view:"📋 Ro'yxat",
-    ai_assistant_title:"🤖 AI Yordamchi",notifications_title:"🔔 Bildirishnomalar",
-    ai_hub_title:"✦ AI (yagona chat)",
-    ai_hub_hint:"Bu chat butun ilova bo‘ylab umumiy. Bu yerda AI loyihalar portfeli va yuklangan xaritalarni ko‘radi.",
-    all_projects:"Barcha loyihalar",
-    notif_center:"Bildirishnomalar",
-    notif_unread_n:"O‘qilmaganlar: {n}",
-    notif_all_read:"Hammasi o‘qildi",
-    notif_read_all:"Hammasini o‘qilgan qil",
-    notif_empty:"Hali bildirishnoma yo‘q",
-    notification:"Bildirishnoma",
-    save_settings:"Sozlamalarni saqlash",
-    maps_available:"Xaritalar mavjud",scenarios_available:"Stsenariylar",
-    projects_available:"Loyihalar",ai_level:"AI darajasi",
-    // ProjectsPage/ProjectDetail
-    projects_of:"{n} dan {max} loyiha",
-    search_results:"Qidiruv natijalari",
-    search_empty:"Hech narsa topilmadi",
-    project_limit:"Tarif uchun loyiha limiti",
-    new_project_btn:"+ Loyiha",
-    scenarios_label:"Stsenariylar",
-    overdue_label:"kechiktirilgan",
-    updated_label:"yangilangan",
-    steps_label:"qadam",
-    maps_label:"xarita",
-    scenarios_count:"stsen.",
-    map_limit_tier:"Tarif uchun xarita limiti {tier}: {n}",
-    template_applied:"Shablon qo'llanildi ✓",
-    ai_customize_template_offer:"Shablon qo'llanildi. Biznesingizga moslashtirishni xohlaysizmi? Nima qilasiz va maqsadingizni yozing — qadamlarni sizga moslashtiraman.",
-    scenario_created:"Stsenariy yaratildi ✓",
-    scenario_limit:"Tarif uchun stsenariy limiti",
-    members_limit:"A'zo limiti: {n}",
-    member_added:"A'zo qo'shildi",
-    member_added_already:"A'zo allaqachon qo'shilgan",
-    member_add_err:"A'zo qo'shishda xato",
-    payment_success:"✅ To'lov muvaffaqiyatli! Tarif yangilandi.",
-    // GanttView
-    steps_with_deadlines:"{n} qadam muddatlari bilan",
-    days_overdue:"kechiktirildi {n}k.",
-    days_left:"{n}k.",
-    tomorrow_label:"ertaga",
-    // Onboarding / interview
-    analyzing_answers:"Javoblaringizni tahlil qilmoqdaman va shaxsiy xarita quryapman…",
-    create_map_btn2:"Xarita yaratish ✦",answer_btn:"Javob berish →",
-    interview_count:"AI suhbat · {n}/{max} savol",
-    skip_interview_confirm:"Intervyuni o'tkazib yuborib, bo'sh xaritadan boshlashni xohlaysizmi?",
-    // Simulation
-    sim_goal:"🎯 Maqsadli natija",sim_metric:"📊 Maqsad metrikasi",
-    sim_budget:"💰 Byudjet ($)",sim_team:"👥 Jamoa (kishi)",
-    sim_revenue:"💵 Maqsad daromad ($)",sim_timeline:"⏱ Muddat",
-    sim_run:"▶ Simulyatsiyani ishga tushirish",sim_stop:"⏹ To'xtatish",sim_reset:"↺ Tiklash",
-    sim_ask_ai:"✦ AI dan so'rash",sim_q_ph:"Simulyatsiya haqida savol…",
-    // Tier-related
-    tier_activated:"{tier} tarifi faollashtirildi ✓",
-    stay_on_plan:"{plan} da qolish",
-    go_to_plan:"{plan} ga o'tish — {price}",
-    card_number_ph:"Karta raqami…",card_holder_ph:"Karta egasining ismi…",
-    card_expiry_ph:"OY/YIL",card_cvv_ph:"CVV",
-    card_data_title:"💳 Karta ma'lumotlari",
-    downgrade_warning:"Tarifni pasaytirgandan so'ng ba'zi ma'lumotlar cheklanishi mumkin.",downgrade_you_have:"Sizda",downgrade_maps_unit:"xarita",downgrade_projects_unit:"loyiha",
-    downgrade_limit_maps:"Yangi tarifda xaritalar",
-    downgrade_limit_projects:"Yangi tarifda loyihalar",
-    downgrade_excess:"Limitdan ortiq ma'lumotlar faqat o'qish uchun bo'ladi.",
-    current_tier_badge:"✓ Joriy tarif",
-    alt_strategies:"Stsenariyning muqobil strategiyalari",
-    done:"Bajarildi",
-    verify_email_banner:"To'liq kirish uchun emailingizni tasdiqlang.",
-    verify_email_resend:"Tasdiqlash xatini qayta yuborish",
-    verify_email_sent:"Xat yuborildi! Pochtangizni tekshiring.",
-    verify_email_done:"✓ Email tasdiqlandi"
-  },
-};
-
-function makeTfn(lang){
-  const d=LANGS[lang]||LANGS.ru;
-  return (key,fallback)=>d[key]!==undefined?d[key]:(fallback!==undefined?fallback:key);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// API CLIENT — общается с Railway-бэкендом, fallback на localStorage
-// Установи window.__STRATEGY_AI_API_URL__ = "https://your-backend.railway.app"
-// (или через script tag: <script>window.__STRATEGY_AI_API_URL__="..."</script>)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-const API_BASE=(typeof window!=="undefined"&&(window as any).__STRATEGY_AI_API_URL__)||"";
-
-// JWT хранится в localStorage ключ "sa_jwt"
-function getJWT():string{try{return localStorage.getItem("sa_jwt")||"";}catch{return "";}}
-function setJWT(t:string){try{localStorage.setItem("sa_jwt",t);}catch{}}
-function clearJWT(){try{localStorage.removeItem("sa_jwt");}catch{}}
-function getRefreshToken():string{try{return localStorage.getItem("sa_refresh_jwt")||"";}catch{return "";}}
-function setRefreshToken(t:string){try{localStorage.setItem("sa_refresh_jwt",t);}catch{}}
-function clearRefreshToken(){try{localStorage.removeItem("sa_refresh_jwt");}catch{}}
-
-// Сохраняем и access и refresh при логине/регистрации
-function saveTokens(token:string,refreshToken?:string){
-  setJWT(token);
-  if(refreshToken)setRefreshToken(refreshToken);
-}
-
-let _refreshingPromise:Promise<boolean>|null=null;
-
-async function tryRefreshToken():Promise<boolean>{
-  if(_refreshingPromise)return _refreshingPromise;
-  _refreshingPromise=(async()=>{
-    try{
-      const rt=getRefreshToken();
-      if(!rt)return false;
-      const r=await fetch(`${API_BASE}/api/auth/refresh`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({refreshToken:rt}),
-      });
-      if(!r.ok){clearJWT();clearRefreshToken();return false;}
-      const d=await r.json();
-      saveTokens(d.token,d.refreshToken);
-      return true;
-    }catch{return false;}
-    finally{_refreshingPromise=null;}
-  })();
-  return _refreshingPromise;
-}
-
-async function apiFetch(path:string,opts:RequestInit={},retry=true):Promise<any>{
-  const headers:Record<string,string>={
-    "Content-Type":"application/json",
-    ...(opts.headers as Record<string,string>||{}),
-  };
-  const jwt=getJWT();
-  if(jwt)headers["Authorization"]=`Bearer ${jwt}`;
-  const r=await fetch(`${API_BASE}${path}`,{...opts,headers});
-  if(r.status===204)return{};
-
-  // Access token истёк — пробуем обновить через refresh token
-  if(r.status===401&&retry){
-    const refreshed=await tryRefreshToken();
-    if(refreshed)return apiFetch(path,opts,false);
-    clearJWT();clearRefreshToken();
-    // Уведомляем App о необходимости разлогина
-    try{(window as any).__sa_onSessionExpired?.();}catch{}
-    throw new Error("session_expired");
-  }
-
-  let data:any;
-  try{data=await r.json();}catch{data={};}
-  if(!r.ok)throw new Error(data?.error||`HTTP ${r.status}`);
-  return data;
-}
-
-// ── localStorage fallback store (используется ТОЛЬКО если API_BASE пустой) ──
-if(typeof window!=="undefined"&&!(window as any).storage){
-  (window as any).storage={
-    async get(k:string){try{const v=localStorage.getItem(k);return v!=null?{value:v}:null;}catch{return null;}},
-    async set(k:string,v:string){try{localStorage.setItem(k,v);}catch{}},
-    async delete(k:string){try{localStorage.removeItem(k);}catch{}}
-  };
-}
-const store={
-  async get(k:string){try{const r=await (window as any).storage.get(k);return r?JSON.parse(r.value):null;}catch{return null;}},
-  async set(k:string,v:any){try{await (window as any).storage.set(k,JSON.stringify(v));}catch{}},
-  async del(k:string){try{await (window as any).storage.delete(k);}catch{}},
-};
-
-// ── auth ──
-const hashPw=(e:string,p:string)=>btoa(`${e}:${p}:sa2026`);
-
-async function getSession(){
-  if(API_BASE){
-    const jwt=getJWT();
-    if(!jwt)return null;
-    try{const d=await apiFetch("/api/auth/me");return d.user?{email:d.user.email}:null;}
-    catch(e:any){if(e?.message==="session_expired"){clearJWT();clearRefreshToken();}return null;}
-  }
-  return store.get("sa_sess");
-}
-async function setSession(email:string){
-  if(!API_BASE)await store.set("sa_sess",{email});
-}
-async function clearSession(){
-  if(API_BASE){clearJWT();clearRefreshToken();}
-  else await store.del("sa_sess");
-}
-async function seedDefault(){
-  if(API_BASE)return; // dev-аккаунт создаётся через API при первом запуске
-  const a=await store.get("sa_acc")||[],e="denisblackman2@gmail.com";
-  if(!a.find((x:any)=>x.email===e))await store.set("sa_acc",[...a,{email:e,pwHash:hashPw(e,"Denis123"),name:"Denis",tier:"team",createdAt:Date.now()}]);
-}
-function normalizeUser(raw:any){
-  if(!raw)return raw;
-  return{
-    ...raw,
-    notifEmail:raw.notifEmail??raw.notif_email,
-    notifPush:raw.notifPush??raw.notif_push,
-    autoSave:raw.autoSave??raw.auto_save,
-    compactMode:raw.compactMode??raw.compact_mode,
-    defaultView:raw.defaultView??raw.default_view,
-    aiLang:raw.aiLang??raw.ai_lang,
-    theme:raw.theme??"dark",
-    palette:raw.palette??"indigo",
-    createdAt:raw.createdAt??raw.created_at,
-    trialEndsAt:raw.trialEndsAt??raw.trial_ends_at,
-    emailVerified:raw.emailVerified??raw.email_verified??true,
-    is_dev:raw.is_dev??false,
-  };
-}
-
-async function register(email:string,pw:string,name:string){
-  if(API_BASE){
-    try{
-      const d=await apiFetch("/api/auth/register",{method:"POST",body:JSON.stringify({email,password:pw,name})});
-      saveTokens(d.token,d.refreshToken);
-      return{user:normalizeUser(d.user),isNew:true};
-    }catch(e:any){return{error:e.message};}
-  }
-  const e2=email.trim().toLowerCase();
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e2))return{error:"Некорректный формат email"};
-  if(pw.length<6)return{error:"Пароль должен быть не менее 6 символов"};
-  const a=await store.get("sa_acc")||[];
-  if(a.find((x:any)=>x.email===e2))return{error:"Email уже зарегистрирован"};
-  const u={email:e2,pwHash:hashPw(e2,pw),name:name?.trim()||e2.split("@")[0],tier:"free",createdAt:Date.now()};
-  await store.set("sa_acc",[...a,u]);await setSession(e2);return{user:u,isNew:true};
-}
-async function login(email:string,pw:string){
-  if(API_BASE){
-    try{
-      const d=await apiFetch("/api/auth/login",{method:"POST",body:JSON.stringify({email,password:pw})});
-      saveTokens(d.token,d.refreshToken);
-      return{user:normalizeUser(d.user),isNew:false};
-    }catch(e:any){return{error:e.message};}
-  }
-  const e=email.trim().toLowerCase();
-  const a=await store.get("sa_acc")||[],u=a.find((x:any)=>x.email===e&&x.pwHash===hashPw(e,pw));
-  if(!u)return{error:"Неверный email или пароль"};
-  await setSession(e);return{user:u,isNew:false};
-}
-async function patchUser(email:string,patch:any){
-  if(API_BASE){
-    try{
-      const body:any={};
-      if(patch.name!==undefined)body.name=patch.name;
-      if(patch.bio!==undefined)body.bio=patch.bio;
-      if(patch.aiLang!==undefined)body.ai_lang=patch.aiLang;
-      if(patch.notifEmail!==undefined)body.notif_email=patch.notifEmail;
-      if(patch.notifPush!==undefined)body.notif_push=patch.notifPush;
-      if(patch.autoSave!==undefined)body.auto_save=patch.autoSave;
-      if(patch.compactMode!==undefined)body.compact_mode=patch.compactMode;
-      if(patch.defaultView!==undefined)body.default_view=patch.defaultView;
-      if(patch.tier!==undefined)body.tier=patch.tier;
-      if(patch.theme!==undefined)body.theme=patch.theme;
-      if(patch.palette!==undefined)body.palette=patch.palette;
-      const d=await apiFetch("/api/auth/profile",{method:"PATCH",body:JSON.stringify(body)});
-      return normalizeUser(d.user);
-    }catch(e:any){throw e;}
-  }
-  const a=await store.get("sa_acc")||[],upd=a.map((x:any)=>x.email===email?{...x,...patch}:x);
-  await store.set("sa_acc",upd);return upd.find((x:any)=>x.email===email);
-}
-
-// ── projects ──
-function normalizeProject(p:any){
-  if(!p)return p;
-  return{...p,owner:p.owner??p.owner_email,createdAt:p.createdAt??p.created_at};
-}
-async function getProjects(email:string){
-  if(API_BASE){
-    try{const d=await apiFetch("/api/projects");return (d.projects||[]).map(normalizeProject);}
-    catch{return[];}
-  }
-  const a=await store.get("sa_proj")||[];
-  return a.filter((p:any)=>p.owner===email||p.members?.find((m:any)=>m.email===email));
-}
-async function saveProject(p:any){
-  if(API_BASE){
-    try{
-      if(p._new){const d=await apiFetch("/api/projects",{method:"POST",body:JSON.stringify({name:p.name})});return normalizeProject(d.project);}
-      else{const body:any={name:p.name};if(p.members!==undefined)body.members=p.members;const d=await apiFetch(`/api/projects/${p.id}`,{method:"PATCH",body:JSON.stringify(body)});return normalizeProject(d.project);}
-    }catch{return p;}
-  }
-  const a=await store.get("sa_proj")||[],i=a.findIndex((x:any)=>x.id===p.id);
-  const pp={...p,updatedAt:Date.now()};
-  await store.set("sa_proj",i>=0?a.map((x:any)=>x.id===p.id?pp:x):[...a,pp]);
-  return pp;
-}
-async function addProjectMember(projectId:string,email:string,role:string){
-  if(API_BASE){
-    try{const d=await apiFetch(`/api/projects/${projectId}/members`,{method:"POST",body:JSON.stringify({email,role})});return normalizeProject(d.project);}
-    catch{return null;}
-  }
-  return null;
-}
-async function removeProjectMember(projectId:string,email:string):Promise<any>{
-  if(API_BASE){
-    try{const d=await apiFetch(`/api/projects/${projectId}/members/${encodeURIComponent(email)}`,{method:"DELETE"});return normalizeProject(d?.project);}
-    catch{return null;}
-  }
-  return null;
-}
-async function deleteProject(id:string){
-  if(API_BASE){
-    try{await apiFetch(`/api/projects/${id}`,{method:"DELETE"});}
-    catch{}
-    return;
-  }
-  const a=await store.get("sa_proj")||[];
-  await store.set("sa_proj",a.filter((p:any)=>p.id!==id));
-  await store.del(`sa_maps_${id}`);
-}
-
-// ── notifications ──
-async function getNotifications(){
-  if(API_BASE){
-    try{return await apiFetch("/api/notifications");}catch{return {notifications:[],unread:0};}
-  }
-  return {notifications:[],unread:0};
-}
-async function readAllNotifications(){
-  if(API_BASE){
-    try{return await apiFetch("/api/notifications/read-all",{method:"POST"});}catch{return {ok:false};}
-  }
-  return {ok:true};
-}
-async function readNotification(id:string){
-  if(API_BASE){
-    try{return await apiFetch(`/api/notifications/${id}/read`,{method:"POST"});}catch{return {ok:false};}
-  }
-  return {ok:true};
-}
-async function deleteNotification(id:string){
-  if(API_BASE){
-    try{return await apiFetch(`/api/notifications/${id}`,{method:"DELETE"});}catch{return {ok:false};}
-  }
-  return {ok:true};
-}
 
 function normalizeMap(m:any){if(!m)return m;return{...m,isScenario:m.isScenario??m.is_scenario??false};}
 const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -2398,8 +640,8 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
   },[]);
   return(
-    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(12px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleCancel();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:isMobile?"100%":"min(95vw,360px)",borderRadius:isMobile?"18px 18px 0 0":20,border:`1px solid ${danger?"rgba(239,68,68,.35)":"var(--glass-border-accent,var(--border))"}`,boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.75))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:9000,backdropFilter:"blur(12px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleCancel();}}>
+      <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:isMobile?"100%":"min(95vw,360px)",borderRadius:isMobile?"18px 18px 0 0":20,border:danger?"1px solid rgba(239,68,68,.35)":undefined,overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"26px 24px 20px",textAlign:"center"}}>
           <div style={{width:52,height:52,borderRadius:15,background:danger?"rgba(239,68,68,.15)":"var(--accent-soft)",border:`1.5px solid ${danger?"rgba(239,68,68,.4)":"var(--accent-1)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,margin:"0 auto 16px"}}>
             {danger?"🗑":"⚡"}
@@ -2425,8 +667,8 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
   async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
   const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Plus Jakarta Sans',sans-serif"};
   return(
-    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",border:"1px solid var(--glass-border-accent,var(--border))",borderRadius:20,boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.6))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20}} onClick={e=>e.stopPropagation()}>
         <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",gap:6}}>
             {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
@@ -2522,8 +764,7 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",on
   const selMkt=TIER_MKT[selected]||TIER_MKT.pro;
   return(
     <div data-theme={theme} data-palette={palette} style={{width:"100vw",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
-      <style>{CSS}</style>
-      <div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(var(--accent-grid) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
+<div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(var(--accent-grid) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
       <div style={{position:"fixed",width:800,height:800,borderRadius:"50%",background:`radial-gradient(circle,${selMkt.glow}18 0%,transparent 65%)`,top:"-20%",right:"-15%",filter:"blur(100px)",pointerEvents:"none",transition:"background 1.4s ease"}}/>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 32px",position:"relative",flexShrink:0,borderBottom:"1px solid var(--border)"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -2583,7 +824,7 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
   async function doReplace(){if(!replaceId)return;setLoading(true);await onReplace(replaceId);}
   const mapsAllowed=tierMapsCount!=null?tierMapsCount:1;
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(10px)",padding:16}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(10px)",padding:16}}>
       <div style={{width:"min(95vw,480px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg2)",border:"1px solid rgba(239,68,68,.3)",borderRadius:22,boxShadow:"0 40px 80px rgba(0,0,0,.85)"}}>
         <div style={{padding:"22px 24px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:16,fontWeight:700,color:"var(--text)"}}>{t("map_limit","Лимит карт исчерпан")}</div>
@@ -2610,8 +851,7 @@ function SavingScreen({theme='dark'}){
   const{t}=useLang();
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:18}}>
-      <style>{CSS}</style>
-      <div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite"}}>✦</div>
+<div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite"}}>✦</div>
       <div style={{fontSize:16,fontWeight:600,color:"var(--text)"}}>Сохраняю карту…</div>
     </div>
   );
@@ -2645,16 +885,14 @@ function PostOnboardFlow({pendingMap,currentUser,theme='dark',onComplete,onBack}
   if(saving)return <SavingScreen theme={theme}/>;
   if(step==="auth")return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
-      <style>{CSS}</style>
-      <AuthModal initialTab="register" theme={theme} title="Сохранить карту" subtitle="Создайте аккаунт — карта сохранится автоматически" onAuth={afterAuth}/>
+<AuthModal initialTab="register" theme={theme} title="Сохранить карту" subtitle="Создайте аккаунт — карта сохранится автоматически" onAuth={afterAuth}/>
       <button onClick={onBack} style={{position:"absolute",top:16,left:16,padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>
     </div>
   );
   if(step==="tier")return <TierSelectionScreen isNew={isNew} currentUser={user} theme={theme} onSelect={afterTierSelect} onBack={()=>setStep("auth")}/>;
   if(step==="conflict")return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-      <style>{CSS}</style>
-      <MapConflictModal existingMaps={existingMaps} newNodeCount={pendingMap?.nodes?.length||0} tierLabel={(TIERS[user?.tier]||TIERS.free).label} tierMapsCount={(TIERS[user?.tier]||TIERS.free).maps} onReplace={async(mapId)=>{await doSaveAndGo(targetProject,user,mapId);}} onUpgrade={()=>setStep("tier")} theme={theme}/>
+<MapConflictModal existingMaps={existingMaps} newNodeCount={pendingMap?.nodes?.length||0} tierLabel={(TIERS[user?.tier]||TIERS.free).label} tierMapsCount={(TIERS[user?.tier]||TIERS.free).maps} onReplace={async(mapId)=>{await doSaveAndGo(targetProject,user,mapId);}} onUpgrade={()=>setStep("tier")} theme={theme}/>
     </div>
   );
   return <SavingScreen theme={theme}/>;
@@ -2663,10 +901,10 @@ function PostOnboardFlow({pendingMap,currentUser,theme='dark',onComplete,onBack}
 // ── Toggle (reusable) ──
 function Toggle({val,onChange,label,desc}){
   return(
-    <div onClick={()=>onChange(!val)} className="icard" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8,cursor:"pointer"}}>
+    <div onClick={()=>onChange(!val)} className="glass-card icard" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.04)",backdropFilter:"blur(10px)",border:"1px solid var(--glass-border-accent,var(--border))",marginBottom:6,cursor:"pointer"}}>
       <div>
-        <div className="icard-title" style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{label}</div>
-        {desc&&<div className="icard-desc" style={{fontSize:13,marginTop:2}}>{desc}</div>}
+        <div className="icard-title" style={{fontSize:12,fontWeight:600,color:"var(--text)"}}>{label}</div>
+        {desc&&<div className="icard-desc" style={{fontSize:11,color:"var(--text4)",marginTop:1}}>{desc}</div>}
       </div>
       <div style={{width:42,height:24,borderRadius:12,background:val?"var(--accent-1)":"var(--surface2)",border:`1px solid ${val?"var(--accent-1)":"var(--border2)"}`,position:"relative",transition:"all .2s",flexShrink:0,marginLeft:16}}>
         <div style={{position:"absolute",top:2,left:val?18:2,width:18,height:18,borderRadius:"50%",background:val?"#fff":"var(--text4)",transition:"left .2s",boxShadow:"0 1px 4px rgba(0,0,0,.3)"}}/>
@@ -2764,6 +1002,9 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
       try{
         const d=await apiFetch("/api/payments/checkout",{method:"POST",body:JSON.stringify({tierKey:selected})});
         if(d.checkoutUrl){window.location.href=d.checkoutUrl;return;}
+        setCardError(t("checkout_no_url","Не удалось получить ссылку на оплату. Проверьте настройки Stripe."));
+        setBuyPhase(null);
+        return;
       }catch(e:any){setCardError(e.message||t("save_error","Ошибка оплаты"));setBuyPhase(null);return;}
     }
     // Fallback-имитация (если бэкенд не подключён — для тестирования)
@@ -2814,9 +1055,8 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   ];
 
   return(
-    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)handleClose();}}>
-      <style>{CSS}</style>
-      <div className={`glass-panel ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.75))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget&&!buyPhase&&!showDeleteConfirm)handleClose();}}>
+<div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,borderRadius:20,display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
 
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
@@ -2939,7 +1179,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   </div>
                 </div>
                 {showDeleteConfirm&&(
-                  <div style={{position:"fixed",inset:0,zIndex:210,background:"rgba(0,0,0,.6)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowDeleteConfirm(false)}>
+                  <div style={{position:"fixed",inset:0,zIndex:210,background:"var(--modal-overlay-bg,rgba(0,0,0,.6))",display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowDeleteConfirm(false)}>
                     <div style={{background:"var(--bg2)",borderRadius:16,border:"1px solid var(--border)",padding:"24px 28px",maxWidth:400,width:"100%",boxShadow:"0 24px 48px rgba(0,0,0,.5)"}} onClick={e=>e.stopPropagation()}>
                       <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:8}}>{t("delete_account","Удалить аккаунт")}?</div>
                       <div style={{fontSize:13.5,color:"var(--text3)",marginBottom:20}}>{t("delete_warning","Все данные будут удалены безвозвратно")}</div>
@@ -2956,24 +1196,24 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
           {/* ── SETTINGS TAB ── */}
           {tab==="settings"&&(
-            <div className="tab-content" style={{flex:1,overflowY:"auto",padding:isMobile?"20px 16px":"28px 32px",minHeight:380}}>
-              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?24:32,maxWidth:720}}>
+            <div className="tab-content" style={{flex:1,overflowY:"auto",padding:isMobile?"16px 14px":"20px 24px",minHeight:380}}>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:isMobile?18:24,maxWidth:720}}>
                 <div>
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🎨</span> {t("appearance","Внешний вид")}</div>
-                  <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div style={{fontSize:12,fontWeight:800,color:"var(--text4)",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>{t("appearance","Внешний вид")}</div>
+                  <div className="glass-card" style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.04)",backdropFilter:"blur(10px)",border:"1px solid var(--glass-border-accent,var(--border))",marginBottom:6,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                     <div>
-                      <div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{t("theme_label","Тема")}</div>
-                      <div style={{fontSize:13,color:"var(--text4)",marginTop:2}}>{theme==="dark"?t("dark_theme_label","🌙 Тёмная"):t("light_theme_label","☀️ Светлая")}</div>
+                      <div style={{fontSize:12,fontWeight:600,color:"var(--text)"}}>{t("theme_label","Тема")}</div>
+                      <div style={{fontSize:11,color:"var(--text4)",marginTop:1}}>{theme==="dark"?t("dark_theme_label","Тёмная"):t("light_theme_label","Светлая")}</div>
                     </div>
-                    <button onClick={onToggleTheme} style={{padding:"6px 14px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text)",cursor:"pointer",fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:6}}>
-                      {theme==="dark"?t("light_theme_label","☀️ Светлая"):t("dark_theme_label","🌙 Тёмная")}
+                    <button onClick={onToggleTheme} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text)",cursor:"pointer",fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:6}}>
+                      {theme==="dark"?t("light_theme_label","Светлая"):t("dark_theme_label","Тёмная")}
                     </button>
                   </div>
                   {onPaletteChange&&(
-                    <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginTop:8,marginBottom:8}}>
-                      <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:4}}>{t("palette_label","Цветовая палитра")}</div>
-                      <div style={{fontSize:12,color:"var(--text5)",marginBottom:8}}>{t("palette_hint","Цвет кнопок и акцентов. Сохраняется автоматически.")}</div>
-                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                    <div className="glass-card" style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.04)",backdropFilter:"blur(10px)",border:"1px solid var(--glass-border-accent,var(--border))",marginTop:6,marginBottom:6}}>
+                      <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:2}}>{t("palette_label","Цветовая палитра")}</div>
+                      <div style={{fontSize:11,color:"var(--text5)",marginBottom:6}}>{t("palette_hint","Цвет кнопок и акцентов")}</div>
+                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                         {[
                           {id:"indigo",label:"◆ Indigo",c1:"#5b6bc0",c2:"#7c8dd9"},
                           {id:"ocean",label:"◇ Ocean",c1:"#5b8fb9",c2:"#7ab8d4"},
@@ -2982,7 +1222,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                           {id:"sunset",label:"◇ Sunset",c1:"#b88a6a",c2:"#c9a088"},
                           {id:"mono",label:"◇ Mono",c1:"#6b7a8a",c2:"#8a9baa"},
                         ].map(({id,label,c1,c2})=>(
-                          <button key={id} onClick={()=>onPaletteChange(id)} style={{padding:"7px 12px",borderRadius:8,border:`2px solid ${palette===id?"var(--accent-1)":"var(--border)"}`,background:palette===id?"var(--accent-soft)":"transparent",color:"var(--text)",cursor:"pointer",fontSize:12,fontWeight:600,display:"flex",alignItems:"center",gap:6}}>
+                          <button key={id} onClick={()=>onPaletteChange(id)} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${palette===id?"var(--accent-1)":"var(--glass-border-accent,var(--border))"}`,background:palette===id?"var(--accent-soft)":"rgba(255,255,255,.02)",color:"var(--text)",cursor:"pointer",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
                             <span style={{width:12,height:12,borderRadius:4,background:`linear-gradient(135deg,${c1},${c2})`}}/>
                             {label}
                           </button>
@@ -2992,23 +1232,23 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   )}
                   <Toggle val={compactMode} onChange={setCompactMode} label={t("compact_mode","Компактный режим")} desc={t("compact_desc","Уменьшенные карточки узлов")}/>
 
-                  <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginTop:8,marginBottom:8}}>
-                    <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("select_language","Язык интерфейса")}</div>
-                    <div style={{display:"flex",gap:6}}>
-                      {[["ru","🇷🇺 RU"],["en","🇬🇧 EN"],["uz","🇺🇿 UZ"]].map(([v,label])=>(
-                        <button key={v} onClick={()=>setUiLang(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${uiLang===v?"var(--accent-1)":"var(--border)"}`,background:uiLang===v?"var(--accent-soft)":"transparent",color:uiLang===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
+                  <div className="glass-card" style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.04)",backdropFilter:"blur(10px)",border:"1px solid var(--glass-border-accent,var(--border))",marginTop:6,marginBottom:6}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"var(--text5)",marginBottom:6}}>{t("select_language","Язык интерфейса")}</div>
+                    <div style={{display:"flex",gap:5}}>
+                      {[["ru","RU"],["en","EN"],["uz","UZ"]].map(([v,label])=>(
+                        <button key={v} onClick={()=>setUiLang(v)} style={{flex:1,padding:"6px 4px",borderRadius:8,border:`1px solid ${uiLang===v?"var(--accent-1)":"var(--glass-border-accent,var(--border))"}`,background:uiLang===v?"var(--accent-soft)":"transparent",color:uiLang===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600,textAlign:"center"}}>
                           {label}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginTop:18,marginBottom:14,display:"flex",alignItems:"center",gap:8}}><span>🗺</span> {t("strategy_maps","Карты")}</div>
-                  <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8}}>
-                    <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("default_view","Вид по умолчанию")}</div>
-                    <div style={{display:"flex",gap:6}}>
-                      {[["canvas",t("canvas_view","🗺 Канвас")],["gantt",t("gantt_view","📅 Gantt")],["list",t("list_view","📋 Список")]].map(([v,label])=>(
-                        <button key={v} onClick={()=>setDefaultView(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${defaultView===v?"var(--accent-1)":"var(--border)"}`,background:defaultView===v?"var(--accent-soft)":"transparent",color:defaultView===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
+                  <div style={{fontSize:12,fontWeight:800,color:"var(--text4)",textTransform:"uppercase",letterSpacing:1,marginTop:14,marginBottom:10}}>{t("strategy_maps","Карты")}</div>
+                  <div className="glass-card" style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.04)",backdropFilter:"blur(10px)",border:"1px solid var(--glass-border-accent,var(--border))",marginBottom:6}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"var(--text5)",marginBottom:6}}>{t("default_view","Вид по умолчанию")}</div>
+                    <div style={{display:"flex",gap:5}}>
+                      {[["canvas",t("canvas_view","Канвас")],["gantt",t("gantt_view","Gantt")],["list",t("list_view","Список")]].map(([v,label])=>(
+                        <button key={v} onClick={()=>setDefaultView(v)} style={{flex:1,padding:"6px 4px",borderRadius:8,border:`1px solid ${defaultView===v?"var(--accent-1)":"var(--glass-border-accent,var(--border))"}`,background:defaultView===v?"var(--accent-soft)":"transparent",color:defaultView===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600,textAlign:"center"}}>
                           {label}
                         </button>
                       ))}
@@ -3018,19 +1258,19 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 </div>
 
                 <div>
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:14,display:"flex",alignItems:"center",gap:8}}>{t("ai_assistant_title","🤖 AI-ассистент")}</div>
-                  <div style={{padding:"13px 16px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)",marginBottom:8}}>
-                    <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",marginBottom:8}}>{t("ai_language","Язык ответов AI")}</div>
-                    <div style={{display:"flex",gap:6}}>
-                      {[["ru","🇷🇺 Русский"],["en","🇬🇧 English"],["uz","🇺🇿 O'zbekcha"]].map(([v,label])=>(
-                        <button key={v} onClick={()=>setAiLang(v)} style={{flex:1,padding:"7px 4px",borderRadius:8,border:`1px solid ${aiLang===v?"var(--accent-1)":"var(--border)"}`,background:aiLang===v?"var(--accent-soft)":"transparent",color:aiLang===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,textAlign:"center"}}>
+                  <div style={{fontSize:12,fontWeight:800,color:"var(--text4)",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>{t("ai_assistant_title","AI-ассистент")}</div>
+                  <div className="glass-card" style={{padding:"10px 14px",borderRadius:10,background:"rgba(255,255,255,.04)",backdropFilter:"blur(10px)",border:"1px solid var(--glass-border-accent,var(--border))",marginBottom:6}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"var(--text5)",marginBottom:6}}>{t("ai_language","Язык ответов AI")}</div>
+                    <div style={{display:"flex",gap:5}}>
+                      {[["ru","Русский"],["en","English"],["uz","O'zbekcha"]].map(([v,label])=>(
+                        <button key={v} onClick={()=>setAiLang(v)} style={{flex:1,padding:"6px 4px",borderRadius:8,border:`1px solid ${aiLang===v?"var(--accent-1)":"var(--glass-border-accent,var(--border))"}`,background:aiLang===v?"var(--accent-soft)":"transparent",color:aiLang===v?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600,textAlign:"center"}}>
                           {label}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginTop:18,marginBottom:14,display:"flex",alignItems:"center",gap:8}}>{t("notifications_title","🔔 Уведомления")}</div>
+                  <div style={{fontSize:12,fontWeight:800,color:"var(--text4)",textTransform:"uppercase",letterSpacing:1,marginTop:14,marginBottom:10}}>{t("notifications_title","Уведомления")}</div>
                   <Toggle val={notifEmail} onChange={setNotifEmail} label={t("email_notifications","Email уведомления")} desc={t("notif_email_desc","Важные обновления на почту")}/>
                   <Toggle val={notifPush} onChange={setNotifPush} label={t("push_notifications","Push уведомления")} desc={t("notif_push_desc","Уведомления в браузере")}/>
                 </div>
@@ -3040,7 +1280,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 <button onClick={saveSettings} disabled={loading} style={{padding:"12px 28px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
                   {loading?t("saving","Сохраняю…"):t("save_settings","Сохранить настройки")}
                 </button>
-                {settingsSaved&&<div style={{fontSize:13.5,color:"#10b981",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> {t("settings_saved","Настройки сохранены ✓")}</div>}
+                {settingsSaved&&<div style={{fontSize:13,color:"#10b981",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> {t("settings_saved","Настройки сохранены")}</div>}
                 {msg&&!settingsSaved&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#10b981":"#ef4444",fontSize:13.5}}>{msg.t}</div>}
               </div>
             </div>
@@ -3272,8 +1512,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
   ];
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative"}}>
-      <style>{CSS}</style>
-      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px)",backgroundSize:"auto,60px 60px,60px 60px",pointerEvents:"none"}}/>
+<div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px)",backgroundSize:"auto,60px 60px,60px 60px",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",padding:"14px 28px",position:"relative",zIndex:10}}>
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
           <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain"}}/>
@@ -3293,7 +1532,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
           </div>
           <h1 style={{fontSize:"clamp(32px,5vw,56px)",fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.1,marginBottom:16}}>
             Ваша стратегия —<br/>
-            <span style={{background:"linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>за 3 минуты</span>
+            <span style={{background:"linear-gradient(135deg,var(--accent-1),var(--accent-2),var(--brand3))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>за 3 минуты</span>
           </h1>
           <p style={{fontSize:17,color:"var(--text3)",lineHeight:1.6,marginBottom:32}}>AI задаст 6 вопросов о вашем бизнесе и построит персональную стратегическую карту с приоритетами, метриками и связями.</p>
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
@@ -3441,8 +1680,7 @@ function Onboarding({onDone,onBack,theme="dark"}){
   const progress=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative"}}>
-      <style>{CSS}</style>
-      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 60% 40% at 50% 0%,var(--accent-glow) 0%,transparent 70%)",pointerEvents:"none"}}/>
+<div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 60% 40% at 50% 0%,var(--accent-glow) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",position:"relative",zIndex:10}}>
         <button onClick={onBack} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>
         <div style={{flex:1}}>
@@ -3494,9 +1732,9 @@ function Onboarding({onDone,onBack,theme="dark"}){
 }
 
 // ── MiniMap ──
-function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme}){
+function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme,statusMap}){
   const{t}=useLang();
-  const STATUS=getSTATUS(t);
+  const STATUS=statusMap||getSTATUS(t);
   const W=180,H=110;
   if(!nodes.length)return null;
   const xs=nodes.map(n=>n.x),ys=nodes.map(n=>n.y);
@@ -3532,18 +1770,18 @@ function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme}){
 }
 
 // ── StatsPopup ──
-function StatsPopup({nodes,edges,onClose}){
+function StatsPopup({nodes,edges,onClose,statusMap}){
   const{t}=useLang();
   const isMobile=useIsMobile();
-  const STATUS=getSTATUS(t);
+  const STATUS=statusMap||getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const total=nodes.length;
   const[closing,setClosing]=useState(false);
   const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
   if(total===0){
     return(
-      <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-        <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,420px)",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"28px 24px",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
+      <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.72))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)"}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+        <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(96vw,420px)",borderRadius:20,padding:"28px 24px",textAlign:"center"}} onClick={e=>e.stopPropagation()}>
           <div style={{fontSize:44,marginBottom:14}}>📊</div>
           <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:8}}>{t("stats_title","Статистика")}</div>
           <div style={{fontSize:14,color:"var(--text4)",lineHeight:1.6}}>{t("stats_empty","Добавьте шаги на карту, чтобы увидеть аналитику.")}</div>
@@ -3580,8 +1818,8 @@ function StatsPopup({nodes,edges,onClose}){
   });
   const healthColor=healthScore>=70?"#10b981":healthScore>=40?"#f59e0b":"#ef4444";
   return(
-    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:isMobile?"100%":"min(96vw,620px)",maxHeight:isMobile?"88vh":"none",overflowY:"auto",borderRadius:isMobile?"18px 18px 0 0":20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
+    <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.72))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:isMobile?"100%":"min(96vw,620px)",maxHeight:isMobile?"88vh":"none",overflowY:"auto",borderRadius:isMobile?"18px 18px 0 0":20,padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
           <div>
             <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>📊 Аналитика карты</div>
@@ -3608,7 +1846,7 @@ function StatsPopup({nodes,edges,onClose}){
           </div>
           {/* Key metrics */}
           <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            {[[done,"✅",t("completed","Выполнено"),"#10b981"],[active,"⚡",t("in_progress","В работе"),"#0ea5e9"],[blocked,"🔒","Блокировано","#ef4444"],[overdue,"⚠️",t("overdue","Просрочено"),"#f97316"],[critical,"🔴","Критичных","#ef4444"],[edges.length,"🔗","Связей","#8b5cf6"]].map(([v,ic,lbl,col])=>(
+            {[[done,"✅",t("completed","Выполнено"),"#10b981"],[active,"⚡",t("in_progress","В работе"),"#0ea5e9"],[blocked,"🔒","Блокировано","#ef4444"],[overdue,"⚠️",t("overdue","Просрочено"),"#f97316"],[critical,"🔴","Критичных","#ef4444"],[edges.length,"🔗","Связей","var(--accent-2)"]].map(([v,ic,lbl,col])=>(
               <div key={lbl} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)"}}>
                 <span style={{fontSize:13}}>{ic}</span>
                 <div>
@@ -3665,11 +1903,11 @@ function StatsPopup({nodes,edges,onClose}){
 }
 
 // ── RichEditorPanel ── (aiPanelOpen: сдвигает влево, чтобы не перекрывать AI; isMobile: полноэкранная панель)
-function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect,onError,onNotify,aiPanelOpen,isMobile}){
+function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,allNodes=[],allEdges=[],onScrollTo,onConnect,onError,onNotify,aiPanelOpen,isMobile,statusMap,etypeMap}){
   const{t,lang}=useLang();
-  const STATUS=getSTATUS(t);
+  const STATUS=statusMap||getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
-  const ETYPE=getETYPE(t);
+  const ETYPE=etypeMap||getETYPE(t);
   const[tab,setTab]=useState("info");
   const[showMore,setShowMore]=useState(false);
   const[newComment,setNewComment]=useState("");
@@ -3680,7 +1918,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const handleClose=()=>{if(exiting)return;setExiting(true);setTimeout(()=>onClose(),320);};
   const comments=node.comments||[];
   const history=node.history||[];
-  const COLORS=["","#6366f1","#8b5cf6","#0ea5e9","#10b981","#f59e0b","#ef4444","#ec4899","#06b6d4","#84cc16","#f97316"];
+  const accentPick=(STATUS.planning&&STATUS.planning.c)||"#5b6bc0";
+  const COLORS=["",accentPick,(ETYPE.affects&&ETYPE.affects.c)||"#8b5cf6","#0ea5e9","#10b981","#f59e0b","#ef4444","#ec4899","#06b6d4","#84cc16","#f97316"];
 
   async function aiRephrase(){
     if(aiRephrLoading)return;
@@ -3762,30 +2001,30 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
     setAutoConnLoading(false);
   }
 
-  const iS={width:"100%",padding:"12px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s"};
-  const iSTextarea={...iS,resize:"vertical" as const,minHeight:44,maxHeight:180,overflowY:"auto" as const,wordBreak:"break-word" as const};
+  const iS={width:"100%",padding:"10px 12px",fontSize:13,background:"rgba(255,255,255,.04)",border:"1px solid var(--glass-border-accent,var(--input-border))",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"border-color .2s",backdropFilter:"blur(8px)"};
+  const iSTextarea={...iS,resize:"vertical" as const,minHeight:40,maxHeight:160,overflowY:"auto" as const,wordBreak:"break-word" as const};
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
-  const tabs=[["info","◈ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
+  const tabs=[["info","◆ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
 
   const panelRight=isMobile?0:aiPanelOpen?360:0;
   const panelWidth=isMobile?"100%":aiPanelOpen?320:340;
   const panelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:panelRight,top:0,bottom:0,width:panelWidth,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
     <div className={`glass-panel panel-slide ${exiting?"panel-slide-out":""}`.trim()} style={panelStyle}>
-      <div style={{display:"flex",alignItems:"center",gap:14,padding:"20px 22px",borderBottom:"1px solid var(--border)",flexShrink:0,background:"var(--surface)"}}>
-        <div style={{width:12,height:12,borderRadius:4,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
-        <div style={{flex:1,fontSize:15,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{node.title||"Без названия"}</div>
+      <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 16px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(12px)"}}>
+        <div style={{width:10,height:10,borderRadius:3,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
+        <div style={{flex:1,fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>{node.title||"Без названия"}</div>
         {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>↗</button>}
         <button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
       </div>
-      <div style={{display:"flex",borderBottom:"1px solid var(--border)",flexShrink:0,overflowX:"auto",padding:"0 14px"}}>
+      <div style={{display:"flex",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,overflowX:"auto",padding:"0 10px"}}>
         {tabs.map(item=>{
           const k=item[0],lbl=item[1];
           const isActive=tab===k;
-          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"14px 16px",border:"none",background:isActive?"var(--surface)":"transparent",color:isActive?"var(--text)":"var(--text4)",fontSize:13,fontWeight:isActive?700:500,cursor:"pointer",borderBottom:isActive?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
+          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"10px 12px",border:"none",background:isActive?"rgba(255,255,255,.04)":"transparent",color:isActive?"var(--text)":"var(--text4)",fontSize:12,fontWeight:isActive?700:500,cursor:"pointer",borderBottom:isActive?"2px solid var(--accent-1)":"2px solid transparent",marginBottom:-1,whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
         })}
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
+      <div style={{flex:1,overflowY:"auto",padding:"14px 16px"}}>
         {tab==="info"&&(
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             <div>
@@ -3929,9 +2168,9 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
 }
 
 // ── AiPanel ── (isMobile: полноэкранная панель)
-function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal,projectName="",mapName="",userName="",msgs:msgsProp,onMsgsChange,onError,isMobile,embedded=false}){
+function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClearExternal,projectName="",mapName="",userName="",msgs:msgsProp,onMsgsChange,onError,isMobile,embedded=false,statusMap}){
   const{t}=useLang();
-  const STATUS=getSTATUS(t);
+  const STATUS=statusMap||getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const tierCfg=AI_TIER[tier]||AI_TIER.free;
   const meta={projectName,mapName,userName};
@@ -4039,45 +2278,47 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         : {position:"absolute" as const,right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"});
   return(
     <div className={`glass-panel ${embedded?"":"panel-slide"} ${exiting&&!embedded?"panel-slide-out":""}`.trim()} style={{...aiPanelStyle,background:"var(--glass-panel-bg)",backdropFilter:"blur(24px)"}}>
-      <div style={{display:"flex",alignItems:"center",gap:16,padding:"24px 24px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent"}}>
-        <div style={{width:44,height:44,borderRadius:14,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:"0 4px 20px var(--accent-glow)",flexShrink:0,border:"2px solid rgba(255,255,255,.15)"}}>✦</div>
+      <div style={{display:"flex",alignItems:"center",gap:12,padding:"16px 18px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(12px)"}}>
+        <div style={{width:36,height:36,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0,border:"1px solid rgba(255,255,255,.2)"}}>◆</div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:"-0.02em"}}>{t("ai_consultant","AI Советник")}</div>
-          <div style={{fontSize:12,color:"var(--accent-2)",fontWeight:600,marginTop:2}}>{tierCfg.badge} {tierCfg.label}</div>
+          <div style={{fontSize:14,fontWeight:900,color:"var(--text)",letterSpacing:"-0.02em"}}>{t("ai_consultant","AI Советник")}</div>
+          <div style={{fontSize:11,color:"var(--accent-2)",fontWeight:600,marginTop:1}}>{tierCfg.badge} {tierCfg.label}</div>
         </div>
-        <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:600}}>✕</button>
-        {!embedded&&<button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"1px solid var(--border)",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
+        <div style={{display:"flex",gap:6}}>
+          <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"6px 10px",borderRadius:8,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:11,fontWeight:600}}>↻</button>
+          {!embedded&&<button onClick={handleClose} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
+        </div>
       </div>
-      <div style={{padding:"16px 20px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent"}}>
-        <div style={{fontSize:11,fontWeight:700,color:"var(--text5)",textTransform:"uppercase",letterSpacing:1,marginBottom:10}}>{t("ai_quick_questions","Быстрые вопросы")}</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+      <div style={{padding:"12px 16px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent"}}>
+        <div style={{fontSize:10,fontWeight:700,color:"var(--text5)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>{t("ai_quick_questions","Быстрые вопросы")}</div>
+        <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
           {quick.map(q=>(
-            <button key={q} className="btn-interactive" onClick={()=>send(q)} style={{padding:"10px 16px",borderRadius:12,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12.5,fontWeight:600,transition:"all .2s",boxShadow:"0 1px 3px rgba(0,0,0,.06)"}}
+            <button key={q} className="btn-interactive" onClick={()=>send(q)} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",color:"var(--text2)",cursor:"pointer",fontSize:11.5,fontWeight:600,transition:"all .2s"}}
               onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";e.currentTarget.style.transform="translateY(-1px)";}}
-              onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--glass-border-accent,var(--border))";e.currentTarget.style.color="var(--text2)";e.currentTarget.style.transform="";}}>{q}</button>
+              onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="var(--glass-border-accent,var(--border))";e.currentTarget.style.color="var(--text2)";e.currentTarget.style.transform="";}}>{q}</button>
           ))}
           {allQuick.length>QUICK_SHOW&&(
-            <button onClick={()=>setShowMoreQuick(s=>!s)} style={{padding:"10px 14px",borderRadius:12,border:"1px dashed var(--border)",background:"transparent",color:"var(--text4)",fontSize:12,fontWeight:600,cursor:"pointer"}}>
+            <button onClick={()=>setShowMoreQuick(s=>!s)} style={{padding:"8px 12px",borderRadius:10,border:"1px dashed var(--border)",background:"transparent",color:"var(--text4)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
               {showMoreQuick?"▲ Свернуть":"+ Ещё…"}
             </button>
           )}
         </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"20px 24px",display:"flex",flexDirection:"column",gap:20,background:"linear-gradient(180deg,transparent 0%,rgba(var(--accent-rgb,91,107,192),.02) 100%)"}}>
+      <div style={{flex:1,overflowY:"auto",padding:"14px 18px",display:"flex",flexDirection:"column",gap:14,background:"linear-gradient(180deg,transparent 0%,rgba(var(--accent-rgb,91,107,192),.02) 100%)"}}>
         {msgs.map((m,i)=>(
-          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:12,alignItems:"flex-start",animation:"fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards"}}>
-            {m.role==="ai"&&<div style={{width:32,height:32,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,marginTop:4,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div>}
-            <div style={{maxWidth:"88%",padding:m.role==="user"?"14px 20px":"16px 20px 16px 24px",borderRadius:m.role==="user"?"18px 18px 6px 18px":m.role==="sys"?"12px":"6px 18px 18px 18px",background:m.role==="user"?"var(--gradient-accent)":m.role==="sys"?"rgba(16,185,129,.12)":"linear-gradient(135deg,var(--surface) 0%,rgba(var(--accent-rgb,91,107,192),.06) 100%)",border:m.role==="user"?"none":m.role==="sys"?"1px solid rgba(16,185,129,.25)":"1px solid var(--glass-border-accent,var(--border))",borderLeft:m.role==="ai"?"4px solid var(--accent-1)":"none",fontSize:14,lineHeight:1.65,color:m.role==="user"?"#fff":m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 4px 16px var(--accent-glow)":m.role==="sys"?"none":"0 4px 20px rgba(0,0,0,.08)"}}>{m.text}</div>
+          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:10,alignItems:"flex-start",animation:"fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards"}}>
+            {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,marginTop:2,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div>}
+            <div style={{maxWidth:"88%",padding:m.role==="user"?"12px 16px":"12px 16px 12px 20px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--gradient-accent)":m.role==="sys"?"rgba(16,185,129,.12)":"rgba(255,255,255,.04)",backdropFilter:m.role==="user"?"none":"blur(10px)",border:m.role==="user"?"none":m.role==="sys"?"1px solid rgba(16,185,129,.25)":"1px solid var(--glass-border-accent,var(--border))",borderLeft:m.role==="ai"?"3px solid var(--accent-1)":"none",fontSize:13,lineHeight:1.6,color:m.role==="user"?"#fff":m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 12px var(--accent-glow)":m.role==="sys"?"none":"0 2px 12px rgba(0,0,0,.06)"}}>{m.text}</div>
           </div>
         ))}
-        {load&&<div style={{display:"flex",gap:12,alignItems:"center"}}><div style={{width:32,height:32,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div><div style={{display:"flex",gap:5,padding:"14px 18px",background:"var(--surface)",borderRadius:"6px 18px 18px 18px",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"0 2px 12px rgba(0,0,0,.06)"}}>{[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`,opacity:.7}}/>)}</div></div>}
+        {load&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",borderRadius:"4px 14px 14px 14px",border:"1px solid var(--glass-border-accent,var(--border))"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`,opacity:.7}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
-      <div style={{padding:"24px",borderTop:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent",flexDirection:"column",display:"flex",gap:14}}>
-        {aiFreeTier&&<div className="glass-card" style={{padding:"14px 18px",borderRadius:12,border:"1px solid var(--glass-border-accent,var(--border))",color:"var(--text3)",fontSize:13}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</div>}
-        <div style={{display:"flex",gap:14}}>
-          <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,padding:"16px 20px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--glass-border-accent,var(--input-border))",borderRadius:14,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"all .2s",opacity:aiFreeTier?.7:1}}/>
-          <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:52,height:52,borderRadius:14,border:"none",background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"var(--surface2)",color:!aiFreeTier&&inp.trim()&&!load?"#fff":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:22,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 4px 20px var(--accent-glow)":"none"}}>↑</button>
+      <div style={{padding:"16px 18px",borderTop:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(8px)",flexDirection:"column",display:"flex",gap:10}}>
+        {aiFreeTier&&<div className="glass-card" style={{padding:"10px 14px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",color:"var(--text3)",fontSize:12}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</div>}
+        <div style={{display:"flex",gap:10}}>
+          <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,padding:"12px 16px",fontSize:13,background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",border:"1px solid var(--glass-border-accent,var(--input-border))",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"all .2s",opacity:aiFreeTier?.7:1}}/>
+          <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:44,height:44,borderRadius:12,border:"none",background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"rgba(255,255,255,.06)",color:!aiFreeTier&&inp.trim()&&!load?"#fff":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>
         </div>
       </div>
     </div>
@@ -4086,9 +2327,9 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
 
 
 // ── EdgeLine ──
-function EdgeLine({edge,nodes,selected,onClick}){
+function EdgeLine({edge,nodes,selected,onClick,etypeMap}){
   const{t}=useLang();
-  const ETYPE=getETYPE(t);
+  const ETYPE=etypeMap||getETYPE(t);
   const s=nodes.find(n=>n.id===edge.source);
   const tNode=nodes.find(n=>n.id===edge.target);
   if(!s||!t)return null;
@@ -4118,15 +2359,16 @@ function EdgeLine({edge,nodes,selected,onClick}){
   );
 }
 
-// ── NodeCard ── (единая сетка 8px, выравнивание, поддержка светлой/тёмной темы)
-function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,onMouseDown,onContextMenu,theme}){
+// ── NodeCard ── (glass-стиль, компактность, текст без перекрытия)
+function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,onMouseDown,onContextMenu,theme,statusMap}){
   const{t}=useLang();
-  const STATUS=getSTATUS(t);
+  const STATUS=statusMap||getSTATUS(t);
   const PRIORITY=getPRIORITY(t);
   const st=STATUS[node.status]||STATUS.planning;
   const pr=PRIORITY[node.priority]||PRIORITY.medium;
   const isLight=theme==="light";
-  const bg=node.color?node.color+(isLight?"22":"18"):(isLight?"#ffffff":"var(--node-bg)");
+  const glassBg=isLight?"rgba(255,255,255,.75)":"rgba(12,18,30,.72)";
+  const bg=node.color?node.color+(isLight?"28":"22"):glassBg;
   const titleColor=selected?"var(--accent-1)":(isLight?"#0f172a":"#e2e8f0");
   const reasonColor=isLight?"#64748b":"#94a3b8";
   const statusColor=isLight?"#475569":"#94a3b8";
@@ -4141,48 +2383,49 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
   const progress=node.progress||0;
   const progressW=Math.max(0,progress/100*204);
   const titleFull=node.title||"Новый шаг";
-  const title=titleFull.length>20?titleFull.slice(0,18)+"…":titleFull;
+  const titleLen=28;
+  const title=titleFull.length>titleLen?titleFull.slice(0,titleLen-1)+"…":titleFull;
   const hasMeta=node.reason||node.action||node.metric;
   const hasAction=!!(node.action&&node.action.trim());
-  const headerY=16;
-  const reasonY=30;
-  const actionY=40;
-  const metricY=hasAction?50:44;
-  const progressY=hasMeta?(hasAction?64:58):36;
-  const progressBarH=6;
+  const headerY=14;
+  const reasonY=26;
+  const actionY=36;
+  const metricY=hasAction?46:40;
+  const progressY=hasMeta?(hasAction?58:52):32;
+  const progressBarH=5;
   const progressCenterY=progressY+progressBarH/2;
-  const statusY=progressY+progressBarH+12;
-  const tagsY=statusY+18;
+  const statusY=progressY+progressBarH+10;
+  const tagsY=statusY+14;
   return(
     <g className="node-card" transform={`translate(${node.x},${node.y})`} onClick={e=>{e.stopPropagation();onClick(node,{shiftKey:e.shiftKey});}} onPointerDown={e=>onMouseDown(e,node)} onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContextMenu?.(e.clientX,e.clientY,node);}} style={{cursor:connecting?"crosshair":"grab"}}>
       {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill="var(--accent-soft)" style={{filter:"blur(8px)"}}/>}
       {focused&&<rect x={-2} y={0} width={244} height={132} rx={14} fill="transparent" stroke="var(--accent-1)" strokeWidth={2} style={{filter:"drop-shadow(0 0 12px var(--accent-glow))"}}/>}
       <rect width={240} height={128} rx={12} fill={bg}
-        stroke={selected?"var(--accent-1)":isConnSrc?"#10b981":isOverdue?"#ef4444":isLight?(node.color||"rgba(0,0,0,.12)"):(node.color||"rgba(255,255,255,.12)")}
+        stroke={selected?"var(--accent-1)":isConnSrc?"#10b981":isOverdue?"#ef4444":isLight?(node.color||"rgba(0,0,0,.1)"):"rgba(255,255,255,.12)"}
         strokeWidth={selected||isConnSrc||isOverdue?2:1}
         filter={selected?"url(#glow)":"none"}/>
       {selected&&<rect width={240} height={128} rx={12} fill="var(--accent-soft)"/>}
-      <rect x={0} y={12} width={4} height={104} rx={2} fill={st.c}/>
-      {/* Заголовок и приоритет — одна линия, выровнены по центру */}
-      <rect x={156} y={9} width={70} height={14} rx={7} fill={`${pr.c}20`} stroke={`${pr.c}50`} strokeWidth={1}/>
-      <circle cx={167} cy={headerY} r={2.5} fill={pr.c}/>
-      <text x={173} y={headerY} fontSize={8.5} fontWeight={700} fill={pr.c} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{pr.label}</text>
-      <g clipPath="url(#nodeTitleClip)"><title>{titleFull}</title><text x={14} y={headerY} fontSize={12} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+      <rect x={0} y={10} width={3} height={108} rx={1.5} fill={st.c}/>
+      {/* Заголовок — полная ширина, приоритет под заголовком справа */}
+      <g clipPath="url(#nodeTitleClip)"><title>{titleFull}</title><text x={14} y={headerY} fontSize={11.5} fontWeight={800} fill={titleColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
         {title}
       </text></g>
+      <rect x={198} y={headerY-6} width={36} height={12} rx={6} fill={`${pr.c}22`} stroke={`${pr.c}40`} strokeWidth={0.5}/>
+      <circle cx={205} cy={headerY} r={2} fill={pr.c}/>
+      <text x={211} y={headerY} fontSize={7} fontWeight={700} fill={pr.c} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>{pr.label}</text>
       {node.reason&&(
-        <g><title>{node.reason}</title><text x={14} y={reasonY} fontSize={9} fill={reasonColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
-          {node.reason.length>40?node.reason.slice(0,38)+"…":node.reason}
+        <g><title>{node.reason}</title><text x={14} y={reasonY} fontSize={8.5} fill={reasonColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+          {node.reason.length>48?node.reason.slice(0,46)+"…":node.reason}
         </text></g>
       )}
       {node.action&&node.action.trim()&&(
-        <g><title>{node.action}</title><text x={14} y={actionY} fontSize={8.5} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle",fontWeight:600}}>
-          ▶ {node.action.length>34?node.action.slice(0,32)+"…":node.action}
+        <g><title>{node.action}</title><text x={14} y={actionY} fontSize={8} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle",fontWeight:600}}>
+          ▸ {node.action.length>42?node.action.slice(0,40)+"…":node.action}
         </text></g>
       )}
       {node.metric&&(
-        <g><title>{node.metric}</title><text x={14} y={metricY} fontSize={9} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
-          ◈ {node.metric.length>32?node.metric.slice(0,30)+"…":node.metric}
+        <g><title>{node.metric}</title><text x={14} y={metricY} fontSize={8} fill={metricColor} style={{fontFamily:"'Plus Jakarta Sans',sans-serif",dominantBaseline:"middle"}}>
+          ◆ {node.metric.length>40?node.metric.slice(0,38)+"…":node.metric}
         </text></g>
       )}
       <rect x={14} y={progressY} width={212} height={progressBarH} rx={3} fill={progressTrack}/>
@@ -4219,9 +2462,9 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
 }
 
 // ── GanttView ──
-function GanttView({nodes,onClose}){
+function GanttView({nodes,onClose,statusMap}){
   const{t,lang}=useLang();
-  const STATUS=getSTATUS(t);
+  const STATUS=statusMap||getSTATUS(t);
   const[exiting,setExiting]=useState(false);
   const handleClose=()=>{if(exiting)return;setExiting(true);setTimeout(()=>onClose(),280);};
   const withDates=nodes.filter(n=>n.deadline);
@@ -4381,7 +2624,7 @@ function VersionHistoryModal({mapId,projectId,onRestore,onClose,onError,theme="d
     onRestore(v);setRestoring(null);setRestoreConfirm(null);onClose();
   }
   return(
-    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.65))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
       <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:isMobile?"18px 18px 0 0":20,width:isMobile?"100%":"min(480px,94vw)",maxHeight:isMobile?"78vh":"80vh",display:"flex",flexDirection:"column",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"18px 24px",borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
           <div style={{fontWeight:800,fontSize:16,color:"var(--text)"}}>📜 {t("version_history","История версий")}</div>
@@ -4445,8 +2688,8 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
   useEffect(()=>{fetchBriefing();},[]);
 
   return(
-    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:isMobile?"18px 18px 0 0":20,width:isMobile?"100%":"min(520px,94vw)",maxHeight:isMobile?"85vh":"none",overflowY:"auto",overflowX:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.65))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+      <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:isMobile?"18px 18px 0 0":20,width:isMobile?"100%":"min(520px,94vw)",maxHeight:isMobile?"85vh":"none",overflowY:"auto",overflowX:"hidden"}} onClick={e=>e.stopPropagation()}>
         <div style={{background:"var(--surface)",padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
@@ -4507,11 +2750,21 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
 }
 
 // ── MapEditor ──
-function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false,aiChatMsgs,aiChatSetMsgs,focusNodeId=null}){
+function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false,aiChatMsgs,aiChatSetMsgs,focusNodeId=null,palette="indigo",onOpenContentPlanHub=null,onOpenContentPlanProject=null}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
-  const STATUS=getSTATUS(t);
-  const ETYPE=getETYPE(t);
+  const[accHex,setAccHex]=useState({a1:"#5b6bc0",a2:"#7c8dd9"});
+  useLayoutEffect(()=>{
+    try{
+      const s=getComputedStyle(document.body);
+      setAccHex({
+        a1:(s.getPropertyValue("--accent-1")||"").trim()||"#5b6bc0",
+        a2:(s.getPropertyValue("--accent-2")||"").trim()||"#7c8dd9",
+      });
+    }catch{}
+  },[palette,theme]);
+  const STATUS=useMemo(()=>{const b=getSTATUS(t);return{...b,planning:{...b.planning,c:accHex.a1}};},[t,accHex.a1]);
+  const ETYPE=useMemo(()=>{const b=getETYPE(t);return{...b,requires:{...b.requires,c:accHex.a1},affects:{...b.affects,c:accHex.a2}};},[t,accHex.a1,accHex.a2]);
   const[nodes,setNodes]=useState(mapData?.nodes||defaultNodes());
   const[edges,setEdges]=useState(mapData?.edges||[]);
   const[selNode,setSelNode]=useState(null);
@@ -4617,7 +2870,16 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
       const token=getJWT();
       socket=ioClient(API_BASE,{transports:["websocket","polling"],auth:{token}});
       socketRef.current=socket;
+      socket.io.on("reconnect_attempt",()=>{
+        const t=getJWT();
+        if(t)socket.auth={...socket.auth,token:t};
+      });
       socket.emit("join-map",{mapId:mapData.id,userName:user.name||user.email});
+      socket.on("join-error",(payload:any)=>{
+        addToast(payload?.message||t("ws_join_denied","Нет доступа к совместному редактированию"),"error");
+        try{socket.disconnect();}catch{}
+        socketRef.current=null;
+      });
       socket.on("user-joined",(data:any)=>setOnlineUsers((u:any[])=>[...u.filter(x=>x.email!==data.email),data]));
       socket.on("user-left",(data:any)=>setOnlineUsers((u:any[])=>u.filter(x=>x.email!==data.email)));
       socket.on("node-move",({nodeId,x,y}:any)=>{
@@ -5152,14 +3414,13 @@ ${ctx}
 
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
-      <style>{CSS}</style>
-      {readOnly&&(
+{readOnly&&(
         <div style={{flexShrink:0,background:"rgba(148,163,184,.12)",borderBottom:"1px solid var(--border)",padding:"6px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontSize:12.5,color:"var(--text3)",fontWeight:600}}>
           <span>👁</span> {t("read_only_banner","Режим просмотра — вы можете просматривать карту, но не редактировать")}
         </div>
       )}
       {/* ── TOOLBAR — 2 rows ── */}
-      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--glass-border-accent,var(--border))",background:"var(--bg2)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:"0 1px 0 var(--glass-border-accent,var(--border))"}}>
+      <div className="crm-toolbar-shell">
 
         {/* ROW 1 — primary actions + search */}
         <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
@@ -5173,8 +3434,8 @@ ${ctx}
               </span>
             )}
             {!readOnly&&<>{sep}
-            <button className="btn-interactive" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)"}}
-              onMouseOver={e=>{e.currentTarget.style.boxShadow="0 6px 24px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
+            <button className="btn-interactive btn-primary-glow" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8}}
+              onMouseOver={e=>{e.currentTarget.style.boxShadow="0 6px 28px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.boxShadow="";}}>
               <span style={{fontSize:17,lineHeight:1}}>+</span> Шаг
             </button>
             <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}} title={connecting?t("cancel","Отмена"):t("link_mode_hint","Режим связи: клик на источник, затем на цель")}
@@ -5226,6 +3487,21 @@ ${ctx}
             )}
           </div>
         </div>
+
+        {user&&onOpenContentPlanHub&&(
+          <div className="crm-substrip" style={{padding:"10px 16px"}}>
+            <div style={{fontSize:10.5,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.08,textAlign:"center",marginBottom:8}}>{t("cp_map_strip_label","Контент-план и разделы")}</div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,flexWrap:"wrap"}}>
+              <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={isMobile}/>
+              {onOpenContentPlanProject&&project?.id&&(
+                <button type="button" className="btn-interactive glass-hairline-b" onClick={()=>onOpenContentPlanProject()} title={t("cp_from_map_hint","Открыть контент-план этого проекта в полноэкранном режиме")}
+                  style={{padding:"8px 16px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:8}}>
+                  <span aria-hidden>✍️</span>{t("cp_from_map_btn","Контент-план проекта")}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ROW 2 — view tools + panels + export */}
         <div style={{minHeight:52,display:"flex",alignItems:"center",gap:isMobile?6:10,padding:isMobile?"10px 16px":"0 24px",flexWrap:isMobile?"wrap":undefined}}>
@@ -5375,7 +3651,7 @@ ${ctx}
           onDoubleClick={e=>{const t=e.target as Element;if(!readOnly&&(t===svgRef.current||t?.tagName==="svg"||t?.getAttribute?.("data-canvas-bg")==="1")){e.preventDefault();addNodeAt(e.clientX,e.clientY);}}}
           onContextMenu={e=>{const t=e.target as Element;if(t===svgRef.current||t?.tagName==="svg"||t?.getAttribute?.("data-canvas-bg")==="1"){e.preventDefault();if(!readOnly)setCtxMenu({x:e.clientX,y:e.clientY});}}}>
           <defs>
-            <clipPath id="nodeTitleClip"><rect x={14} y={4} width={138} height={14} rx={2}/></clipPath>
+            <clipPath id="nodeTitleClip"><rect x={14} y={2} width={178} height={16} rx={2}/></clipPath>
             <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x%40},${view.y%40})`}>
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--grid)" strokeWidth="1"/>
@@ -5384,14 +3660,14 @@ ${ctx}
           <rect width="100%" height="100%" fill={bgMode==="grid"?"url(#grid)":"var(--bg)"} data-canvas-bg="1"/>
           <g transform={`translate(${view.x},${view.y}) scale(${view.zoom})`}>
             {edges.filter(e=>!hiddenIds.has(e.source)&&!hiddenIds.has(e.target)).map(e=>(
-              <EdgeLine key={e.id} edge={e} nodes={nodes} selected={selEdge?.id===e.id} onClick={ed=>{setSelEdge(ed);setSelNode(null);}}/>
+              <EdgeLine key={e.id} edge={e} nodes={nodes} selected={selEdge?.id===e.id} etypeMap={ETYPE} onClick={ed=>{setSelEdge(ed);setSelNode(null);}}/>
             ))}
             {filteredNodes.map(n=>(
-              <NodeCard key={n.id} node={n} selected={selNode?.id===n.id||selNodes.has(n.id)} focused={focusPulseId===n.id} connecting={connecting} connectSource={connectSrc} onClick={onNodeClick} onMouseDown={onNodeMouseDown} onContextMenu={(x,y,nd)=>{if(!readOnly)setCtxMenu({x,y,node:nd});}} theme={theme}/>
+              <NodeCard key={n.id} node={n} selected={selNode?.id===n.id||selNodes.has(n.id)} focused={focusPulseId===n.id} connecting={connecting} connectSource={connectSrc} onClick={onNodeClick} onMouseDown={onNodeMouseDown} onContextMenu={(x,y,nd)=>{if(!readOnly)setCtxMenu({x,y,node:nd});}} theme={theme} statusMap={STATUS}/>
             ))}
           </g>
           {connecting&&(
-            <text x={W/2} y={36} textAnchor="middle" fontSize={13} fill="#818cf8" fontWeight={700} style={{pointerEvents:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+            <text x={W/2} y={36} textAnchor="middle" fontSize={13} fill="var(--accent-2)" fontWeight={700} style={{pointerEvents:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
               {connectSrc?`Выберите цель для "${connectSrc.title?.slice(0,20)}"…`:"Нажмите на исходный узел…"}
             </text>
           )}
@@ -5418,7 +3694,7 @@ ${ctx}
         )}
         {/* edge label editor */}
         {selEdge&&!selNode&&!readOnly&&(
-          <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"var(--surface,#0d1829)",border:"1px solid rgba(99,102,241,.25)",borderRadius:12,boxShadow:"var(--shadow,0 16px 40px rgba(0,0,0,.7))",zIndex:40,animation:"slideUp .2s ease"}}>
+          <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"var(--surface,#0d1829)",border:"1px solid var(--glass-border-accent,var(--border))",borderRadius:12,boxShadow:"var(--shadow,0 16px 40px rgba(0,0,0,.7))",zIndex:40,animation:"slideUp .2s ease"}}>
             <span style={{fontSize:13,color:"#64748b",fontWeight:600}}>{t("edge_type","Тип связи:")}</span>
             <CustomSelect
               value={selEdge.type||"requires"}
@@ -5448,7 +3724,7 @@ ${ctx}
           </div>
         )}
         {ctxMenu&&<div style={{position:"fixed",inset:0,zIndex:399}} onClick={()=>setCtxMenu(null)}/>}
-        {showMini&&<MiniMap nodes={nodes} edges={edges} viewX={view.x} viewY={view.y} zoom={view.zoom} canvasW={W} canvasH={H} onJump={(x,y)=>{viewRef.current={...viewRef.current,x,y};setView(v=>({...v,x,y}));}} theme={theme}/>}
+        {showMini&&<MiniMap nodes={nodes} edges={edges} viewX={view.x} viewY={view.y} zoom={view.zoom} canvasW={W} canvasH={H} onJump={(x,y)=>{viewRef.current={...viewRef.current,x,y};setView(v=>({...v,x,y}));}} theme={theme} statusMap={STATUS}/>}
         {toasts.map(toast=><Toast key={toast.id} msg={toast.msg} type={toast.type} onClose={()=>setToasts(ts=>ts.filter(x=>x.id!==toast.id))}/>)}
         {selNode&&(
           <RichEditorPanel
@@ -5481,14 +3757,16 @@ ${ctx}
             }}
             onError={(msg)=>addToast(msg,"error")}
             onNotify={(msg,type)=>addToast(msg,type||"info")}
+            statusMap={STATUS}
+            etypeMap={ETYPE}
           />
         )}
-        {showAI&&<AiPanel isMobile={isMobile} nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgsLocal} onMsgsChange={setAiChatMsgsLocal} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:nn});}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")}/>}
-        {showStats&&<StatsPopup nodes={nodes} edges={edges} onClose={()=>setShowStats(false)}/>}
+        {showAI&&<AiPanel isMobile={isMobile} nodes={nodes} edges={edges} ctx={mapData?.ctx||""} tier={user?.tier||"free"} projectName={project?.name||""} mapName={mapData?.name||""} userName={user?.name||user?.email||""} msgs={aiChatMsgsLocal} onMsgsChange={setAiChatMsgsLocal} onAddNode={(n)=>{const nn={...n,id:uid(),x:snap((-view.x/view.zoom)+W/view.zoom/2-120+Math.random()*80),y:snap((-view.y/view.zoom)+H/view.zoom/2-64+Math.random()*80),comments:[],history:[]};pushUndo(nodes,edges);setNodes(ns=>[...ns,nn]);if(!readOnly)socketRef.current?.emit("node-add",{mapId:mapData?.id,node:nn});}} onClose={()=>setShowAI(false)} externalMsgs={pendingAiMsgs} onClearExternal={()=>setPendingAiMsgs([])} onError={(msg)=>addToast(msg,"error")} statusMap={STATUS}/>}
+        {showStats&&<StatsPopup nodes={nodes} edges={edges} onClose={()=>setShowStats(false)} statusMap={STATUS}/>}
         {showTemplates&&<TemplateModal tier={user?.tier} onSelect={(tmpl:any)=>{setShowTemplates(false);if(tmpl){pushUndo(nodes,edges);setNodes(tmpl.nodes.map((n:any)=>({...n,comments:[],history:[]})));setEdges(tmpl.edges);emitEdgeUpdate(tmpl.edges);setTimeout(fitView,100);setPendingAiMsgs([{role:"ai",text:t("ai_customize_template_offer","Я применил шаблон. Хотите подстроить его под ваш бизнес? Напишите, чем вы занимаетесь и какая цель — я адаптирую шаги под вас.")}]);setShowAI(true);}}} onClose={()=>setShowTemplates(false)} theme={theme}/>}
-        {showGantt&&<GanttView nodes={nodes} onClose={()=>setShowGantt(false)}/>}
+        {showGantt&&<GanttView nodes={nodes} onClose={()=>setShowGantt(false)} statusMap={STATUS}/>}
         {showTour&&<MapTour onDone={()=>setShowTour(false)}/>}
-        {showSim&&<SimulationModal mapData={{...mapData,nodes,edges}} allProjectMaps={allMaps} onClose={()=>setShowSim(false)} theme={theme}/>}
+        {showSim&&<SimulationModal mapData={{...mapData,nodes,edges}} allProjectMaps={allMaps} onClose={()=>setShowSim(false)} theme={theme} statusMap={STATUS}/>}
         {showOnboarding&&<InMapOnboarding project={project} tier={user?.tier} theme={theme} onDone={(mapObj:any)=>{setShowOnboarding(false);const es=mapObj.edges||[];setNodes(mapObj.nodes||[]);setEdges(es);emitEdgeUpdate(es);setTimeout(fitView,200);}} onSkip={()=>{setShowOnboarding(false);setNodes(defaultNodes());}}/>}
         {showBriefing&&(
           <WeeklyBriefingModal nodes={nodes} mapName={mapData?.name||"Карта"} user={user} onClose={()=>setShowBriefing(false)} theme={theme} onError={(msg)=>addToast(msg,"error")}/>
@@ -5511,13 +3789,13 @@ ${ctx}
         {/* Удалённые курсоры (WebSocket presence) */}
         {Object.values(remoteCursors).map((c:any)=>(
           <div key={c.email} style={{position:"fixed",left:c.x,top:c.y,pointerEvents:"none",zIndex:500,transform:"translate(-50%,-50%)"}}>
-            <div style={{width:10,height:10,borderRadius:"50%",background:"#6366f1",border:"2px solid #fff",boxShadow:"0 2px 8px rgba(0,0,0,.3)"}}/>
-            <div style={{position:"absolute",top:12,left:12,background:"#6366f1",color:"#fff",padding:"2px 6px",borderRadius:5,fontSize:10,fontWeight:600,whiteSpace:"nowrap"}}>{c.name||c.email}</div>
+            <div style={{width:10,height:10,borderRadius:"50%",background:"var(--accent-1)",border:"2px solid #fff",boxShadow:"0 2px 8px rgba(0,0,0,.3)"}}/>
+            <div style={{position:"absolute",top:12,left:12,background:"var(--accent-1)",color:"var(--accent-on-bg,#fff)",padding:"2px 6px",borderRadius:5,fontSize:10,fontWeight:600,whiteSpace:"nowrap"}}>{c.name||c.email}</div>
           </div>
         ))}
         {showShortcuts&&(
-          <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.6)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={()=>setShowShortcuts(false)}>
-            <div className="glass-panel" style={{borderRadius:isMobile?"18px 18px 0 0":24,border:"1px solid var(--glass-border-accent,var(--border))",padding:"32px 36px",maxWidth:440,width:isMobile?"100%":"90%",maxHeight:isMobile?"78vh":"none",overflowY:isMobile?"auto":"visible",animation:"scaleIn .2s ease",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)"}} onClick={e=>e.stopPropagation()}>
+          <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.6))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={()=>setShowShortcuts(false)}>
+            <div className="glass-panel glass-panel-lg" style={{borderRadius:isMobile?"18px 18px 0 0":24,padding:"32px 36px",maxWidth:440,width:isMobile?"100%":"90%",maxHeight:isMobile?"78vh":"none",overflowY:isMobile?"auto":"visible",animation:"scaleIn .2s ease"}} onClick={e=>e.stopPropagation()}>
               <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:16}}>⌨️ Горячие клавиши</div>
               <p style={{fontSize:12,color:"var(--text4)",marginBottom:12}}>💡 {t("shortcuts_copy_hint","Выделите узел, Ctrl+C — копировать, Ctrl+V — вставить. Комбинации можно копировать из этой подсказки.")}</p>
               {[["Ctrl+Z / Ctrl+Y","Отменить / Повторить"],["Ctrl+Shift+A","Открыть AI-советник"],["Ctrl+F","Поиск шагов"],["Ctrl+A","Выбрать все узлы"],["Ctrl+C","Копировать шаг"],["Ctrl+V","Вставить шаг"],["Delete / Backspace","Удалить выбранное"],["Shift+клик","Мультивыбор узлов"],["Двойной клик на фон","Добавить шаг в точке"],["ПКМ на узле/фоне","Контекстное меню"],["Escape","Снять выбор / закрыть меню"],["← → ↑ ↓","Двигать шаг (Shift=×4)"],["Перетащить фон","Панорамировать"],["Scroll","Масштаб"],["?","Эта подсказка"]].map(row=>(
@@ -5532,57 +3810,23 @@ ${ctx}
         )}
 
         {showNotifs&&(
-          <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:260,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowNotifs(false);}}>
-            <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,560px)",maxHeight:isMobile?"78vh":"80vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
-              <div style={{padding:"16px 18px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--text4)",fontWeight:900}}>N</div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
-                  <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
-                </div>
-                <button className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-                  {t("notif_read_all","Прочитать все")}
-                </button>
-                <button onClick={()=>setShowNotifs(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
-              </div>
-              <div style={{padding:"10px 12px",overflow:"auto"}}>
-                {notifLoading&&notifs.length===0?(
-                  <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
-                ):notifs.length===0?(
-                  <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
-                ):(
-                  <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                    {notifs.map((n:any)=>(
-                      <div key={n.id} className="glass-card" style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${n.is_read?"var(--border)":"var(--glass-border-accent,var(--border))"}`,background:"var(--surface)"}}>
-                        <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                          <div style={{width:10,height:10,borderRadius:"50%",marginTop:6,background:n.is_read?"var(--border2)":"var(--accent-1)",boxShadow:n.is_read?"none":"0 0 0 3px var(--accent-soft)"}}/>
-                          <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.title||t("notification","Уведомление")}</div>
-                            {n.body&&<div style={{fontSize:12.8,color:"var(--text4)",lineHeight:1.45,whiteSpace:"pre-wrap"}}>{n.body}</div>}
-                          </div>
-                          <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
-                            {!n.is_read&&(
-                              <button className="btn-interactive" onClick={async()=>{await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-                                ✓
-                              </button>
-                            )}
-                            <button className="btn-interactive" onClick={async()=>{await deleteNotification(n.id);setNotifs(xs=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
-                              ×
-                            </button>
-                            {n.link&&(
-                              <button className="btn-interactive" onClick={async()=>{if(!n.is_read){await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));} window.location.href=n.link;}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:900}}>
-                                ↗
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <NotificationsCenterModal
+            open={showNotifs}
+            onClose={()=>setShowNotifs(false)}
+            isMobile={isMobile}
+            zIndex={260}
+            notifs={notifs}
+            setNotifs={setNotifs}
+            notifUnread={notifUnread}
+            setNotifUnread={setNotifUnread}
+            notifLoading={notifLoading}
+            lang={lang}
+            t={t}
+            loadNotifications={loadNotifications}
+            showItemMeta={false}
+            deleteGlyph="×"
+            onFollowLink={async(n:any)=>{if(n.link)window.location.href=n.link;}}
+          />
         )}
         <div className="zoom-ctrl glass-card" style={{position:"absolute",bottom:28,left:28,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"10px 16px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 8px 32px rgba(0,0,0,.2)"}}>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
@@ -5594,8 +3838,459 @@ ${ctx}
   );
 }
 
+// ── Главная навигация: Стратегия ↔ Контент-план (отдельная услуга) ──
+function MainWorkspaceNav({mode,onStrategy,onContentPlan,t,isMobile}:{mode:"strategy"|"contentPlan";onStrategy:()=>void;onContentPlan:()=>void;t:(k:string,fb?:string)=>string;isMobile:boolean}){
+  const base={padding:isMobile?"8px 12px":"9px 16px",borderRadius:10,border:"none",cursor:"pointer",fontSize:isMobile?12:13,fontWeight:800,transition:"all .18s",fontFamily:"inherit"};
+  return(
+    <div className="workspace-nav-tabs" style={{display:"inline-flex",alignItems:"center",gap:4,padding:4,borderRadius:14,background:"var(--surface)",border:"1px solid var(--border)"}} role="tablist" aria-label={t("workspace_nav_aria","Разделы приложения")}>
+      <button type="button" role="tab" aria-selected={mode==="strategy"} title={mode==="strategy"?undefined:t("nav_workspace_strategy_tip","Карты проектов, шаги, Gantt")} disabled={mode==="strategy"} onClick={onStrategy} style={{...base,background:mode==="strategy"?"var(--gradient-accent)":"transparent",color:mode==="strategy"?"var(--accent-on-bg)":"var(--text4)",boxShadow:mode==="strategy"?"0 2px 14px var(--accent-glow)":"none",opacity:mode==="strategy"?.95:1,cursor:mode==="strategy"?"default":"pointer"}}>{t("nav_workspace_strategy","Стратегия")}</button>
+      <button type="button" role="tab" aria-selected={mode==="contentPlan"} title={mode==="contentPlan"?undefined:t("nav_workspace_content_tip","Публикации и календарь по проектам")} disabled={mode==="contentPlan"} onClick={onContentPlan} style={{...base,background:mode==="contentPlan"?"var(--gradient-accent)":"transparent",color:mode==="contentPlan"?"var(--accent-on-bg)":"var(--text4)",boxShadow:mode==="contentPlan"?"0 2px 14px var(--accent-glow)":"none",opacity:mode==="contentPlan"?.95:1,cursor:mode==="contentPlan"?"default":"pointer"}}>{t("nav_workspace_content","Контент-план")}</button>
+    </div>
+  );
+}
+
+function formatNotifTimestamp(createdAt:any,lang:string){
+  if(!createdAt)return"—";
+  try{return new Date(createdAt).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});}
+  catch{return"—";}
+}
+
+/** Единая модалка списка уведомлений (хаб контент-плана, проекты, карта, список проектов). */
+function NotificationsCenterModal({open,onClose,isMobile,zIndex=220,notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,lang,t,loadNotifications,showItemMeta=true,deleteGlyph="🗑",onFollowLink}:{open:boolean;onClose:()=>void;isMobile:boolean;zIndex?:number;notifs:any[];setNotifs:(fn:any)=>void;notifUnread:number;setNotifUnread:(fn:any)=>void;notifLoading:boolean;lang:string;t:(k:string,fb?:string)=>string;loadNotifications:()=>Promise<void>;showItemMeta?:boolean;deleteGlyph?:string;onFollowLink:(n:any)=>void|Promise<void>}){
+  if(!open)return null;
+  async function markReadIfNeeded(n:any){
+    if(n.is_read)return;
+    await readNotification(n.id);
+    setNotifs((xs:any[])=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));
+    setNotifUnread((u:number)=>Math.max(0,u-1));
+  }
+  return(
+    <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.65))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div className="glass-panel glass-panel-lg" role="dialog" aria-modal="true" aria-label={t("notif_center","Уведомления")} style={{width:isMobile?"100%":"min(92vw,560px)",maxHeight:isMobile?"78vh":"80vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}} onClick={e=>e.stopPropagation()}>
+        <div style={{padding:"16px 18px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--text4)",fontWeight:900}} aria-hidden>N</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
+            <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
+          </div>
+          <button type="button" className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+            {t("notif_read_all","Прочитать все")}
+          </button>
+          <button type="button" onClick={onClose} aria-label={t("close","Закрыть")} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+        </div>
+        <div style={{padding:"10px 12px",overflow:"auto"}}>
+          {notifLoading&&notifs.length===0?(
+            <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
+          ):notifs.length===0?(
+            <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
+          ):(
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {notifs.map((n:any)=>(
+                <div key={n.id} className="glass-card" style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${n.is_read?"var(--border)":"var(--glass-border-accent,var(--border))"}`,background:"var(--surface)"}}>
+                  <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                    <div style={{width:10,height:10,borderRadius:"50%",marginTop:6,background:n.is_read?"var(--border2)":"var(--accent-1)",boxShadow:n.is_read?"none":"0 0 0 3px var(--accent-soft)"}} aria-hidden/>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.title||t("notification","Уведомление")}</div>
+                      {n.body&&<div style={{fontSize:12.8,color:"var(--text4)",lineHeight:1.45,whiteSpace:"pre-wrap"}}>{n.body}</div>}
+                      {showItemMeta&&(
+                        <div style={{fontSize:12,color:"var(--text6)",marginTop:8,display:"flex",gap:10,flexWrap:"wrap"}}>
+                          <span>{formatNotifTimestamp(n.created_at,lang)}</span>
+                          {n.type&&<span>· {String(n.type)}</span>}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
+                      {!n.is_read&&(
+                        <button type="button" className="btn-interactive" aria-label={t("notif_mark_read","Прочитано")} onClick={()=>markReadIfNeeded(n)} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>✓</button>
+                      )}
+                      <button type="button" className="btn-interactive" aria-label={t("notif_delete","Удалить уведомление")} onClick={async()=>{await deleteNotification(n.id);setNotifs((xs:any[])=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread((u:number)=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
+                        {deleteGlyph}
+                      </button>
+                      {n.link&&(
+                        <button type="button" className="btn-interactive" aria-label={t("notif_open_link","Открыть ссылку")} onClick={async()=>{await markReadIfNeeded(n);await Promise.resolve(onFollowLink(n));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:900}}>↗</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AiHubModal({open,onClose,isMobile,zIndex=230,t,hint,children}:{open:boolean;onClose:()=>void;isMobile:boolean;zIndex?:number;t:(k:string,fb?:string)=>string;hint:string;children:React.ReactNode}){
+  if(!open)return null;
+  return(
+    <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.65))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+      <div className="glass-panel glass-panel-lg" role="dialog" aria-modal="true" aria-label={t("ai_hub_title","✦ AI (единый чат)")} style={{width:isMobile?"100%":"min(92vw,720px)",maxHeight:isMobile?"86vh":"86vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}} onClick={e=>e.stopPropagation()}>
+        <div style={{padding:"14px 16px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10,background:"var(--surface)"}}>
+          <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",fontWeight:900}} aria-hidden>✦</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("ai_hub_title","✦ AI (единый чат)")}</div>
+            <div style={{fontSize:12.5,color:"var(--text5)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={hint}>{hint}</div>
+          </div>
+          <button type="button" onClick={onClose} aria-label={t("close","Закрыть")} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+        </div>
+        <div style={{padding:12}}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Хаб контент-плана: те же проекты, что и в стратегии ──
+function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,onUpgrade,onProfile,onToggleTheme,aiChatMsgs,aiChatSetMsgs,onSelectProject,onOpenMap}){
+  const{t,lang}=useLang();
+  const isMobile=useIsMobile();
+  const[projects,setProjects]=useState<any[]>([]);
+  const[mapsByProj,setMapsByProj]=useState<Record<string,any[]>>({});
+  const[loading,setLoading]=useState(true);
+  const[showAIHub,setShowAIHub]=useState(false);
+  const[showNotifs,setShowNotifs]=useState(false);
+  const[notifs,setNotifs]=useState<any[]>([]);
+  const[notifUnread,setNotifUnread]=useState(0);
+  const[notifLoading,setNotifLoading]=useState(false);
+  const tier=TIERS[user?.tier||"free"]||TIERS.free;
+
+  useEffect(()=>{(async()=>{setLoading(true);try{const ps=await getProjects(user.email);setProjects(ps);const mm:Record<string,any[]>={};for(const p of ps){mm[p.id]=await getMaps(p.id);}setMapsByProj(mm);}catch{setProjects([]);setMapsByProj({});}finally{setLoading(false);}})();},[user?.email]);
+  useEffect(()=>{document.title=t("cp_doc_hub_title","Strategy AI — Контент-план");},[t]);
+
+  async function loadNotifications(){
+    if(!API_BASE)return;
+    setNotifLoading(true);
+    try{
+      const d=await getNotifications();
+      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
+      setNotifUnread(Number(d?.unread||0));
+    }catch{}
+    setNotifLoading(false);
+  }
+  useEffect(()=>{loadNotifications();},[]);
+  useEffect(()=>{
+    if(!showNotifs)return;
+    loadNotifications();
+    const id=setInterval(()=>loadNotifications(),30000);
+    return()=>clearInterval(id);
+  },[showNotifs]);
+
+  const allMapsForAI=Object.values(mapsByProj).flatMap((arr:any)=>Array.isArray(arr)?arr:[]);
+  const aiNodes=allMapsForAI.flatMap((m:any)=>m.nodes||[]).slice(0,220);
+  const aiEdges=allMapsForAI.flatMap((m:any)=>m.edges||[]).slice(0,260);
+  const aiCtx=`Портфель (контент-план): ${(projects||[]).slice(0,20).map((p:any)=>`«${p.name||"Проект"}»`).join(", ")}. Проектов: ${(projects||[]).length}, карт загружено: ${allMapsForAI.length}.`;
+
+  return(
+    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.1) 0%,transparent 60%)",pointerEvents:"none"}}/>
+      <div className="crm-app-header" style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",flexWrap:"wrap"}}>
+        <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,minWidth:0}}>
+          <img src="/logo.png" alt="" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
+          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
+        </div>
+        {!isMobile&&(
+          <div style={{flex:1,display:"flex",justifyContent:"center",minWidth:0}}>
+            <MainWorkspaceNav mode="contentPlan" onStrategy={onBackToStrategy} onContentPlan={()=>{}} t={t} isMobile={false}/>
+          </div>
+        )}
+        <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0,flexWrap:"wrap",marginLeft:isMobile?0:"auto"}}>
+          <button type="button" onClick={onToggleTheme} title={t("toggle_theme_tip","Сменить тему оформления")} aria-label={t("toggle_theme_tip","Сменить тему оформления")} style={{padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>{theme==="dark"?"☀️":"🌙"}</span>{!isMobile&&<span style={{fontSize:12,fontWeight:700}}>{t("theme_short","Тема")}</span>}
+          </button>
+          <button type="button" className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>✦</span>{!isMobile&&<span style={{fontSize:12}}>{t("ai_hub_btn_short","AI-чат")}</span>}
+          </button>
+          {API_BASE&&(
+            <button type="button" className="btn-interactive" onClick={()=>setShowNotifs(true)} title={t("notifications_title","Уведомления")} aria-label={t("notifications_title","Уведомления")} style={{position:"relative",padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
+              <span aria-hidden>🔔</span>{!isMobile&&<span style={{fontSize:12}}>{t("notif_btn_short","Алерты")}</span>}
+              {notifUnread>0&&(
+                <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
+                  {notifUnread>99?"99+":notifUnread}
+                </span>
+              )}
+            </button>
+          )}
+          <button type="button" onClick={onProfile} title={t("profile_title","Профиль и тариф")} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
+            <div style={{width:24,height:24,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"var(--accent-on-bg)",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</div>
+            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{tier.label}</span></>}
+          </button>
+          <button type="button" onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
+        </div>
+      </div>
+      {isMobile&&(
+        <div className="crm-substrip" style={{padding:"10px 16px",display:"flex",justifyContent:"center"}}>
+          <MainWorkspaceNav mode="contentPlan" onStrategy={onBackToStrategy} onContentPlan={()=>{}} t={t} isMobile={true}/>
+        </div>
+      )}
+      <div style={{flex:1,overflowY:"auto",padding:isMobile?16:28,position:"relative",zIndex:5}}>
+        <div style={{maxWidth:980,margin:"0 auto"}}>
+          <div className="glass-card" style={{marginBottom:24,padding:isMobile?"18px 16px":"24px 28px",borderRadius:18,border:"1px solid var(--glass-border-accent,var(--border))",background:"linear-gradient(135deg,var(--accent-soft),transparent)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+              <span style={{width:44,height:44,borderRadius:14,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 20px var(--accent-glow)"}}>✍️</span>
+              <div>
+                <h1 style={{fontSize:isMobile?20:26,fontWeight:900,color:"var(--text)",letterSpacing:-.6,margin:0}}>{t("cp_hub_title","Контент-план")}</h1>
+                <div style={{fontSize:13.5,color:"var(--text4)",marginTop:4,maxWidth:560}}>{t("cp_hub_subtitle","Отдельный рабочий режим: публикации и календарь по проектам из вашей стратегии. Шаги карт подтягиваются для привязки идей.")}</div>
+                <div style={{fontSize:12,color:"var(--text5)",marginTop:10,maxWidth:640,lineHeight:1.45}}>{t("cp_hub_nav_hint","Подсказка: переключатель «Стратегия» в шапке ведёт к списку проектов; оттуда же открываются карты и шаги.")}</div>
+              </div>
+            </div>
+            {!tier.contentPlan&&(
+              <div style={{marginTop:14,padding:"12px 16px",borderRadius:12,border:"1px dashed var(--border2)",background:"var(--surface)"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("cp_hub_locked","Тариф Pro и выше")}</div>
+                <div style={{fontSize:13,color:"var(--text5)",marginBottom:10}}>{t("cp_hub_locked_hint","Контент-план как услуга доступен с Pro — AI и вы наполняете ленту в связке со стратегическими шагами.")}</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:10,alignItems:"center"}}>
+                  {onUpgrade&&<button type="button" className="btn-interactive" onClick={onUpgrade} style={{padding:"9px 18px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 14px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+                  <button type="button" className="btn-interactive" onClick={onBackToStrategy} style={{padding:"9px 16px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("cp_preview_strategy","Посмотреть стратегию")}</button>
+                </div>
+              </div>
+            )}
+          </div>
+          {loading?(
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:14}}>
+              {[1,2,3].map(i=><div key={i} style={{height:130,borderRadius:16,background:"var(--surface)",animation:"pulse 1.5s ease infinite",border:"1px solid var(--border)"}}/>)}
+            </div>
+          ):projects.length===0?(
+            <div style={{textAlign:"center",padding:48,border:"1px dashed var(--border2)",borderRadius:16,background:"var(--surface)"}}>
+              <div style={{fontSize:36,marginBottom:8}}>📂</div>
+              <div style={{fontSize:15,fontWeight:700,color:"var(--text3)"}}>{t("cp_no_projects","Пока нет проектов")}</div>
+              <div style={{fontSize:13,color:"var(--text5)",marginTop:8,maxWidth:400,marginLeft:"auto",marginRight:"auto",lineHeight:1.5}}>{t("cp_create_in_strategy","Создайте проект в разделе «Стратегия» — он появится и здесь.")}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center",marginTop:20}}>
+                <button type="button" className="btn-interactive" onClick={onBackToStrategy} style={{padding:"11px 22px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("cp_go_strategy","Перейти в стратегию")}</button>
+              </div>
+            </div>
+          ):(
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(300px,1fr))",gap:18}}>
+              {projects.map((p:any,i:number)=>{
+                const maps=mapsByProj[p.id]||[];
+                const nMaps=maps.length;
+                const nNodes=maps.reduce((acc:number,m:any)=>acc+(m.nodes?.length||0),0);
+                return(
+                  <button key={p.id} type="button" className="btn-interactive card-stagger crm-dashboard-card" disabled={!tier.contentPlan} aria-label={tier.contentPlan?t("cp_card_aria_open","Открыть контент-план проекта {name}").replace("{name}",p.name||""):t("cp_card_aria_locked","Разблокировать Pro для контент-плана")}
+                    onClick={()=>{if(!tier.contentPlan){onUpgrade&&onUpgrade();return;}onOpenProject(p,maps);}} style={{textAlign:"left",padding:"20px 22px",borderRadius:18,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",cursor:tier.contentPlan?"pointer":"not-allowed",opacity:tier.contentPlan?1:.78,display:"flex",flexDirection:"column",gap:12,animationDelay:`${Math.min(i,8)*0.05}s`}}>
+                    <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>{p.name||t("untitled","Без названия")}</div>
+                    <div style={{fontSize:12.5,color:"var(--text5)",display:"flex",gap:12,flexWrap:"wrap"}}>
+                      <span>{t("cp_stat_maps","{n} карт").replace("{n}",String(nMaps))}</span>
+                      <span>·</span>
+                      <span>{t("cp_stat_steps","{n} шагов").replace("{n}",String(nNodes))}</span>
+                    </div>
+                    <div style={{marginTop:"auto",paddingTop:4}}>
+                      <span className={tier.contentPlan?"btn-primary-glow":undefined} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:10,fontSize:12.5,fontWeight:800,border:tier.contentPlan?"none":"1px dashed var(--border2)",background:tier.contentPlan?"var(--gradient-accent)":"var(--surface2)",color:tier.contentPlan?"var(--accent-on-bg)":"var(--text4)",boxShadow:tier.contentPlan?"0 2px 12px var(--accent-glow)":"none"}}>
+                        {tier.contentPlan?<>✍️ {t("cp_open_plan_btn","Открыть план")}</>:<>🔒 {t("cp_locked_cta_short","Нужен Pro")}</>}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showNotifs&&onSelectProject&&onOpenMap&&(
+        <NotificationsCenterModal
+          open={showNotifs}
+          onClose={()=>setShowNotifs(false)}
+          isMobile={isMobile}
+          zIndex={220}
+          notifs={notifs}
+          setNotifs={setNotifs}
+          notifUnread={notifUnread}
+          setNotifUnread={setNotifUnread}
+          notifLoading={notifLoading}
+          lang={lang}
+          t={t}
+          loadNotifications={loadNotifications}
+          onFollowLink={async(n:any)=>{
+            if(!n.link)return;
+            try{
+              const u=new URL(n.link,window.location.origin);
+              const open=(u.searchParams.get("open")||"").toLowerCase();
+              const projectId=u.searchParams.get("projectId")||"";
+              const mapId=u.searchParams.get("mapId")||"";
+              const nodeId=u.searchParams.get("nodeId")||"";
+              if(open==="contentplan"&&projectId){
+                const p=projects.find((x:any)=>x.id===projectId);
+                if(p){setShowNotifs(false);onOpenProject(p,mapsByProj[projectId]||[]);return;}
+              }
+              if(open==="project"&&projectId){
+                const p=projects.find((x:any)=>x.id===projectId);
+                if(p){setShowNotifs(false);onSelectProject(p);return;}
+              }
+              if(open==="map"&&projectId&&mapId){
+                const p=projects.find((x:any)=>x.id===projectId);
+                if(p){setShowNotifs(false);onOpenMap({id:mapId},p,false,false,nodeId||null);return;}
+              }
+            }catch{}
+            window.location.href=n.link;
+          }}
+        />
+      )}
+
+      {showAIHub&&(
+        <AiHubModal open={showAIHub} onClose={()=>setShowAIHub(false)} isMobile={isMobile} t={t} hint={t("ai_hub_hint_cp","Тот же чат, что в стратегии. Контекст — проекты и карты, открытые в разделе контент-плана.")}>
+          <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={t("cp_hub_title","Контент-план")} mapName="" userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
+        </AiHubModal>
+      )}
+    </div>
+  );
+}
+
+// ── Контент-план одного проекта (полноэкранно, как карта) ──
+function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrategyProject,onLogout,onChangeTier,onUpgrade,onProfile,onToggleTheme,aiChatMsgs,aiChatSetMsgs,onSelectProject,onOpenMap,onSwitchContentPlanProject}){
+  const{t,lang}=useLang();
+  const isMobile=useIsMobile();
+  const tier=TIERS[user?.tier||"free"]||TIERS.free;
+  const[showAIHub,setShowAIHub]=useState(false);
+  const[showNotifs,setShowNotifs]=useState(false);
+  const[notifs,setNotifs]=useState<any[]>([]);
+  const[notifUnread,setNotifUnread]=useState(0);
+  const[notifLoading,setNotifLoading]=useState(false);
+  const[allProjects,setAllProjects]=useState<any[]>([]);
+
+  useEffect(()=>{document.title=`${project?.name||"Проект"} — ${t("cp_doc_suffix","Контент-план")}`;},[project?.name,t]);
+  useEffect(()=>{(async()=>{try{setAllProjects(await getProjects(user.email));}catch{setAllProjects([]);}})();},[user?.email]);
+
+  async function loadNotifications(){
+    if(!API_BASE)return;
+    setNotifLoading(true);
+    try{
+      const d=await getNotifications();
+      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
+      setNotifUnread(Number(d?.unread||0));
+    }catch{}
+    setNotifLoading(false);
+  }
+  useEffect(()=>{loadNotifications();},[]);
+  useEffect(()=>{
+    if(!showNotifs)return;
+    loadNotifications();
+    const id=setInterval(()=>loadNotifications(),30000);
+    return()=>clearInterval(id);
+  },[showNotifs]);
+
+  const aiNodes=(maps||[]).flatMap((m:any)=>m.nodes||[]).slice(0,220);
+  const aiEdges=(maps||[]).flatMap((m:any)=>m.edges||[]).slice(0,260);
+  const aiCtx=`Контент-план проекта «${project?.name||"Проект"}». Карты: ${(maps||[]).length}. Шагов стратегии в контексте: ${aiNodes.length}.`;
+
+  return(
+    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+      <div className="crm-app-header" style={{display:"flex",alignItems:"center",gap:isMobile?8:10,padding:isMobile?"10px 14px":"12px 20px",flexWrap:"wrap"}}>
+        <button type="button" onClick={onBackToHub} className="btn-interactive" title={t("cp_back_hub_tip","К списку проектов в контент-плане")} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>
+          <span aria-hidden>←</span>{isMobile?t("cp_back_hub_short","Все"):<span>{t("cp_back_hub","Все проекты")}</span>}
+        </button>
+        <div style={{flex:1,minWidth:0,maxWidth:isMobile?"100%":"none",order:isMobile?3:undefined}}>
+          <div style={{fontSize:isMobile?15:17,fontWeight:900,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>✍️ {project?.name||t("untitled","Проект")}</div>
+          <div style={{fontSize:12,color:"var(--text5)"}}>{t("cp_project_sub","Контент-план и календарь")}</div>
+        </div>
+        {!isMobile&&(
+          <div style={{flex:"1 1 200px",display:"flex",justifyContent:"center",minWidth:0,order:2}}>
+            <MainWorkspaceNav mode="contentPlan" onStrategy={onOpenStrategyProject} onContentPlan={()=>{}} t={t} isMobile={false}/>
+          </div>
+        )}
+        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginLeft:isMobile?0:"auto",order:isMobile?2:4}}>
+          <button type="button" onClick={onOpenStrategyProject} className="btn-interactive" title={t("cp_open_strategy_tip","Картами и шагами в проекте")} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:12,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>🗺</span>{isMobile?"":<span>{t("cp_open_strategy","Карты проекта")}</span>}
+          </button>
+          <button type="button" onClick={onToggleTheme} title={t("toggle_theme_tip","Сменить тему оформления")} aria-label={t("toggle_theme_tip","Сменить тему оформления")} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>{theme==="dark"?"☀️":"🌙"}</span>{!isMobile&&<span style={{fontSize:12,fontWeight:700}}>{t("theme_short","Тема")}</span>}
+          </button>
+          <button type="button" className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>✦</span>{!isMobile&&<span style={{fontSize:12}}>{t("ai_hub_btn_short","AI-чат")}</span>}
+          </button>
+          {API_BASE&&(
+            <button type="button" className="btn-interactive" onClick={()=>setShowNotifs(true)} title={t("notifications_title","Уведомления")} aria-label={t("notifications_title","Уведомления")} style={{position:"relative",padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
+              <span aria-hidden>🔔</span>{!isMobile&&<span style={{fontSize:12}}>{t("notif_btn_short","Алерты")}</span>}
+              {notifUnread>0&&(
+                <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
+                  {notifUnread>99?"99+":notifUnread}
+                </span>
+              )}
+            </button>
+          )}
+          <button type="button" onClick={onProfile} title={t("profile_title","Профиль и тариф")} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
+            <div style={{width:26,height:26,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:"var(--accent-on-bg)",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</div>
+            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{tier.label}</span></>}
+          </button>
+          <button type="button" onClick={onLogout} style={{padding:"6px 12px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
+        </div>
+      </div>
+      {isMobile&&(
+        <div className="crm-substrip" style={{padding:"8px 14px",display:"flex",justifyContent:"center"}}>
+          <MainWorkspaceNav mode="contentPlan" onStrategy={onOpenStrategyProject} onContentPlan={()=>{}} t={t} isMobile={true}/>
+        </div>
+      )}
+      <div style={{flex:1,overflow:"auto",padding:isMobile?"12px 14px":"16px 22px"}}>
+        {!tier.contentPlan?(
+          <div className="glass-card" style={{textAlign:"center",padding:48,borderRadius:16,border:"1px dashed var(--border2)"}}>
+            <div style={{fontSize:36,marginBottom:10}}>🔒</div>
+            <div style={{fontSize:15,fontWeight:800}}>{t("content_plan_locked_title","Контент-план доступен на Pro")}</div>
+            <div style={{fontSize:13,color:"var(--text5)",marginTop:10,maxWidth:380,marginLeft:"auto",marginRight:"auto",lineHeight:1.5}}>{t("content_plan_locked_hint_inline","Оформите Pro в профиле — откроются календарь, привязка к шагам стратегии и AI-подсказки по ленте.")}</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center",marginTop:20}}>
+              {onUpgrade&&<button type="button" className="btn-interactive" onClick={onUpgrade} style={{padding:"11px 22px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontWeight:800,fontSize:14,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+              <button type="button" className="btn-interactive" onClick={onOpenStrategyProject} style={{padding:"11px 18px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("cp_back_to_maps_only","Только карты проекта")}</button>
+            </div>
+          </div>
+        ):(
+          <ContentPlanTab projectId={project.id} projectName={project.name||""} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/>
+        )}
+      </div>
+
+      {showNotifs&&onSelectProject&&onOpenMap&&(
+        <NotificationsCenterModal
+          open={showNotifs}
+          onClose={()=>setShowNotifs(false)}
+          isMobile={isMobile}
+          zIndex={220}
+          notifs={notifs}
+          setNotifs={setNotifs}
+          notifUnread={notifUnread}
+          setNotifUnread={setNotifUnread}
+          notifLoading={notifLoading}
+          lang={lang}
+          t={t}
+          loadNotifications={loadNotifications}
+          onFollowLink={async(n:any)=>{
+            if(!n.link)return;
+            try{
+              const u=new URL(n.link,window.location.origin);
+              const open=(u.searchParams.get("open")||"").toLowerCase();
+              const projectId=u.searchParams.get("projectId")||"";
+              const mapId=u.searchParams.get("mapId")||"";
+              const nodeId=u.searchParams.get("nodeId")||"";
+              if(open==="contentplan"&&projectId&&onSwitchContentPlanProject){
+                if(projectId===project?.id){setShowNotifs(false);return;}
+                const p=allProjects.find((x:any)=>x.id===projectId);
+                if(p){
+                  setShowNotifs(false);
+                  const ms=await getMaps(p.id);
+                  onSwitchContentPlanProject(p,Array.isArray(ms)?ms:[]);
+                  return;
+                }
+              }
+              if(open==="project"&&projectId){
+                const p=allProjects.find((x:any)=>x.id===projectId);
+                if(p){setShowNotifs(false);onSelectProject(p);return;}
+              }
+              if(open==="map"&&projectId&&mapId){
+                const p=allProjects.find((x:any)=>x.id===projectId);
+                if(p){setShowNotifs(false);onOpenMap({id:mapId},p,false,false,nodeId||null);return;}
+              }
+            }catch{}
+            window.location.href=n.link;
+          }}
+        />
+      )}
+
+      {showAIHub&&(
+        <AiHubModal open={showAIHub} onClose={()=>setShowAIHub(false)} isMobile={isMobile} t={t} hint={t("ai_hub_hint_cp_project","Контекст — карты и шаги текущего проекта в режиме контент-плана.")}>
+          <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={project?.name||""} mapName={t("cp_doc_suffix","Контент-план")} userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
+        </AiHubModal>
+      )}
+    </div>
+  );
+}
+
 // ── ProjectsPage ──
-function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onProfile,theme,onToggleTheme,aiChatMsgs,aiChatSetMsgs}){
+function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onProfile,theme,onToggleTheme,aiChatMsgs,aiChatSetMsgs,onOpenContentPlanHub,onOpenContentPlanProject}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
   const ROLES=getROLES(t);
@@ -5696,18 +4391,22 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
 
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
-      <style>{CSS}</style>
-      {toast&&(
+{toast&&(
         <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"14px 24px",borderRadius:14,border:`1px solid ${toast.type==="error"?"rgba(239,68,68,.4)":"rgba(16,185,129,.4)"}`,background:toast.type==="error"?"rgba(239,68,68,.15)":"rgba(16,185,129,.15)",color:toast.type==="error"?"#f87171":"#34d399",fontSize:14,fontWeight:700,boxShadow:"0 8px 32px rgba(0,0,0,.3)",animation:"slideUp .3s ease",backdropFilter:"blur(12px)"}}>
           {toast.type==="error"?"⚠ ":"✓ "}{toast.msg}
         </div>
       )}
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
-      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
-        <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:0}}>
+      <div className="crm-app-header" style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",flexWrap:"wrap"}}>
+        <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}>
           <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
           <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
         </div>
+        {!isMobile&&onOpenContentPlanHub&&(
+          <div style={{flex:1,display:"flex",justifyContent:"center",minWidth:0}}>
+            <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={false}/>
+          </div>
+        )}
         <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0}}>
           <button onClick={onToggleTheme} style={{padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{theme==="dark"?"☀️":"🌙"}</button>
           <button className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)") } style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800}}>
@@ -5732,6 +4431,11 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
       </div>
       <div style={{flex:1,overflowY:"auto",padding:isMobile?16:24,position:"relative",zIndex:5}}>
         <div style={{maxWidth:960,margin:"0 auto"}}>
+          {isMobile&&onOpenContentPlanHub&&(
+            <div style={{marginBottom:18}}>
+              <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={true}/>
+            </div>
+          )}
           <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:20,marginBottom:32}}>
             <div>
               <h1 style={{fontSize:isMobile?18:22,fontWeight:900,color:"var(--text)",letterSpacing:-.5,marginBottom:2}}>{t("your_projects","Мои проекты")}</h1>
@@ -5829,8 +4533,8 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                 const roleLabel=ROLES[myRole]||"";
                 const icon=((p.name||"P").trim()[0]||"P").toUpperCase();
                 return(
-                  <div key={p.id} onClick={()=>onSelectProject(p)} className="icard card-stagger card-interactive"
-                    style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(0,0,0,.04)",animationDelay:`${i*0.06}s`}}>
+                  <div key={p.id} onClick={()=>onSelectProject(p)} className="icard card-stagger card-interactive crm-dashboard-card"
+                    style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",animationDelay:`${i*0.06}s`}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:14}}>
                       <div style={{width:40,height:40,borderRadius:12,background:"var(--surface2)",border:"1px solid var(--glass-border-accent,var(--border))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,color:"var(--text2)",fontWeight:900,letterSpacing:.3}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
@@ -5883,126 +4587,69 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
       {delId&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message="Все карты и данные проекта будут удалены без возможности восстановления." confirmLabel="Удалить" onConfirm={()=>deleteProj(delId)} onCancel={()=>setDelId(null)} danger={true}/>}
 
       {showNotifs&&(
-        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:220,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowNotifs(false);}}>
-          <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,560px)",maxHeight:isMobile?"78vh":"80vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
-            <div style={{padding:"16px 18px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--text4)",fontWeight:900}}>N</div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
-                <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
-              </div>
-              <button className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-                {t("notif_read_all","Прочитать все")}
-              </button>
-              <button onClick={()=>setShowNotifs(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
-            </div>
-            <div style={{padding:"10px 12px",overflow:"auto"}}>
-              {notifLoading&&notifs.length===0?(
-                <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
-              ):notifs.length===0?(
-                <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
-              ):(
-                <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                  {notifs.map((n:any)=>(
-                    <div key={n.id} className="glass-card" style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${n.is_read?"var(--border)":"var(--glass-border-accent,var(--border))"}`,background:"var(--surface)"}}>
-                      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                        <div style={{width:10,height:10,borderRadius:"50%",marginTop:6,background:n.is_read?"var(--border2)":"var(--accent-1)",boxShadow:n.is_read?"none":"0 0 0 3px var(--accent-soft)"}}/>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.title||t("notification","Уведомление")}</div>
-                          {n.body&&<div style={{fontSize:12.8,color:"var(--text4)",lineHeight:1.45,whiteSpace:"pre-wrap"}}>{n.body}</div>}
-                          <div style={{fontSize:12,color:"var(--text6)",marginTop:8,display:"flex",gap:10,flexWrap:"wrap"}}>
-                            <span>{n.created_at?new Date(n.created_at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"—"}</span>
-                            {n.type&&<span>· {String(n.type)}</span>}
-                          </div>
-                        </div>
-                        <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
-                          {!n.is_read&&(
-                            <button className="btn-interactive" onClick={async()=>{await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-                              ✓
-                            </button>
-                          )}
-                          <button className="btn-interactive" onClick={async()=>{await deleteNotification(n.id);setNotifs(xs=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
-                            🗑
-                          </button>
-                          {n.link&&(
-                            <button
-                              className="btn-interactive"
-                              onClick={async()=>{
-                                if(!n.is_read){
-                                  await readNotification(n.id);
-                                  setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));
-                                  setNotifUnread(u=>Math.max(0,u-1));
-                                }
-                                try{
-                                  const u=new URL(n.link,window.location.origin);
-                                  const open=(u.searchParams.get("open")||"").toLowerCase();
-                                  const projectId=u.searchParams.get("projectId")||"";
-                                  const mapId=u.searchParams.get("mapId")||"";
-                                  const nodeId=u.searchParams.get("nodeId")||"";
-                                  if(open==="project"&&projectId){
-                                    const p=projects.find((x:any)=>x.id===projectId);
-                                    if(p){setShowNotifs(false);onSelectProject(p);return;}
-                                  }
-                                  if(open==="map"&&projectId&&mapId){
-                                    const p=projects.find((x:any)=>x.id===projectId);
-                                    if(p){
-                                      setShowNotifs(false);
-                                      onOpenMap({id:mapId},p,false,false,nodeId||null);
-                                      return;
-                                    }
-                                  }
-                                }catch{}
-                                window.location.href=n.link;
-                              }}
-                              style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:900}}
-                            >
-                              ↗
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <NotificationsCenterModal
+          open={showNotifs}
+          onClose={()=>setShowNotifs(false)}
+          isMobile={isMobile}
+          zIndex={220}
+          notifs={notifs}
+          setNotifs={setNotifs}
+          notifUnread={notifUnread}
+          setNotifUnread={setNotifUnread}
+          notifLoading={notifLoading}
+          lang={lang}
+          t={t}
+          loadNotifications={loadNotifications}
+          onFollowLink={async(n:any)=>{
+            if(!n.link)return;
+            try{
+              const u=new URL(n.link,window.location.origin);
+              const open=(u.searchParams.get("open")||"").toLowerCase();
+              const projectId=u.searchParams.get("projectId")||"";
+              const mapId=u.searchParams.get("mapId")||"";
+              const nodeId=u.searchParams.get("nodeId")||"";
+              if(open==="contentplan"){
+                if(!projectId&&onOpenContentPlanHub){setShowNotifs(false);onOpenContentPlanHub();return;}
+                if(projectId&&onOpenContentPlanProject){
+                  const p=projects.find((x:any)=>x.id===projectId);
+                  if(p){setShowNotifs(false);onOpenContentPlanProject(p,(maps as any)[p.id]||[]);return;}
+                }
+              }
+              if(open==="project"&&projectId){
+                const p=projects.find((x:any)=>x.id===projectId);
+                if(p){setShowNotifs(false);onSelectProject(p);return;}
+              }
+              if(open==="map"&&projectId&&mapId){
+                const p=projects.find((x:any)=>x.id===projectId);
+                if(p){setShowNotifs(false);onOpenMap({id:mapId},p,false,false,nodeId||null);return;}
+              }
+            }catch{}
+            window.location.href=n.link;
+          }}
+        />
       )}
 
       {showAIHub&&(
-        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:230,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowAIHub(false);}}>
-          <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,720px)",maxHeight:isMobile?"86vh":"86vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
-            <div style={{padding:"14px 16px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10,background:"var(--surface)"}}>
-              <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",fontWeight:900}}>✦</div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("ai_hub_title","✦ AI (единый чат)")}</div>
-                <div style={{fontSize:12.5,color:"var(--text5)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t("ai_hub_hint","Этот чат общий для всего приложения. Здесь AI видит портфель проектов и загруженные карты.")}</div>
-              </div>
-              <button onClick={()=>setShowAIHub(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
-            </div>
-            <div style={{padding:12}}>
-              <AiPanel
-                embedded={true}
-                isMobile={isMobile}
-                nodes={aiNodes}
-                edges={aiEdges}
-                ctx={aiCtx}
-                tier={user?.tier||"free"}
-                projectName={t("all_projects","Все проекты")}
-                mapName=""
-                userName={user?.name||user?.email||""}
-                msgs={aiChatMsgs||[]}
-                onMsgsChange={aiChatSetMsgs||(()=>{})}
-                onAddNode={()=>{}}
-                onClose={()=>{}}
-                externalMsgs={[]}
-                onClearExternal={()=>{}}
-                onError={()=>{}}
-              />
-            </div>
-          </div>
-        </div>
+        <AiHubModal open={showAIHub} onClose={()=>setShowAIHub(false)} isMobile={isMobile} t={t} hint={t("ai_hub_hint","Этот чат общий для всего приложения. Здесь AI видит портфель проектов и загруженные карты.")}>
+          <AiPanel
+            embedded={true}
+            isMobile={isMobile}
+            nodes={aiNodes}
+            edges={aiEdges}
+            ctx={aiCtx}
+            tier={user?.tier||"free"}
+            projectName={t("all_projects","Все проекты")}
+            mapName=""
+            userName={user?.name||user?.email||""}
+            msgs={aiChatMsgs||[]}
+            onMsgsChange={aiChatSetMsgs||(()=>{})}
+            onAddNode={()=>{}}
+            onClose={()=>{}}
+            externalMsgs={[]}
+            onClearExternal={()=>{}}
+            onError={()=>{}}
+          />
+        </AiHubModal>
       )}
     </div>
   );
@@ -6035,6 +4682,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
   const [filterStatus,setFilterStatus]=useState<string>("all");
   const [viewMode,setViewMode]=useState<"calendar"|"map"|"list"|"tree">("calendar");
   const [aiSuggesting,setAiSuggesting]=useState(false);
+  const [pendingDeleteId,setPendingDeleteId]=useState<string|null>(null);
   const isMobile=useIsMobile();
   const treePrefsKey=`sa_cp_tree_${projectId}`;
   const [treeExpandedAll,setTreeExpandedAll]=useState<Record<string,boolean>>({});
@@ -6071,10 +4719,16 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
     setEditId(null);
   }
   function removeItem(id:string){
+    setPendingDeleteId(id);
+  }
+  function confirmRemoveItem(){
+    const id=pendingDeleteId;
+    if(!id)return;
+    setPendingDeleteId(null);
     const list=items.filter((x:any)=>x.id!==id);
     setItems(list);
     saveContentPlan(projectId,list);
-    setEditId(null);
+    if(editId===id)setEditId(null);
   }
   async function aiSuggest(){
     if(allNodes.length===0)return;
@@ -6103,22 +4757,28 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
 
   function ContentMap({filtered,CHANNEL_LABEL,CONTENT_TYPES,CONTENT_STATUSES,setEditId,removeItem,t,isMobile}:any){
     return(
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(280px,1fr))",gap:20,padding:"4px 0"}}>
+      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(280px,1fr))",gap:20,padding:"4px 0"}} role="region" aria-label={t("content_map_aria","Карточки публикаций")}>
         {filtered.map((it:any)=>(
-          <div key={it.id} className="glass-card btn-interactive" onClick={()=>setEditId(it.id)} style={{padding:"20px 18px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",cursor:"pointer",display:"flex",flexDirection:"column",gap:10,minHeight:120,transition:"all .2s",position:"relative"}}
+          <div key={it.id} className="glass-card btn-interactive" role="button" tabIndex={0}
+            aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
+            onClick={()=>setEditId(it.id)}
+            onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
+            style={{padding:"20px 18px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",cursor:"pointer",display:"flex",flexDirection:"column",gap:10,minHeight:120,transition:"all .2s",position:"relative",outline:"none"}}
             onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 12px 32px var(--accent-glow)";}}
-            onMouseOut={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
+            onMouseOut={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}
+            onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
+            onBlur={e=>{e.currentTarget.style.boxShadow="";}}>
             <div style={{fontSize:14,fontWeight:800,color:"var(--text)",lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}} title={it.title}>{it.title||t("untitled","Без названия")}</div>
             <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap",marginTop:"auto"}}>
               <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
               <span>·</span>
               <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
             </div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4,gap:8}}>
               <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:11.5,fontWeight:700}}>
                 {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
               </div>
-              <button onClick={e=>{e.stopPropagation();removeItem(it.id);}} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+              <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
             </div>
           </div>
         ))}
@@ -6144,7 +4804,13 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
             <div style={{fontSize:13,fontWeight:800,color:"var(--text4)",marginBottom:12,textTransform:"uppercase",letterSpacing:.5}}>📋 {t("content_no_date","Без даты")}</div>
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
               {nodate.map((it:any)=>(
-                <div key={it.id} className="btn-interactive" style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}} onClick={()=>setEditId(it.id)}>
+                <div key={it.id} className="btn-interactive" role="button" tabIndex={0}
+                  aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
+                  style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",outline:"none"}}
+                  onClick={()=>setEditId(it.id)}
+                  onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
+                  onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
+                  onBlur={e=>{e.currentTarget.style.boxShadow="none";}}>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
                     <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -6157,7 +4823,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                   <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
                     {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
                   </div>
-                  <button onClick={e=>{e.stopPropagation();removeItem(it.id);}} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
                 </div>
               ))}
             </div>
@@ -6168,7 +4834,13 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
             <div style={{fontSize:13,fontWeight:800,color:"var(--accent-1)",marginBottom:12}}>📅 {fmtDate(d)}</div>
             <div style={{display:"flex",flexDirection:"column",gap:8}}>
               {byDate[d].map((it:any)=>(
-                <div key={it.id} className="btn-interactive" style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}} onClick={()=>setEditId(it.id)}>
+                <div key={it.id} className="btn-interactive" role="button" tabIndex={0}
+                  aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
+                  style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",outline:"none"}}
+                  onClick={()=>setEditId(it.id)}
+                  onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
+                  onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
+                  onBlur={e=>{e.currentTarget.style.boxShadow="none";}}>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
                     <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -6181,7 +4853,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                   <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
                     {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
                   </div>
-                  <button onClick={e=>{e.stopPropagation();removeItem(it.id);}} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12}}>🗑</button>
+                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
                 </div>
               ))}
             </div>
@@ -6213,7 +4885,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
             <div style={{fontSize:13,fontWeight:800,color:"var(--text)"}}>🌳 {t("content_tree_title","Дерево контент‑плана")}</div>
             <div style={{fontSize:12,color:"var(--text4)",marginTop:2}}>{t("content_tree_hint","Проект → канал → статус → публикации. Нажмите на карточку, чтобы редактировать.")}</div>
           </div>
-          <button className="btn-interactive" onClick={()=>setEditId("new")} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:12.5,fontWeight:800,whiteSpace:"nowrap"}}>
+          <button type="button" className="btn-interactive" onClick={()=>setEditId("new")} title={t("add_content_item_tip","Новая запись в плане")} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:12.5,fontWeight:800,whiteSpace:"nowrap",boxShadow:"0 2px 12px var(--accent-glow)"}}>
             {t("add_content_item","+ Публикация")}
           </button>
         </div>
@@ -6226,8 +4898,8 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                 <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{CHANNEL_LABEL[ch]||ch}</div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <div style={{fontSize:12,color:"var(--text5)",fontWeight:700}}>{Object.values(byChannel[ch]).reduce((s:any,a:any)=>s+(a?.length||0),0)} шт.</div>
-                <button className="btn-interactive" onClick={(e)=>{e.preventDefault();e.stopPropagation();setTreeCollapsed(p=>({channels:{...p.channels,[ch]:!p.channels[ch]},statuses:p.statuses}));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+                <div style={{fontSize:12,color:"var(--text5)",fontWeight:700}}>{t("content_tree_count","{n} шт.").replace("{n}",String(Object.values(byChannel[ch]).reduce((s:any,a:any)=>s+(a?.length||0),0)))}</div>
+                <button type="button" className="btn-interactive" aria-expanded={!treeCollapsed.channels[ch]} aria-label={treeCollapsed.channels[ch]?t("content_tree_expand_ch","Развернуть канал {ch}").replace("{ch}",CHANNEL_LABEL[ch]||ch):t("content_tree_collapse_ch","Свернуть канал {ch}").replace("{ch}",CHANNEL_LABEL[ch]||ch)} onClick={(e)=>{e.preventDefault();e.stopPropagation();setTreeCollapsed(p=>({channels:{...p.channels,[ch]:!p.channels[ch]},statuses:p.statuses}));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800,minWidth:36}}>
                   {treeCollapsed.channels[ch]?"▸":"▾"}
                 </button>
               </div>
@@ -6243,7 +4915,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
                         <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
                           <div style={{fontSize:12.5,fontWeight:900,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{STATUS_LABEL[st]||st}</div>
-                          <button className="btn-interactive" onClick={(e)=>{e.preventDefault();e.stopPropagation();setTreeCollapsed(p=>({channels:p.channels,statuses:{...p.statuses,[statusKey]:!p.statuses[statusKey]}}));}} style={{padding:"4px 8px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:900,flexShrink:0}}>
+                          <button type="button" className="btn-interactive" aria-expanded={!collapsed} aria-label={collapsed?t("content_tree_expand_st","Развернуть: {st}").replace("{st}",STATUS_LABEL[st]||st):t("content_tree_collapse_st","Свернуть: {st}").replace("{st}",STATUS_LABEL[st]||st)} onClick={(e)=>{e.preventDefault();e.stopPropagation();setTreeCollapsed(p=>({channels:p.channels,statuses:{...p.statuses,[statusKey]:!p.statuses[statusKey]}}));}} style={{padding:"4px 8px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:900,flexShrink:0,minWidth:32}}>
                             {collapsed?"▸":"▾"}
                           </button>
                         </div>
@@ -6252,7 +4924,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                       {!collapsed&&(
                         <div className="collapse-wrap collapse-in" style={{display:"flex",flexDirection:"column",gap:8}}>
                           {byChannel[ch][st].slice(0,treeExpandedAll[statusKey]?999:(isMobile?6:8)).map((it:any,ii:number)=>(
-                            <button key={it.id} className="btn-interactive" onClick={()=>setEditId(it.id)} style={{textAlign:"left",padding:"10px 12px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer"}}>
+                            <button key={it.id} type="button" className="btn-interactive" onClick={()=>setEditId(it.id)} aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))} style={{textAlign:"left",padding:"10px 12px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",width:"100%"}}>
                               <div style={{fontSize:12.5,fontWeight:900,marginBottom:3,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{it.title||t("untitled","Без названия")}</div>
                               <div style={{fontSize:11.5,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap",lineHeight:1.4}}>
                                 {it.scheduledDate&&<span>📅 {it.scheduledDate}</span>}
@@ -6262,7 +4934,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                             </button>
                           ))}
                           {byChannel[ch][st].length>(isMobile?6:8)&&!treeExpandedAll[statusKey]&&(
-                            <button onClick={(e)=>{e.stopPropagation();setTreeExpandedAll(p=>({...p,[statusKey]:true}));}} style={{fontSize:12,color:"var(--accent-1)",padding:"6px 10px",border:"none",background:"transparent",cursor:"pointer",fontWeight:700,textAlign:"left"}}>
+                            <button type="button" className="btn-interactive" onClick={(e)=>{e.stopPropagation();setTreeExpandedAll(p=>({...p,[statusKey]:true}));}} title={t("content_show_all_tip","Показать все публикации в этой группе")} style={{fontSize:12,color:"var(--accent-1)",padding:"8px 10px",borderRadius:8,border:"1px dashed var(--border2)",background:"var(--surface2)",cursor:"pointer",fontWeight:700,textAlign:"left",width:"100%"}}>
                               {t("content_show_all","Показать все")} (+{byChannel[ch][st].length-(isMobile?6:8)})
                             </button>
                           )}
@@ -6282,52 +4954,79 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
     );
   }
 
+  const viewModes:[typeof viewMode,string,string][]=[
+    ["calendar","📅",t("content_view_calendar","Календарь")],
+    ["map","🗺",t("content_view_map","Карта")],
+    ["tree","🌳",t("content_view_tree","Дерево")],
+    ["list","≡",t("content_view_list","Список")],
+  ];
+  const viewTips:Record<string,string>={
+    calendar:t("content_view_tip_calendar","По датам публикации и без даты"),
+    map:t("content_view_tip_map","Карточки по каналам и типам"),
+    tree:t("content_view_tip_tree","Иерархия канал → статус"),
+    list:t("content_view_tip_list","Компактный список со статусами"),
+  };
+
   return(
     <div>
       <div style={{marginBottom:20}}>
         <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:4}}>✍️ {t("content_plan","Контент-план")}</div>
-        <div style={{fontSize:13,color:"var(--text4)"}}>{t("content_plan_intro","Планируйте посты, видео и рассылки. Переключайте вид: календарь по датам, по каналам или список.")}</div>
+        <div style={{fontSize:13,color:"var(--text4)",lineHeight:1.45}}>{t("content_plan_intro","Планируйте посты, видео и рассылки. Переключайте вид: календарь по датам, по каналам или список.")}</div>
       </div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16,flexWrap:"wrap"}}>
-        <div style={{flex:1}}/>
-        <div style={{display:"flex",gap:6,padding:4,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface2)"}}>
-          <button onClick={()=>setViewMode("calendar")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="calendar"?"var(--accent-soft)":"transparent",color:viewMode==="calendar"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-            📅 {t("content_view_calendar","Календарь")}
-          </button>
-          <button onClick={()=>setViewMode("map")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="map"?"var(--accent-soft)":"transparent",color:viewMode==="map"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-            🗺 {t("content_view_map","Карта")}
-          </button>
-          <button onClick={()=>setViewMode("tree")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="tree"?"var(--accent-soft)":"transparent",color:viewMode==="tree"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-            🌳 {t("content_view_tree","Дерево")}
-          </button>
-          <button onClick={()=>setViewMode("list")} className="btn-interactive" style={{padding:"7px 10px",borderRadius:10,border:"none",background:viewMode==="list"?"var(--accent-soft)":"transparent",color:viewMode==="list"?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-            ≡ {t("content_view_list","Список")}
-          </button>
+      <div style={{display:"flex",alignItems:"flex-start",gap:12,marginBottom:14,flexWrap:"wrap"}}>
+        <div style={{flex:"1 1 220px",minWidth:0}}>
+          <div style={{fontSize:11,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.06,marginBottom:8}}>{t("content_view_group_label","Как показать план")}</div>
+          <div role="tablist" aria-label={t("content_view_group_aria","Режим отображения контент-плана")} style={{display:"flex",gap:6,padding:4,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface2)",flexWrap:isMobile?"nowrap":"wrap",overflowX:isMobile?"auto":"visible",WebkitOverflowScrolling:"touch",maxWidth:"100%"}}>
+            {viewModes.map(([id,icon,label])=>(
+              <button key={id} type="button" role="tab" aria-selected={viewMode===id} aria-pressed={viewMode===id} title={viewTips[id]} onClick={()=>setViewMode(id)} className="btn-interactive" style={{padding:isMobile?"8px 12px":"7px 12px",borderRadius:10,border:"none",background:viewMode===id?"var(--accent-soft)":"transparent",color:viewMode===id?"var(--accent-1)":"var(--text4)",cursor:"pointer",fontSize:isMobile?11.5:12,fontWeight:800,whiteSpace:"nowrap",flexShrink:0,boxShadow:viewMode===id?"inset 0 0 0 1px var(--glass-border-accent,var(--border))":"none"}}>
+                <span aria-hidden>{icon}</span> {label}
+              </button>
+            ))}
+          </div>
         </div>
-        {allNodes.length>0&&(
-          <button onClick={aiSuggest} disabled={aiSuggesting} style={{padding:"7px 14px",borderRadius:9,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:aiSuggesting?"wait":"pointer",fontSize:13,fontWeight:700}}>
-            {aiSuggesting?"…":t("content_ai_suggest","✨ Предложить по стратегии")}
-          </button>
-        )}
-        <button className="btn-interactive" onClick={()=>setEditId("new")} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
+        <div style={{display:"flex",flexDirection:"column",gap:8,alignItems:isMobile?"stretch":"flex-end",flex:"0 1 auto"}}>
+          <div style={{fontSize:11,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.06,alignSelf:isMobile?"flex-start":"flex-end"}}>{t("content_actions_label","Действия")}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,justifyContent:isMobile?"stretch":"flex-end"}}>
+            {allNodes.length>0?(
+              <button type="button" onClick={aiSuggest} disabled={aiSuggesting} title={t("content_ai_suggest_tip","Сгенерировать идеи из названий шагов на картах")} style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:aiSuggesting?"wait":"pointer",fontSize:13,fontWeight:700,opacity:aiSuggesting?.85:1}}>
+                {aiSuggesting?"…":t("content_ai_suggest","✨ Предложить по стратегии")}
+              </button>
+            ):(
+              <button type="button" disabled title={t("content_ai_suggest_disabled","Сначала добавьте шаги на картах проекта — тогда AI сможет предложить темы")} style={{padding:"8px 14px",borderRadius:10,border:"1px dashed var(--border2)",background:"var(--surface)",color:"var(--text5)",cursor:"not-allowed",fontSize:12.5,fontWeight:600,textAlign:"left",maxWidth:280}}>
+                {t("content_ai_suggest_need_steps","✨ AI: нужны шаги на карте")}
+              </button>
+            )}
+            <button type="button" className="btn-interactive" onClick={()=>setEditId("new")} title={t("add_content_item_tip","Новая запись в плане: пост, рассылка, видео…")} style={{padding:"8px 18px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
+          </div>
+        </div>
       </div>
-      <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
-        {["all",...CONTENT_STATUSES.map(s=>s.id)].map(s=>(
-          <button key={s} onClick={()=>setFilterStatus(s)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${filterStatus===s?"var(--accent-1)":"var(--border)"}`,background:filterStatus===s?"var(--accent-soft)":"var(--surface)",color:filterStatus===s?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>
-            {s==="all"?t("all_statuses","Все"):t(CONTENT_STATUSES.find(x=>x.id===s)?.labelKey||"")}
-          </button>
-        ))}
+      <div style={{marginBottom:14}}>
+        <div style={{fontSize:11,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.06,marginBottom:8}}>{t("content_filter_status_label","Фильтр по статусу")}</div>
+        <div role="group" aria-label={t("content_filter_status_aria","Статус публикации")} style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {["all",...CONTENT_STATUSES.map(s=>s.id)].map(s=>(
+            <button key={s} type="button" aria-pressed={filterStatus===s} onClick={()=>setFilterStatus(s)} style={{padding:"7px 14px",borderRadius:10,border:`1px solid ${filterStatus===s?"var(--accent-1)":"var(--border)"}`,background:filterStatus===s?"var(--accent-soft)":"var(--surface)",color:filterStatus===s?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12.5,fontWeight:filterStatus===s?800:600,transition:"border-color .15s, background .15s"}}>
+              {s==="all"?t("all_statuses","Все"):t(CONTENT_STATUSES.find(x=>x.id===s)?.labelKey||"")}
+            </button>
+          ))}
+        </div>
       </div>
       {loading?(
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:12}}>
           {[1,2,3].map(i=><div key={i} style={{height:100,borderRadius:14,background:"var(--surface)",animation:"pulse 1.5s ease infinite",border:"1px solid var(--border)"}}/>)}
         </div>
+      ):filtered.length===0&&items.length>0?(
+        <div className="glass-card" style={{textAlign:"center",padding:"40px 24px",border:"1px dashed var(--border2)",borderRadius:16}}>
+          <div style={{fontSize:32,marginBottom:8}}>🔍</div>
+          <div style={{fontSize:14,fontWeight:800,color:"var(--text)",marginBottom:6}}>{t("content_filter_empty_title","Нет публикаций с таким статусом")}</div>
+          <div style={{fontSize:13,color:"var(--text5)",marginBottom:18,maxWidth:360,marginLeft:"auto",marginRight:"auto",lineHeight:1.5}}>{t("content_filter_empty_desc","Смените фильтр или добавьте публикацию в нужном статусе.")}</div>
+          <button type="button" className="btn-interactive" onClick={()=>setFilterStatus("all")} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("content_filter_reset","Показать все статусы")}</button>
+        </div>
       ):filtered.length===0?(
-        <div className="glass-card" style={{textAlign:"center",padding:"44px 24px",border:"1px dashed var(--border2)"}}>
+        <div className="glass-card" style={{textAlign:"center",padding:"44px 24px",border:"1px dashed var(--border2)",borderRadius:16}}>
           <div style={{fontSize:36,marginBottom:10}}>✍️</div>
           <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_empty_title","Планируйте публикации")}</div>
-          <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:320,margin:"0 auto 16px"}}>{t("content_plan_empty_desc","Добавьте посты, видео и рассылки. AI предложит идеи на основе шагов вашей стратегии.")}</div>
-          <button onClick={()=>setEditId("new")} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("add_content_item","+ Публикация")}</button>
+          <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:320,margin:"0 auto 16px",lineHeight:1.5}}>{t("content_plan_empty_desc","Добавьте посты, видео и рассылки. AI предложит идеи на основе шагов вашей стратегии.")}</div>
+          <button type="button" className="btn-interactive" onClick={()=>setEditId("new")} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
         </div>
       ):(
         viewMode==="calendar"
@@ -6353,8 +5052,8 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                   <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",border:`1px solid ${it.status==="published"?"rgba(16,185,129,.3)":it.status==="scheduled"?"var(--glass-border-accent,var(--border))":"var(--border)"}`,color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
                     {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft")}
                   </div>
-                  <button onClick={()=>setEditId(it.id)} className="btn-interactive" style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:700}}>✏️</button>
-                  <button onClick={()=>removeItem(it.id)} className="btn-interactive" style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:800}}>🗑</button>
+                  <button type="button" onClick={()=>setEditId(it.id)} className="btn-interactive" title={t("edit","Редактировать")} aria-label={t("content_edit_item_aria","Редактировать: {title}").replace("{title}",(it.title||t("untitled","Без названия")).slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:700}}>✏️</button>
+                  <button type="button" onClick={()=>removeItem(it.id)} className="btn-interactive" title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",(it.title||"").slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:800}}>🗑</button>
                 </div>
               ))}
             </div>
@@ -6363,6 +5062,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
 
       {(editId==="new"||editingItem)&&(
         <ContentPlanItemModal
+          formKey={editId||""}
           item={editingItem||{title:"",type:"post",channel:"blog",status:"draft",brief:"",scheduledDate:"",strategyStepId:"",strategyStepTitle:""}}
           allNodes={allNodes}
           t={t}
@@ -6371,11 +5071,22 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
           onClose={()=>setEditId(null)}
         />
       )}
+
+      {pendingDeleteId&&(
+        <ConfirmDialog
+          title={t("content_delete_confirm_title","Удалить из контент-плана?")}
+          message={t("content_delete_confirm_msg","Запись «{title}» будет удалена без восстановления.").replace("{title}",String((items.find((x:any)=>x.id===pendingDeleteId)?.title)||t("untitled","Без названия")).slice(0,120))}
+          confirmLabel={t("delete","Удалить")}
+          onConfirm={confirmRemoveItem}
+          onCancel={()=>setPendingDeleteId(null)}
+          danger={true}
+        />
+      )}
     </div>
   );
 }
 
-function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
+function ContentPlanItemModal({formKey,item,allNodes,t,theme,onSave,onClose}:{formKey:string;item:any;allNodes:any[];t:(k:string,fb?:string)=>string;theme:string;onSave:(item:any)=>void;onClose:()=>void}){
   const [title,setTitle]=useState(item.title||"");
   const [type,setType]=useState(item.type||"post");
   const [channel,setChannel]=useState(item.channel||"blog");
@@ -6383,54 +5094,80 @@ function ContentPlanItemModal({item,allNodes,t,theme,onSave,onClose}){
   const [brief,setBrief]=useState(item.brief||"");
   const [scheduledDate,setScheduledDate]=useState(item.scheduledDate||"");
   const [stepId,setStepId]=useState(item.strategyStepId||"");
-  useEffect(()=>{setTitle(item.title||"");setType(item.type||"post");setChannel(item.channel||"blog");setStatus(item.status||"draft");setBrief(item.brief||"");setScheduledDate(item.scheduledDate||"");setStepId(item.strategyStepId||"");},[item?.id]);
+  const [dirty,setDirty]=useState(false);
+  const [showDiscard,setShowDiscard]=useState(false);
+  useEffect(()=>{
+    setTitle(item.title||"");
+    setType(item.type||"post");
+    setChannel(item.channel||"blog");
+    setStatus(item.status||"draft");
+    setBrief(item.brief||"");
+    setScheduledDate(item.scheduledDate||"");
+    setStepId(item.strategyStepId||"");
+    setDirty(false);
+  },[formKey,item?.id]);
   const stepOptions=allNodes.map((n:any)=>({id:n.id,title:n.title,mapName:n.mapName}));
-  const selectedStep=stepOptions.find((s:any)=>s.id===stepId);
+  function requestClose(){
+    if(dirty){setShowDiscard(true);return;}
+    onClose();
+  }
   function handleSave(){
     const stepTitle=stepOptions.find((s:any)=>s.id===stepId)?.title||"";
     onSave({title:title.trim()||"Без названия",type,channel,status,brief,scheduledDate,strategyStepId:stepId||"",strategyStepTitle:stepTitle});
   }
   return(
-    <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <div className="glass-panel" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.4)",padding:"24px"}} onClick={e=>e.stopPropagation()}>
+    <>
+    <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)requestClose();}}>
+      <div className="glass-panel glass-panel-lg" data-theme={theme} style={{width:"min(96vw,440px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20,padding:"24px"}} onClick={e=>e.stopPropagation()}>
         <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:18}}>✍️ {item.id?t("edit","Редактировать"):t("add_content_item","Публикация")}</div>
-        <input placeholder={t("title","Название")} value={title} onChange={e=>setTitle(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:10,outline:"none",fontFamily:"inherit"}}/>
+        <input placeholder={t("title","Название")} value={title} onChange={e=>{setTitle(e.target.value);setDirty(true);}} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:10,outline:"none",fontFamily:"inherit"}}/>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_type","Тип контента")}</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
-          {CONTENT_TYPES.map(x=>(<button key={x.id} onClick={()=>setType(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${type===x.id?"var(--accent-1)":"var(--border)"}`,background:type===x.id?"var(--accent-soft)":"var(--surface)",color:type===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}} role="group" aria-label={t("content_label_type","Тип контента")}>
+          {CONTENT_TYPES.map(x=>(<button key={x.id} type="button" aria-pressed={type===x.id} onClick={()=>{setType(x.id);setDirty(true);}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${type===x.id?"var(--accent-1)":"var(--border)"}`,background:type===x.id?"var(--accent-soft)":"var(--surface)",color:type===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:type===x.id?700:600}}>{t(x.labelKey)}</button>))}
         </div>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_channel","Канал публикации")}</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
-          {CONTENT_CHANNELS.map(x=>(<button key={x.id} onClick={()=>setChannel(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${channel===x.id?"var(--accent-1)":"var(--border)"}`,background:channel===x.id?"var(--accent-soft)":"var(--surface)",color:channel===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}} role="group" aria-label={t("content_label_channel","Канал публикации")}>
+          {CONTENT_CHANNELS.map(x=>(<button key={x.id} type="button" aria-pressed={channel===x.id} onClick={()=>{setChannel(x.id);setDirty(true);}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${channel===x.id?"var(--accent-1)":"var(--border)"}`,background:channel===x.id?"var(--accent-soft)":"var(--surface)",color:channel===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:channel===x.id?700:600}}>{t(x.labelKey)}</button>))}
         </div>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_status","Статус")}</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
-          {CONTENT_STATUSES.map(x=>(<button key={x.id} onClick={()=>setStatus(x.id)} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${status===x.id?"var(--accent-1)":"var(--border)"}`,background:status===x.id?"var(--accent-soft)":"var(--surface)",color:status===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:600}}>{t(x.labelKey)}</button>))}
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}} role="group" aria-label={t("content_label_status","Статус")}>
+          {CONTENT_STATUSES.map(x=>(<button key={x.id} type="button" aria-pressed={status===x.id} onClick={()=>{setStatus(x.id);setDirty(true);}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${status===x.id?"var(--accent-1)":"var(--border)"}`,background:status===x.id?"var(--accent-soft)":"var(--surface)",color:status===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:status===x.id?700:600}}>{t(x.labelKey)}</button>))}
         </div>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("scheduled_date_short","Дата публикации")}</div>
-        <input type="date" value={scheduledDate} onChange={e=>setScheduledDate(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}/>
+        <input type="date" value={scheduledDate} onChange={e=>{setScheduledDate(e.target.value);setDirty(true);}} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}/>
         {stepOptions.length>0&&(
           <>
             <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_link_step","Связать с шагом стратегии")}</div>
-            <select value={stepId} onChange={e=>setStepId(e.target.value)} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}>
+            <select value={stepId} onChange={e=>{setStepId(e.target.value);setDirty(true);}} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}>
               <option value="">— Не привязан</option>
               {stepOptions.map((s:any)=>(<option key={s.id} value={s.id}>{s.title} {s.mapName?`(${s.mapName})`:""}</option>))}
             </select>
           </>
         )}
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("brief","Тезис / описание")}</div>
-        <textarea placeholder={t("brief","Краткое описание или тезис публикации")} value={brief} onChange={e=>setBrief(e.target.value)} rows={3} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:18,outline:"none",resize:"vertical",fontFamily:"inherit"}}/>
-        <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
-          <button onClick={onClose} style={{padding:"10px 20px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("cancel","Отмена")}</button>
-          <button onClick={handleSave} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("save","Сохранить")}</button>
+        <textarea placeholder={t("brief","Краткое описание или тезис публикации")} value={brief} onChange={e=>{setBrief(e.target.value);setDirty(true);}} rows={3} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:18,outline:"none",resize:"vertical",fontFamily:"inherit"}}/>
+        <div style={{display:"flex",gap:10,justifyContent:"flex-end",flexWrap:"wrap"}}>
+          <button type="button" onClick={requestClose} className="btn-interactive" style={{padding:"10px 20px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("cancel","Отмена")}</button>
+          <button type="button" onClick={handleSave} className="btn-interactive" style={{padding:"10px 22px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("save","Сохранить")}</button>
         </div>
       </div>
     </div>
+    {showDiscard&&(
+      <ConfirmDialog
+        title={t("content_discard_title","Закрыть без сохранения?")}
+        message={t("content_discard_msg","Изменения в публикации будут потеряны.")}
+        confirmLabel={t("discard","Не сохранять")}
+        danger={false}
+        onConfirm={()=>{setShowDiscard(false);onClose();}}
+        onCancel={()=>setShowDiscard(false)}
+      />
+    )}
+    </>
   );
 }
 
 // ── ProjectDetail ──
-function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier,aiChatMsgs,aiChatSetMsgs}){
+function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier,onUpgrade,onOpenContentPlanHub,onOpenContentPlanProject,aiChatMsgs,aiChatSetMsgs}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
   const[maps,setMaps]=useState([]);
@@ -6576,10 +5313,10 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     const prog=ns.length?Math.round(ns.reduce((s,n)=>s+(n.progress||0),0)/ns.length):0;
     const overdue=ns.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
     return(
-      <div className="card-stagger card-interactive" style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",position:"relative",animationDelay:`${staggerIndex*0.05}s`,boxShadow:"0 2px 12px rgba(0,0,0,.06)"}}
+      <div className="card-stagger card-interactive crm-dashboard-card" style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",position:"relative",animationDelay:`${staggerIndex*0.05}s`}}
         onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}
-        onMouseOver={e=>{e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.background="var(--card-hover,var(--surface))";e.currentTarget.style.boxShadow="var(--glass-shadow-accent, none),0 12px 32px rgba(0,0,0,.12)";}}
-        onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";e.currentTarget.style.background="var(--card)";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.06)";}}>
+        onMouseOver={e=>{e.currentTarget.style.borderColor="var(--accent-1)";}}
+        onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
           <div style={{width:34,height:34,borderRadius:9,background:"var(--accent-soft)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,border:"1px solid var(--glass-border-accent,var(--border))"}}>
             {isSc?"⎇":"🗺️"}
@@ -6609,28 +5346,41 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
 
   return(
     <div data-theme={theme} style={{minHeight:"100vh",background:"var(--bg)",color:"var(--text)",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
-      <style>{CSS}</style>
-      {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+{toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
 
       {/* Header */}
-      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"16px 24px",display:"flex",alignItems:"center",gap:isMobile?12:16}}>
-        <button onClick={onBack} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text3)";}}>←</button>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:isMobile?15:16,fontWeight:900,color:"var(--text)",letterSpacing:-.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{proj.name||"Проект"}</div>
-          <div style={{fontSize:isMobile?12:13,color:"var(--text5)",marginTop:2}}>{regularMaps.length} карт • {scenarios.length} сцен. • {(proj.members||[]).length} уч.</div>
+      <div className="crm-app-header" style={{padding:isMobile?"12px 16px":"16px 24px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:isMobile?"1 1 100%":"1 1 auto",maxWidth:isMobile?"100%":"44%"}}>
+          <button onClick={onBack} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text3)";}}>←</button>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:isMobile?15:16,fontWeight:900,color:"var(--text)",letterSpacing:-.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{proj.name||"Проект"}</div>
+            <div style={{fontSize:isMobile?12:13,color:"var(--text5)",marginTop:2}}>{regularMaps.length} карт • {scenarios.length} сцен. • {(proj.members||[]).length} уч.</div>
+          </div>
         </div>
-        <button onClick={onToggleTheme} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>{theme==="dark"?"☀️":"🌙"}</button>
-        {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
-        <button onClick={onProfile} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
+        {!isMobile&&onOpenContentPlanHub&&(
+          <div style={{flex:"1 1 180px",display:"flex",justifyContent:"center",minWidth:0}}>
+            <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={false}/>
+          </div>
+        )}
+        <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,marginLeft:isMobile?"auto":undefined}}>
+          <button onClick={onToggleTheme} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>{theme==="dark"?"☀️":"🌙"}</button>
+          {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
+          <button onClick={onProfile} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
+        </div>
       </div>
+      {isMobile&&onOpenContentPlanHub&&(
+        <div className="crm-substrip" style={{padding:"10px 16px"}}>
+          <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={true}/>
+        </div>
+      )}
 
       {/* Stats bar */}
       {totalNodes>0&&(
-        <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"14px 24px",display:"flex",gap:isMobile?16:32,flexWrap:"wrap"}}>
+        <div className="crm-stats-bar" style={{padding:isMobile?"12px 16px":"14px 24px",display:"flex",gap:isMobile?16:32,flexWrap:"wrap"}}>
           {[
-            {label:"Шагов всего",val:totalNodes,color:"#6366f1"},
+            {label:"Шагов всего",val:totalNodes,color:"var(--accent-1)"},
             {label:"Завершено",val:`${doneNodes} (${totalNodes?Math.round(doneNodes/totalNodes*100):0}%)`,color:"#10b981"},
-            {label:t("avg_prog","Средний прогресс"),val:`${avgProgress}%`,color:"#8b5cf6"},
+            {label:t("avg_prog","Средний прогресс"),val:`${avgProgress}%`,color:"var(--accent-2)"},
             ...(overdueCount>0?[{label:t("overdue","Просрочено"),val:overdueCount,color:"#ef4444"}]:[]),
           ].map(s=>(
             <div key={s.label}>
@@ -6642,7 +5392,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       )}
 
       {/* Tabs */}
-      <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:isMobile?"0 16px":"0 24px",background:"var(--bg2)",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+      <div className="crm-tabs-bar" style={{display:"flex",gap:0,padding:isMobile?"0 16px":"0 24px",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],["ai",isMobile?"✦":"✦ "+t("project_ai_tab","AI")],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
           <button key={k} onClick={()=>setTab(k)} style={{padding:isMobile?"12px 14px":"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:isMobile?13:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s",flexShrink:0}}>{lbl}</button>
         ))}
@@ -6686,7 +5436,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               </div>
               {canEdit&&(
                 tier.scenarios===0?(
-                  <button onClick={()=>onChangeTier&&onChangeTier()} style={{padding:"7px 14px",borderRadius:9,border:"1px solid rgba(245,158,11,.25)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:13,fontWeight:700}}>🔒 Pro+</button>
+                  <button onClick={()=>onUpgrade&&onUpgrade()} style={{padding:"7px 14px",borderRadius:9,border:"1px solid rgba(245,158,11,.25)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:13,fontWeight:700}}>🔒 Pro+</button>
                 ):(
                   <button className="btn-interactive" onClick={tryCreateScenario} style={{padding:"7px 16px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>+ {t("new_scenario","Новый сценарий")}</button>
                 )
@@ -6697,7 +5447,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 <div style={{fontSize:36,marginBottom:10}}>⎇</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("scenarios_pro","Сценарии доступны с Pro")}</div>
                 <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:300,margin:"0 auto 16px"}}>Создавайте альтернативные планы: «Что если потеряем ключевого клиента?» или «Что если вырастем ×3 за год?»</div>
-                {onChangeTier&&<button className="btn-interactive" onClick={onChangeTier} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+                {onUpgrade&&<button className="btn-interactive" onClick={onUpgrade} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
               </div>
             ):scenarios.length===0?(
               <div style={{textAlign:"center",padding:"50px 20px",border:"1px dashed var(--border2)",borderRadius:16}}>
@@ -6722,10 +5472,21 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 <div style={{fontSize:36,marginBottom:10}}>✍️</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_locked_title","Контент-план доступен на Pro")}</div>
                 <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:360,margin:"0 auto 16px"}}>{t("content_plan_pro_only","Приложение использует знания о вашем бизнесе и стратегии для планирования постов.")}</div>
-                {onChangeTier&&<button className="btn-interactive" onClick={onChangeTier} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+                {onUpgrade&&<button className="btn-interactive" onClick={onUpgrade} style={{padding:"9px 20px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
               </div>
             ):(
-              <ContentPlanTab projectId={proj.id} projectName={proj.name||"Проект"} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/>
+              <>
+                {onOpenContentPlanProject&&(
+                  <div className="glass-card" style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:14,padding:"14px 18px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"linear-gradient(135deg,var(--accent-soft),transparent)",marginBottom:20}}>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",marginBottom:4}}>{t("cp_workspace_banner_title","Отдельный раздел «Контент-план»")}</div>
+                      <div style={{fontSize:12.5,color:"var(--text5)",lineHeight:1.45}}>{t("cp_workspace_banner_hint","Тот же план в полноэкранном режиме — как карта: удобно вести ленту и календарь без переключения вкладок.")}</div>
+                    </div>
+                    <button type="button" className="btn-interactive" onClick={()=>onOpenContentPlanProject(proj,maps)} style={{padding:"10px 18px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",boxShadow:"0 2px 14px var(--accent-glow)",flexShrink:0}}>{t("cp_open_workspace","Открыть раздел →")}</button>
+                  </div>
+                )}
+                <ContentPlanTab projectId={proj.id} projectName={proj.name||"Проект"} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/>
+              </>
             )}
           </div>
         )}
@@ -6794,7 +5555,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 <button className="btn-interactive" onClick={addMember} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add","Добавить")}</button>
               </div>
             )}
-            {(proj.members||[]).length>=tier.users&&<div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",padding:"8px",borderRadius:8,border:"1px dashed var(--border2)"}}>{t("member_limit","Лимит участников для {plan}: {n}.").replace("{plan}",tier.label).replace("{n}",String(tier.users))} <span onClick={onChangeTier} style={{color:"var(--accent-2)",cursor:"pointer",fontWeight:700}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</span></div>}
+            {(proj.members||[]).length>=tier.users&&<div style={{fontSize:13.5,color:"var(--text5)",textAlign:"center",padding:"8px",borderRadius:8,border:"1px dashed var(--border2)"}}>{t("member_limit","Лимит участников для {plan}: {n}.").replace("{plan}",tier.label).replace("{n}",String(tier.users))} <span onClick={()=>onUpgrade&&onUpgrade()} style={{color:"var(--accent-2)",cursor:"pointer",fontWeight:700}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</span></div>}
           </div>
         )}
 
@@ -6812,7 +5573,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                   <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{TIERS[user.tier]?.label||"Free"}</div>
                   <div style={{fontSize:13,color:"var(--text5)"}}>до {fmt(tier.maps)} карт • {fmt(tier.scenarios)} сценариев • {fmt(tier.users)} участников</div>
                 </div>
-                {onChangeTier&&<button className="btn-interactive" onClick={onChangeTier} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("upgrade_plan","Улучшить")}</button>}
+                {onUpgrade&&<button className="btn-interactive" onClick={onUpgrade} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("upgrade_plan","Улучшить")}</button>}
               </div>
             </div>
             {isOwner&&(
@@ -6829,82 +5590,43 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       {delProjConfirm&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message={t("confirm_delete_proj","Все карты и данные проекта будут удалены безвозвратно.")} confirmLabel={t("delete","Удалить")} onConfirm={async()=>{await deleteProject(proj.id);setDelProjConfirm(false);onBack();}} onCancel={()=>setDelProjConfirm(false)} danger={true}/>}
 
       {showNotifs&&(
-        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:220,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)setShowNotifs(false);}}>
-          <div className="glass-panel" style={{width:isMobile?"100%":"min(92vw,560px)",maxHeight:isMobile?"78vh":"80vh",borderRadius:isMobile?"18px 18px 0 0":22,overflow:"hidden",border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 26px 70px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",animation:"scaleIn .2s ease"}}>
-            <div style={{padding:"16px 18px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:30,height:30,borderRadius:10,background:"var(--surface2)",border:"1px solid var(--border)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--text4)",fontWeight:900}}>N</div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
-                <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
-              </div>
-              <button className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-                {t("notif_read_all","Прочитать все")}
-              </button>
-              <button onClick={()=>setShowNotifs(false)} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
-            </div>
-            <div style={{padding:"10px 12px",overflow:"auto"}}>
-              {notifLoading&&notifs.length===0?(
-                <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
-              ):notifs.length===0?(
-                <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
-              ):(
-                <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                  {notifs.map((n:any)=>(
-                    <div key={n.id} className="glass-card" style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${n.is_read?"var(--border)":"var(--glass-border-accent,var(--border))"}`,background:"var(--surface)"}}>
-                      <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-                        <div style={{width:10,height:10,borderRadius:"50%",marginTop:6,background:n.is_read?"var(--border2)":"var(--accent-1)",boxShadow:n.is_read?"none":"0 0 0 3px var(--accent-soft)"}}/>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontSize:13.5,fontWeight:900,color:"var(--text)",marginBottom:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{n.title||t("notification","Уведомление")}</div>
-                          {n.body&&<div style={{fontSize:12.8,color:"var(--text4)",lineHeight:1.45,whiteSpace:"pre-wrap"}}>{n.body}</div>}
-                          <div style={{fontSize:12,color:"var(--text6)",marginTop:8,display:"flex",gap:10,flexWrap:"wrap"}}>
-                            <span>{n.created_at?new Date(n.created_at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"—"}</span>
-                            {n.type&&<span>· {String(n.type)}</span>}
-                          </div>
-                        </div>
-                        <div style={{display:"flex",flexDirection:"column",gap:6,flexShrink:0}}>
-                          {!n.is_read&&(
-                            <button className="btn-interactive" onClick={async()=>{await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
-                              ✓
-                            </button>
-                          )}
-                          <button className="btn-interactive" onClick={async()=>{await deleteNotification(n.id);setNotifs(xs=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread(u=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
-                            ×
-                          </button>
-                          {n.link&&(
-                            <button className="btn-interactive" onClick={async()=>{
-                              if(!n.is_read){await readNotification(n.id);setNotifs(xs=>xs.map((x:any)=>x.id===n.id?{...x,is_read:true}:x));setNotifUnread(u=>Math.max(0,u-1));}
-                              try{
-                                const u=new URL(n.link,window.location.origin);
-                                const open=(u.searchParams.get("open")||"").toLowerCase();
-                                const projectId=u.searchParams.get("projectId")||"";
-                                const mapId=u.searchParams.get("mapId")||"";
-                                const nodeId=u.searchParams.get("nodeId")||"";
-                                if(open==="map"&&projectId&&mapId&&projectId===proj.id){
-                                  setShowNotifs(false);
-                                  onOpenMap({id:mapId},proj,false,false,nodeId||null);
-                                  return;
-                                }
-                              }catch{}
-                              window.location.href=n.link;
-                            }} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:900}}>
-                              ↗
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <NotificationsCenterModal
+          open={showNotifs}
+          onClose={()=>setShowNotifs(false)}
+          isMobile={isMobile}
+          zIndex={220}
+          notifs={notifs}
+          setNotifs={setNotifs}
+          notifUnread={notifUnread}
+          setNotifUnread={setNotifUnread}
+          notifLoading={notifLoading}
+          lang={lang}
+          t={t}
+          loadNotifications={loadNotifications}
+          deleteGlyph="×"
+          onFollowLink={async(n:any)=>{
+            if(!n.link)return;
+            try{
+              const u=new URL(n.link,window.location.origin);
+              const open=(u.searchParams.get("open")||"").toLowerCase();
+              const projectId=u.searchParams.get("projectId")||"";
+              const mapId=u.searchParams.get("mapId")||"";
+              const nodeId=u.searchParams.get("nodeId")||"";
+              if(open==="map"&&projectId&&mapId&&projectId===proj.id){
+                setShowNotifs(false);
+                onOpenMap({id:mapId},proj,false,false,nodeId||null);
+                return;
+              }
+            }catch{}
+            window.location.href=n.link;
+          }}
+        />
       )}
 
       {/* Scenario choice modal */}
       {showScChoice&&(
-        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:160,backdropFilter:"blur(14px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)setShowScChoice(false);}}>
-          <div className="glass-panel" style={{width:"min(95vw,460px)",borderRadius:22,border:"1px solid var(--glass-border-accent,var(--border))",overflow:"hidden",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.6)",animation:"scaleIn .2s ease"}}>
+        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.8))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:160,backdropFilter:"blur(14px)",animation:"fadeIn .2s ease"}} onClick={e=>{if(e.target===e.currentTarget)setShowScChoice(false);}}>
+          <div className="glass-panel glass-panel-xl" style={{width:"min(95vw,460px)",borderRadius:22,overflow:"hidden",animation:"scaleIn .2s ease"}}>
             <div style={{padding:"18px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:30,height:30,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>⎇</div>
               <div style={{fontSize:14,fontWeight:800,color:"var(--text)",flex:1}}>{t("new_scenario","Новый сценарий")}</div>
@@ -7131,9 +5853,8 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
   const iS={width:"100%",padding:"8px 11px",fontSize:13.5,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:9,color:"var(--text)",outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"};
 
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.82)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",animation:"fadeIn .2s ease",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <style>{CSS}</style>
-      <div style={{width:isMobile?"100%":"min(95vw,860px)",maxHeight:isMobile?"88vh":"90vh",margin:isMobile?0:"auto",background:"var(--bg2)",borderRadius:isMobile?"18px 18px 0 0":22,border:"1px solid var(--border)",boxShadow:"0 40px 80px rgba(0,0,0,.7)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.82))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",animation:"fadeIn .2s ease",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+<div className="glass-panel glass-panel-xl" style={{width:isMobile?"100%":"min(95vw,860px)",maxHeight:isMobile?"88vh":"90vh",margin:isMobile?0:"auto",borderRadius:isMobile?"18px 18px 0 0":22,display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{width:32,height:32,borderRadius:9,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>⎇</div>
@@ -7209,15 +5930,14 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
   const canUse=tierData.templates;
   const[selected,setSelected]=useState(null);
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
-      <style>{CSS}</style>
-      <div className="glass-panel" style={{width:isMobile?"100%":"min(95vw,760px)",maxHeight:isMobile?"88vh":"86vh",borderRadius:isMobile?"18px 18px 0 0":22,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.5)",display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.8))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:180,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+<div className="glass-panel glass-panel-xl" style={{width:isMobile?"100%":"min(95vw,760px)",maxHeight:isMobile?"88vh":"86vh",borderRadius:isMobile?"18px 18px 0 0":22,display:"flex",flexDirection:"column",overflow:"hidden",animation:"scaleIn .2s ease"}}>
         <div style={{padding:"18px 22px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:12}}>
           <div style={{flex:1}}>
-            <div style={{fontSize:15,fontWeight:900,color:"var(--text)"}}>📋 Шаблоны карт</div>
+            <div style={{fontSize:15,fontWeight:900,color:"var(--text)"}}>{t("map_templates_modal_title","📋 Шаблоны карт")}</div>
             <div style={{fontSize:13,color:"var(--text4)",marginTop:2}}>{t("choose_template","Выберите готовую стратегическую карту или начните с нуля")}</div>
           </div>
-          {!canUse&&<div style={{padding:"4px 10px",borderRadius:8,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13,fontWeight:700}}>Team+ тариф</div>}
+          {!canUse&&<div style={{padding:"4px 10px",borderRadius:8,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13,fontWeight:700}}>{t("templates_team_tier_badge","Team+ тариф")}</div>}
           <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
         </div>
         <div style={{flex:1,overflowY:"auto",padding:"18px 22px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12,alignContent:"start"}}>
@@ -7232,10 +5952,10 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
                 <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",marginBottom:4}}>{tmpl.name.split(" ").slice(1).join(" ")}</div>
                 <div style={{fontSize:13,color:"var(--text4)",marginBottom:8}}>{tmpl.desc}</div>
                 <div style={{display:"flex",gap:6}}>
-                  <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{tmpl.nodes.length} шагов</div>
-                  <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{tmpl.edges.length} связей</div>
+                  <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{t("map_template_n_steps","{n} шагов").replace("{n}",String(tmpl.nodes.length))}</div>
+                  <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{t("map_template_n_edges","{n} связей").replace("{n}",String(tmpl.edges.length))}</div>
                 </div>
-                {locked&&<div style={{marginTop:6,fontSize:13,color:"#f59e0b",fontWeight:700}}>🔒 Team+</div>}
+                {locked&&<div style={{marginTop:6,fontSize:13,color:"#f59e0b",fontWeight:700}}>{t("templates_locked_team","🔒 Team+")}</div>}
               </div>
             );
           })}
@@ -7277,12 +5997,12 @@ function MapTour({onDone}){
   },[isLast,step]);
   return(
     <div style={{position:"fixed",inset:0,zIndex:9999,pointerEvents:"none"}}>
-      <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.45)",backdropFilter:"blur(3px)",pointerEvents:"all"}} onClick={()=>isLast?onDone():setStep(st=>st+1)}/>
-      <div className="glass-panel" style={{position:"absolute",bottom:"50%",left:"50%",transform:"translate(-50%,50%)",width:400,borderRadius:22,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 32px 80px rgba(0,0,0,.6)",padding:"26px 28px",pointerEvents:"all",animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)",zIndex:10000}}>
+      <div style={{position:"absolute",inset:0,background:"var(--tour-overlay-bg,rgba(0,0,0,.45))",backdropFilter:"blur(3px)",pointerEvents:"all"}} onClick={()=>isLast?onDone():setStep(st=>st+1)}/>
+      <div className="glass-panel glass-panel-xl" style={{position:"absolute",bottom:"50%",left:"50%",transform:"translate(-50%,50%)",width:400,borderRadius:22,padding:"26px 28px",pointerEvents:"all",animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)",zIndex:10000}}>
         {/* Progress */}
         <div style={{display:"flex",gap:4,marginBottom:20}}>
           {TOUR_STEPS.map((_,i)=>(
-            <div key={i} onClick={()=>setStep(i)} style={{flex:i===step?3:1,height:3,borderRadius:2,background:i===step?"var(--accent-1)":i<step?"rgba(99,102,241,.5)":"var(--border)",cursor:"pointer",transition:"all .3s"}}/>
+            <div key={i} onClick={()=>setStep(i)} style={{flex:i===step?3:1,height:3,borderRadius:2,background:i===step?"var(--accent-1)":i<step?"rgba(var(--accent-rgb),0.45)":"var(--border)",cursor:"pointer",transition:"all .3s"}}/>
           ))}
         </div>
         <div style={{fontSize:32,marginBottom:14,textAlign:"center"}}>{s.icon}</div>
@@ -7303,9 +6023,9 @@ function MapTour({onDone}){
 
 
 // ── SimulationModal ──
-function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
+function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}){
   const{t}=useLang();
-  const STATUS=getSTATUS(t);
+  const STATUS=statusMap||getSTATUS(t);
   const[params,setParams]=useState({plannedResult:"",plannedMetric:"",revenue:500000,team:5,budget:50000,timeline:"6 месяцев"});
   const[secMapId,setSecMapId]=useState("");
   const[simState,setSimState]=useState("idle");
@@ -7422,9 +6142,8 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
   const fi={width:"100%",padding:"8px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"};
 
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.9)",display:"flex",flexDirection:"column",zIndex:300,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}}>
-      <style>{CSS}</style>
-      <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.9))",display:"flex",flexDirection:"column",zIndex:300,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}}>
+<div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <div style={{fontSize:15,fontWeight:900,color:"var(--text)",flex:1}}>⎇ Симуляция · {mapData.name||"Карта"}</div>
         {isRunning&&<div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--text3)"}}><div style={{width:10,height:10,borderRadius:"50%",background:"#10b981",animation:"pulse 1s infinite"}}/>{progress}% завершено</div>}
         {isFinished&&final&&<div style={{fontSize:13,color:final.avg>=60?"#10b981":"#f59e0b",fontWeight:700}}>{final.planAchievement.toUpperCase()} · {final.avg}%</div>}
@@ -7460,7 +6179,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
             </div>
           )}
           <div style={{display:"flex",flexDirection:"column",gap:6,marginTop:4}}>
-            {!isRunning&&!isPaused&&<button onClick={startSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#0ea5e9,#6366f1)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Запустить</button>}
+            {!isRunning&&!isPaused&&<button onClick={startSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,var(--info),var(--accent-1))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Запустить</button>}
             {isRunning&&<button onClick={pauseSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.08)",color:"#f59e0b",fontSize:13,fontWeight:700,cursor:"pointer"}}>⏸ Пауза</button>}
             {isPaused&&<button onClick={resumeSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#10b981,#0ea5e9)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Продолжить</button>}
             {(isRunning||isPaused)&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#ef4444",fontSize:13,fontWeight:700,cursor:"pointer"}}>■ Стоп</button>}
@@ -7559,10 +6278,10 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark"}){
         <div style={{width:300,flexShrink:0,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
           <div style={{flex:1,overflowY:"auto",padding:"12px",display:"flex",flexDirection:"column",gap:6}}>
             {log.map((entry,i)=>{
-              const colors={sys:"var(--text4)",start:"#0ea5e9",plan:"#8b5cf6",step:"var(--text3)",result:"#f59e0b",ai:"#a5b4fc",user:"var(--text)"};
+              const colors={sys:"var(--text4)",start:"#0ea5e9",plan:"var(--accent-2)",step:"var(--text3)",result:"#f59e0b",ai:"var(--accent-2)",user:"var(--text)"};
               return <div key={i} style={{fontSize:13.5,lineHeight:1.6,color:colors[entry.role]||"var(--text3)",fontFamily:entry.role==="result"||entry.role==="start"?"'JetBrains Mono',monospace":"inherit"}}>{entry.text}</div>;
             })}
-            {aiLoad&&<div style={{display:"flex",gap:4,padding:"6px 0"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"#6366f1",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>}
+            {aiLoad&&<div style={{display:"flex",gap:4,padding:"6px 0"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>}
             <div ref={logRef}/>
           </div>
           <div style={{padding:"10px 12px",borderTop:"1px solid var(--border)",flexShrink:0}}>
@@ -7651,14 +6370,13 @@ ${mapHint} X:150–900, Y:80–520.`;
   }
   const pct=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",display:"flex",flexDirection:"column",zIndex:250,backdropFilter:"blur(20px)",animation:"fadeIn .2s ease"}}>
-      <style>{CSS}</style>
-      <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.92))",display:"flex",flexDirection:"column",zIndex:250,backdropFilter:"blur(20px)",animation:"fadeIn .2s ease"}}>
+<div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>✦</div>
         <div style={{flex:1}}>
           <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>AI создаёт карту · {project?.name}</div>
           <div style={{height:3,borderRadius:2,background:"var(--surface2)",marginTop:4,overflow:"hidden"}}>
-            <div style={{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#6366f1,#8b5cf6)",borderRadius:2,transition:"width .4s"}}/>
+            <div style={{height:"100%",width:pct+"%",background:"var(--gradient-accent)",borderRadius:2,transition:"width .4s"}}/>
           </div>
         </div>
         <button onClick={()=>setShowSkipConfirm(true)} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>{t("skip","Пропустить")}</button>
@@ -7688,7 +6406,7 @@ ${mapHint} X:150–900, Y:80–520.`;
         </div>
       )}
       {showSkipConfirm&&(
-        <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
+        <div style={{position:"absolute",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
           <div style={{background:"var(--bg2)",borderRadius:16,padding:"24px 28px",maxWidth:360,border:"1px solid var(--border)",animation:"scaleIn .2s ease",textAlign:"center"}}>
             <div style={{fontSize:24,marginBottom:12}}>⚠️</div>
             <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:8}}>Пропустить интервью?</div>
@@ -7750,15 +6468,14 @@ function SplashScreen({onDone,theme,authReady=false}){
   },[]);
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg,#070b14)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
-      <style>{CSS}</style>
-      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
+<div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{animation:"float 3s ease infinite",marginBottom:32}}>
         <img src="/logo.png" alt="Strategy AI" style={{width:96,height:96,objectFit:"contain"}}/>
       </div>
       <div style={{fontSize:36,fontWeight:900,color:"var(--text,#e2e8f0)",letterSpacing:-1.5,marginBottom:6,animation:"slideUp .5s ease"}}>Strategy AI</div>
       
       <div style={{width:240,height:3,borderRadius:2,background:"rgba(99,102,241,.15)",overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#6366f1,#8b5cf6)",borderRadius:2,transition:"width .1s linear"}}/>
+        <div style={{height:"100%",width:`${pct}%`,background:"var(--gradient-accent)",borderRadius:2,transition:"width .1s linear"}}/>
       </div>
       <div style={{marginTop:10,fontSize:13,color:"var(--text4)",fontWeight:600}}>{pct < 100 ? t("loading",t("loading_short","Загрузка…")) : "Готово ✓"}</div>
     </div>
@@ -7907,178 +6624,16 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
   const MARQUEE_ITEMS=[t("lf1_title","Стратегические карты"),t("lf2_title","AI-консультант"),t("lf3_title","Симуляция сценариев"),t("lf4_title","Gantt-таймлайн"),t("health_score","Health Score"),t("lf5_title","Командная работа"),"McKinsey-level AI"];
 
   const tag=(label)=>(
-    <div style={{display:"flex",alignItems:"center",gap:12,fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"#6366f1",letterSpacing:3,textTransform:"uppercase",marginBottom:22}}>
-      <div style={{width:18,height:1,background:"#6366f1"}}/>{label}
+    <div style={{display:"flex",alignItems:"center",gap:12,fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"var(--accent-1)",letterSpacing:3,textTransform:"uppercase",marginBottom:22}}>
+      <div style={{width:18,height:1,background:"var(--accent-1)"}}/>{label}
     </div>
   );
 
   const sH2=(html)=><h2 style={{fontSize:"clamp(40px,5.5vw,68px)",fontWeight:900,letterSpacing:-2.5,lineHeight:1.0,color:"#f0eeff",marginBottom:18}} dangerouslySetInnerHTML={{__html:html}}/>;
 
-  const LANDING_CSS=`
-    body{overflow:auto!important;}
-    .lpage{font-family:'Plus Jakarta Sans',sans-serif;background:#03030a;color:#f0eeff;overflow-x:hidden;width:100%;min-height:100vh;}
-    /* scroll reveal — elements are VISIBLE by default, animation is additive */
-    .lrv{animation:lrvUp 1s cubic-bezier(.16,1,.3,1) both;}
-    .lrv-l{animation:lrvLeft 1s cubic-bezier(.16,1,.3,1) both;}
-    .lrv-r{animation:lrvRight 1s cubic-bezier(.16,1,.3,1) both;}
-    .lrv-sc{animation:lrvScale 1s cubic-bezier(.16,1,.3,1) both;}
-    @keyframes lrvUp{from{opacity:0;transform:translateY(44px)}to{opacity:1;transform:none}}
-    @keyframes lrvLeft{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
-    @keyframes lrvRight{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
-    @keyframes lrvScale{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
-    /* grid cells — animate in with delay based on data-i */
-    .lgc,.ltc,.lprc,.lmc,.lpc{animation:lrvUp .9s cubic-bezier(.16,1,.3,1) both;}
-    .lgc:nth-child(1),.ltc:nth-child(1),.lprc:nth-child(1),.lmc:nth-child(1),.lpc:nth-child(1){animation-delay:.05s}
-    .lgc:nth-child(2),.ltc:nth-child(2),.lprc:nth-child(2),.lmc:nth-child(2),.lpc:nth-child(2){animation-delay:.13s}
-    .lgc:nth-child(3),.ltc:nth-child(3),.lprc:nth-child(3),.lmc:nth-child(3),.lpc:nth-child(3){animation-delay:.21s}
-    .lgc:nth-child(4),.ltc:nth-child(4),.lmc:nth-child(4),.lprc:nth-child(4){animation-delay:.29s}
-    .lgc:nth-child(5),.ltc:nth-child(5),.lprc:nth-child(5){animation-delay:.37s}
-    .lgc:nth-child(6),.ltc:nth-child(6){animation-delay:.45s}
-    /* grid cell hover bottom line */
-    .lgc,.ltc,.lprc,.lpc{position:relative;overflow:hidden;}
-    .lgc::after,.ltc::before,.lprc::after,.lpc::after{content:'';position:absolute;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#6366f1,transparent);transform:scaleX(0);transform-origin:center;transition:transform .5s;}
-    .lgc::after{bottom:0;}.ltc::before{top:0;}.lprc::after{bottom:0;}.lpc::after{bottom:0;}
-    .lgc:hover::after,.ltc:hover::before,.lprc:hover::after,.lpc:hover::after{transform:scaleX(1);}
-    /* hover bg */
-    .lgc:hover,.ltc:hover,.lpc:hover{background:#07060f!important;}
-    .lprc:hover:not(.lhot){background:#07060f!important;}
-    /* ── Gradient title + bright desc on hover ── */
-    @keyframes lGradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    /* metrics cards */
-    .lmc .lmc-val{transition:color .25s;}
-    .lmc:hover .lmc-val{
-      background:linear-gradient(90deg,#818cf8,#c4b5fd,#38bdf8,#818cf8);
-      background-size:300% 100%;
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:lGradShift 4s ease infinite;
-    }
-    .lmc .lmc-desc{color:rgba(240,238,255,.35);transition:color .25s;}
-    .lmc:hover .lmc-desc{color:rgba(240,238,255,.82);}
-    /* feature grid cards */
-    .lgc .lgc-title{transition:color .2s;}
-    .lgc:hover .lgc-title{
-      background:linear-gradient(90deg,#818cf8,#a78bfa,#38bdf8,#818cf8);
-      background-size:300% 100%;
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:lGradShift 4.5s ease infinite;
-    }
-    .lgc .lgc-desc{color:rgba(240,238,255,.38);transition:color .25s;line-height:1.7;}
-    .lgc:hover .lgc-desc{color:rgba(240,238,255,.85);}
-    /* process cards */
-    .lpc .lpc-title{transition:color .2s;}
-    .lpc:hover .lpc-title{
-      background:linear-gradient(90deg,#818cf8,#c4b5fd,#7dd3fc,#818cf8);
-      background-size:300% 100%;
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:lGradShift 4s ease infinite;
-    }
-    .lpc .lpc-desc{color:rgba(240,238,255,.38);transition:color .25s;line-height:1.7;}
-    .lpc:hover .lpc-desc{color:rgba(240,238,255,.82);}
-    /* testimonials */
-    .ltc .ltc-quote{color:rgba(240,238,255,.5);transition:color .3s;line-height:1.72;}
-    .ltc:hover .ltc-quote{color:rgba(240,238,255,.9);}
-    .ltc .ltc-name{transition:color .2s;}
-    .ltc:hover .ltc-name{
-      background:linear-gradient(90deg,#a78bfa,#818cf8,#38bdf8,#a78bfa);
-      background-size:300% 100%;
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:lGradShift 5s ease infinite;
-    }
-    .ltc .ltc-role{color:rgba(240,238,255,.2);transition:color .25s;}
-    .ltc:hover .ltc-role{color:rgba(240,238,255,.52);}
-    /* pricing */
-    .lprc .lprc-title{color:rgba(240,238,255,.28);transition:color .2s;}
-    .lprc:hover .lprc-title,.lprc.lhot .lprc-title{color:rgba(240,238,255,.75);}
-    .lprc:hover .lprc-title{
-      background:linear-gradient(90deg,#818cf8,#a78bfa,#38bdf8,#818cf8);
-      background-size:300% 100%;
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:lGradShift 4s ease infinite;
-    }
-    .lprc .lprc-price{color:#f0eeff;transition:color .2s, background .2s, background-position .2s;}
-    .lprc:hover .lprc-price{
-      background:linear-gradient(90deg,#818cf8,#a78bfa,#38bdf8,#c4b5fd,#818cf8);
-      background-size:300% 100%;
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;
-      animation:lGradShift 4s ease infinite;
-    }
-    .lprc .lprc-desc{color:rgba(240,238,255,.38);transition:color .25s;}
-    .lprc:hover .lprc-desc{color:rgba(240,238,255,.75);}
-    .lprc .lprc-feat{color:rgba(240,238,255,.45);transition:color .2s;}
-    .lprc:hover .lprc-feat{color:rgba(240,238,255,.78);}
-    /* marquee */
-    @keyframes lmarquee{to{transform:translateX(-50%);}}
-    .lmarquee-track{display:flex;gap:0;animation:lmarquee 30s linear infinite;width:max-content;}
-    .lmarquee-track:hover{animation-play-state:paused;}
-    /* hero word rise */
-    @keyframes lrise{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .lword{display:inline-block;}
-    .linner{display:inline-block;animation:lrise .9s cubic-bezier(.16,1,.3,1) both;}
-    /* buttons */
-    .lbtn-prim{padding:17px 46px;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 16px 50px rgba(99,102,241,.56);transition:all .28s;letter-spacing:-.2px;}
-    .lbtn-prim:hover{transform:translateY(-3px);box-shadow:0 26px 66px rgba(99,102,241,.74);}
-    .lbtn-sec{padding:16px 38px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#f0eeff;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .28s;}
-    .lbtn-sec:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22);transform:translateY(-2px);}
-    .lp-ghost{width:100%;padding:14px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;background:transparent;border:1px solid rgba(255,255,255,.1);color:#f0eeff;transition:all .25s;}
-    .lp-ghost:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22);}
-    .lp-fill{width:100%;padding:14px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;box-shadow:0 8px 28px rgba(99,102,241,.44);transition:all .25s;}
-    .lp-fill:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(99,102,241,.68);}
-    /* grad text */
-    @keyframes lGradFlow{0%{background-position:0% 50%}33%{background-position:100% 50%}66%{background-position:50% 100%}100%{background-position:0% 50%}}
-    .lgrad{background:linear-gradient(135deg,#6366f1,#a78bfa,#67e8f9,#a78bfa,#6366f1);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:lGradFlow 3.5s linear infinite;}
-    @keyframes lscrollPulse{0%,100%{opacity:.4}50%{opacity:1}}
-    @keyframes lblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
-    .lscrollbar{animation:lscrollPulse 2.2s ease infinite;}
-    .lbadgedot{animation:lblink 2s ease infinite;}
-    /* section delay classes */
-    .ld1{animation-delay:.1s!important}.ld2{animation-delay:.2s!important}.ld3{animation-delay:.3s!important}
-    /* ── Mobile responsive ── */
-    @media (max-width:768px){
-      .lpage section{padding-left:20px!important;padding-right:20px!important;}
-      .lhero-h1{font-size:clamp(36px,10vw,52px)!important;margin-bottom:24px!important;}
-      .lhero-p{font-size:15px!important;margin-bottom:36px!important;color:rgba(240,238,255,.72)!important;}
-      .lhero-btns{flex-direction:column;align-items:stretch!important;gap:14px!important;}
-      .lbtn-prim,.lbtn-sec{width:100%;text-align:center;padding:14px!important;}
-      .lcta-wrap{padding:60px 20px!important;}
-      .lcta-wrap h2{font-size:clamp(32px,8vw,48px)!important;}
-      .lcta-wrap p{color:rgba(240,238,255,.7)!important;}
-      .lcta-wrap .lcta-trust{gap:16px!important;flex-wrap:wrap;justify-content:center;}
-      .lshimmer{height:4px!important;margin:2px 0 28px!important;}
-    }
-    @media (max-width:640px){
-      .lmc{padding:32px 20px!important;border-right:none!important;border-bottom:1px solid rgba(255,255,255,.06)!important;}
-      .lmc:last-child{border-bottom:none!important;}
-      .lmc-val{font-size:48px!important;}
-    }
-    @media (max-width:900px){
-      .lgc,.ltc,.lpc{grid-column:span 1!important;}
-    }
-    @media (max-width:768px){
-      .lmetrics-grid{grid-template-columns:1fr!important;}
-      .lfeat-grid{grid-template-columns:1fr!important;}
-      .lproc-grid{grid-template-columns:1fr!important;}
-      .ltesti-grid{grid-template-columns:1fr!important;}
-      .lpricing-grid{grid-template-columns:1fr!important;}
-      .lfeat-header,.lproc-header,.lpricing-header{grid-template-columns:1fr!important;gap:32px!important;}
-    }
-    @media (max-width:480px){
-      .lprc{padding:28px 20px!important;}
-      .lpc{padding:36px 24px!important;}
-      .ltc{padding:36px 24px!important;}
-    }
-  `;
 
   return(
     <div className="lpage" data-theme={theme}>
-      <style>{CSS}</style>
-      <style>{LANDING_CSS}</style>
-
       {/* Stars background — full page fixed */}
       <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none"}}>
         <SparklesCanvas density={180} speed={0.4} minSz={0.3} maxSz={1.1} color="#ffffff" style={{opacity:.35}}/>
@@ -8111,7 +6666,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
           ))}
         </div>
         <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{padding:"8px 22px",borderRadius:8,border:"1px solid rgba(255,255,255,.1)",background:"transparent",color:"#f0eeff",fontSize:13,cursor:"pointer",fontFamily:"inherit",transition:"all .25s"}} onMouseOver={e=>e.currentTarget.style.background="rgba(255,255,255,.07)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>{t("sign_in","Войти")}</button>
-        <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{padding:"9px 26px",borderRadius:8,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 6px 22px rgba(99,102,241,.42)",transition:"all .25s"}} onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 12px 34px rgba(99,102,241,.65)";}} onMouseOut={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 6px 22px rgba(99,102,241,.42)";}}>{t("start_free","Начать бесплатно")}</button>
+        <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{padding:"9px 26px",borderRadius:8,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg,#fff)",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 6px 22px var(--accent-glow)",transition:"all .25s"}} onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 12px 34px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 6px 22px var(--accent-glow)";}}>{t("start_free","Начать бесплатно")}</button>
           </>
         )}
         {isMobile&&(
@@ -8131,7 +6686,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:12,marginTop:"auto",paddingTop:24}}>
                   <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{width:"100%",padding:"14px",borderRadius:10,border:"1px solid rgba(255,255,255,.2)",background:"transparent",color:"#f0eeff",fontSize:15,cursor:"pointer",fontFamily:"inherit"}}>{t("sign_in","Войти")}</button>
-                  <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{width:"100%",padding:"14px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t("start_free","Начать бесплатно")}</button>
+                  <button onClick={()=>{onGetStarted();setMenuOpen(false);}} style={{width:"100%",padding:"14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg,#fff)",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 6px 22px var(--accent-glow)"}}>{t("start_free","Начать бесплатно")}</button>
                 </div>
               </div>
             )}
@@ -8156,8 +6711,8 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
           </h1>
           {/* shimmer lines — тёмный овал убран везде */}
           <div className="lshimmer" style={{position:"relative",width:600,maxWidth:"min(600px,92vw)",height:8,margin:"2px auto 38px",animation:"slideUp .8s .72s both"}}>
-            <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:0,width:"76%",height:2,filter:"blur(2.5px)",background:"linear-gradient(90deg,transparent,#6366f1,transparent)"}}/>
-            <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:2,width:"76%",height:1,background:"linear-gradient(90deg,transparent,#6366f1,transparent)"}}/>
+            <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:0,width:"76%",height:2,filter:"blur(2.5px)",background:"linear-gradient(90deg,transparent,var(--accent-1),transparent)"}}/>
+            <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:2,width:"76%",height:1,background:"linear-gradient(90deg,transparent,var(--accent-1),transparent)"}}/>
             <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:0,width:"32%",height:5,filter:"blur(3px)",background:"linear-gradient(90deg,transparent,#67e8f9,transparent)"}}/>
             <div style={{position:"absolute",left:"50%",transform:"translateX(-50%)",top:2,width:"32%",height:1,background:"linear-gradient(90deg,transparent,#67e8f9,transparent)"}}/>
           </div>
@@ -8179,7 +6734,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
         <div className="lmarquee-track">
           {[...MARQUEE_ITEMS,...MARQUEE_ITEMS].map((item,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"0 40px",fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.22)",letterSpacing:2,textTransform:"uppercase",whiteSpace:"nowrap"}}>
-              <span style={{width:4,height:4,borderRadius:"50%",background:"#6366f1",display:"inline-block",flexShrink:0}}/>
+              <span style={{width:4,height:4,borderRadius:"50%",background:"var(--accent-1)",display:"inline-block",flexShrink:0}}/>
               {item}
             </div>
           ))}
@@ -8279,7 +6834,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
           <div className="lpricing-grid" style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(5,1fr)",gap:1,background:"transparent",alignItems:"stretch"}}>
             {PRICING.map((p,i)=>(
               <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"44px 36px",position:"relative",cursor:"default",transition:"background .35s",display:"flex",flexDirection:"column"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
-                {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,#6366f1,#8b5cf6)"}}/>}
+                {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"var(--gradient-accent)"}}/>}
                 {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(99,102,241,.18)",border:"1px solid rgba(99,102,241,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#818cf8",letterSpacing:2,textTransform:"uppercase"}}>{t("pricing_hot_badge","★ ТОП")}</div>}
                 <span className="lprc-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:p.hot?"#818cf8":"rgba(240,238,255,.3)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:26}}>{p.tier}</span>
                 <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
@@ -8348,8 +6903,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
   const isMobile=useIsMobile();
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg,#070b14)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
-      <style>{CSS}</style>
-      {/* Backgrounds */}
+{/* Backgrounds */}
       <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px)",backgroundSize:"50px 50px",pointerEvents:"none"}}/>
       <div style={{position:"absolute",width:700,height:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 65%)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",filter:"blur(80px)",pointerEvents:"none"}}/>
       {/* Back button */}
@@ -8367,7 +6921,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
           {/* Buttons */}
           <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
             <button onClick={onRegister}
-              style={{padding:"16px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",color:"#fff",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 10px 32px rgba(99,102,241,.5)",transition:"all .2s",letterSpacing:-.2}}
+              style={{padding:"16px",borderRadius:14,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg,#fff)",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 10px 32px var(--accent-glow)",transition:"all .2s",letterSpacing:-.2}}
               onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 16px 44px rgba(99,102,241,.6)";}}
               onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 10px 32px rgba(99,102,241,.5)";}}>
               {t("ws_start_btn","Начать бесплатно ✦")}
@@ -8410,6 +6964,8 @@ export default function App(){
   const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("sa_theme")||"dark";}catch{return"dark";}});
   const[palette,setPalette]=useState(()=>{try{return localStorage.getItem("sa_palette")||"indigo";}catch{return"indigo";}});
   const[project,setProject]=useState(null);
+  const[cpProject,setCpProject]=useState<any>(null);
+  const[cpMaps,setCpMaps]=useState<any[]>([]);
   const[mapData,setMapData]=useState(null);
   const[mapIsNew,setMapIsNew]=useState(false);
   const[mapReadOnly,setMapReadOnly]=useState(false);
@@ -8467,9 +7023,7 @@ export default function App(){
     if(b.getAttribute("data-palette")!==bodyPalette)b.setAttribute("data-palette",bodyPalette);
   },[theme,bodyPalette]);
   // t функция для LangCtx.Provider (App является корневым провайдером)
-  const t=(k:string,fb?:string)=>{
-    try{const L=(LANGS as any);return(L[lang]||L.ru)?.[k]||fb||k;}catch{return fb||k;}
-  };
+  const t = makeTfn(lang);
 
   const initRunningRef=useRef(false);
   const pendingDeepLinkRef=useRef<any>(null);
@@ -8479,12 +7033,16 @@ export default function App(){
       if(!dl||!userObj?.email)return false;
       if(!API_BASE)return false;
       const ps=await getProjects(userObj.email);
-      const p=ps.find((x:any)=>x.id===dl.projectId);
-      if(!p)return false;
       if(dl.open==="projects"){
         setScreen("projects");
         return true;
       }
+      if(dl.open==="contentPlan"&&!dl.projectId){
+        setScreen("contentPlanHub");
+        return true;
+      }
+      const p=ps.find((x:any)=>x.id===dl.projectId);
+      if(!p)return false;
       if(dl.open==="project"){
         setProject(p);setScreen("project");
         return true;
@@ -8505,6 +7063,13 @@ export default function App(){
         }catch{}
         return true;
       }
+      if(dl.open==="contentPlan"){
+        const ms=await getMaps(p.id);
+        setCpProject(p);
+        setCpMaps(ms||[]);
+        setScreen("contentPlanProject");
+        return true;
+      }
     }catch{}
     return false;
   }
@@ -8517,12 +7082,14 @@ export default function App(){
       // Проверяем share-ссылку и deep-link в URL (поддерживаем query)
       const searchParams=new URLSearchParams(window.location.search);
       const shareFromQuery=searchParams.get("share");
-      const openParam=(searchParams.get("open")||"").toLowerCase(); // projects | project | map
+      const openParam=(searchParams.get("open")||"").toLowerCase(); // projects | project | map | contentplan
       const dlProjectId=searchParams.get("projectId")||"";
       const dlMapId=searchParams.get("mapId")||"";
       const dlNodeId=searchParams.get("nodeId")||"";
       if(openParam==="projects"){
         pendingDeepLinkRef.current={open:openParam};
+      } else if(openParam==="contentplan"){
+        pendingDeepLinkRef.current=dlProjectId?{open:"contentPlan",projectId:dlProjectId}:{open:"contentPlan"};
       } else if((openParam==="project"||openParam==="map")&&dlProjectId){
         pendingDeepLinkRef.current={open:openParam,projectId:dlProjectId,mapId:dlMapId,nodeId:dlNodeId};
       }
@@ -8530,9 +7097,9 @@ export default function App(){
       const shareFromHash=hash.startsWith("#share=")?hash.slice(7).replace(/\?.*/,"").trim():"";
       const shareId=shareFromQuery||shareFromHash;
 
-      // Обработка успешной оплаты через Stripe
-      // tier из URL не используем — берём актуальный tier с сервера после /me
+      // Обработка успешной оплаты через Stripe (?payment=success&tier=pro)
       const paymentStatus=searchParams.get("payment");
+      const paymentTierFromUrl=searchParams.get("tier");
       if(paymentStatus==="success"){
         window.history.replaceState({},"",window.location.pathname);
       }
@@ -8572,11 +7139,15 @@ export default function App(){
           try{
             const d=await apiFetch("/api/auth/me");
             if(d.user){
-              const uNorm=normalizeUser(d.user);
-              setUser(uNorm);
+              let uNorm=normalizeUser(d.user);
               if(paymentStatus==="success"){
+                const synced=await refreshUserAfterPayment(paymentTierFromUrl);
+                if(synced)uNorm=synced;
+                setUser(uNorm);
                 setPaymentToast(true);
                 setTimeout(()=>setPaymentToast(false),4000);
+              }else{
+                setUser(uNorm);
               }
               // Если в URL был deep-link — пробуем открыть сразу после login
               if(pendingDeepLinkRef.current){
@@ -8622,7 +7193,8 @@ export default function App(){
   useEffect(()=>{
     const orig=window.fetch.bind(window);
     (window as any).__sa_onSessionExpired=()=>{
-      setUser(null);setScreen("landing");setShowAuth(true);setAuthTab("login");
+      setUser(null);setProject(null);setMapData(null);setCpProject(null);setCpMaps([]);
+      setScreen("landing");setShowAuth(true);setAuthTab("login");
     };
     return()=>{};
   },[]);
@@ -8638,12 +7210,12 @@ export default function App(){
     const updated=await patchUser(user.email,{tier:t});
     if(updated)setUser(updated);
     setShowTiers(false);
-    if(screen!=="projects"&&screen!=="project"&&screen!=="map")setScreen("projects");
+    if(screen!=="projects"&&screen!=="project"&&screen!=="map"&&screen!=="contentPlanHub"&&screen!=="contentPlanProject")setScreen("projects");
   }
 
   async function onLogout(){
     await clearSession();
-    setUser(null);setProject(null);setMapData(null);
+    setUser(null);setProject(null);setMapData(null);setCpProject(null);setCpMaps([]);
     setAiChatMsgs([]);
     setScreen("landing");
   }
@@ -8686,6 +7258,8 @@ export default function App(){
       project:"Strategy AI — Проект",
       map:"Strategy AI — Карта",
       sharedMap:"Strategy AI — Просмотр карты",
+      contentPlanHub:"Strategy AI — Контент-план",
+      contentPlanProject:"Strategy AI — Контент-план проекта",
     };
     document.title=titles[screen]||"Strategy AI";
   },[screen]);
@@ -8696,22 +7270,25 @@ export default function App(){
     const h=()=>{
       if(screen==="map"&&project){setMapData(null);setScreen("project");}
       else if(screen==="project"&&project){setProject(null);setScreen("projects");}
+      else if(screen==="contentPlanProject"&&cpProject){setCpProject(null);setCpMaps([]);setScreen("contentPlanHub");}
+      else if(screen==="contentPlanHub"){setScreen("projects");}
     };
     window.addEventListener("popstate",h);
     return()=>window.removeEventListener("popstate",h);
-  },[screen,project]);
+  },[screen,project,cpProject]);
   useEffect(()=>{
     if(screen==="project"&&project&&history.state?.screen!=="project")history.pushState({screen:"project",projectId:project.id},"","");
     else if(screen==="map"&&mapData&&history.state?.screen!=="map")history.pushState({screen:"map",mapId:mapData.id},"","");
-  },[screen,project?.id,mapData?.id]);
+    else if(screen==="contentPlanHub"&&history.state?.screen!=="contentPlanHub")history.pushState({screen:"contentPlanHub"},"","");
+    else if(screen==="contentPlanProject"&&cpProject&&history.state?.screen!=="contentPlanProject")history.pushState({screen:"contentPlanProject",projectId:cpProject.id},"","");
+  },[screen,project?.id,mapData?.id,cpProject?.id]);
 
   const appPalette=screen==="landing"?undefined:palette;
 
   if(loadError)return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
       <div data-theme={theme} data-palette={palette} className="screen-enter" style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,gap:24}}>
-        <style>{CSS}</style>
-        <div className="glass-card" style={{padding:"32px 40px",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.3)",display:"flex",flexDirection:"column",alignItems:"center",gap:20,maxWidth:480}}>
+<div className="glass-card" style={{padding:"32px 40px",borderRadius:20,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 24px 64px rgba(0,0,0,.3)",display:"flex",flexDirection:"column",alignItems:"center",gap:20,maxWidth:480}}>
           <div style={{fontSize:36,marginBottom:4}}>⚠️</div>
           <div style={{fontSize:18,fontWeight:800,color:"var(--text)",textAlign:"center"}}>{loadError}</div>
           <button className="btn-interactive" onClick={()=>{setLoadError(null);initApp();}} style={{padding:"16px 32px",borderRadius:14,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 24px var(--accent-glow)",transition:"transform .2s ease, box-shadow .25s ease"}}>{t("retry","Повторить")}</button>
@@ -8726,15 +7303,14 @@ export default function App(){
   return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
       <div data-theme={theme} data-palette={appPalette} className="screen-wrap" style={{minHeight:"100vh",background:"var(--bg)",transition:"background .35s ease, color .35s ease"}}>
-      <style>{CSS}</style>
-      <OfflineBanner/>
+<OfflineBanner/>
       <>
         {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>prev==="projects"?prev:"landing")} theme={theme} authReady={authChecked}/>}
         {screen==="landing"&&<div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}><LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onGetStarted={()=>setScreen("welcome")}/></div>}
         {screen==="sharedMap"&&sharedMapData&&(
           <MapEditor
             user={null} mapData={sharedMapData.map} project={{name:sharedMapData.projectName||""}}
-            isNew={false} theme={theme} readOnly={true}
+            isNew={false} theme={theme} readOnly={true} palette={palette}
             onBack={()=>{setSharedMapData(null);setScreen("landing");if(typeof window!=="undefined")window.history.replaceState("","",window.location.pathname);}}
             onProfile={()=>{}}
             onToggleTheme={toggleTheme}
@@ -8762,6 +7338,54 @@ export default function App(){
               onToggleTheme={toggleTheme}
               aiChatMsgs={aiChatMsgs}
               aiChatSetMsgs={setAiChatMsgs}
+              onOpenContentPlanHub={()=>setScreen("contentPlanHub")}
+              onOpenContentPlanProject={(p:any,m:any[])=>{setCpProject(p);setCpMaps(Array.isArray(m)?m:[]);setScreen("contentPlanProject");}}
+            />
+            {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={(u:any)=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
+          </div>
+        )}
+        {screen==="contentPlanHub"&&user&&(
+          <div className="screen-enter" style={{height:"100%",display:"flex",flexDirection:"column",flex:1}}>
+            <TrialBanner user={user} onUpgrade={()=>setShowProfile(true)}/>
+            <EmailVerifyBanner user={user}/>
+            <ContentPlanHubPage
+              user={user}
+              theme={theme}
+              onBackToStrategy={()=>setScreen("projects")}
+              onOpenProject={(p:any,maps:any[])=>{setCpProject(p);setCpMaps(Array.isArray(maps)?maps:[]);setScreen("contentPlanProject");}}
+              onLogout={onLogout}
+              onProfile={()=>setShowProfile(true)}
+              onToggleTheme={toggleTheme}
+              onUpgrade={()=>setShowProfile(true)}
+              aiChatMsgs={aiChatMsgs}
+              aiChatSetMsgs={setAiChatMsgs}
+              onSelectProject={onSelectProject}
+              onOpenMap={onOpenMap}
+            />
+            {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={(u:any)=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
+          </div>
+        )}
+        {screen==="contentPlanProject"&&user&&cpProject&&(
+          <div className="screen-enter" style={{height:"100%",display:"flex",flexDirection:"column",flex:1}}>
+            <TrialBanner user={user} onUpgrade={()=>setShowProfile(true)}/>
+            <EmailVerifyBanner user={user}/>
+            <ContentPlanProjectPage
+              user={user}
+              project={cpProject}
+              maps={cpMaps}
+              theme={theme}
+              onBackToHub={()=>{setCpProject(null);setCpMaps([]);setScreen("contentPlanHub");}}
+              onOpenStrategyProject={()=>{setProject(cpProject);setCpProject(null);setCpMaps([]);setScreen("project");}}
+              onLogout={onLogout}
+              onProfile={()=>setShowProfile(true)}
+              onToggleTheme={toggleTheme}
+              onChangeTier={onChangeTier}
+              onUpgrade={()=>setShowProfile(true)}
+              aiChatMsgs={aiChatMsgs}
+              aiChatSetMsgs={setAiChatMsgs}
+              onSelectProject={onSelectProject}
+              onOpenMap={onOpenMap}
+              onSwitchContentPlanProject={(p:any,m:any[])=>{setCpProject(p);setCpMaps(Array.isArray(m)?m:[]);}}
             />
             {showProfile&&<ProfileModal user={user} theme={theme} palette={palette} onPaletteChange={changePalette} onClose={()=>setShowProfile(false)} onUpdate={(u:any)=>setUser(u)} onChangeTier={onChangeTier} onLogout={onLogout} onToggleTheme={toggleTheme}/>}
           </div>
@@ -8775,6 +7399,9 @@ export default function App(){
               onProfile={()=>setShowProfile(true)}
               onToggleTheme={toggleTheme}
               onChangeTier={onChangeTier}
+              onUpgrade={()=>setShowProfile(true)}
+              onOpenContentPlanHub={()=>setScreen("contentPlanHub")}
+              onOpenContentPlanProject={(p:any,m:any[])=>{setCpProject(p);setCpMaps(Array.isArray(m)?m:[]);setScreen("contentPlanProject");}}
               aiChatMsgs={aiChatMsgs}
               aiChatSetMsgs={setAiChatMsgs}
             />
@@ -8785,10 +7412,20 @@ export default function App(){
           <div className="screen-enter" style={{height:"100%",display:"flex",flexDirection:"column",flex:1}}>
             <MapEditor
               user={user} mapData={mapData} project={project}
-              isNew={mapIsNew} theme={theme} readOnly={mapReadOnly}
+              isNew={mapIsNew} theme={theme} readOnly={mapReadOnly} palette={palette}
               onBack={()=>setScreen("project")}
               onProfile={()=>setShowProfile(true)}
               onToggleTheme={toggleTheme}
+              onOpenContentPlanHub={()=>setScreen("contentPlanHub")}
+              onOpenContentPlanProject={async()=>{
+                if(!project?.id)return;
+                try{
+                  const ms=await getMaps(project.id);
+                  setCpProject(project);
+                  setCpMaps(Array.isArray(ms)?ms:[]);
+                  setScreen("contentPlanProject");
+                }catch{}
+              }}
               aiChatMsgs={aiChatMsgs}
               aiChatSetMsgs={setAiChatMsgs}
               focusNodeId={mapFocusNodeId}

@@ -1,25 +1,15 @@
 const router = require('express').Router();
 const { pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { getProjectAccess } = require('../lib/projectAccess');
+const { validateMapBody } = require('../lib/mapPayload');
 
 const MAX_VERSIONS = 20;
 
 // Проверка доступа к проекту/карте — возвращает роль пользователя
 async function getMapAccess(projectId, mapId, userEmail) {
-  const { rows: pRows } = await pool.query(
-    'SELECT id, owner_email, members FROM projects WHERE id = $1',
-    [projectId]
-  );
-  if (!pRows[0]) return null;
-  const project = pRows[0];
-
-  let role = null;
-  if (project.owner_email === userEmail) role = 'owner';
-  else {
-    const m = (project.members || []).find(x => x.email === userEmail);
-    role = m?.role || null;
-  }
-  if (!role) return null;
+  const { project, role } = await getProjectAccess(projectId, userEmail);
+  if (!project || !role) return null;
 
   const { rows: mRows } = await pool.query(
     'SELECT id FROM maps WHERE id = $1 AND project_id = $2',
@@ -52,6 +42,13 @@ router.post('/:projectId/maps/:mapId/versions', requireAuth, async (req, res, ne
     if (!role || role === 'viewer') return res.status(403).json({ error: 'Нет прав для сохранения версии' });
 
     const { label, nodes, edges, ctx } = req.body;
+    const verr = validateMapBody({
+      nodes: nodes !== undefined ? nodes : [],
+      edges: edges !== undefined ? edges : [],
+      ctx: ctx !== undefined ? ctx : undefined,
+    });
+    if (verr) return res.status(400).json({ error: verr, code: 'MAP_PAYLOAD_LIMIT' });
+
     await pool.query(
       `INSERT INTO map_versions (map_id, user_email, label, nodes, edges, ctx)
        VALUES ($1, $2, $3, $4, $5, $6)`,

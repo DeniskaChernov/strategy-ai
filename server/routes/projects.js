@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { getProjectAccess } = require('../lib/projectAccess');
 
 // Тарифные лимиты
 const TIER_LIMITS = {
@@ -13,16 +14,6 @@ const TIER_LIMITS = {
 
 // Доступность фич по тарифу
 const CONTENT_PLAN_TIERS = new Set(['pro', 'team', 'enterprise']);
-
-// Проверка доступа к проекту (owner/editor/viewer)
-async function getProjectAccess(projectId, userEmail) {
-  const { rows } = await pool.query('SELECT * FROM projects WHERE id = $1', [projectId]);
-  if (!rows[0]) return { project: null, role: null };
-  const project = rows[0];
-  if (project.owner_email === userEmail) return { project, role: 'owner' };
-  const member = (project.members || []).find(m => m.email === userEmail);
-  return { project, role: member?.role || null };
-}
 
 // GET /api/projects — все проекты пользователя (owner + member)
 router.get('/', requireAuth, async (req, res, next) => {

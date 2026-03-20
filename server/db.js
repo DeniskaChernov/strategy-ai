@@ -163,6 +163,15 @@ async function initDB() {
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS theme TEXT DEFAULT 'dark'`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS palette TEXT DEFAULT 'indigo'`);
 
+    // Идемпотентность Stripe webhooks (event.id)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS stripe_webhook_events (
+        id   TEXT PRIMARY KEY,
+        received_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_stripe_events_received ON stripe_webhook_events(received_at)`);
+
     await client.query('COMMIT');
     console.log('✅ Database initialized');
   } catch (err) {
@@ -248,4 +257,19 @@ async function seedDB() {
   }
 }
 
-module.exports = { pool, initDB, seedDB };
+/** Удаляет старые записи идемпотентности webhooks (Stripe event.id). По умолчанию старше 90 дней. */
+async function cleanupStripeWebhookEvents() {
+  const raw = process.env.STRIPE_WEBHOOK_EVENTS_RETENTION_DAYS;
+  let days = parseInt(raw || '90', 10);
+  if (Number.isNaN(days)) days = 90;
+  days = Math.min(365, Math.max(30, days));
+  const { rowCount } = await pool.query(
+    `DELETE FROM stripe_webhook_events WHERE received_at < (now() - ($1::int * interval '1 day'))`,
+    [days]
+  );
+  if (rowCount > 0) {
+    console.log(`✅ stripe_webhook_events: удалено ${rowCount} записей старше ${days} дн.`);
+  }
+}
+
+module.exports = { pool, initDB, seedDB, cleanupStripeWebhookEvents };
