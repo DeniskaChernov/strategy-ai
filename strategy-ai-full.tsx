@@ -3420,7 +3420,7 @@ ${ctx}
         </div>
       )}
       {/* ── TOOLBAR — 2 rows ── */}
-      <div className="crm-toolbar-shell">
+      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--glass-border-accent,var(--border))",background:"var(--bg2)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:"0 1px 0 var(--glass-border-accent,var(--border))"}}>
 
         {/* ROW 1 — primary actions + search */}
         <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
@@ -3434,8 +3434,8 @@ ${ctx}
               </span>
             )}
             {!readOnly&&<>{sep}
-            <button className="btn-interactive btn-primary-glow" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8}}
-              onMouseOver={e=>{e.currentTarget.style.boxShadow="0 6px 28px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.boxShadow="";}}>
+            <button className="btn-interactive" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)"}}
+              onMouseOver={e=>{e.currentTarget.style.boxShadow="0 6px 24px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
               <span style={{fontSize:17,lineHeight:1}}>+</span> Шаг
             </button>
             <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}} title={connecting?t("cancel","Отмена"):t("link_mode_hint","Режим связи: клик на источник, затем на цель")}
@@ -3489,12 +3489,12 @@ ${ctx}
         </div>
 
         {user&&onOpenContentPlanHub&&(
-          <div className="crm-substrip" style={{padding:"10px 16px"}}>
+          <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border)",background:"var(--surface2)"}}>
             <div style={{fontSize:10.5,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.08,textAlign:"center",marginBottom:8}}>{t("cp_map_strip_label","Контент-план и разделы")}</div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,flexWrap:"wrap"}}>
               <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={isMobile}/>
               {onOpenContentPlanProject&&project?.id&&(
-                <button type="button" className="btn-interactive glass-hairline-b" onClick={()=>onOpenContentPlanProject()} title={t("cp_from_map_hint","Открыть контент-план этого проекта в полноэкранном режиме")}
+                <button type="button" className="btn-interactive" onClick={()=>onOpenContentPlanProject()} title={t("cp_from_map_hint","Открыть контент-план этого проекта в полноэкранном режиме")}
                   style={{padding:"8px 16px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:8}}>
                   <span aria-hidden>✍️</span>{t("cp_from_map_btn","Контент-план проекта")}
                 </button>
@@ -3983,7 +3983,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.1) 0%,transparent 60%)",pointerEvents:"none"}}/>
-      <div className="crm-app-header" style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",flexWrap:"wrap"}}>
+      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,minWidth:0}}>
           <img src="/logo.png" alt="" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
           <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
@@ -4018,7 +4018,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
         </div>
       </div>
       {isMobile&&(
-        <div className="crm-substrip" style={{padding:"10px 16px",display:"flex",justifyContent:"center"}}>
+        <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",display:"flex",justifyContent:"center"}}>
           <MainWorkspaceNav mode="contentPlan" onStrategy={onBackToStrategy} onContentPlan={()=>{}} t={t} isMobile={true}/>
         </div>
       )}
@@ -4064,7 +4064,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
                 const nMaps=maps.length;
                 const nNodes=maps.reduce((acc:number,m:any)=>acc+(m.nodes?.length||0),0);
                 return(
-                  <button key={p.id} type="button" className="btn-interactive card-stagger crm-dashboard-card" disabled={!tier.contentPlan} aria-label={tier.contentPlan?t("cp_card_aria_open","Открыть контент-план проекта {name}").replace("{name}",p.name||""):t("cp_card_aria_locked","Разблокировать Pro для контент-плана")}
+                  <button key={p.id} type="button" className="btn-interactive card-stagger" disabled={!tier.contentPlan} aria-label={tier.contentPlan?t("cp_card_aria_open","Открыть контент-план проекта {name}").replace("{name}",p.name||""):t("cp_card_aria_locked","Разблокировать Pro для контент-плана")}
                     onClick={()=>{if(!tier.contentPlan){onUpgrade&&onUpgrade();return;}onOpenProject(p,maps);}} style={{textAlign:"left",padding:"20px 22px",borderRadius:18,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",cursor:tier.contentPlan?"pointer":"not-allowed",opacity:tier.contentPlan?1:.78,display:"flex",flexDirection:"column",gap:12,animationDelay:`${Math.min(i,8)*0.05}s`}}>
                     <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>{p.name||t("untitled","Без названия")}</div>
                     <div style={{fontSize:12.5,color:"var(--text5)",display:"flex",gap:12,flexWrap:"wrap"}}>
@@ -4073,7 +4073,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
                       <span>{t("cp_stat_steps","{n} шагов").replace("{n}",String(nNodes))}</span>
                     </div>
                     <div style={{marginTop:"auto",paddingTop:4}}>
-                      <span className={tier.contentPlan?"btn-primary-glow":undefined} style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:10,fontSize:12.5,fontWeight:800,border:tier.contentPlan?"none":"1px dashed var(--border2)",background:tier.contentPlan?"var(--gradient-accent)":"var(--surface2)",color:tier.contentPlan?"var(--accent-on-bg)":"var(--text4)",boxShadow:tier.contentPlan?"0 2px 12px var(--accent-glow)":"none"}}>
+                      <span style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 14px",borderRadius:10,fontSize:12.5,fontWeight:800,border:tier.contentPlan?"none":"1px dashed var(--border2)",background:tier.contentPlan?"var(--gradient-accent)":"var(--surface2)",color:tier.contentPlan?"var(--accent-on-bg)":"var(--text4)",boxShadow:tier.contentPlan?"0 2px 12px var(--accent-glow)":"none"}}>
                         {tier.contentPlan?<>✍️ {t("cp_open_plan_btn","Открыть план")}</>:<>🔒 {t("cp_locked_cta_short","Нужен Pro")}</>}
                       </span>
                     </div>
@@ -4173,7 +4173,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
 
   return(
     <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
-      <div className="crm-app-header" style={{display:"flex",alignItems:"center",gap:isMobile?8:10,padding:isMobile?"10px 14px":"12px 20px",flexWrap:"wrap"}}>
+      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:10,padding:isMobile?"10px 14px":"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",flexWrap:"wrap"}}>
         <button type="button" onClick={onBackToHub} className="btn-interactive" title={t("cp_back_hub_tip","К списку проектов в контент-плане")} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>
           <span aria-hidden>←</span>{isMobile?t("cp_back_hub_short","Все"):<span>{t("cp_back_hub","Все проекты")}</span>}
         </button>
@@ -4214,7 +4214,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
         </div>
       </div>
       {isMobile&&(
-        <div className="crm-substrip" style={{padding:"8px 14px",display:"flex",justifyContent:"center"}}>
+        <div style={{padding:"8px 14px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",display:"flex",justifyContent:"center"}}>
           <MainWorkspaceNav mode="contentPlan" onStrategy={onOpenStrategyProject} onContentPlan={()=>{}} t={t} isMobile={true}/>
         </div>
       )}
@@ -4397,7 +4397,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
         </div>
       )}
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
-      <div className="crm-app-header" style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",flexWrap:"wrap"}}>
+      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}>
           <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
           <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
@@ -4533,7 +4533,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                 const roleLabel=ROLES[myRole]||"";
                 const icon=((p.name||"P").trim()[0]||"P").toUpperCase();
                 return(
-                  <div key={p.id} onClick={()=>onSelectProject(p)} className="icard card-stagger card-interactive crm-dashboard-card"
+                  <div key={p.id} onClick={()=>onSelectProject(p)} className="icard card-stagger card-interactive"
                     style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",animationDelay:`${i*0.06}s`}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:14}}>
                       <div style={{width:40,height:40,borderRadius:12,background:"var(--surface2)",border:"1px solid var(--glass-border-accent,var(--border))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,color:"var(--text2)",fontWeight:900,letterSpacing:.3}}>{icon}</div>
@@ -5313,7 +5313,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     const prog=ns.length?Math.round(ns.reduce((s,n)=>s+(n.progress||0),0)/ns.length):0;
     const overdue=ns.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
     return(
-      <div className="card-stagger card-interactive crm-dashboard-card" style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",position:"relative",animationDelay:`${staggerIndex*0.05}s`}}
+      <div className="card-stagger card-interactive" style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",position:"relative",animationDelay:`${staggerIndex*0.05}s`}}
         onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}
         onMouseOver={e=>{e.currentTarget.style.borderColor="var(--accent-1)";}}
         onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";}}>
@@ -5349,7 +5349,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
 {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
 
       {/* Header */}
-      <div className="crm-app-header" style={{padding:isMobile?"12px 16px":"16px 24px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"16px 24px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:isMobile?"1 1 100%":"1 1 auto",maxWidth:isMobile?"100%":"44%"}}>
           <button onClick={onBack} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text3)";}}>←</button>
           <div style={{flex:1,minWidth:0}}>
@@ -5369,14 +5369,14 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
         </div>
       </div>
       {isMobile&&onOpenContentPlanHub&&(
-        <div className="crm-substrip" style={{padding:"10px 16px"}}>
+        <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border)",background:"var(--bg2)"}}>
           <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={true}/>
         </div>
       )}
 
       {/* Stats bar */}
       {totalNodes>0&&(
-        <div className="crm-stats-bar" style={{padding:isMobile?"12px 16px":"14px 24px",display:"flex",gap:isMobile?16:32,flexWrap:"wrap"}}>
+        <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"14px 24px",display:"flex",gap:isMobile?16:32,flexWrap:"wrap"}}>
           {[
             {label:"Шагов всего",val:totalNodes,color:"var(--accent-1)"},
             {label:"Завершено",val:`${doneNodes} (${totalNodes?Math.round(doneNodes/totalNodes*100):0}%)`,color:"#10b981"},
@@ -5392,7 +5392,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       )}
 
       {/* Tabs */}
-      <div className="crm-tabs-bar" style={{display:"flex",gap:0,padding:isMobile?"0 16px":"0 24px",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+      <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:isMobile?"0 16px":"0 24px",background:"var(--bg2)",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
         {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],["ai",isMobile?"✦":"✦ "+t("project_ai_tab","AI")],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
           <button key={k} onClick={()=>setTab(k)} style={{padding:isMobile?"12px 14px":"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:isMobile?13:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s",flexShrink:0}}>{lbl}</button>
         ))}
