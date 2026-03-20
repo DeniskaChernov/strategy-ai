@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const esbuild = require('esbuild');
 
 fs.mkdirSync('public', { recursive: true });
-for (const f of ['global.css', 'landing.css']) {
+for (const f of ['global.css', 'landing.css', 'strategy-shell.css']) {
   fs.copyFileSync(path.join(__dirname, 'client', f), path.join(__dirname, 'public', f));
 }
 

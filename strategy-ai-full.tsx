@@ -30,6 +30,7 @@ import {
   deleteNotification,
 } from "./client/api";
 import { makeTfn } from "./client/i18n/makeTfn";
+import { StrategyShellSidebar, StrategyShellBg, type StrategyShellNav } from "./strategy-shell-sidebar";
 
 const TIERS={
   free:    {label:"Free",    price:"Бесплатно",  color:"#64748b",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
@@ -2750,8 +2751,8 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
 }
 
 // ── MapEditor ──
-function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false,aiChatMsgs,aiChatSetMsgs,focusNodeId=null,palette="indigo",onOpenContentPlanHub=null,onOpenContentPlanProject=null}){
-  const{t,lang}=useLang();
+function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false,aiChatMsgs,aiChatSetMsgs,focusNodeId=null,palette="indigo",onOpenContentPlanHub=null,onOpenContentPlanProject=null,onShellGlobalNav}){
+  const{t,lang,setLang}=useLang();
   const isMobile=useIsMobile();
   const[accHex,setAccHex]=useState({a1:"#5b6bc0",a2:"#7c8dd9"});
   useLayoutEffect(()=>{
@@ -3412,15 +3413,48 @@ ${ctx}
   const retrySave=async()=>{setSaveState("saving");try{await saveMap(project.id,{...mapData,nodes,edges,updatedAt:Date.now()});setSaveState("saved");}catch{setSaveState("error");}};
   const saveVersion=async()=>{if(!API_BASE||!project?.id||!mapData?.id)return;try{const lbl=t("version_save_label","Промежуточная версия")+" "+new Date().toLocaleString("ru",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});await apiFetch(`/api/projects/${project.id}/maps/${mapData.id}/versions`,{method:"POST",body:JSON.stringify({label:lbl,nodes,edges,ctx:mapData?.ctx||""})});addToast(t("version_saved","Версия сохранена ✓"),"success");}catch(e:any){addToast(e?.message||t("save_error","Ошибка"),"error");}};
 
-  return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
+  function handleShellNav(nav:StrategyShellNav){
+    if(nav==="ai"){setShowAI(true);return;}
+    if(nav==="scenarios"){setShowSim(true);return;}
+    if(nav==="timeline"){setShowGantt(true);return;}
+    if(nav==="insights"){setShowStats(true);return;}
+    if(nav==="settings"){onProfile();return;}
+    if(nav==="map")return;
+    if(nav==="team"){addToast(t("shell_team_hint","Участники проекта — в карточке проекта и в профиле."),"info");return;}
+    onShellGlobalNav?.(nav);
+  }
+  const shellUi=!!user&&!isMobile;
+
+  const _mapMain=(
+    <>
 {readOnly&&(
         <div style={{flexShrink:0,background:"rgba(148,163,184,.12)",borderBottom:"1px solid var(--border)",padding:"6px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontSize:12.5,color:"var(--text3)",fontWeight:600}}>
           <span>👁</span> {t("read_only_banner","Режим просмотра — вы можете просматривать карту, но не редактировать")}
         </div>
       )}
+      {shellUi&&(
+        <div className="sa-topbar">
+          <div className="tbl">
+            <div className="tbl-title">
+              <div className="tbt">{mapData?.name||t("shell_strategy_map","Карта стратегии")}</div>
+              <div className="tb-sub">{project?.name||""}</div>
+            </div>
+          </div>
+          <div className="tbr">
+            {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
+            {!readOnly&&(
+              <div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981"}}>
+                {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<>✗ {t("save_error","Ошибка")}</>:<>✓ {t("saved_short","Сохранено")}</>}
+              </div>
+            )}
+            {!readOnly&&user&&(
+              <button type="button" className="btn-ic" onClick={onProfile} title={t("profile_title","Профиль")} aria-label={t("profile_title","Профиль")}>{(user?.name||user?.email||"U")[0].toUpperCase()}</button>
+            )}
+          </div>
+        </div>
+      )}
       {/* ── TOOLBAR — 2 rows ── */}
-      <div style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--glass-border-accent,var(--border))",background:"var(--bg2)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:"0 1px 0 var(--glass-border-accent,var(--border))"}}>
+      <div className={shellUi?"sa-map-toolbar-rows":undefined} style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--glass-border-accent,var(--border))",background:shellUi?"transparent":"var(--bg2)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:shellUi?"none":"0 1px 0 var(--glass-border-accent,var(--border))"}}>
 
         {/* ROW 1 — primary actions + search */}
         <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
@@ -3470,19 +3504,23 @@ ${ctx}
 
           {/* RIGHT: user + save */}
           <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
-            {ib(false,"Переключить тему",onToggleTheme,theme==="dark"?<>☀️</>:<>🌙</>)}
-            {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
+            {!shellUi&&ib(false,"Переключить тему",onToggleTheme,theme==="dark"?<>☀️</>:<>🌙</>)}
+            {!shellUi&&API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
             {readOnly?(
               <div style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",fontSize:13,fontWeight:600,color:"var(--text4)"}}>{t("read_only","Только просмотр")}</div>
             ):(
               <>
+            {!shellUi&&(
             <button onClick={onProfile} title={t("profile_title","Профиль")} aria-label={t("profile_title","Профиль")}
               style={{width:32,height:32,borderRadius:"50%",border:`2px solid ${tier.color}55`,background:`linear-gradient(135deg,${tier.color}cc,${tier.color}44)`,color:"#fff",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
               {(user?.name||user?.email||"U")[0].toUpperCase()}
             </button>
+            )}
+            {!shellUi&&(
             <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981",transition:"color .25s ease, opacity .25s ease"}}>
               {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button className="btn-interactive" onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span style={{animation:"successPop .35s ease"}}>✓</span> {t("saved_short","Сохранено")}</>}
             </div>
+            )}
               </>
             )}
           </div>
@@ -3626,15 +3664,17 @@ ${ctx}
 
         </div>
       </div>
-      {/* canvas — фон канваса и точки как в strategy-reference.html (#canvas-wrap) */}
+      {/* canvas — в оболочке макета: .sa-screen-map + .sa-canvas-wrap (точки через :: при grid) */}
+      <div className="sa-screen-map screen on" style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",overflow:"hidden",position:"relative"}}>
       <div
-        className={"sa-map-canvas-wrap"+(bgMode==="grid"?" sa-map-dots":"")}
+        className={"sa-canvas-wrap"+(bgMode!=="grid"?" sa-canvas-no-dots":"")}
         style={{
           flex:1,
           position:"relative",
           overflow:"hidden",
-          ...(bgMode==="grid"?{background:"var(--map-canvas, var(--bg))"}:{}),
+          ...(bgMode==="grid"?{}:{}),
           ...(bgMode==="stars"&&theme==="dark"?{background:"var(--map-canvas, #08061a)"}:{}),
+          ...(bgMode==="none"?{background:"var(--bg)"}:{}),
         }}>
         {/* stars — только тёмная тема; SVG rect прозрачный иначе звёзды не видны */}
         {bgMode==="stars"&&theme==="dark"&&(
@@ -3836,13 +3876,50 @@ ${ctx}
             onFollowLink={async(n:any)=>{if(n.link)window.location.href=n.link;}}
           />
         )}
-        <div className="zoom-ctrl glass-card" style={{position:"absolute",bottom:28,left:28,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"10px 16px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",boxShadow:"var(--glass-shadow-accent,none),0 8px 32px rgba(0,0,0,.2)"}}>
+        <div className={"zoom-ctrl"+(shellUi?" map-toolbar":"")+" glass-card"} style={{position:"absolute",bottom:shellUi?20:28,left:shellUi?"50%":28,transform:shellUi?"translateX(-50%)":undefined,display:"flex",gap:8,alignItems:"center",zIndex:30,padding:"10px 16px",borderRadius:16,border:shellUi?"none":undefined,boxShadow:shellUi?undefined:"var(--glass-shadow-accent,none),0 8px 32px rgba(0,0,0,.2)"}}>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.min(3,view.zoom*1.2);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_in","Увеличить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
           <div style={{fontSize:14,color:"var(--text3)",fontWeight:700,minWidth:48,textAlign:"center"}}>{Math.round(view.zoom*100)}%</div>
           <button className="zoom-ctrl-btn" onClick={()=>{const nz=Math.max(.2,view.zoom*.83);viewRef.current={...viewRef.current,zoom:nz};setView(v=>({...v,zoom:nz}));}} title={t("zoom_out","Уменьшить")} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+          {shellUi&&(
+            <>
+              <div className="mt-sep" aria-hidden/>
+              <button type="button" className={"mt-btn"+(showAI?" on":"")} onClick={()=>setShowAI(a=>!a)} title={t("ai_consultant_hint","AI-консультант")}>✦</button>
+              <button type="button" className="mt-btn" onClick={fitView} title={t("fit_view_hint","Вписать карту в экран")}>⊡</button>
+            </>
+          )}
         </div>
       </div>
+      </div>
+    </>
+  );
+  return shellUi?(
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} data-palette={palette} style={{width:"100%",height:"100%",minHeight:"100vh",maxHeight:"100vh",display:"flex",flexDirection:"column",position:"relative",overflow:"hidden",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+      <StrategyShellBg/>
+      <div className="sa-app" style={{flex:1,minHeight:0,minWidth:0,display:"flex",overflow:"hidden",position:"relative",zIndex:1}}>
+        <StrategyShellSidebar
+          theme={theme}
+          onToggleTheme={onToggleTheme}
+          activeNav="map"
+          onNavigate={handleShellNav}
+          tierLabel={tier.label}
+          tierColor={tier.color}
+          onTierClick={onProfile}
+          lang={lang}
+          onLang={code=>setLang(code)}
+          userName={user?.name||""}
+          userEmail={user?.email||""}
+          scenarioCount={0}
+          onUserCard={onProfile}
+          onCrmClick={()=>addToast(t("shell_crm_soon","Интеграция CRM запланирована."),"info")}
+          showContentPlan={!!onOpenContentPlanHub}
+          onContentPlan={onOpenContentPlanHub||undefined}
+          t={t}
+        />
+        <div className="sa-main" style={{flex:1,minWidth:0,minHeight:0,display:"flex",flexDirection:"column",overflow:"hidden"}}>{_mapMain}</div>
+      </div>
     </div>
+  ):(
+    <div data-theme={theme} data-palette={palette} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>{_mapMain}</div>
   );
 }
 
@@ -4299,7 +4376,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
 
 // ── ProjectsPage ──
 function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onProfile,theme,onToggleTheme,aiChatMsgs,aiChatSetMsgs,onOpenContentPlanHub,onOpenContentPlanProject}){
-  const{t,lang}=useLang();
+  const{t,lang,setLang}=useLang();
   const isMobile=useIsMobile();
   const ROLES=getROLES(t);
   const[projects,setProjects]=useState([]);
@@ -4397,14 +4474,34 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const aiEdges=allMapsForAI.flatMap((m:any)=>m.edges||[]).slice(0,260);
   const aiCtx=`Портфель проектов пользователя: ${(projects||[]).slice(0,20).map((p:any)=>`«${p.name||"Проект"}»`).join(", ")}. Всего проектов: ${(projects||[]).length}. Всего карт загружено: ${allMapsForAI.length}.`;
 
-  return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+  function handleProjectsShellNav(nav:StrategyShellNav){
+    if(nav==="projects")return;
+    if(nav==="settings"){onProfile();return;}
+    if(nav==="map"){
+      if(lastMapData&&lastProj)onOpenMap(lastMapData,lastProj,false,false);
+      else if(lastProj)onSelectProject(lastProj);
+      else{setToast({msg:t("shell_open_map_hint","Создайте проект и откройте карту."),type:"error"});setTimeout(()=>setToast(null),3200);}
+      return;
+    }
+    if(nav==="contentPlan"){onOpenContentPlanHub?.();return;}
+    if(nav==="ai"){setShowAIHub(true);return;}
+    if(nav==="scenarios"){setToast({msg:t("shell_scenarios_hint","Откройте карту проекта — там доступна симуляция сценариев."),type:"info"});setTimeout(()=>setToast(null),3500);return;}
+    if(nav==="timeline"){setToast({msg:t("shell_timeline_hint","Откройте карту — диаграмма Gantt на панели инструментов."),type:"info"});setTimeout(()=>setToast(null),3500);return;}
+    if(nav==="insights"){setToast({msg:t("shell_insights_hint","Откройте карту — статистика на панели инструментов."),type:"info"});setTimeout(()=>setToast(null),3500);return;}
+    if(nav==="team"){setToast({msg:t("shell_team_hint","Участники отображаются в карточке каждого проекта."),type:"info"});setTimeout(()=>setToast(null),3500);return;}
+  }
+  const shellUi=!isMobile;
+  const scenarioBadgeCount=allMapsForAI.filter((m:any)=>m.isScenario).length;
+
+  const _projMain=(
+    <>
 {toast&&(
         <div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:9999,padding:"14px 24px",borderRadius:14,border:`1px solid ${toast.type==="error"?"rgba(239,68,68,.4)":"rgba(16,185,129,.4)"}`,background:toast.type==="error"?"rgba(239,68,68,.15)":"rgba(16,185,129,.15)",color:toast.type==="error"?"#f87171":"#34d399",fontSize:14,fontWeight:700,boxShadow:"0 8px 32px rgba(0,0,0,.3)",animation:"slideUp .3s ease",backdropFilter:"blur(12px)"}}>
           {toast.type==="error"?"⚠ ":"✓ "}{toast.msg}
         </div>
       )}
-      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.08) 0%,transparent 60%)",pointerEvents:"none"}}/>
+      {!shellUi&&<div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.08) 0%,transparent 60%)",pointerEvents:"none"}}/>}
+      {!shellUi&&(
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}>
           <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
@@ -4437,7 +4534,23 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           <button onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
         </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:isMobile?16:24,position:"relative",zIndex:5}}>
+      )}
+      {shellUi&&(
+        <div className="sa-topbar">
+          <div className="tbl">
+            <div className="tbl-title">
+              <div className="tbt">{t("your_projects","Мои проекты")}</div>
+              <div className="tb-sub">{myCount}{tier.projects==="∞"?"":" / "+tier.projects} · {tier.label}</div>
+            </div>
+          </div>
+          <div className="tbr" style={{flexWrap:"wrap",justifyContent:"flex-end"}}>
+            {onOpenContentPlanHub&&<MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={false}/>}
+            <button type="button" className="btn-ic" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")}>✦</button>
+            {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
+          </div>
+        </div>
+      )}
+      <div className={shellUi?"scr-inner":undefined} style={{flex:1,overflowY:"auto",padding:shellUi?"16px 18px":isMobile?16:24,position:"relative",zIndex:5,minHeight:0}}>
         <div style={{maxWidth:960,margin:"0 auto"}}>
           {isMobile&&onOpenContentPlanHub&&(
             <div style={{marginBottom:18}}>
@@ -4659,7 +4772,37 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           />
         </AiHubModal>
       )}
+    </>
+  );
+  return shellUi?(
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",height:"100%",minHeight:"100vh",maxHeight:"100vh",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif",overflow:"hidden"}}>
+      <StrategyShellBg/>
+      <div className="sa-app" style={{flex:1,minHeight:0,minWidth:0,display:"flex",overflow:"hidden",position:"relative",zIndex:1}}>
+        <StrategyShellSidebar
+          theme={theme}
+          onToggleTheme={onToggleTheme}
+          activeNav="projects"
+          onNavigate={handleProjectsShellNav}
+          tierLabel={tier.label}
+          tierColor={tier.color}
+          onTierClick={onProfile}
+          lang={lang}
+          onLang={code=>setLang(code)}
+          userName={user.name||""}
+          userEmail={user.email||""}
+          scenarioCount={scenarioBadgeCount}
+          onUserCard={onProfile}
+          onLogout={onLogout}
+          onCrmClick={()=>{setToast({msg:t("shell_crm_soon","Интеграция CRM запланирована."),type:"info"});setTimeout(()=>setToast(null),2800);}}
+          showContentPlan={!!onOpenContentPlanHub}
+          onContentPlan={onOpenContentPlanHub?()=>onOpenContentPlanHub():undefined}
+          t={t}
+        />
+        <div className="sa-main" style={{flex:1,minWidth:0,minHeight:0,display:"flex",flexDirection:"column",overflow:"hidden"}}>{_projMain}</div>
+      </div>
     </div>
+  ):(
+    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{_projMain}</div>
   );
 }
 
@@ -7451,6 +7594,10 @@ export default function App(){
                   setCpMaps(Array.isArray(ms)?ms:[]);
                   setScreen("contentPlanProject");
                 }catch{}
+              }}
+              onShellGlobalNav={(nav)=>{
+                if(nav==="projects"){setMapData(null);setProject(null);setScreen("projects");}
+                if(nav==="contentPlan")setScreen("contentPlanHub");
               }}
               aiChatMsgs={aiChatMsgs}
               aiChatSetMsgs={setAiChatMsgs}
