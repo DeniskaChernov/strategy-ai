@@ -252,7 +252,15 @@ body:has(.sa-ref-landing)::before{
 html:has(.sa-ref-landing),
 body:has(.sa-ref-landing){
   overflow-x:hidden !important;
+  overflow-y:hidden !important;
   max-width:100%;
+  width:100%;
+}
+body:has(.sa-ref-landing) #root,
+body:has(.sa-ref-landing) .screen-wrap{
+  overflow-x:hidden !important;
+  max-width:100%;
+  width:100%;
 }
 .sa-ref-landing.sa-strategy-ui.view.on.sa-v-landing{
   align-items:stretch !important;
@@ -269,6 +277,7 @@ body:has(.sa-ref-landing){
 }
 /* Навбар на всю ширину вьюпорта (раньше max-width:960 + центр давали «поля» и сдвиг) */
 #land-nav-fixed{
+  top:0 !important;
   left:0 !important;
   right:0 !important;
   transform:none !important;
@@ -278,6 +287,23 @@ body:has(.sa-ref-landing){
   flex-wrap:wrap;
   row-gap:10px;
   column-gap:12px;
+  z-index:600 !important;
+  /* Матовое стекло сразу и при прокрутке — как в shell */
+  background:rgba(9,7,22,.55) !important;
+  backdrop-filter:blur(26px) saturate(1.15) !important;
+  -webkit-backdrop-filter:blur(26px) saturate(1.15) !important;
+  border-bottom:.5px solid rgba(255,255,255,.1) !important;
+}
+body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
+  background:rgba(255,255,255,.62) !important;
+  border-bottom-color:rgba(104,80,220,.16) !important;
+}
+#land-nav-fixed.scrolled{
+  background:var(--sb) !important;
+  backdrop-filter:blur(28px) saturate(1.2) !important;
+  -webkit-backdrop-filter:blur(28px) saturate(1.2) !important;
+  box-shadow:0 1px 0 var(--b1),0 4px 24px rgba(0,0,0,.18) !important;
+  padding:10px 24px !important;
 }
 .sa-ref-landing .features-grid{
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr)) !important;

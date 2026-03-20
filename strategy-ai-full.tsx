@@ -660,50 +660,43 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
   );
 }
 
-// ── AuthModal ──
+// ── AuthModal (классы overlay/modal-box из strategy-reference / strategy-shell.css) ──
 function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitle}){
   const{lang,setLang,t}=useLang();
   const[tab,setTab]=useState(initialTab),[email,setEmail]=useState(""),[pw,setPw]=useState(""),[name,setName]=useState(""),[err,setErr]=useState(""),[loading,setLoading]=useState(false);
   const[closing,setClosing]=useState(false);
   const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
   async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
-  const inp={width:"100%",padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Inter',system-ui,sans-serif"};
+  const dk=theme==="dark"?"dk":"lt";
   return(
-    <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.6))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(16px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:"min(95vw,400px)",maxHeight:"90vh",overflowY:"auto",borderRadius:20}} onClick={e=>e.stopPropagation()}>
-        <div style={{padding:"18px 24px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",gap:6}}>
-            {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([t2,l])=>(
-              <button key={t2} onClick={()=>{setTab(t2);setErr("");}} style={{padding:"7px 18px",borderRadius:9,border:"none",background:tab===t2?"var(--accent-soft)":"transparent",color:tab===t2?"var(--accent-1)":"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{l}</button>
-            ))}
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            {/* Lang switcher */}
-            <div style={{display:"flex",alignItems:"center",gap:2,padding:"3px 4px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)"}}>
-              {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
-                <button key={code} onClick={()=>setLang(code)}
-                  style={{padding:"3px 8px",borderRadius:6,border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,letterSpacing:.8,cursor:"pointer",transition:"all .18s",
-                    background:lang===code?"var(--accent-soft)":"transparent",
-                    color:lang===code?"var(--accent-1)":"var(--text4)"}}>
-                  {label}
-                </button>
-              ))}
+    <div className={`sa-strategy-ui ${dk} sa-modal-host`} data-theme={theme}>
+      <div className={"overlay open"+(closing?" sa-overlay-fade-out":"")} style={{zIndex:1}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
+        <div className={"modal-box"+(closing?" sa-modal-shrink-out":"")} style={{width:"min(440px,calc(100vw - 32px))",maxWidth:"100%",boxSizing:"border-box",maxHeight:"88vh",overflowY:"auto",position:"relative",paddingTop:26}} onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+          {onClose&&<button type="button" className="modal-close" onClick={handleClose} aria-label={t("close","Закрыть")}>×</button>}
+          <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:14}}>
+            <div className="tabs" role="tablist">
+              <button type="button" role="tab" className={"tab"+(tab==="login"?" on":"")} onClick={()=>{setTab("login");setErr("");}}>{t("login","Войти")}</button>
+              <button type="button" role="tab" className={"tab"+(tab==="register"?" on":"")} onClick={()=>{setTab("register");setErr("");}}>{t("register","Регистрация")}</button>
             </div>
-            {onClose&&<button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{display:"flex",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:22,padding:3,gap:1}}>
+                {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
+                  <button key={code} type="button" className={"land-lang-btn"+(lang===code?" on":"")} onClick={()=>setLang(code)}>{label}</button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-        <div style={{padding:"20px 24px 24px"}}>
-          <div style={{textAlign:"center",marginBottom:22}}>
-            <img src="/logo.png" alt="Strategy AI" style={{width:48,height:48,objectFit:"contain",margin:"0 auto 12px",display:"block"}}/>
-            <div style={{fontSize:18,fontWeight:700,color:"var(--text)"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
-            {subtitle&&<div style={{fontSize:13,color:"var(--text4)",marginTop:6,lineHeight:1.5}}>{subtitle}</div>}
+          <div style={{textAlign:"center",marginBottom:20}}>
+            <div className="modal-gem" style={{marginLeft:"auto",marginRight:"auto"}}><img src="/logo.png" alt="" width={28} height={28} style={{objectFit:"contain"}}/></div>
+            <div id="auth-modal-title" className="modal-title" style={{marginTop:14}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
+            {subtitle&&<div className="modal-sub">{subtitle}</div>}
           </div>
-          {tab==="register"&&<input placeholder={t("name","Имя")} value={name} onChange={e=>setName(e.target.value)} style={inp}/>}
-          <input type="email" placeholder={t("email","Email")} value={email} onChange={e=>setEmail(e.target.value)} style={inp} onKeyDown={e=>e.key==="Enter"&&submit()}/>
-          <input type="password" placeholder={t("password","Пароль")} value={pw} onChange={e=>setPw(e.target.value)} style={{...inp,marginBottom:0}} onKeyDown={e=>e.key==="Enter"&&submit()}/>
-          {err&&<div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#f87171",fontSize:13}}>{err}</div>}
-          <button onClick={submit} disabled={loading} style={{width:"100%",marginTop:16,padding:"13px",borderRadius:11,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",opacity:loading?.7:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            {loading&&<div style={{width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTop:"2px solid #fff",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>}
+          {tab==="register"&&<input className="modal-inp" placeholder={t("name","Имя")} value={name} onChange={e=>setName(e.target.value)} autoComplete="name"/>}
+          <input type="email" className="modal-inp" placeholder={t("email","Email")} value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete="email"/>
+          <input type="password" className="modal-inp" placeholder={t("password","Пароль")} value={pw} onChange={e=>setPw(e.target.value)} style={{marginBottom:err?8:4}} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete={tab==="login"?"current-password":"new-password"}/>
+          {err?<div className="modal-err" style={{marginBottom:10}}>{err}</div>:null}
+          <button type="button" className="modal-btn" onClick={submit} disabled={loading} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,opacity:loading?.65:1,cursor:loading?"wait":"pointer"}}>
+            {loading&&<span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.35)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite",flexShrink:0}}/>}
             {tab==="login"?t("sign_in","Войти"):t("sign_up","Зарегистрироваться")}
           </button>
         </div>
@@ -765,17 +758,17 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",on
   const sel=TIERS[selected]||TIERS.pro;
   const selMkt=TIER_MKT[selected]||TIER_MKT.pro;
   return(
-    <div data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
-<div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(var(--accent-grid) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
-      <div style={{position:"fixed",width:800,height:800,borderRadius:"50%",background:`radial-gradient(circle,${selMkt.glow}18 0%,transparent 65%)`,top:"-20%",right:"-15%",filter:"blur(100px)",pointerEvents:"none",transition:"background 1.4s ease"}}/>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 32px",position:"relative",flexShrink:0,borderBottom:"1px solid var(--border)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 6px 24px var(--accent-glow)"}}>✦</div>
-          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",minHeight:"100vh",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
+      <StrategyShellBg/>
+      <div style={{position:"fixed",width:800,height:800,borderRadius:"50%",background:`radial-gradient(circle,${selMkt.glow}18 0%,transparent 65%)`,top:"-20%",right:"-15%",filter:"blur(100px)",pointerEvents:"none",transition:"background 1.4s ease",zIndex:0}}/>
+      <div className="sa-app-topbar" style={{zIndex:2}}>
+        <div className="land-logo" style={{gap:10}}>
+          <div className="land-gem" style={{width:34,height:34,borderRadius:11,fontSize:13}}>SA</div>
+          <span className="land-brand">Strategy AI</span>
         </div>
-        {!isNew&&onBack&&<button onClick={onBack} style={{padding:"7px 16px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,cursor:"pointer",fontWeight:500}}>{t("back_btn","← Назад")}</button>}
+        {!isNew&&onBack&&<button type="button" className="btn-g" onClick={onBack}>{t("back_btn","← Назад")}</button>}
       </div>
-      <div style={{position:"relative",maxWidth:1300,width:"100%",margin:"0 auto",padding:"0 24px 80px",flex:1}}>
+      <div style={{position:"relative",zIndex:1,maxWidth:1300,width:"100%",margin:"0 auto",padding:"0 24px 80px",flex:1}}>
         <div style={{textAlign:"center",padding:"40px 0 44px"}}>
           <h1 style={{fontSize:52,fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.05,marginBottom:10,animation:"slideUp .4s .1s both"}}>
             Выберите<br/>
@@ -3884,7 +3877,7 @@ ${ctx}
           {shellUi&&(
             <>
               <div className="mt-sep" aria-hidden/>
-              <button type="button" className={"mt-btn"+(showAI?" on":"")} onClick={()=>setShowAI(a=>!a)} title={t("ai_consultant_hint","AI-консультант")}>✦</button>
+              <button type="button" className={"mt-btn"+(showAI?" on":"")} onClick={()=>setShowAI(a=>!a)} title={t("ai_consultant_hint","AI-консультант (Ctrl+Shift+A)")} aria-label={t("ai_consultant_hint","AI-консультант")} style={{display:"inline-flex",alignItems:"center",gap:4,padding:"0 8px",minWidth:"auto"}}><span aria-hidden>✦</span><span style={{fontSize:10.5,fontWeight:700}}>AI</span></button>
               <button type="button" className="mt-btn" onClick={fitView} title={t("fit_view_hint","Вписать карту в экран")}>⊡</button>
             </>
           )}
@@ -3920,7 +3913,10 @@ ${ctx}
       </div>
     </div>
   ):(
-    <div data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden",boxSizing:"border-box"}}>{_mapMain}</div>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",height:"100vh",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden",boxSizing:"border-box"}}>
+      <StrategyShellBg/>
+      <div style={{flex:1,minHeight:0,position:"relative",zIndex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>{_mapMain}</div>
+    </div>
   );
 }
 
@@ -4066,40 +4062,35 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
   const aiCtx=`Портфель (контент-план): ${(projects||[]).slice(0,20).map((p:any)=>`«${p.name||"Проект"}»`).join(", ")}. Проектов: ${(projects||[]).length}, карт загружено: ${allMapsForAI.length}.`;
 
   return(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>
-      <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.1) 0%,transparent 60%)",pointerEvents:"none"}}/>
-      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
-        <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,minWidth:0}}>
-          <img src="/logo.png" alt="" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
-          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",overflow:"hidden",position:"relative"}}>
+      <StrategyShellBg/>
+      <div style={{flex:1,minHeight:0,minWidth:0,display:"flex",flexDirection:"column",position:"relative",zIndex:1,overflow:"hidden"}}>
+      <div className="sa-app-topbar">
+        <div className="atb-cluster" style={{minWidth:0}}>
+          <div className="land-logo" style={{gap:10}}>
+            <div className="land-gem" style={{width:32,height:32,borderRadius:10,fontSize:12}}>SA</div>
+            <span className="land-brand" style={{fontSize:15}}>Strategy AI</span>
+          </div>
         </div>
         {!isMobile&&(
           <div style={{flex:1,display:"flex",justifyContent:"center",minWidth:0}}>
             <MainWorkspaceNav mode="contentPlan" onStrategy={onBackToStrategy} onContentPlan={()=>{}} t={t} isMobile={false}/>
           </div>
         )}
-        <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0,flexWrap:"wrap",marginLeft:isMobile?0:"auto"}}>
-          <button type="button" onClick={onToggleTheme} title={t("toggle_theme_tip","Сменить тему оформления")} aria-label={t("toggle_theme_tip","Сменить тему оформления")} style={{padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6}}>
-            <span aria-hidden>{theme==="dark"?"☀️":"🌙"}</span>{!isMobile&&<span style={{fontSize:12,fontWeight:700}}>{t("theme_short","Тема")}</span>}
+        <div className="atb-cluster" style={{marginLeft:isMobile?0:"auto"}}>
+          <div className="tpill" onClick={onToggleTheme} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onToggleTheme();}} aria-label={t("toggle_theme_tip","Сменить тему оформления")}>
+            <div className={`tpi${theme==="dark"?" on":""}`}>☽</div>
+            <div className={`tpi${theme==="light"?" on":""}`}>☀</div>
+          </div>
+          <button type="button" className="btn-g" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{height:32,fontSize:11.5,padding:"0 12px",display:"inline-flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>✦</span>{!isMobile&&t("ai_hub_btn_short","AI-чат")}
           </button>
-          <button type="button" className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
-            <span aria-hidden>✦</span>{!isMobile&&<span style={{fontSize:12}}>{t("ai_hub_btn_short","AI-чат")}</span>}
+          {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
+          <button type="button" className="btn-g" onClick={onProfile} style={{height:32,padding:"0 12px",gap:8,display:"inline-flex",alignItems:"center",maxWidth:isMobile?44:220}}>
+            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</span>
+            {!isMobile&&<><span style={{fontSize:12,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase"}}>{tier.label}</span></>}
           </button>
-          {API_BASE&&(
-            <button type="button" className="btn-interactive" onClick={()=>setShowNotifs(true)} title={t("notifications_title","Уведомления")} aria-label={t("notifications_title","Уведомления")} style={{position:"relative",padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
-              <span aria-hidden>🔔</span>{!isMobile&&<span style={{fontSize:12}}>{t("notif_btn_short","Алерты")}</span>}
-              {notifUnread>0&&(
-                <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
-                  {notifUnread>99?"99+":notifUnread}
-                </span>
-              )}
-            </button>
-          )}
-          <button type="button" onClick={onProfile} title={t("profile_title","Профиль и тариф")} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
-            <div style={{width:24,height:24,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"var(--accent-on-bg)",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</div>
-            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{tier.label}</span></>}
-          </button>
-          <button type="button" onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
+          <button type="button" className="btn-g" onClick={onLogout} style={{height:32,fontSize:11.5,color:"var(--red)"}}>{t("logout","Выйти")}</button>
         </div>
       </div>
       {isMobile&&(
@@ -4109,9 +4100,9 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
       )}
       <div style={{flex:1,overflowY:"auto",padding:isMobile?16:28,position:"relative",zIndex:5}}>
         <div style={{maxWidth:"min(1240px,100%)",width:"100%",margin:"0 auto"}}>
-          <div className="glass-card" style={{marginBottom:24,padding:isMobile?"18px 16px":"24px 28px",borderRadius:18,border:"1px solid var(--glass-border-accent,var(--border))",background:"linear-gradient(135deg,var(--accent-soft),transparent)"}}>
+          <div className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1" style={{marginBottom:24,padding:isMobile?"18px 16px":"24px 28px",background:"linear-gradient(135deg,var(--accent-soft),transparent)"}}>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
-              <span style={{width:44,height:44,borderRadius:14,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 20px var(--accent-glow)"}}>✍️</span>
+              <span className="sa-cp-hub-hero-ic" style={{width:44,height:44,borderRadius:14,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 20px var(--accent-glow)"}}>✍️</span>
               <div style={{flex:1,minWidth:0}}>
                 <h1 style={{fontSize:isMobile?20:26,fontWeight:900,color:"var(--text)",letterSpacing:-.6,margin:0}}>{t("cp_hub_title","Контент-план")}</h1>
                 <div style={{fontSize:13.5,color:"var(--text4)",marginTop:4,maxWidth:"min(720px,100%)"}}>{t("cp_hub_subtitle","Отдельный рабочий режим: публикации и календарь по проектам из вашей стратегии. Шаги карт подтягиваются для привязки идей.")}</div>
@@ -4149,7 +4140,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
                 const nMaps=maps.length;
                 const nNodes=maps.reduce((acc:number,m:any)=>acc+(m.nodes?.length||0),0);
                 return(
-                  <button key={p.id} type="button" className="btn-interactive card-stagger" disabled={!tier.contentPlan} aria-label={tier.contentPlan?t("cp_card_aria_open","Открыть контент-план проекта {name}").replace("{name}",p.name||""):t("cp_card_aria_locked","Разблокировать Pro для контент-плана")}
+                  <button key={p.id} type="button" className="btn-interactive card-stagger sa-cp-hub-card" disabled={!tier.contentPlan} aria-label={tier.contentPlan?t("cp_card_aria_open","Открыть контент-план проекта {name}").replace("{name}",p.name||""):t("cp_card_aria_locked","Разблокировать Pro для контент-плана")}
                     onClick={()=>{if(!tier.contentPlan){onUpgrade&&onUpgrade();return;}onOpenProject(p,maps);}} style={{textAlign:"left",padding:"20px 22px",borderRadius:18,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",cursor:tier.contentPlan?"pointer":"not-allowed",opacity:tier.contentPlan?1:.78,display:"flex",flexDirection:"column",gap:12,animationDelay:`${Math.min(i,8)*0.05}s`}}>
                     <div style={{fontSize:16,fontWeight:900,color:"var(--text)",letterSpacing:-.3}}>{p.name||t("untitled","Без названия")}</div>
                     <div style={{fontSize:12.5,color:"var(--text5)",display:"flex",gap:12,flexWrap:"wrap"}}>
@@ -4215,7 +4206,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
           <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={t("cp_hub_title","Контент-план")} mapName="" userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
         </AiHubModal>
       )}
-    </div>
+    </div></div>
   );
 }
 
@@ -4257,65 +4248,59 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
   const aiCtx=`Контент-план проекта «${project?.name||"Проект"}». Карты: ${(maps||[]).length}. Шагов стратегии в контексте: ${aiNodes.length}.`;
 
   return(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>
-      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:10,padding:isMobile?"10px 14px":"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",flexWrap:"wrap"}}>
-        <button type="button" onClick={onBackToHub} className="btn-interactive" title={t("cp_back_hub_tip","К списку проектов в контент-плане")} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>
-          <span aria-hidden>←</span>{isMobile?t("cp_back_hub_short","Все"):<span>{t("cp_back_hub","Все проекты")}</span>}
-        </button>
-        <div style={{flex:1,minWidth:0,maxWidth:isMobile?"100%":"none",order:isMobile?3:undefined}}>
-          <div style={{fontSize:isMobile?15:17,fontWeight:900,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>✍️ {project?.name||t("untitled","Проект")}</div>
-          <div style={{fontSize:12,color:"var(--text5)"}}>{t("cp_project_sub","Контент-план и календарь")}</div>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",overflow:"hidden",position:"relative"}}>
+      <StrategyShellBg/>
+      <div style={{flex:1,minHeight:0,minWidth:0,display:"flex",flexDirection:"column",position:"relative",zIndex:1,overflow:"hidden"}}>
+      <div className="sa-app-topbar">
+        <div className="atb-cluster" style={{minWidth:0,flex:isMobile?"1 1 100%":undefined}}>
+          <button type="button" className="sa-back-ic" onClick={onBackToHub} title={t("cp_back_hub_tip","К списку проектов в контент-плане")} aria-label={t("cp_back_hub","Все проекты")}>←</button>
+          <div style={{minWidth:0,maxWidth:isMobile?"calc(100% - 48px)":"280px"}}>
+            <div className="tb-title" style={{fontSize:isMobile?14:15,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>✍️ {project?.name||t("untitled","Проект")}</div>
+            <div className="tb-sub">{t("cp_project_sub","Контент-план и календарь")}</div>
+          </div>
         </div>
         {!isMobile&&(
-          <div style={{flex:"1 1 200px",display:"flex",justifyContent:"center",minWidth:0,order:2}}>
+          <div style={{flex:"1 1 200px",display:"flex",justifyContent:"center",minWidth:0}}>
             <MainWorkspaceNav mode="contentPlan" onStrategy={onOpenStrategyProject} onContentPlan={()=>{}} t={t} isMobile={false}/>
           </div>
         )}
-        <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap",marginLeft:isMobile?0:"auto",order:isMobile?2:4}}>
-          <button type="button" onClick={onOpenStrategyProject} className="btn-interactive" title={t("cp_open_strategy_tip","Картами и шагами в проекте")} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:12,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:6}}>
-            <span aria-hidden>🗺</span>{isMobile?"":<span>{t("cp_open_strategy","Карты проекта")}</span>}
+        <div className="atb-cluster" style={{marginLeft:isMobile?0:"auto"}}>
+          <button type="button" className="btn-g" onClick={onOpenStrategyProject} title={t("cp_open_strategy_tip","Картами и шагами в проекте")} style={{height:32,fontSize:11.5,padding:"0 12px",display:"inline-flex",alignItems:"center",gap:6,color:"var(--acc)"}}>
+            <span aria-hidden>🗺</span>{isMobile?"":t("cp_open_strategy","Карты проекта")}
           </button>
-          <button type="button" onClick={onToggleTheme} title={t("toggle_theme_tip","Сменить тему оформления")} aria-label={t("toggle_theme_tip","Сменить тему оформления")} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6}}>
-            <span aria-hidden>{theme==="dark"?"☀️":"🌙"}</span>{!isMobile&&<span style={{fontSize:12,fontWeight:700}}>{t("theme_short","Тема")}</span>}
+          <div className="tpill" onClick={onToggleTheme} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onToggleTheme();}} aria-label={t("toggle_theme_tip","Сменить тему оформления")}>
+            <div className={`tpi${theme==="dark"?" on":""}`}>☽</div>
+            <div className={`tpi${theme==="light"?" on":""}`}>☀</div>
+          </div>
+          <button type="button" className="btn-g" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{height:32,fontSize:11.5,padding:"0 12px",display:"inline-flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>✦</span>{!isMobile&&t("ai_hub_btn_short","AI-чат")}
           </button>
-          <button type="button" className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
-            <span aria-hidden>✦</span>{!isMobile&&<span style={{fontSize:12}}>{t("ai_hub_btn_short","AI-чат")}</span>}
+          {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
+          <button type="button" className="btn-g" onClick={onProfile} style={{height:32,padding:"0 12px",gap:8,display:"inline-flex",alignItems:"center",maxWidth:isMobile?40:200}}>
+            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</span>
+            {!isMobile&&<><span style={{fontSize:12,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase"}}>{tier.label}</span></>}
           </button>
-          {API_BASE&&(
-            <button type="button" className="btn-interactive" onClick={()=>setShowNotifs(true)} title={t("notifications_title","Уведомления")} aria-label={t("notifications_title","Уведомления")} style={{position:"relative",padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800,display:"flex",alignItems:"center",gap:6}}>
-              <span aria-hidden>🔔</span>{!isMobile&&<span style={{fontSize:12}}>{t("notif_btn_short","Алерты")}</span>}
-              {notifUnread>0&&(
-                <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
-                  {notifUnread>99?"99+":notifUnread}
-                </span>
-              )}
-            </button>
-          )}
-          <button type="button" onClick={onProfile} title={t("profile_title","Профиль и тариф")} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 11px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
-            <div style={{width:26,height:26,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:"var(--accent-on-bg)",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</div>
-            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:12.5,color:"var(--text4)",fontWeight:700}}>{tier.label}</span></>}
-          </button>
-          <button type="button" onClick={onLogout} style={{padding:"6px 12px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
+          <button type="button" className="btn-g" onClick={onLogout} style={{height:32,fontSize:11.5,color:"var(--red)"}}>{t("logout","Выйти")}</button>
         </div>
       </div>
       {isMobile&&(
-        <div style={{padding:"8px 14px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",display:"flex",justifyContent:"center"}}>
+        <div style={{padding:"8px 14px",borderBottom:".5px solid var(--b1)",background:"var(--top)",display:"flex",justifyContent:"center"}}>
           <MainWorkspaceNav mode="contentPlan" onStrategy={onOpenStrategyProject} onContentPlan={()=>{}} t={t} isMobile={true}/>
         </div>
       )}
-      <div style={{flex:1,overflow:"auto",padding:isMobile?"12px 14px":"16px 22px"}}>
+      <div className="sa-page-reveal" style={{flex:1,overflow:"auto",padding:isMobile?"12px 14px":"18px 22px"}}>
         {!tier.contentPlan?(
-          <div className="glass-card" style={{textAlign:"center",padding:48,borderRadius:16,border:"1px dashed var(--border2)"}}>
-            <div style={{fontSize:36,marginBottom:10}}>🔒</div>
-            <div style={{fontSize:15,fontWeight:800}}>{t("content_plan_locked_title","Контент-план доступен на Pro")}</div>
-            <div style={{fontSize:13,color:"var(--text5)",marginTop:10,maxWidth:380,marginLeft:"auto",marginRight:"auto",lineHeight:1.5}}>{t("content_plan_locked_hint_inline","Оформите Pro в профиле — откроются календарь, привязка к шагам стратегии и AI-подсказки по ленте.")}</div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center",marginTop:20}}>
-              {onUpgrade&&<button type="button" className="btn-interactive" onClick={onUpgrade} style={{padding:"11px 22px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontWeight:800,fontSize:14,boxShadow:"0 4px 18px var(--accent-glow)"}}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
-              <button type="button" className="btn-interactive" onClick={onOpenStrategyProject} style={{padding:"11px 18px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("cp_back_to_maps_only","Только карты проекта")}</button>
+          <div className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1" style={{textAlign:"center",padding:"40px 28px",maxWidth:440,margin:"0 auto",borderStyle:"dashed"}}>
+            <div style={{fontSize:40,marginBottom:12,animation:"float 3s ease-in-out infinite"}}>🔒</div>
+            <div className="modal-title" style={{marginBottom:8}}>{t("content_plan_locked_title","Контент-план доступен на Pro")}</div>
+            <div className="modal-sub" style={{marginBottom:22}}>{t("content_plan_locked_hint_inline","Оформите Pro в профиле — откроются календарь, привязка к шагам стратегии и AI-подсказки по ленте.")}</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:12,justifyContent:"center"}}>
+              {onUpgrade&&<button type="button" className="btn-p lg" onClick={onUpgrade}>{t("upgrade_to_pro","Перейти на Pro")}</button>}
+              <button type="button" className="btn-g lg" style={{minWidth:200,justifyContent:"center"}} onClick={onOpenStrategyProject}>{t("cp_back_to_maps_only","Только карты проекта")}</button>
             </div>
           </div>
         ):(
-          <ContentPlanTab projectId={project.id} projectName={project.name||""} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/>
+          <div className="sa-page-reveal sa-pr-d1"><ContentPlanTab projectId={project.id} projectName={project.name||""} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/></div>
         )}
       </div>
 
@@ -4370,7 +4355,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
           <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={project?.name||""} mapName={t("cp_doc_suffix","Контент-план")} userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
         </AiHubModal>
       )}
-    </div>
+    </div></div>
   );
 }
 
@@ -4500,12 +4485,13 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           {toast.type==="error"?"⚠ ":"✓ "}{toast.msg}
         </div>
       )}
-      {!shellUi&&<div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.08) 0%,transparent 60%)",pointerEvents:"none"}}/>}
       {!shellUi&&(
-      <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
-        <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}>
-          <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain",flexShrink:0}}/>
-          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
+      <div className="sa-app-topbar">
+        <div className="atb-cluster" style={{minWidth:0}}>
+          <div className="land-logo" style={{gap:10}}>
+            <div className="land-gem" style={{width:32,height:32,borderRadius:10,fontSize:12}}>SA</div>
+            <span className="land-brand" style={{fontSize:15}}>Strategy AI</span>
+          </div>
         </div>
         {!isMobile&&onOpenContentPlanHub&&(
           <div style={{flex:1,display:"flex",justifyContent:"center",minWidth:0}}>
@@ -4514,24 +4500,15 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
         )}
         <div style={{display:"flex",alignItems:"center",gap:isMobile?6:8,flexShrink:0}}>
           <button onClick={onToggleTheme} style={{padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{theme==="dark"?"☀️":"🌙"}</button>
-          <button className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)") } style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:800}}>
-            ✦
+          <button type="button" className="btn-interactive" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{padding:"6px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800,display:"inline-flex",alignItems:"center",gap:6}}>
+            <span aria-hidden>✦</span>{t("ai_hub_btn_short","AI-чат")}
           </button>
-          {API_BASE&&(
-            <button className="btn-interactive" onClick={()=>setShowNotifs(true)} title={t("notifications_title","🔔 Уведомления")} style={{position:"relative",padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,fontWeight:800}}>
-              🔔
-              {notifUnread>0&&(
-                <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
-                  {notifUnread>99?"99+":notifUnread}
-                </span>
-              )}
-            </button>
-          )}
-          <button onClick={onProfile} style={{display:"flex",alignItems:"center",gap:isMobile?4:8,padding:"6px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer"}}>
-            <div style={{width:24,height:24,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:900,color:"var(--accent-on-bg)",flexShrink:0,boxShadow:"0 2px 10px var(--accent-glow)"}}>{(user.name||user.email)[0].toUpperCase()}</div>
-            {!isMobile&&<><span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:13.5,color:"var(--text4)",fontWeight:700}}>{tier.label}</span></>}
+          {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
+          <button type="button" className="btn-g" onClick={onProfile} style={{height:32,padding:"0 12px",gap:8,display:"inline-flex",alignItems:"center",maxWidth:isMobile?44:220}}>
+            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</span>
+            {!isMobile&&<><span style={{fontSize:12,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase"}}>{tier.label}</span></>}
           </button>
-          <button onClick={onLogout} style={{padding:"6px 14px",borderRadius:9,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("logout","Выйти")}</button>
+          <button type="button" className="btn-g" onClick={onLogout} style={{height:32,fontSize:11.5,color:"var(--red)"}}>{t("logout","Выйти")}</button>
         </div>
       </div>
       )}
@@ -4545,8 +4522,10 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           </div>
           <div className="tb-r" style={{flexWrap:"wrap",justifyContent:"flex-end"}}>
             {onOpenContentPlanHub&&<MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={false}/>}
-            <button type="button" className="btn-ic" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")}>✦</button>
-            {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
+            <button type="button" className="btn-g" onClick={()=>setShowAIHub(true)} title={t("ai_hub_title","✦ AI (единый чат)")} style={{height:32,fontSize:11.5,padding:"0 12px",display:"inline-flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}>
+              <span aria-hidden>✦</span>{t("ai_hub_btn_short","AI-чат")}
+            </button>
+            {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
           </div>
         </div>
       )}
@@ -4803,18 +4782,25 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
       </div>
     </div>
   ):(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>{_projMain}</div>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",overflow:"hidden",position:"relative"}}>
+      <StrategyShellBg/>
+      <div style={{flex:1,minHeight:0,minWidth:0,display:"flex",flexDirection:"column",position:"relative",zIndex:1,overflow:"hidden"}}>{_projMain}</div>
+    </div>
   );
 }
 
-function NotifBell({unread,onClick}:{unread:number,onClick:()=>void}){
+function NotifBell({unread,onClick,className,showLabel}:{unread:number;onClick:()=>void;className?:string;showLabel?:boolean}){
   const{t}=useLang();
   if(!API_BASE)return null;
+  const isIc=className?.includes("btn-ic");
+  const lbl=t("notifications_short","Уведомления");
   return(
-    <button className="btn-interactive" onClick={onClick} title={t("notifications_title","Уведомления")} style={{position:"relative",padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,fontWeight:800}}>
-      •
+    <button type="button" className={className||"btn-interactive"} onClick={onClick} title={t("notifications_title","Уведомления")} aria-label={t("notifications_title","Уведомления")}
+      style={isIc?{position:"relative"}:{position:"relative",padding:showLabel?"6px 12px":"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,fontWeight:800,display:"inline-flex",alignItems:"center",gap:6}}>
+      <span aria-hidden style={{fontSize:isIc?15:16,lineHeight:1}}>🔔</span>
+      {showLabel&&!isIc&&<span style={{fontSize:11,fontWeight:700,maxWidth:80,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lbl}</span>}
       {unread>0&&(
-        <span style={{position:"absolute",top:-6,right:-6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
+        <span style={{position:"absolute",top:isIc?4: -6,right:isIc?4: -6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
           {unread>99?"99+":unread}
         </span>
       )}
@@ -5465,10 +5451,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     const prog=ns.length?Math.round(ns.reduce((s,n)=>s+(n.progress||0),0)/ns.length):0;
     const overdue=ns.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
     return(
-      <div className="card-stagger card-interactive" style={{padding:"20px 22px",background:"var(--card)",border:`1px solid ${isSc?"rgba(139,92,246,.2)":"var(--border)"}`,borderRadius:18,cursor:"pointer",position:"relative",animationDelay:`${staggerIndex*0.05}s`}}
-        onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}
-        onMouseOver={e=>{e.currentTarget.style.borderColor="var(--accent-1)";}}
-        onMouseOut={e=>{e.currentTarget.style.borderColor=isSc?"rgba(139,92,246,.2)":"var(--border)";}}>
+      <div className={"card-stagger sa-map-card"+(isSc?" sa-map-card--sc":"")} style={{padding:"20px 22px",cursor:"pointer",animationDelay:`${staggerIndex*0.05}s`,borderColor:isSc?"rgba(139,92,246,.35)":undefined}}
+        onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
           <div style={{width:34,height:34,borderRadius:9,background:"var(--accent-soft)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,border:"1px solid var(--glass-border-accent,var(--border))"}}>
             {isSc?"⎇":"🗺️"}
@@ -5497,16 +5481,17 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   }
 
   return(
-    <div data-theme={theme} style={{minHeight:"100vh",background:"var(--bg)",color:"var(--text)",fontFamily:"'Inter',system-ui,sans-serif"}}>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{minHeight:"100vh",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflowX:"hidden"}}>
+      <StrategyShellBg/>
+      <div style={{position:"relative",zIndex:1,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
 {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
 
-      {/* Header */}
-      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"16px 24px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:isMobile?"1 1 100%":"1 1 auto",maxWidth:isMobile?"100%":"44%"}}>
-          <button onClick={onBack} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text3)";}}>←</button>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:isMobile?15:16,fontWeight:900,color:"var(--text)",letterSpacing:-.2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{proj.name||"Проект"}</div>
-            <div style={{fontSize:isMobile?12:13,color:"var(--text5)",marginTop:2}}>{regularMaps.length} карт • {scenarios.length} сцен. • {(proj.members||[]).length} уч.</div>
+      <div className="sa-app-topbar">
+        <div className="atb-cluster" style={{minWidth:0,flex:isMobile?"1 1 100%":"1 1 auto",maxWidth:isMobile?"100%":"46%"}}>
+          <button type="button" className="sa-back-ic" onClick={onBack} aria-label={t("back_btn","Назад")}>←</button>
+          <div style={{minWidth:0}}>
+            <div className="tb-title" style={{fontSize:isMobile?14:15,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{proj.name||"Проект"}</div>
+            <div className="tb-sub">{regularMaps.length} карт • {scenarios.length} сцен. • {(proj.members||[]).length} уч.</div>
           </div>
         </div>
         {!isMobile&&onOpenContentPlanHub&&(
@@ -5514,43 +5499,44 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
             <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={false}/>
           </div>
         )}
-        <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0,marginLeft:isMobile?"auto":undefined}}>
-          <button onClick={onToggleTheme} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";}}>{theme==="dark"?"☀️":"🌙"}</button>
-          {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
-          <button onClick={onProfile} style={{width:40,height:40,minWidth:44,minHeight:44,borderRadius:"50%",border:"2px solid var(--accent-1)",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 12px var(--accent-glow)",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.transform="scale(1.05)";}} onMouseOut={e=>{e.currentTarget.style.transform="none";}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
+        <div className="atb-cluster" style={{marginLeft:isMobile?"auto":undefined}}>
+          <div className="tpill" onClick={onToggleTheme} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onToggleTheme();}} aria-label={t("toggle_theme","Тема")}>
+            <div className={`tpi${theme==="dark"?" on":""}`}>☽</div>
+            <div className={`tpi${theme==="light"?" on":""}`}>☀</div>
+          </div>
+          {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
+          <button type="button" className="btn-ic" onClick={onProfile} title={t("profile_title","Профиль")} aria-label={t("profile_title","Профиль")} style={{fontSize:14,fontWeight:900}}>{(user.name||user.email||"U")[0].toUpperCase()}</button>
         </div>
       </div>
       {isMobile&&onOpenContentPlanHub&&(
-        <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border)",background:"var(--bg2)"}}>
+        <div style={{padding:"10px 16px",borderBottom:".5px solid var(--b1)",background:"var(--top)",display:"flex",justifyContent:"center"}}>
           <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={true}/>
         </div>
       )}
 
-      {/* Stats bar */}
       {totalNodes>0&&(
-        <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:isMobile?"12px 16px":"14px 24px",display:"flex",gap:isMobile?16:32,flexWrap:"wrap"}}>
+        <div className="sa-proj-stats sa-page-reveal sa-pr-d1">
           {[
-            {label:"Шагов всего",val:totalNodes,color:"var(--accent-1)"},
-            {label:"Завершено",val:`${doneNodes} (${totalNodes?Math.round(doneNodes/totalNodes*100):0}%)`,color:"#10b981"},
-            {label:t("avg_prog","Средний прогресс"),val:`${avgProgress}%`,color:"var(--accent-2)"},
-            ...(overdueCount>0?[{label:t("overdue","Просрочено"),val:overdueCount,color:"#ef4444"}]:[]),
+            {label:"Шагов всего",val:totalNodes,color:"var(--acc)"},
+            {label:"Завершено",val:`${doneNodes} (${totalNodes?Math.round(doneNodes/totalNodes*100):0}%)`,color:"var(--green)"},
+            {label:t("avg_prog","Средний прогресс"),val:`${avgProgress}%`,color:"var(--acc2)"},
+            ...(overdueCount>0?[{label:t("overdue","Просрочено"),val:overdueCount,color:"var(--red)"}]:[]),
           ].map(s=>(
-            <div key={s.label}>
-              <div style={{fontSize:12.5,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.5,marginBottom:2}}>{s.label}</div>
-              <div style={{fontSize:14,fontWeight:900,color:s.color}}>{s.val}</div>
+            <div key={s.label} className="sps-block">
+              <div className="sps-lbl">{s.label}</div>
+              <div className="sps-val" style={{color:s.color}}>{s.val}</div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Tabs */}
-      <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--border)",padding:isMobile?"0 16px":"0 24px",background:"var(--bg2)",overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
+      <div className="sa-proj-tabs sa-page-reveal sa-pr-d2" role="tablist">
         {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],["ai",isMobile?"✦":"✦ "+t("project_ai_tab","AI")],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
-          <button key={k} onClick={()=>setTab(k)} style={{padding:isMobile?"12px 14px":"14px 20px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:isMobile?13:14,fontWeight:tab===k?800:500,cursor:"pointer",borderBottom:tab===k?"3px solid var(--accent-1)":"3px solid transparent",marginBottom:-1,transition:"all .15s",flexShrink:0}}>{lbl}</button>
+          <button key={k} type="button" role="tab" aria-selected={tab===k} className={tab===k?"on":""} onClick={()=>setTab(k)}>{lbl}</button>
         ))}
       </div>
 
-      <div style={{maxWidth:1000,margin:"0 auto",padding:isMobile?"24px 20px":"36px 32px"}}>
+      <div className="sa-page-reveal sa-pr-d3" style={{maxWidth:1000,margin:"0 auto",padding:isMobile?"24px 20px":"36px 32px",flex:1}}>
         {/* Maps Tab */}
         {tab==="maps"&&(
           <div>
@@ -5807,6 +5793,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -6618,18 +6605,22 @@ function SplashScreen({onDone,theme,authReady=false}){
     },300);
     return()=>clearTimeout(tid);
   },[]);
+  const dk=theme==="dark"?"dk":"lt";
   return(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg,#070b14)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif"}}>
-<div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
-      <div style={{animation:"float 3s ease infinite",marginBottom:32}}>
-        <img src="/logo.png" alt="Strategy AI" style={{width:96,height:96,objectFit:"contain"}}/>
+    <div className={"sa-strategy-ui "+dk} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
+      <StrategyShellBg/>
+      <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
+        <div style={{animation:"float 3s ease infinite",marginBottom:28}}>
+          <div className="modal-gem" style={{width:88,height:88,borderRadius:20,marginBottom:0}}>
+            <img src="/logo.png" alt="Strategy AI" style={{width:44,height:44,objectFit:"contain"}}/>
+          </div>
+        </div>
+        <div className="modal-title" style={{fontSize:"clamp(26px,5vw,34px)",marginBottom:8,animation:"slideUp .5s ease"}}>Strategy AI</div>
+        <div style={{width:240,maxWidth:"min(260px,72vw)",height:3,borderRadius:2,background:"var(--inp)",border:".5px solid var(--b1)",overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,var(--acc),var(--acc2))",borderRadius:2,transition:"width .1s linear"}}/>
+        </div>
+        <div className="modal-sub" style={{marginTop:12,marginBottom:0,fontWeight:600}}>{pct < 100 ? t("loading",t("loading_short","Загрузка…")) : "✓"}</div>
       </div>
-      <div style={{fontSize:36,fontWeight:900,color:"var(--text,#e2e8f0)",letterSpacing:-1.5,marginBottom:6,animation:"slideUp .5s ease"}}>Strategy AI</div>
-      
-      <div style={{width:240,height:3,borderRadius:2,background:"rgba(99,102,241,.15)",overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${pct}%`,background:"var(--gradient-accent)",borderRadius:2,transition:"width .1s linear"}}/>
-      </div>
-      <div style={{marginTop:10,fontSize:13,color:"var(--text4)",fontWeight:600}}>{pct < 100 ? t("loading",t("loading_short","Загрузка…")) : "Готово ✓"}</div>
     </div>
   );
 }
@@ -6688,70 +6679,42 @@ function LandingPage({onGetStarted,onSignIn,onToggleTheme,theme,lang="ru",onChan
     </>
   );
 }
-// ── WelcomeScreen (Auth) ──
+// ── WelcomeScreen — тот же визуальный язык, что лендинг / strategy-reference ──
 function WelcomeScreen({onLogin,onRegister,onBack,theme}){
   const{t}=useLang();
   const isMobile=useIsMobile();
   const cosmic=theme==="dark";
   return(
-    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:cosmic?"var(--bg)":"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
       <StrategyShellBg/>
-      {cosmic?(
-        <>
-          <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
-            <SparklesCanvas density={150} speed={0.38} minSz={0.3} maxSz={1.05} color="#ffffff" style={{opacity:.35}}/>
-          </div>
-        </>
-      ):(
-        <>
-          <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px)",backgroundSize:"50px 50px",pointerEvents:"none"}}/>
-          <div style={{position:"absolute",width:700,height:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 65%)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",filter:"blur(80px)",pointerEvents:"none"}}/>
-        </>
-      )}
-      {/* Back button */}
-      <button onClick={onBack} style={{position:"absolute",top:24,left:24,zIndex:2,display:"flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text2)";}}>{t("back_btn","← Назад")}</button>
-      {/* Auth card */}
-      <div style={{width:"min(96vw,440px)",padding:isMobile?16:0,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)",position:"relative",zIndex:1}}>
-        {/* Logo */}
-        <div style={{textAlign:"center",marginBottom:32}}>
-          <img src="/logo.png" alt="Strategy AI" style={{width:80,height:80,objectFit:"contain",margin:"0 auto 16px",display:"block",animation:"float 3s ease infinite"}}/>
-          <div style={{fontSize:28,fontWeight:900,color:"var(--text)",letterSpacing:-1,marginBottom:6}}>Strategy AI</div>
-          <div style={{fontSize:14,color:"var(--text3)"}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
+      {cosmic&&(
+        <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
+          <SparklesCanvas density={150} speed={0.38} minSz={0.3} maxSz={1.05} color="#ffffff" style={{opacity:.32}}/>
         </div>
-        {/* Card */}
-        <div style={{background:"var(--surface2)",borderRadius:24,border:"1px solid var(--border)",padding:isMobile?24:36,backdropFilter:"blur(20px)"}}>
-          {/* Buttons */}
-          <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
-            <button onClick={onRegister}
-              style={{padding:"16px",borderRadius:14,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg,#fff)",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 10px 32px var(--accent-glow)",transition:"all .2s",letterSpacing:-.2}}
-              onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 16px 44px var(--accent-glow),0 12px 40px rgba(104,54,245,.45)";}}
-              onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 10px 32px var(--accent-glow)";}}>
-              {t("ws_start_btn","Начать бесплатно ✦")}
-            </button>
-            <button onClick={onLogin}
-              style={{padding:"15px",borderRadius:14,border:"1.5px solid var(--border2)",background:"var(--surface)",color:"var(--text)",fontSize:15,fontWeight:700,cursor:"pointer",transition:"all .2s",letterSpacing:-.2}}
-              onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.borderColor="var(--accent-1)";}}
-              onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border2)";}}>
-              {t("ws_login_btn","Уже есть аккаунт — Войти →")}
-            </button>
+      )}
+      <button type="button" className="btn-g" onClick={onBack} style={{position:"absolute",top:20,left:20,zIndex:2}}>{t("back_btn","← Назад")}</button>
+      <div style={{width:"100%",maxWidth:460,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
+        <div style={{textAlign:"center",marginBottom:22}}>
+          <img src="/logo.png" alt="Strategy AI" style={{width:72,height:72,objectFit:"contain",margin:"0 auto 14px",display:"block",animation:"float 3s ease infinite"}}/>
+          <div className="modal-title" style={{fontSize:"clamp(22px,4vw,28px)",marginBottom:8}}>Strategy AI</div>
+          <div className="modal-sub" style={{marginBottom:0}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
+        </div>
+        <div className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
+          <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:22}}>
+            <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={onRegister}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
+            <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={onLogin}>{t("ws_login_btn","Уже есть аккаунт — Войти →")}</button>
           </div>
-          {/* Divider */}
-          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:24}}>
-            <div style={{flex:1,height:1,background:"var(--divider)"}}/>
-            <span style={{fontSize:13,color:"var(--text4)",fontWeight:600,letterSpacing:.5}}>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span>
-            <div style={{flex:1,height:1,background:"var(--divider)"}}/>
-          </div>
-          {/* Features grid */}
-          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:12}}>
+          <div className="modal-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
+          <div className="sa-ws-feat-grid" style={{marginTop:18}}>
             {[["🗺",t("ws_feat1","Карты целей")],["✦",t("ws_feat2","AI советник")],["📅",t("ws_feat3","Gantt-план")],["⬇",t("ws_feat4","PNG/JSON экспорт")],["⎇",t("ws_feat5","1 сценарий")],["📌",t("ws_feat6","До 5 шагов")]].map(([ic,lbl])=>(
-              <div key={lbl} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:11,background:"var(--surface)",border:"1px solid var(--border)"}}>
-                <span style={{fontSize:16,flexShrink:0}}>{ic}</span>
-                <span style={{fontSize:13.5,color:"var(--text2)",fontWeight:600}}>{lbl}</span>
+              <div key={lbl} className="sa-ws-feat">
+                <span className="sf-ic" aria-hidden>{ic}</span>
+                <span className="sf-txt">{lbl}</span>
               </div>
             ))}
           </div>
         </div>
-        <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"var(--text4)"}}>
+        <div className="modal-sub" style={{textAlign:"center",marginTop:18,marginBottom:0,fontSize:12}}>
           {t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
         </div>
       </div>
@@ -7116,7 +7079,12 @@ export default function App(){
 <OfflineBanner/>
       <>
         {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>prev==="projects"?prev:"landing")} theme={theme} authReady={authChecked}/>}
-        {screen==="landing"&&<div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}><LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onToggleTheme={toggleTheme} onSignIn={()=>{setScreen("welcome");setAuthTab("login");setShowAuth(true);}} onGetStarted={()=>setScreen("welcome")}/></div>}
+        {screen==="landing"&&(
+          <div className="screen-enter" style={{height:"100%",minHeight:"100vh",overflow:"hidden",position:"relative"}}>
+            <LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onToggleTheme={toggleTheme} onSignIn={()=>{setAuthTab("login");setShowAuth(true);}} onGetStarted={()=>{setShowAuth(false);setScreen("welcome");}}/>
+            {showAuth&&<AuthModal initialTab={authTab} theme={theme} onClose={()=>setShowAuth(false)} onAuth={handleAuth}/>}
+          </div>
+        )}
         {screen==="sharedMap"&&sharedMapData&&(
           <MapEditor
             user={null} mapData={sharedMapData.map} project={{name:sharedMapData.projectName||""}}

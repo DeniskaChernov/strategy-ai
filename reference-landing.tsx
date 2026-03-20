@@ -35,7 +35,7 @@ export function ReferenceLandingView({
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
-    document.body.style.overflow = "auto";
+    /* Скролл только у .sa-ref-landing; body остаётся overflow:hidden (#root) — иначе два вертикальных скролла */
     const el = rootRef.current;
     const onScroll = () => {
       const top = el ? el.scrollTop : 0;
@@ -44,7 +44,6 @@ export function ReferenceLandingView({
     onScroll();
     el?.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      document.body.style.overflow = "hidden";
       el?.removeEventListener("scroll", onScroll);
     };
   }, []);
@@ -81,7 +80,7 @@ export function ReferenceLandingView({
       <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", opacity: theme === "dark" ? 0.45 : 0.12 }}>
         <canvas id="stars-canvas" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden/>
       </div>
-      <nav id="land-nav-fixed" className={navScrolled ? "scrolled" : ""} style={{ position: "fixed" }}>
+      <nav id="land-nav-fixed" className={navScrolled ? "scrolled" : ""} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 600 }}>
         <div className="land-logo">
           <div className="land-gem">SA</div>
           <span className="land-brand">Strategy AI</span>

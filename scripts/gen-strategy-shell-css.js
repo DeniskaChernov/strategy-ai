@@ -91,6 +91,118 @@ const appOverrides = `
 /* Выход — без конфликта с .lang-btn (flex:1) */
 .sa-shell-logout{margin:0 12px 12px;align-self:stretch;padding:8px 10px;border-radius:8px;border:.5px solid var(--b1);background:transparent;color:var(--t3);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .18s,color .18s}
 .sa-shell-logout:hover{background:var(--rowh);color:var(--t2)}
+
+/* Модалки React: хост без flex-column корня .sa-strategy-ui */
+.sa-strategy-ui.sa-modal-host{
+  position:fixed!important;
+  inset:0!important;
+  z-index:220!important;
+  display:block!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+  background:transparent!important;
+  pointer-events:none!important;
+}
+.sa-strategy-ui.sa-modal-host > .overlay.open{pointer-events:all!important}
+.sa-strategy-ui .overlay.sa-overlay-fade-out{background:rgba(0,0,0,0)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:background .22s ease,backdrop-filter .22s ease}
+.sa-strategy-ui .modal-box.sa-modal-shrink-out{opacity:0!important;transform:scale(.93) translateY(16px)!important;transition:all .22s cubic-bezier(.4,0,.2,1)!important}
+
+/* Статичная стеклянная панель (welcome, карточки) */
+.sa-strategy-ui .sa-ref-panel{
+  background:var(--sb);
+  backdrop-filter:blur(44px) saturate(1.1);
+  -webkit-backdrop-filter:blur(44px) saturate(1.1);
+  border:.5px solid var(--b2);
+  border-radius:20px;
+  padding:28px;
+  box-shadow:0 28px 70px rgba(0,0,0,.42);
+}
+.sa-strategy-ui.lt .sa-ref-panel{box-shadow:0 28px 70px rgba(78,55,180,.22)}
+
+/* Сетка фич на welcome — как мини feat-card */
+.sa-ws-feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px}
+.sa-ws-feat{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;
+  background:var(--card);border:.5px solid var(--b1);transition:border-color .2s,transform .2s,box-shadow .2s;
+  box-shadow:var(--shc);
+}
+.sa-ws-feat:hover{border-color:var(--bh);transform:translateY(-2px);box-shadow:var(--shh)}
+.sa-ws-feat .sf-ic{font-size:16px;line-height:1;flex-shrink:0}
+.sa-ws-feat .sf-txt{font-size:12.5px;font-weight:600;color:var(--t2);line-height:1.35}
+
+/* Топбар полноэкранных экранов без shell — как sa-topbar */
+.sa-app-topbar{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;row-gap:10px;
+  padding:11px 18px;background:var(--top);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+  border-bottom:.5px solid var(--b1);flex-shrink:0;position:relative;z-index:10;
+}
+.sa-app-topbar .atb-cluster{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sa-strategy-ui.lt .sa-app-topbar{box-shadow:0 1px 0 rgba(104,80,220,.14),0 4px 20px rgba(78,55,180,.06)}
+
+/* Появление контента страницы */
+@keyframes sa-fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.sa-page-reveal{animation:sa-fade-up .5s cubic-bezier(.22,1,.36,1) both}
+.sa-page-reveal.sa-pr-d1{animation-delay:.07s}
+.sa-page-reveal.sa-pr-d2{animation-delay:.14s}
+.sa-page-reveal.sa-pr-d3{animation-delay:.21s}
+
+/* Панель референса — лёгкий lift при hover */
+.sa-ref-panel{transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s ease,border-color .25s ease}
+.sa-ref-panel.sa-ref-panel--lift:hover{transform:translateY(-3px);box-shadow:0 32px 78px rgba(0,0,0,.5);border-color:var(--bh)}
+.sa-strategy-ui.lt .sa-ref-panel.sa-ref-panel--lift:hover{box-shadow:0 32px 78px rgba(78,55,180,.28)}
+
+/* Карточка карты проекта — как proj-card */
+.sa-map-card{
+  position:relative;overflow:hidden;border-radius:16px!important;border:.5px solid var(--b1)!important;
+  background:var(--card)!important;box-shadow:var(--shc)!important;
+  transition:transform .24s cubic-bezier(.22,1,.36,1),box-shadow .28s ease,border-color .22s!important;
+}
+.sa-map-card::after{content:'';position:absolute;inset:0;border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.07),transparent 55%);pointer-events:none}
+.sa-map-card:hover{border-color:var(--bh)!important;transform:translateY(-4px)!important;box-shadow:var(--shh)!important}
+.sa-map-card.sa-map-card--sc{border-color:rgba(139,92,246,.28)!important}
+.sa-map-card.sa-map-card--sc:hover{border-color:rgba(165,92,246,.55)!important;box-shadow:0 16px 48px rgba(139,92,246,.22)!important}
+.sa-strategy-ui.lt .sa-map-card::after{background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(255,255,255,.05) 42%,transparent 68%)}
+
+/* Хаб контент-плана: карточки проектов + иконка в hero */
+.sa-cp-hub-card:not(:disabled){
+  transition:transform .26s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,border-color .22s;
+}
+.sa-cp-hub-card:not(:disabled):hover{
+  transform:translateY(-4px);
+  box-shadow:var(--shh);
+  border-color:var(--bh)!important;
+}
+.sa-cp-hub-card:not(:disabled):active{transform:translateY(-2px) scale(.992)}
+.sa-cp-hub-hero-ic{transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .35s ease}
+.sa-ref-panel:hover .sa-cp-hub-hero-ic{transform:scale(1.06);box-shadow:0 8px 28px var(--accent-glow)}
+
+/* Статистика под шапкой проекта */
+.sa-proj-stats{display:flex;flex-wrap:wrap;gap:clamp(14px,3vw,32px);padding:12px 18px;background:var(--top);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:.5px solid var(--b1)}
+.sa-proj-stats .sps-block{transition:transform .2s ease}
+.sa-proj-stats .sps-block:hover{transform:translateY(-2px)}
+.sa-proj-stats .sps-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:4px}
+.sa-proj-stats .sps-val{font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+
+/* Вкладки карточки проекта */
+.sa-proj-tabs{display:flex;gap:2px;border-bottom:.5px solid var(--b1);padding:0 16px;background:var(--top);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sa-proj-tabs button{
+  flex-shrink:0;padding:12px 14px;font-size:12.5px;font-weight:500;color:var(--t3);cursor:pointer;border:none;background:transparent;
+  font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s,background .2s;border-radius:8px 8px 0 0;
+}
+.sa-proj-tabs button:hover{color:var(--t1);background:var(--rowh)}
+.sa-proj-tabs button.on{color:var(--acc);font-weight:700;border-bottom-color:var(--acc)}
+.sa-strategy-ui.lt .sa-proj-tabs button.on{color:#5526d6;border-bottom-color:#5526d6}
+.sa-proj-tabs button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* Кнопка-иконка назад в топбаре */
+.sa-app-topbar .sa-back-ic{
+  width:36px;height:36px;border-radius:10px;border:.5px solid var(--b1);background:var(--inp);color:var(--t2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background .2s,color .2s,transform .15s,border-color .2s;
+}
+.sa-app-topbar .sa-back-ic:hover{background:var(--card2);color:var(--t1);border-color:var(--bh)}
+.sa-app-topbar .sa-back-ic:active{transform:scale(.96)}
 `;
 const out = path.join(root, "client", "strategy-shell.css");
 fs.writeFileSync(out, css + appOverrides, "utf8");
