@@ -5,9 +5,9 @@
   "main": "server/index.js",
   "scripts": {
     "build": "node build.js",
-    "ci": "node build.js",
+    "ci": "node build.js && node scripts/verify-build-artifacts.js",
     "start": "node server/index.js",
-    "dev": "nodemon server/index.js",
+    "dev": "node scripts/sync-css.js && nodemon server/index.js",
     "seed": "node server/seed.js",
     "prepare": "node -e \"if (process.env.CI === 'true' || process.env.HUSKY === '0') process.exit(0); require('child_process').execSync('npx husky', {stdio:'inherit'})\"",
     "deploy": "git add -A && git status --short && (git diff --cached --quiet || (git commit -m \"chore: auto-deploy\" && git push))"
