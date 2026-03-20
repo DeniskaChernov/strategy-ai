@@ -247,6 +247,111 @@ body:has(.sa-ref-landing)::before{
   visibility:hidden;
   animation:none !important;
 }
+
+/* ── Лендинг React (.sa-ref-landing): без гориз. скролла, контент по ширине экрана ── */
+html:has(.sa-ref-landing),
+body:has(.sa-ref-landing){
+  overflow-x:hidden !important;
+  max-width:100%;
+}
+.sa-ref-landing.sa-strategy-ui.view.on.sa-v-landing{
+  align-items:stretch !important;
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+.sa-ref-landing .land-inner{
+  max-width:min(960px,100%) !important;
+  width:100% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  box-sizing:border-box;
+}
+/* Навбар на всю ширину вьюпорта (раньше max-width:960 + центр давали «поля» и сдвиг) */
+#land-nav-fixed{
+  left:0 !important;
+  right:0 !important;
+  transform:none !important;
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box;
+  flex-wrap:wrap;
+  row-gap:10px;
+  column-gap:12px;
+}
+.sa-ref-landing .features-grid{
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr)) !important;
+}
+.sa-ref-landing .testi-grid{
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr)) !important;
+}
+.sa-ref-landing .compare-wrap{
+  max-width:100%;
+}
+.sa-ref-landing .land-footer{
+  width:100%;
+  max-width:min(960px,100%);
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing:border-box;
+  justify-content:center;
+  text-align:center;
+}
+.sa-ref-landing .land-footer .footer-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 14px;
+  justify-content:center;
+}
+.sa-ref-landing .land-footer .footer-copy{
+  width:100%;
+  margin-top:8px;
+}
+
+/* MainWorkspaceNav вне shell (мобильная карта и т.п.): токены body[data-theme] */
+.workspace-nav-tabs.tabs{
+  display:inline-flex;
+  align-items:center;
+  background:var(--input-bg);
+  border:1px solid var(--input-border);
+  border-radius:10px;
+  padding:3px;
+  gap:2px;
+  box-sizing:border-box;
+}
+.workspace-nav-tabs.tabs .tab{
+  font-size:12px;
+  color:var(--text4);
+  cursor:pointer;
+  padding:6px 12px;
+  border-radius:7px;
+  transition:all .18s;
+  font-weight:500;
+  border:none;
+  background:transparent;
+  font-family:inherit;
+  line-height:1.2;
+  user-select:none;
+}
+.workspace-nav-tabs.tabs .tab:disabled{
+  opacity:1;
+  cursor:default;
+}
+.workspace-nav-tabs.tabs .tab.on{
+  background:var(--surface);
+  color:var(--text);
+  font-weight:600;
+  box-shadow:0 1px 4px rgba(0,0,0,.12);
+}
+body[data-theme="light"] .workspace-nav-tabs.tabs .tab.on{
+  background:var(--card);
+  color:var(--accent-1);
+  box-shadow:0 2px 8px rgba(104,54,245,.14);
+}
+.workspace-nav-tabs.tabs.workspace-nav-tabs--sm .tab{
+  font-size:11px;
+  padding:4px 10px;
+}
 [data-theme="light"] input,[data-theme="light"] textarea,[data-theme="light"] select{
   background:var(--input-bg) !important;border-color:var(--input-border) !important;
   color:var(--text) !important;color-scheme:light;

@@ -765,7 +765,7 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",on
   const sel=TIERS[selected]||TIERS.pro;
   const selMkt=TIER_MKT[selected]||TIER_MKT.pro;
   return(
-    <div data-theme={theme} data-palette={palette} style={{width:"100vw",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
+    <div data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
 <div style={{position:"fixed",inset:0,backgroundImage:"linear-gradient(var(--accent-grid) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid) 1px,transparent 1px)",backgroundSize:"60px 60px",pointerEvents:"none"}}/>
       <div style={{position:"fixed",width:800,height:800,borderRadius:"50%",background:`radial-gradient(circle,${selMkt.glow}18 0%,transparent 65%)`,top:"-20%",right:"-15%",filter:"blur(100px)",pointerEvents:"none",transition:"background 1.4s ease"}}/>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 32px",position:"relative",flexShrink:0,borderBottom:"1px solid var(--border)"}}>
@@ -852,7 +852,7 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
 function SavingScreen({theme='dark'}){
   const{t}=useLang();
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:18}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:18}}>
 <div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite"}}>✦</div>
       <div style={{fontSize:16,fontWeight:600,color:"var(--text)"}}>Сохраняю карту…</div>
     </div>
@@ -886,14 +886,14 @@ function PostOnboardFlow({pendingMap,currentUser,theme='dark',onComplete,onBack}
   }
   if(saving)return <SavingScreen theme={theme}/>;
   if(step==="auth")return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
 <AuthModal initialTab="register" theme={theme} title="Сохранить карту" subtitle="Создайте аккаунт — карта сохранится автоматически" onAuth={afterAuth}/>
       <button onClick={onBack} style={{position:"absolute",top:16,left:16,padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>
     </div>
   );
   if(step==="tier")return <TierSelectionScreen isNew={isNew} currentUser={user} theme={theme} onSelect={afterTierSelect} onBack={()=>setStep("auth")}/>;
   if(step==="conflict")return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
 <MapConflictModal existingMaps={existingMaps} newNodeCount={pendingMap?.nodes?.length||0} tierLabel={(TIERS[user?.tier]||TIERS.free).label} tierMapsCount={(TIERS[user?.tier]||TIERS.free).maps} onReplace={async(mapId)=>{await doSaveAndGo(targetProject,user,mapId);}} onUpgrade={()=>setStep("tier")} theme={theme}/>
     </div>
   );
@@ -1513,7 +1513,7 @@ function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
     {icon:"📊",title:"Сценарии",desc:"Симулируйте разные стратегии без риска для основного плана"},
   ];
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Inter',system-ui,sans-serif",position:"relative"}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Inter',system-ui,sans-serif",position:"relative"}}>
 <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px)",backgroundSize:"auto,60px 60px,60px 60px",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",padding:"14px 28px",position:"relative",zIndex:10}}>
         <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
@@ -1681,7 +1681,7 @@ function Onboarding({onDone,onBack,theme="dark"}){
   }
   const progress=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",position:"relative"}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",position:"relative"}}>
 <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 60% 40% at 50% 0%,var(--accent-glow) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",position:"relative",zIndex:10}}>
         <button onClick={onBack} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>
@@ -3533,8 +3533,8 @@ ${ctx}
             <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:shellUi?14:12,flexWrap:"wrap"}}>
               <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={isMobile}/>
               {onOpenContentPlanProject&&project?.id&&(
-                <button type="button" className="btn-interactive" onClick={()=>onOpenContentPlanProject()} title={t("cp_from_map_hint","Открыть контент-план этого проекта в полноэкранном режиме")}
-                  style={{padding:"8px 16px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:8}}>
+                <button type="button" className={shellUi?"btn-g":"btn-interactive"} onClick={()=>onOpenContentPlanProject()} title={t("cp_from_map_hint","Открыть контент-план этого проекта в полноэкранном режиме")}
+                  style={shellUi?{height:32,fontSize:11.5,padding:"0 14px",whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",gap:6,color:"var(--acc)"}:{padding:"8px 16px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:8}}>
                   <span aria-hidden>✍️</span>{t("cp_from_map_btn","Контент-план проекта")}
                 </button>
               )}
@@ -3542,8 +3542,8 @@ ${ctx}
           </div>
         )}
 
-        {/* ROW 2 — view tools + panels + export */}
-        <div style={{minHeight:shellUi?56:52,display:"flex",alignItems:"center",gap:isMobile?6:shellUi?12:10,padding:isMobile?"10px 16px":shellUi?"10px 20px":"0 24px",flexWrap:isMobile?"wrap":shellUi?"wrap":"nowrap"}}>
+        {/* ROW 2 — view tools + panels + export (в shell вторая строка — экспорт, без вылезания за экран) */}
+        <div style={{minHeight:shellUi?56:52,display:"flex",alignItems:"center",gap:isMobile?6:shellUi?12:10,padding:isMobile?"10px 16px":shellUi?"10px 20px":"0 24px",flexWrap:isMobile?"wrap":shellUi?"wrap":"nowrap",width:"100%",minWidth:0,boxSizing:"border-box"}}>
 
           {/* View tools */}
           <div style={{display:"flex",alignItems:"center",gap:isMobile?4:shellUi?8:6,flexShrink:0}}>
@@ -3603,8 +3603,8 @@ ${ctx}
           {sep}
 
           {/* Export/Import */}
-          <div style={{display:"flex",alignItems:"center",gap:shellUi?10:8,flexShrink:0,flexWrap:shellUi?"wrap":"nowrap"}}>
-            <span style={{fontSize:shellUi?13:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:4}}>{t("export_label","Экспорт")}</span>
+          <div style={{display:"flex",alignItems:"center",gap:shellUi?8:8,flexShrink:shellUi?undefined:0,flexWrap:"wrap",minWidth:0,maxWidth:"100%",...(shellUi?{flexBasis:"100%",width:"100%",paddingTop:8,marginTop:4,borderTop:"1px solid var(--b1)"}:{})}}>
+            <span style={{fontSize:shellUi?13:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:4,flexShrink:0}}>{t("export_label","Экспорт")}</span>
             <button onClick={exportPNG} disabled={exporting} title="Скачать PNG"
               style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
               onMouseOver={e=>{if(!exporting)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
@@ -3911,7 +3911,6 @@ ${ctx}
           userEmail={user?.email||""}
           scenarioCount={0}
           onUserCard={onProfile}
-          onCrmClick={()=>addToast(t("shell_crm_soon","Интеграция CRM запланирована."),"info")}
           showContentPlan={!!onOpenContentPlanHub}
           onContentPlan={onOpenContentPlanHub||undefined}
           showTrialBanner={(user?.tier||"free")==="free"}
@@ -3921,17 +3920,16 @@ ${ctx}
       </div>
     </div>
   ):(
-    <div data-theme={theme} data-palette={palette} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>{_mapMain}</div>
+    <div data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden",boxSizing:"border-box"}}>{_mapMain}</div>
   );
 }
 
 // ── Главная навигация: Стратегия ↔ Контент-план (отдельная услуга) ──
 function MainWorkspaceNav({mode,onStrategy,onContentPlan,t,isMobile}:{mode:"strategy"|"contentPlan";onStrategy:()=>void;onContentPlan:()=>void;t:(k:string,fb?:string)=>string;isMobile:boolean}){
-  const base={padding:isMobile?"8px 12px":"9px 16px",borderRadius:10,border:"none",cursor:"pointer",fontSize:isMobile?12:13,fontWeight:800,transition:"all .18s",fontFamily:"inherit"};
   return(
-    <div className="workspace-nav-tabs" style={{display:"inline-flex",alignItems:"center",gap:4,padding:4,borderRadius:14,background:"var(--surface)",border:"1px solid var(--border)"}} role="tablist" aria-label={t("workspace_nav_aria","Разделы приложения")}>
-      <button type="button" role="tab" aria-selected={mode==="strategy"} title={mode==="strategy"?undefined:t("nav_workspace_strategy_tip","Карты проектов, шаги, Gantt")} disabled={mode==="strategy"} onClick={onStrategy} style={{...base,background:mode==="strategy"?"var(--gradient-accent)":"transparent",color:mode==="strategy"?"var(--accent-on-bg)":"var(--text4)",boxShadow:mode==="strategy"?"0 2px 14px var(--accent-glow)":"none",opacity:mode==="strategy"?.95:1,cursor:mode==="strategy"?"default":"pointer"}}>{t("nav_workspace_strategy","Стратегия")}</button>
-      <button type="button" role="tab" aria-selected={mode==="contentPlan"} title={mode==="contentPlan"?undefined:t("nav_workspace_content_tip","Публикации и календарь по проектам")} disabled={mode==="contentPlan"} onClick={onContentPlan} style={{...base,background:mode==="contentPlan"?"var(--gradient-accent)":"transparent",color:mode==="contentPlan"?"var(--accent-on-bg)":"var(--text4)",boxShadow:mode==="contentPlan"?"0 2px 14px var(--accent-glow)":"none",opacity:mode==="contentPlan"?.95:1,cursor:mode==="contentPlan"?"default":"pointer"}}>{t("nav_workspace_content","Контент-план")}</button>
+    <div className={"workspace-nav-tabs tabs"+(isMobile?" workspace-nav-tabs--sm":"")} role="tablist" aria-label={t("workspace_nav_aria","Разделы приложения")}>
+      <button type="button" role="tab" className={"tab"+(mode==="strategy"?" on":"")} aria-selected={mode==="strategy"} title={mode==="strategy"?undefined:t("nav_workspace_strategy_tip","Карты проектов, шаги, Gantt")} disabled={mode==="strategy"} onClick={onStrategy}>{t("nav_workspace_strategy","Стратегия")}</button>
+      <button type="button" role="tab" className={"tab"+(mode==="contentPlan"?" on":"")} aria-selected={mode==="contentPlan"} title={mode==="contentPlan"?undefined:t("nav_workspace_content_tip","Публикации и календарь по проектам")} disabled={mode==="contentPlan"} onClick={onContentPlan}>{t("nav_workspace_content","Контент-план")}</button>
     </div>
   );
 }
@@ -4068,7 +4066,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
   const aiCtx=`Портфель (контент-план): ${(projects||[]).slice(0,20).map((p:any)=>`«${p.name||"Проект"}»`).join(", ")}. Проектов: ${(projects||[]).length}, карт загружено: ${allMapsForAI.length}.`;
 
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>
       <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 70% 50% at 50% -10%,rgba(var(--accent-rgb,91,107,192),.1) 0%,transparent 60%)",pointerEvents:"none"}}/>
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,padding:isMobile?"10px 16px":"12px 24px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",position:"relative",zIndex:10,flexWrap:"wrap"}}>
         <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0,minWidth:0}}>
@@ -4259,7 +4257,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
   const aiCtx=`Контент-план проекта «${project?.name||"Проект"}». Карты: ${(maps||[]).length}. Шагов стратегии в контексте: ${aiNodes.length}.`;
 
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>
       <div style={{display:"flex",alignItems:"center",gap:isMobile?8:10,padding:isMobile?"10px 14px":"12px 20px",borderBottom:"1px solid var(--border)",background:"var(--bg2)",flexWrap:"wrap"}}>
         <button type="button" onClick={onBackToHub} className="btn-interactive" title={t("cp_back_hub_tip","К списку проектов в контент-плане")} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>
           <span aria-hidden>←</span>{isMobile?t("cp_back_hub_short","Все"):<span>{t("cp_back_hub","Все проекты")}</span>}
@@ -4796,7 +4794,6 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           projectCount={myCount}
           onUserCard={onProfile}
           onLogout={onLogout}
-          onCrmClick={()=>{setToast({msg:t("shell_crm_soon","Интеграция CRM запланирована."),type:"info"});setTimeout(()=>setToast(null),2800);}}
           showContentPlan={!!onOpenContentPlanHub}
           onContentPlan={onOpenContentPlanHub?()=>onOpenContentPlanHub():undefined}
           showTrialBanner={(user?.tier||"free")==="free"}
@@ -4806,7 +4803,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
       </div>
     </div>
   ):(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>{_projMain}</div>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif"}}>{_projMain}</div>
   );
 }
 
@@ -6622,7 +6619,7 @@ function SplashScreen({onDone,theme,authReady=false}){
     return()=>clearTimeout(tid);
   },[]);
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg,#070b14)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif"}}>
+    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg,#070b14)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif"}}>
 <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% 50%,rgba(99,102,241,.08) 0%,transparent 70%)",pointerEvents:"none"}}/>
       <div style={{animation:"float 3s ease infinite",marginBottom:32}}>
         <img src="/logo.png" alt="Strategy AI" style={{width:96,height:96,objectFit:"contain"}}/>
@@ -6697,7 +6694,7 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
   const isMobile=useIsMobile();
   const cosmic=theme==="dark";
   return(
-    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100vw",height:"100vh",background:cosmic?"var(--bg)":"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:cosmic?"var(--bg)":"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
       <StrategyShellBg/>
       {cosmic?(
         <>

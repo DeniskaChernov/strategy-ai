@@ -49,7 +49,8 @@ const appOverrides = `
 .sa-strategy-ui>.sa-app{flex:1;min-height:0;min-width:0;overflow:hidden}
 .sa-canvas-wrap.sa-canvas-no-dots::before{display:none!important}
 .sa-canvas-wrap>svg{pointer-events:auto!important;touch-action:none}
-.sa-map-toolbar-rows{border-bottom:.5px solid var(--b1);background:var(--top);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.sa-map-toolbar-rows{border-bottom:.5px solid var(--b1);background:var(--top);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);min-width:0;overflow-x:hidden;overflow-y:visible}
+.sa-map-toolbar-rows>div{min-width:0;max-width:100%;box-sizing:border-box}
 
 /* Сайдбар: читаемее ширина */
 .sa-sb{width:236px;min-width:236px}
@@ -75,6 +76,14 @@ const appOverrides = `
 /* Полоса «Стратегия / Контент-план» на карте */
 .sa-map-cp-strip{background:var(--top)!important;border-bottom:.5px solid var(--b1)!important;padding:8px 18px!important}
 .sa-map-cp-strip .cp-strip-label{display:none}
+
+/* Вкладки разделов (MainWorkspaceNav) — те же токены, что .tabs/.tab в макете */
+.sa-strategy-ui .workspace-nav-tabs.tabs{display:flex;background:var(--inp);border:.5px solid var(--b0);border-radius:10px;padding:3px;gap:2px;align-items:center}
+.sa-strategy-ui .workspace-nav-tabs.tabs .tab{font-size:11.5px;color:var(--t3);cursor:pointer;padding:5px 12px;border-radius:7px;transition:all .18s;font-weight:500;user-select:none;border:none;background:transparent;font-family:inherit;line-height:1.2}
+.sa-strategy-ui .workspace-nav-tabs.tabs .tab.on{background:var(--card);color:var(--t1);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.sa-strategy-ui.lt .workspace-nav-tabs.tabs .tab.on{background:rgba(255,255,255,.92);color:var(--acc);box-shadow:0 2px 8px rgba(104,54,245,.14)}
+.sa-strategy-ui .workspace-nav-tabs.tabs .tab:disabled{opacity:1;cursor:default}
+.sa-strategy-ui .workspace-nav-tabs.tabs.workspace-nav-tabs--sm .tab{font-size:11px;padding:4px 10px}
 
 /* Нижняя плавающая панель: не дублировать тень glass-card */
 .sa-canvas-wrap .map-toolbar.glass-card{border:none!important;box-shadow:none!important;background:transparent!important;padding:6px 8px!important}
