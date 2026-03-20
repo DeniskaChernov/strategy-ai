@@ -1,6 +1,7 @@
 /* Шрифты подключаются в public/index.html (preconnect + link) */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter','Plus Jakarta Sans',sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+#root{font-family:'Inter',system-ui,sans-serif;}
 input,textarea,select,button{font-family:'Inter','Plus Jakarta Sans',sans-serif;}
 :root{
   /* ── Spacing scale (премиальный минимализм, больше воздуха) ── */
@@ -219,14 +220,29 @@ body[data-theme="light"][data-palette="indigo"]::before{
 }
 #root{position:relative;z-index:1;min-height:100%;}
 .screen-wrap{position:relative;}
-/* Лендинг: не тянуть фон/орбы приложения — чёрный космос (класс sa-landing + fallback :has) */
+/* Лендинг: старый космос (.lpage) | референс (.sa-ref-landing) */
 body.sa-landing,
 body:has(.lpage){
   background:#03030a !important;
   color:#f0eeff !important;
 }
+body.sa-landing:has(.sa-ref-landing),
+body:has(.sa-ref-landing){
+  background:#050410 !important;
+  color:#eaeaf8 !important;
+}
+body[data-theme="light"].sa-landing:has(.sa-ref-landing),
+body[data-theme="light"]:has(.sa-ref-landing){
+  background:#d8d4ff !important;
+  color:#0a0818 !important;
+}
 body.sa-landing::before,
 body:has(.lpage)::before{
+  opacity:0 !important;
+  visibility:hidden;
+  animation:none !important;
+}
+body:has(.sa-ref-landing)::before{
   opacity:0 !important;
   visibility:hidden;
   animation:none !important;

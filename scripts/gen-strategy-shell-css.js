@@ -18,15 +18,22 @@ const pairs = [
   ["#s-scenarios", ".sa-screen-scenarios"],
   ["#s-map", ".sa-screen-map"],
   ["#canvas-wrap", ".sa-canvas-wrap"],
+  ["#map-canvas-wrap", ".sa-canvas-wrap"],
   ["#canvas", ".sa-canvas-host"],
   ["#topbar", ".sa-topbar"],
   ["#main", ".sa-main"],
   ["#sb", ".sa-sb"],
+  ["#app-shell", ".sa-app"],
   ["#app", ".sa-app"],
+  ["#v-app", ".sa-v-app"],
+  ["#v-landing", ".sa-v-landing"],
+  ["#v-tier", ".sa-v-tier"],
   ["#bgl", ".sa-bgl"],
   ["#bgd", ".sa-bgd"],
 ];
 for (const [a, b] of pairs) css = css.split(a).join(b);
+css = css.split(".map-canvas-wrap").join(".sa-canvas-wrap");
+css = css.replace(/\.map-tb\b/g, ".map-toolbar");
 css = css.replace(/^\.dk\{/gm, ".sa-strategy-ui.dk{");
 css = css.replace(/^\.lt\{/gm, ".sa-strategy-ui.lt{");
 css = css.replace(/\.lt /g, ".sa-strategy-ui.lt ");
@@ -34,7 +41,7 @@ css = css.replace(/\.lt\./g, ".sa-strategy-ui.lt.");
 css = css.replace(/body\{background:var\(--bg\)/g, ".sa-strategy-ui{background:var(--bg)");
 css = `/* Автогенерация: node scripts/gen-strategy-shell-css.js ← public/strategy-reference.html */\n` +
   `/* Корень: <div class="sa-strategy-ui dk|lt">…</div> */\n` +
-  css.replace(/html,body\{height:100%;overflow:hidden;font-family:'Inter',sans-serif[^}]*\}/,
+  css.replace(/html,body\{[^}]+\}/,
     "html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;height:100%;min-height:100vh;max-height:100vh;overflow:hidden;display:flex;flex-direction:column}");
 const appOverrides = `
 
@@ -56,11 +63,11 @@ const appOverrides = `
 .sa-strategy-ui .cs-sub{color:var(--t3);opacity:.9}
 
 /* Контент main: на всю ширину колонки */
-.sa-main .scr-inner{max-width:none!important;width:100%;box-sizing:border-box}
+.sa-main .scr{max-width:none!important;width:100%;box-sizing:border-box}
 
 /* Верхняя полоса: выравнивание по центру + перенос */
 .sa-topbar{align-items:center;flex-wrap:wrap;row-gap:10px}
-.sa-topbar .tbr{flex-wrap:wrap;justify-content:flex-end;gap:10px;row-gap:8px;align-items:center}
+.sa-topbar .tb-r{flex-wrap:wrap;justify-content:flex-end;gap:10px;row-gap:8px;align-items:center}
 
 /* Первая строка тулбара карты в одной теме с макетом */
 .sa-map-toolbar-rows>div:first-child{border-bottom-color:var(--b1)!important}
