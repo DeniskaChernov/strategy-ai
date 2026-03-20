@@ -6659,8 +6659,8 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
           {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
             <button key={code} onClick={()=>onChangeLang&&onChangeLang(code)}
               style={{padding:"4px 9px",borderRadius:6,border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:11,fontWeight:700,letterSpacing:.8,cursor:"pointer",transition:"all .18s",
-                background:lang===code?"rgba(99,102,241,.3)":"transparent",
-                color:lang===code?"#a5b4fc":"rgba(240,238,255,.35)"}}>
+                background:lang===code?"rgba(104,54,245,.3)":"transparent",
+                color:lang===code?"#c4b0ff":"rgba(240,238,255,.35)"}}>
               {label}
             </button>
           ))}
@@ -6681,7 +6681,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
                 ))}
                 <div style={{display:"flex",gap:8,padding:"16px 0"}}>
                   {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
-                    <button key={code} onClick={()=>onChangeLang&&onChangeLang(code)} style={{padding:"8px 14px",borderRadius:8,border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:12,fontWeight:700,cursor:"pointer",background:lang===code?"rgba(99,102,241,.3)":"rgba(255,255,255,.08)",color:lang===code?"#a5b4fc":"#f0eeff"}}>{label}</button>
+                    <button key={code} onClick={()=>onChangeLang&&onChangeLang(code)} style={{padding:"8px 14px",borderRadius:8,border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:12,fontWeight:700,cursor:"pointer",background:lang===code?"rgba(104,54,245,.3)":"rgba(255,255,255,.08)",color:lang===code?"#c4b0ff":"#f0eeff"}}>{label}</button>
                   ))}
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:12,marginTop:"auto",paddingTop:24}}>
@@ -6697,7 +6697,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       {/* ── HERO ── */}
       <section style={{position:"relative",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:isMobile?"60px 20px 70px":"100px 60px 90px",overflow:"hidden",zIndex:1,width:"100%",boxSizing:"border-box"}}>
         {/* glow */}
-        <div style={{position:"absolute",top:"-10%",left:"50%",transform:"translateX(-50%)",width:1000,height:650,background:"radial-gradient(ellipse 65% 60% at 50% 40%,rgba(99,102,241,.1) 0%,transparent 68%)",filter:"blur(56px)",zIndex:2,pointerEvents:"none"}}/>
+        <div style={{position:"absolute",top:"-10%",left:"50%",transform:"translateX(-50%)",width:1000,height:650,background:"radial-gradient(ellipse 65% 60% at 50% 40%,rgba(104,54,245,.1) 0%,transparent 68%)",filter:"blur(56px)",zIndex:2,pointerEvents:"none"}}/>
         {/* mask */}
         <div style={{position:"absolute",inset:0,zIndex:3,background:"radial-gradient(ellipse 72% 65% at 50% 50%,rgba(3,3,10,.8) 0%,rgba(3,3,10,.18) 70%,transparent 100%)",pointerEvents:"none"}}/>
 
@@ -6745,7 +6745,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       <div style={{position:"relative",zIndex:2,borderBottom:"1px solid rgba(255,255,255,.06)"}}>
         <div className="lmetrics-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",maxWidth:1280,margin:"0 auto"}}>
           {[{to:2,sfx:t("lm1_sfx","мин"),lbl:t("lm1_lbl","от вопроса до первой стратегической карты")},{to:94,sfx:"%",lbl:t("lm2_lbl","точность AI-анализа на тестовых кейсах McKinsey")},{to:5,sfx:"",lbl:t("lm3_lbl","уровней экспертной глубины — от Free до Enterprise")},{to:null,sfx:"∞",lbl:t("lm4_lbl","сценариев для анализа альтернативных исходов")}].map((m,i)=>(
-            <div key={i} className="lmc" style={{padding:"58px 44px",borderRight:i<3?"1px solid rgba(255,255,255,.06)":undefined,transition:"background .38s"}} onMouseOver={e=>e.currentTarget.style.background="rgba(99,102,241,.05)"} onMouseOut={e=>e.currentTarget.style.background=""}>
+            <div key={i} className="lmc" style={{padding:"58px 44px",borderRight:i<3?"1px solid rgba(255,255,255,.06)":undefined,transition:"background .38s"}} onMouseOver={e=>e.currentTarget.style.background="rgba(104,54,245,.05)"} onMouseOut={e=>e.currentTarget.style.background=""}>
               <div className="lmc-val" style={{fontSize:70,fontWeight:900,letterSpacing:-3.5,lineHeight:.88,color:"#f0eeff",marginBottom:14,display:"flex",alignItems:"flex-end",gap:3}}>
                 {m.to?<span className="lcnt" data-to={m.to}>0</span>:<span style={{fontSize:64,letterSpacing:-2}}>{m.sfx}</span>}
                 {m.to&&<sup style={{fontSize:28,fontWeight:300,color:"rgba(240,238,255,.25)",marginBottom:8}}>{m.sfx}</sup>}
@@ -6791,7 +6791,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
           <div className="lproc-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:1,background:"rgba(255,255,255,.06)"}}>
             {STEPS.map((s,i)=>(
               <div key={i} className="lpc" style={{background:"#03030a",padding:"58px 46px",cursor:"default",transition:"background .35s"}} onMouseOver={e=>e.currentTarget.style.background="#07060f"} onMouseOut={e=>e.currentTarget.style.background="#03030a"}>
-                <div style={{position:"absolute",top:16,right:26,fontSize:116,fontWeight:900,color:"rgba(99,102,241,.055)",lineHeight:1,letterSpacing:-5,pointerEvents:"none",userSelect:"none"}}>{s.n}</div>
+                <div style={{position:"absolute",top:16,right:26,fontSize:116,fontWeight:900,color:"rgba(104,54,245,.055)",lineHeight:1,letterSpacing:-5,pointerEvents:"none",userSelect:"none"}}>{s.n}</div>
                 <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"rgba(240,238,255,.25)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:24}}>{s.tag}</span>
                 <div className="lpc-title" style={{fontSize:28,fontWeight:800,color:"#f0eeff",marginBottom:14,letterSpacing:-.5,lineHeight:1.1}}>{s.title}</div>
                 <div className="lpc-desc" style={{fontSize:13.5,lineHeight:1.82}}>{s.desc}</div>
@@ -6835,10 +6835,10 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
             {PRICING.map((p,i)=>(
               <div key={i} className={`lprc${p.hot?" lhot":""}`} style={{background:p.hot?"#070520":"#03030a",padding:"44px 36px",position:"relative",cursor:"default",transition:"background .35s",display:"flex",flexDirection:"column"}} onMouseOver={e=>{if(!p.hot)e.currentTarget.style.background="#07060f";}} onMouseOut={e=>e.currentTarget.style.background=p.hot?"#070520":"#03030a"}>
                 {p.hot&&<div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"var(--gradient-accent)"}}/>}
-                {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(99,102,241,.18)",border:"1px solid rgba(99,102,241,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#818cf8",letterSpacing:2,textTransform:"uppercase"}}>{t("pricing_hot_badge","★ ТОП")}</div>}
-                <span className="lprc-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:p.hot?"#818cf8":"rgba(240,238,255,.3)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:26}}>{p.tier}</span>
+                {p.hot&&<div style={{position:"absolute",top:18,right:18,padding:"3px 12px",borderRadius:100,background:"rgba(104,54,245,.18)",border:"1px solid rgba(104,54,245,.3)",fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:"#b49cff",letterSpacing:2,textTransform:"uppercase"}}>{t("pricing_hot_badge","★ ТОП")}</div>}
+                <span className="lprc-title" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:p.hot?"#b49cff":"rgba(240,238,255,.3)",letterSpacing:3,textTransform:"uppercase",display:"block",marginBottom:26}}>{p.tier}</span>
                 <div style={{display:"flex",alignItems:"flex-end",gap:4,marginBottom:6}}>
-                  <span className="lprc-price" style={{fontSize:p.tier==="Enterprise"?48:64,fontWeight:900,letterSpacing:p.tier==="Enterprise"?-1:-3,lineHeight:.88,color:"#f0eeff",...(p.hot?{background:"linear-gradient(135deg,#818cf8,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}:{})}}>${p.price}</span>
+                  <span className="lprc-price" style={{fontSize:p.tier==="Enterprise"?48:64,fontWeight:900,letterSpacing:p.tier==="Enterprise"?-1:-3,lineHeight:.88,color:"#f0eeff",...(p.hot?{background:"linear-gradient(135deg,#6836f5,#a050ff)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}:{})}}>${p.price}</span>
                   <span style={{fontSize:17,fontWeight:300,color:"rgba(240,238,255,.25)",marginBottom:10}}>{p.mo}</span>
                 </div>
                 <div className="lprc-desc" style={{fontSize:13,marginBottom:32,paddingBottom:32,borderBottom:"1px solid rgba(255,255,255,.06)",lineHeight:1.6}}>{p.desc}</div>
@@ -6860,10 +6860,10 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
       <section style={{padding:isMobile?"0 0 70px":"0 0 130px",position:"relative",zIndex:2}}>
         <div style={{maxWidth:1280,margin:"0 auto",padding:isMobile?"0 20px":"0 60px"}}>
           <div className="lrv-sc lcta-wrap" style={{border:"1px solid rgba(255,255,255,.07)",padding:isMobile?"50px 24px":"120px 80px",textAlign:"center",position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:"15%",right:"15%",height:1.5,background:"linear-gradient(90deg,transparent,rgba(99,102,241,.6),transparent)"}}/>
+            <div style={{position:"absolute",top:0,left:"15%",right:"15%",height:1.5,background:"linear-gradient(90deg,transparent,rgba(104,54,245,.6),transparent)"}}/>
             {/* sparkles inside CTA */}
             <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
-              <SparklesCanvas density={90} speed={.7} minSz={.3} maxSz={1.1} color="#818cf8" style={{opacity:.45}}/>
+              <SparklesCanvas density={90} speed={.7} minSz={.3} maxSz={1.1} color="#a050ff" style={{opacity:.45}}/>
             </div>
             <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 88% 88% at 50% 50%,rgba(3,3,10,.88) 28%,rgba(3,3,10,.6) 100%)",zIndex:1,pointerEvents:"none"}}/>
             <div style={{position:"relative",zIndex:2}}>
@@ -7022,6 +7022,13 @@ export default function App(){
     if(b.getAttribute("data-theme")!==theme)b.setAttribute("data-theme",theme);
     if(b.getAttribute("data-palette")!==bodyPalette)b.setAttribute("data-palette",bodyPalette);
   },[theme,bodyPalette]);
+  /* Лендинг: чёрный космос без орбов приложения — класс надёжнее CSS :has() */
+  useLayoutEffect(()=>{
+    const b=document.body;
+    if(screen==="landing")b.classList.add("sa-landing");
+    else b.classList.remove("sa-landing");
+    return()=>{b.classList.remove("sa-landing");};
+  },[screen]);
   // t функция для LangCtx.Provider (App является корневым провайдером)
   const t = makeTfn(lang);
 
@@ -7306,7 +7313,7 @@ export default function App(){
 <OfflineBanner/>
       <>
         {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>prev==="projects"?prev:"landing")} theme={theme} authReady={authChecked}/>}
-        {screen==="landing"&&<div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}><LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onGetStarted={()=>setScreen("welcome")}/></div>}
+        {screen==="landing"&&<div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}><LandingPage theme="dark" lang={lang} onChangeLang={changeLang} onGetStarted={()=>setScreen("welcome")}/></div>}
         {screen==="sharedMap"&&sharedMapData&&(
           <MapEditor
             user={null} mapData={sharedMapData.map} project={{name:sharedMapData.projectName||""}}

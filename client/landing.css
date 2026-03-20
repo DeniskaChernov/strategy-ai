@@ -1,6 +1,16 @@
 
     body{overflow:auto!important;}
-    .lpage{font-family:'Plus Jakarta Sans',sans-serif;background:color-mix(in srgb,#03030a 86%,var(--accent-1) 14%);color:#f0eeff;overflow-x:hidden;width:100%;min-height:100vh;}
+    /* Лендинг всегда тёмный «космос» — без CRM-орбов и лаванды с основного body */
+    .lpage{
+      font-family:'Plus Jakarta Sans',sans-serif;
+      background:color-mix(in srgb,#03030a 86%,var(--accent-1) 14%);
+      color:#f0eeff;
+      overflow-x:hidden;
+      width:100%;
+      min-height:100vh;
+      position:relative;
+      isolation:isolate;
+    }
     /* scroll reveal — elements are VISIBLE by default, animation is additive */
     .lrv{animation:lrvUp 1s cubic-bezier(.16,1,.3,1) both;}
     .lrv-l{animation:lrvLeft 1s cubic-bezier(.16,1,.3,1) both;}
@@ -31,7 +41,7 @@
     /* metrics cards */
     .lmc .lmc-val{transition:color .25s;}
     .lmc:hover .lmc-val{
-      background:linear-gradient(90deg,#818cf8,#c4b5fd,#38bdf8,#818cf8);
+      background:linear-gradient(90deg,#6836f5,#c9a8ff,#38bdf8,#6836f5);
       background-size:300% 100%;
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
@@ -42,7 +52,7 @@
     /* feature grid cards */
     .lgc .lgc-title{transition:color .2s;}
     .lgc:hover .lgc-title{
-      background:linear-gradient(90deg,#818cf8,#a78bfa,#38bdf8,#818cf8);
+      background:linear-gradient(90deg,#6836f5,#a050ff,#38bdf8,#6836f5);
       background-size:300% 100%;
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
@@ -53,7 +63,7 @@
     /* process cards */
     .lpc .lpc-title{transition:color .2s;}
     .lpc:hover .lpc-title{
-      background:linear-gradient(90deg,#818cf8,#c4b5fd,#7dd3fc,#818cf8);
+      background:linear-gradient(90deg,#6836f5,#c9a8ff,#7dd3fc,#6836f5);
       background-size:300% 100%;
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
@@ -66,7 +76,7 @@
     .ltc:hover .ltc-quote{color:rgba(240,238,255,.9);}
     .ltc .ltc-name{transition:color .2s;}
     .ltc:hover .ltc-name{
-      background:linear-gradient(90deg,#a78bfa,#818cf8,#38bdf8,#a78bfa);
+      background:linear-gradient(90deg,#a050ff,#6836f5,#38bdf8,#a050ff);
       background-size:300% 100%;
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
@@ -78,7 +88,7 @@
     .lprc .lprc-title{color:rgba(240,238,255,.28);transition:color .2s;}
     .lprc:hover .lprc-title,.lprc.lhot .lprc-title{color:rgba(240,238,255,.75);}
     .lprc:hover .lprc-title{
-      background:linear-gradient(90deg,#818cf8,#a78bfa,#38bdf8,#818cf8);
+      background:linear-gradient(90deg,#6836f5,#a050ff,#38bdf8,#6836f5);
       background-size:300% 100%;
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
@@ -86,7 +96,7 @@
     }
     .lprc .lprc-price{color:#f0eeff;transition:color .2s, background .2s, background-position .2s;}
     .lprc:hover .lprc-price{
-      background:linear-gradient(90deg,#818cf8,#a78bfa,#38bdf8,#c4b5fd,#818cf8);
+      background:linear-gradient(90deg,#6836f5,#a050ff,#38bdf8,#c9a8ff,#6836f5);
       background-size:300% 100%;
       -webkit-background-clip:text;-webkit-text-fill-color:transparent;
       background-clip:text;
