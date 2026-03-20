@@ -21,9 +21,6 @@ build/
 out/
 public/app.js
 public/app.js.map
-public/build-meta.json
-public/global.css
-public/landing.css
 
 # OS files
 .DS_Store
