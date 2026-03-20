@@ -6636,7 +6636,7 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
     <div className="lpage" data-theme={theme}>
       {/* Stars background — full page fixed */}
       <div style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none"}}>
-        <SparklesCanvas density={180} speed={0.4} minSz={0.3} maxSz={1.1} color="#ffffff" style={{opacity:.35}}/>
+        <SparklesCanvas density={180} speed={0.4} minSz={0.3} maxSz={1.1} color="#ffffff" style={{opacity:.52}}/>
       </div>
 
       {/* ── NAV ── */}
@@ -7309,7 +7309,7 @@ export default function App(){
 
   return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
-      <div data-theme={theme} data-palette={appPalette} className="screen-wrap" style={{minHeight:"100vh",background:"var(--bg)",transition:"background .35s ease, color .35s ease"}}>
+      <div data-theme={theme} data-palette={appPalette} className="screen-wrap" style={{minHeight:"100vh",background:screen==="landing"?"transparent":"var(--bg)",transition:"background .35s ease, color .35s ease"}}>
 <OfflineBanner/>
       <>
         {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>prev==="projects"?prev:"landing")} theme={theme} authReady={authChecked}/>}

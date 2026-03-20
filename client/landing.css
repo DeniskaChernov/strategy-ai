@@ -3,7 +3,8 @@
     /* Лендинг всегда тёмный «космос» — без CRM-орбов и лаванды с основного body */
     .lpage{
       font-family:'Plus Jakarta Sans',sans-serif;
-      background:color-mix(in srgb,#03030a 86%,var(--accent-1) 14%);
+      /* Прозрачный слой: космос = body.sa-landing (#03030a) + canvas звёзд под контентом (не плоский color-mix поверх CRM --bg) */
+      background:transparent;
       color:#f0eeff;
       overflow-x:hidden;
       width:100%;
