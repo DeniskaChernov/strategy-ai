@@ -3390,7 +3390,7 @@ ${ctx}
 
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
   const rightPanelOpen=selNode||showAI;
-  const[bgMode,setBgMode]=useState("grid"); // grid | stars | none
+  const[bgMode,setBgMode]=useState("stars"); // grid | stars | none — по умолчанию космос как на лендинге
   const toolbarStyle={display:"flex",alignItems:"center",gap:5};
   const btnStyle=(active)=>({padding:"6px 12px",borderRadius:10,border:`1px solid ${active?"var(--accent-1)":"var(--border)"}`,background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",transition:"all .2s"});
   const sep=<div style={{width:1,height:24,background:"var(--border)",margin:"0 6px",flexShrink:0,borderRadius:1}}/>;
@@ -3627,11 +3627,16 @@ ${ctx}
         </div>
       </div>
       {/* canvas */}
-      <div style={{flex:1,position:"relative",overflow:"hidden"}}>
-        {/* stars bg */}
-        {bgMode==="stars"&&(
+      <div style={{
+        flex:1,
+        position:"relative",
+        overflow:"hidden",
+        ...(bgMode==="stars"&&theme==="dark"?{background:"#03030a"}:{}),
+      }}>
+        {/* stars bg — только тёмная тема; rect SVG иначе непрозрачный и звёзды не видны */}
+        {bgMode==="stars"&&theme==="dark"&&(
           <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
-            <SparklesCanvas density={160} speed={0.35} minSz={0.3} maxSz={1.0} color="#ffffff" style={{opacity:.22}}/>
+            <SparklesCanvas density={175} speed={0.35} minSz={0.3} maxSz={1.0} color="#ffffff" style={{opacity:.4}}/>
           </div>
         )}
         {showSearch&&(
@@ -3657,7 +3662,7 @@ ${ctx}
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--grid)" strokeWidth="1"/>
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill={bgMode==="grid"?"url(#grid)":"var(--bg)"} data-canvas-bg="1"/>
+          <rect width="100%" height="100%" fill={bgMode==="grid"?"url(#grid)":bgMode==="stars"&&theme==="dark"?"transparent":"var(--bg)"} data-canvas-bg="1"/>
           <g transform={`translate(${view.x},${view.y}) scale(${view.zoom})`}>
             {edges.filter(e=>!hiddenIds.has(e.source)&&!hiddenIds.has(e.target)).map(e=>(
               <EdgeLine key={e.id} edge={e} nodes={nodes} selected={selEdge?.id===e.id} etypeMap={ETYPE} onClick={ed=>{setSelEdge(ed);setSelNode(null);}}/>
@@ -6901,15 +6906,26 @@ function LandingPage({onGetStarted,theme,lang="ru",onChangeLang}){
 function WelcomeScreen({onLogin,onRegister,onBack,theme}){
   const{t}=useLang();
   const isMobile=useIsMobile();
+  const cosmic=theme==="dark";
   return(
-    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:"var(--bg,#070b14)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
-{/* Backgrounds */}
-      <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px)",backgroundSize:"50px 50px",pointerEvents:"none"}}/>
-      <div style={{position:"absolute",width:700,height:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 65%)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",filter:"blur(80px)",pointerEvents:"none"}}/>
+    <div data-theme={theme} style={{width:"100vw",height:"100vh",background:cosmic?"#03030a":"var(--bg,#070b14)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Plus Jakarta Sans',sans-serif",position:"relative",overflow:"hidden"}}>
+      {cosmic?(
+        <>
+          <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
+            <SparklesCanvas density={150} speed={0.38} minSz={0.3} maxSz={1.05} color="#ffffff" style={{opacity:.5}}/>
+          </div>
+          <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none",background:"radial-gradient(ellipse 72% 58% at 50% 32%,rgba(104,54,245,.1) 0%,transparent 60%)"}}/>
+        </>
+      ):(
+        <>
+          <div style={{position:"absolute",inset:0,backgroundImage:"linear-gradient(var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px),linear-gradient(90deg,var(--accent-grid,rgba(99,102,241,.04)) 1px,transparent 1px)",backgroundSize:"50px 50px",pointerEvents:"none"}}/>
+          <div style={{position:"absolute",width:700,height:700,borderRadius:"50%",background:"radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 65%)",top:"50%",left:"50%",transform:"translate(-50%,-50%)",filter:"blur(80px)",pointerEvents:"none"}}/>
+        </>
+      )}
       {/* Back button */}
-      <button onClick={onBack} style={{position:"absolute",top:24,left:24,display:"flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text2)";}}>{t("back_btn","← Назад")}</button>
+      <button onClick={onBack} style={{position:"absolute",top:24,left:24,zIndex:2,display:"flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text2)";}}>{t("back_btn","← Назад")}</button>
       {/* Auth card */}
-      <div style={{width:"min(96vw,440px)",padding:isMobile?16:0,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
+      <div style={{width:"min(96vw,440px)",padding:isMobile?16:0,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)",position:"relative",zIndex:1}}>
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:32}}>
           <img src="/logo.png" alt="Strategy AI" style={{width:80,height:80,objectFit:"contain",margin:"0 auto 16px",display:"block",animation:"float 3s ease infinite"}}/>
@@ -6922,8 +6938,8 @@ function WelcomeScreen({onLogin,onRegister,onBack,theme}){
           <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
             <button onClick={onRegister}
               style={{padding:"16px",borderRadius:14,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg,#fff)",fontSize:15,fontWeight:800,cursor:"pointer",boxShadow:"0 10px 32px var(--accent-glow)",transition:"all .2s",letterSpacing:-.2}}
-              onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 16px 44px rgba(99,102,241,.6)";}}
-              onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 10px 32px rgba(99,102,241,.5)";}}>
+              onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 16px 44px var(--accent-glow),0 12px 40px rgba(104,54,245,.45)";}}
+              onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="0 10px 32px var(--accent-glow)";}}>
               {t("ws_start_btn","Начать бесплатно ✦")}
             </button>
             <button onClick={onLogin}
