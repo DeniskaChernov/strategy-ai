@@ -134,7 +134,7 @@ export function StrategyShellSidebar({
         <div className="u-dot"/>
       </div>
       {onLogout&&(
-        <button type="button" className="lang-btn" onClick={onLogout} style={{margin:"0 12px 12px",alignSelf:"stretch",border:"none",cursor:"pointer",fontSize:11,color:"var(--t3)"}}>
+        <button type="button" className="sa-shell-logout" onClick={onLogout}>
           {t("logout","Выйти")}
         </button>
       )}

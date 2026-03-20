@@ -3457,7 +3457,7 @@ ${ctx}
       <div className={shellUi?"sa-map-toolbar-rows":undefined} style={{flexShrink:0,zIndex:30,borderBottom:"1px solid var(--glass-border-accent,var(--border))",background:shellUi?"transparent":"var(--bg2)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",boxShadow:shellUi?"none":"0 1px 0 var(--glass-border-accent,var(--border))"}}>
 
         {/* ROW 1 — primary actions + search */}
-        <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":undefined}}>
+        <div style={{minHeight:60,display:"flex",alignItems:"center",gap:isMobile?10:12,padding:isMobile?"10px 16px":shellUi?"0 20px":"0 24px",borderBottom:"1px solid var(--border)",flexWrap:isMobile?"wrap":shellUi?"wrap":undefined}}>
 
           {/* LEFT: nav + breadcrumb + edit */}
           <div style={{display:"flex",alignItems:"center",gap:isMobile?8:12,flexShrink:0,minWidth:0}}>
@@ -3527,9 +3527,9 @@ ${ctx}
         </div>
 
         {user&&onOpenContentPlanHub&&(
-          <div style={{padding:"10px 16px",borderBottom:"1px solid var(--border)",background:"var(--surface2)"}}>
-            <div style={{fontSize:10.5,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.08,textAlign:"center",marginBottom:8}}>{t("cp_map_strip_label","Контент-план и разделы")}</div>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,flexWrap:"wrap"}}>
+          <div className={shellUi?"sa-map-cp-strip":undefined} style={{padding:shellUi?undefined:"10px 16px",borderBottom:shellUi?undefined:"1px solid var(--border)",background:shellUi?undefined:"var(--surface2)"}}>
+            <div className={shellUi?"cp-strip-label":undefined} style={{fontSize:10.5,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.08,textAlign:"center",marginBottom:shellUi?0:8}}>{t("cp_map_strip_label","Контент-план и разделы")}</div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:shellUi?14:12,flexWrap:"wrap"}}>
               <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={isMobile}/>
               {onOpenContentPlanProject&&project?.id&&(
                 <button type="button" className="btn-interactive" onClick={()=>onOpenContentPlanProject()} title={t("cp_from_map_hint","Открыть контент-план этого проекта в полноэкранном режиме")}
@@ -3542,11 +3542,11 @@ ${ctx}
         )}
 
         {/* ROW 2 — view tools + panels + export */}
-        <div style={{minHeight:52,display:"flex",alignItems:"center",gap:isMobile?6:10,padding:isMobile?"10px 16px":"0 24px",flexWrap:isMobile?"wrap":undefined}}>
+        <div style={{minHeight:shellUi?56:52,display:"flex",alignItems:"center",gap:isMobile?6:shellUi?12:10,padding:isMobile?"10px 16px":shellUi?"10px 20px":"0 24px",flexWrap:isMobile?"wrap":shellUi?"wrap":"nowrap"}}>
 
           {/* View tools */}
-          <div style={{display:"flex",alignItems:"center",gap:isMobile?4:6,flexShrink:0}}>
-            {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>Вид</span>}
+          <div style={{display:"flex",alignItems:"center",gap:isMobile?4:shellUi?8:6,flexShrink:0}}>
+            {!isMobile&&<span style={{fontSize:shellUi?13:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>Вид</span>}
             {tb(false,fitView,<>{isMobile?"⊡":<>⊡ {t("fit_view","Вписать")}</>}</>,t("fit_view_hint","Вписать карту в экран"))}
             {selNode&&tb(false,()=>scrollToNode(selNode),<>{isMobile?"◎":<>◎ {t("center_on","К узлу")}</>}</>,t("center_on_hint","Центрировать на выбранном шаге"))}
             {!readOnly&&tb(false,autoLayout,<>{isMobile?"⌥":t("auto_layout","⌥ Расклад")}</>,t("auto_layout_hint","Автоматическая раскладка по связям"))}
@@ -3556,8 +3556,8 @@ ${ctx}
           {sep}
 
           {/* Canvas bg */}
-          <div style={{display:"flex",alignItems:"center",gap:2,flexShrink:0}}>
-            {!isMobile&&<span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>{t("bg_label","Фон")}</span>}
+          <div style={{display:"flex",alignItems:"center",gap:shellUi?6:2,flexShrink:0}}>
+            {!isMobile&&<span style={{fontSize:shellUi?13:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>{t("bg_label","Фон")}</span>}
             {[["grid","⊞","Точки"],["stars","✦","Звёзды"],["none","○","Чисто"]].map(([m,icon,label])=>(
               <button key={m} onClick={()=>setBgMode(m)} title={`Фон: ${label}`}
                 style={{height:30,padding:"0 10px",borderRadius:8,border:"none",background:bgMode===m?"rgba(99,102,241,.15)":"transparent",color:bgMode===m?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:14,fontWeight:600,flexShrink:0,transition:"all .2s"}}>
@@ -3582,19 +3582,19 @@ ${ctx}
           {sep}
 
           {/* Panels: Simulation, Templates, Gantt */}
-          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:shellUi?6:3,flexShrink:0}}>
             {!readOnly&&<button onClick={()=>setShowSim(true)} title={t("simulation_hint","Симуляция выполнения стратегии")}
-              style={{height:26,padding:"0 10px",borderRadius:6,border:"1px solid rgba(14,165,233,.3)",background:"rgba(14,165,233,.07)",color:"#38bdf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
+              style={{height:shellUi?30:26,padding:shellUi?"0 12px":"0 10px",borderRadius:8,border:shellUi?"1px solid rgba(104,54,245,.35)":"1px solid rgba(14,165,233,.3)",background:shellUi?"rgba(104,54,245,.1)":"rgba(14,165,233,.07)",color:shellUi?"#c4b5fd":"#38bdf8",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
               ⎇ Симуляция
             </button>}
             {!readOnly&&(TIERS[user?.tier||"free"]?.templates)&&(
               <button onClick={()=>setShowTemplates(true)} title={t("templates_hint","Шаблоны карт")}
-                style={{height:26,padding:"0 10px",borderRadius:6,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
+                style={{height:shellUi?30:26,padding:shellUi?"0 12px":"0 10px",borderRadius:8,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.07)",color:"#fbbf24",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
                 📋 Шаблоны
               </button>
             )}
             <button onClick={()=>setShowGantt(g=>!g)} title={t("gantt_title","Диаграмма Ганта")}
-              style={{height:26,padding:"0 10px",borderRadius:6,border:`1px solid ${showGantt?"rgba(16,185,129,.5)":"rgba(16,185,129,.2)"}`,background:showGantt?"rgba(16,185,129,.14)":"rgba(16,185,129,.06)",color:"#34d399",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
+              style={{height:shellUi?30:26,padding:shellUi?"0 12px":"0 10px",borderRadius:8,border:`1px solid ${showGantt?"rgba(16,185,129,.5)":"rgba(16,185,129,.2)"}`,background:showGantt?"rgba(16,185,129,.14)":"rgba(16,185,129,.06)",color:"#34d399",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:4}}>
               📅 Gantt
             </button>
           </div>
@@ -3602,25 +3602,25 @@ ${ctx}
           {sep}
 
           {/* Export/Import */}
-          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-            <span style={{fontSize:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:4}}>{t("export_label","Экспорт")}</span>
+          <div style={{display:"flex",alignItems:"center",gap:shellUi?10:8,flexShrink:0,flexWrap:shellUi?"wrap":"nowrap"}}>
+            <span style={{fontSize:shellUi?13:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:4}}>{t("export_label","Экспорт")}</span>
             <button onClick={exportPNG} disabled={exporting} title="Скачать PNG"
-              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
               onMouseOver={e=>{if(!exporting)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               {exporting?"…":"⬇ PNG"}
             </button>
             <button onClick={exportJSON} title="Скачать JSON"
-              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
               onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               ⬇ JSON
             </button>
             <button onClick={exportPDF} title={t("export_pdf_hint","PDF через печать браузера (Ctrl+P → Сохранить как PDF)")}
-              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
               onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
               ⬇ PDF
             </button>
             <button onClick={exportPPTX} title={t("export_pptx","Скачать PPTX")}
-              style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#f87171",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#f87171",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
               onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.12)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(239,68,68,.06)";}}>
               ⬇ PPTX
             </button>
@@ -4108,13 +4108,13 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
         </div>
       )}
       <div style={{flex:1,overflowY:"auto",padding:isMobile?16:28,position:"relative",zIndex:5}}>
-        <div style={{maxWidth:980,margin:"0 auto"}}>
+        <div style={{maxWidth:"min(1240px,100%)",width:"100%",margin:"0 auto"}}>
           <div className="glass-card" style={{marginBottom:24,padding:isMobile?"18px 16px":"24px 28px",borderRadius:18,border:"1px solid var(--glass-border-accent,var(--border))",background:"linear-gradient(135deg,var(--accent-soft),transparent)"}}>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
               <span style={{width:44,height:44,borderRadius:14,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 20px var(--accent-glow)"}}>✍️</span>
-              <div>
+              <div style={{flex:1,minWidth:0}}>
                 <h1 style={{fontSize:isMobile?20:26,fontWeight:900,color:"var(--text)",letterSpacing:-.6,margin:0}}>{t("cp_hub_title","Контент-план")}</h1>
-                <div style={{fontSize:13.5,color:"var(--text4)",marginTop:4,maxWidth:560}}>{t("cp_hub_subtitle","Отдельный рабочий режим: публикации и календарь по проектам из вашей стратегии. Шаги карт подтягиваются для привязки идей.")}</div>
+                <div style={{fontSize:13.5,color:"var(--text4)",marginTop:4,maxWidth:"min(720px,100%)"}}>{t("cp_hub_subtitle","Отдельный рабочий режим: публикации и календарь по проектам из вашей стратегии. Шаги карт подтягиваются для привязки идей.")}</div>
                 <div style={{fontSize:12,color:"var(--text5)",marginTop:10,maxWidth:640,lineHeight:1.45}}>{t("cp_hub_nav_hint","Подсказка: переключатель «Стратегия» в шапке ведёт к списку проектов; оттуда же открываются карты и шаги.")}</div>
               </div>
             </div>
@@ -4551,7 +4551,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
         </div>
       )}
       <div className={shellUi?"scr-inner":undefined} style={{flex:1,overflowY:"auto",padding:shellUi?"16px 18px":isMobile?16:24,position:"relative",zIndex:5,minHeight:0}}>
-        <div style={{maxWidth:960,margin:"0 auto"}}>
+        <div style={{maxWidth:shellUi?"min(1440px,100%)":960,width:"100%",margin:"0 auto"}}>
           {isMobile&&onOpenContentPlanHub&&(
             <div style={{marginBottom:18}}>
               <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={true}/>
@@ -4632,7 +4632,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
               <button onClick={loadProjects} className="btn-interactive" style={{padding:"12px 24px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:14,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>
             </div>
           ):loading?(
-            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:20}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":`repeat(auto-fill,minmax(${shellUi?300:260}px,1fr))`,gap:isMobile?16:20}}>
               {[1,2,3,4].map(i=>(
                 <div key={i} className="glass-card" style={{padding:"22px 22px 18px",borderRadius:18,border:"1px solid var(--border)",display:"flex",flexDirection:"column",gap:14}}>
                   <div style={{display:"flex",gap:14}}>
@@ -4647,7 +4647,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
               ))}
             </div>
           ):(
-            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(260px,1fr))",gap:isMobile?16:20}}>
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":`repeat(auto-fill,minmax(${shellUi?300:260}px,1fr))`,gap:isMobile?16:20}}>
               {filtered.map((p,i)=>{
                 const pm=maps[p.id]||[];
                 const myRole=p.owner===user.email?"owner":p.members?.find(m=>m.email===user.email)?.role;
