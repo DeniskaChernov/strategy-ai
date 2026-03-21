@@ -277,6 +277,11 @@ export const LANGS = {
     upgrade_tier:"✦ Расширить тариф",
     // Landing page nav
     nav_features:"Возможности",nav_process:"Процесс",nav_pricing:"Тарифы",
+    ref_tiers_line:"Линейка тарифов",
+    ref_tiers_note:"Полные лимиты по проектам, картам и AI — в разделе «Учётная запись» после входа.",
+    ref_tier_p_free:"Бесплатно",ref_tier_p_starter:"$9/мес",ref_tier_p_pro:"$29/мес",ref_tier_p_team:"$59/мес",ref_tier_p_enterprise:"$149+/мес",
+    ref_tier_d_free:"Для знакомства",ref_tier_d_starter:"Для старта",ref_tier_d_pro:"Для профессионалов",ref_tier_d_team:"Для команд",ref_tier_d_enterprise:"Для топ-команд",
+    projects_briefing_cta:"Брифинг по последней карте",
     // Landing hero
     hero_sub:"AI анализирует ваш бизнес, строит стратегическую карту и даёт консультацию уровня McKinsey. Для тех, кто принимает решения с последствиями.",
     // Landing features section
@@ -748,6 +753,11 @@ export const LANGS = {
     upgrade_tier:"✦ Upgrade plan",
     // Landing page nav
     nav_features:"Features",nav_process:"Process",nav_pricing:"Pricing",
+    ref_tiers_line:"Pricing lineup",
+    ref_tiers_note:"Full limits for projects, maps, and AI — in account settings after sign-in.",
+    ref_tier_p_free:"Free",ref_tier_p_starter:"$9/mo",ref_tier_p_pro:"$29/mo",ref_tier_p_team:"$59/mo",ref_tier_p_enterprise:"$149+/mo",
+    ref_tier_d_free:"Getting started",ref_tier_d_starter:"For early teams",ref_tier_d_pro:"For professionals",ref_tier_d_team:"For teams",ref_tier_d_enterprise:"For large orgs",
+    projects_briefing_cta:"Briefing for your last map",
     // Landing hero
     hero_sub:"AI analyzes your business, builds a strategic map and delivers McKinsey-level consultation. For those who make decisions with consequences.",
     // Landing features section
@@ -1221,6 +1231,11 @@ export const LANGS = {
     upgrade_tier:"✦ Tarifni yaxshilash",
     // Landing page nav
     nav_features:"Imkoniyatlar",nav_process:"Jarayon",nav_pricing:"Narxlar",
+    ref_tiers_line:"Tariflar qatori",
+    ref_tiers_note:"Loyihalar, xaritalar va AI bo'yicha to'liq limitlar — tizimga kirgach «Hisob» bo'limida.",
+    ref_tier_p_free:"Bepul",ref_tier_p_starter:"$9/oy",ref_tier_p_pro:"$29/oy",ref_tier_p_team:"$59/oy",ref_tier_p_enterprise:"$149+/oy",
+    ref_tier_d_free:"Tanishish uchun",ref_tier_d_starter:"Boshlash uchun",ref_tier_d_pro:"Professionallar uchun",ref_tier_d_team:"Jamoalar uchun",ref_tier_d_enterprise:"Yirik jamoalar uchun",
+    projects_briefing_cta:"So'nggi xarita bo'yicha brifing",
     // Landing hero
     hero_sub:"AI biznesingizni tahlil qiladi, strategik xarita tuzadi va McKinsey darajasida maslahat beradi. Oqibatli qarorlar qabul qiladiganlar uchun.",
     // Landing features section

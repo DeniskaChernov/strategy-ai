@@ -66,6 +66,13 @@ export function ReferenceLandingView({
     { n: "3", tk: "ref_how3_t", tf: "Спросите AI", dk: "ref_how3_d", df: "Вопросы по пробелам, рискам и приоритетам в контексте карты." },
     { n: "4", tk: "ref_how4_t", tf: "Исполнение", dk: "ref_how4_d", df: "Таймлайн, прогресс и командная работа." },
   ];
+  const tierStrip = [
+    { id: "free" as const, badge: "⬡", color: "#9088b0", name: "Free" },
+    { id: "starter" as const, badge: "◈", color: "#12c482", name: "Starter" },
+    { id: "pro" as const, badge: "◆", color: "#a050ff", name: "Pro" },
+    { id: "team" as const, badge: "✦", color: "#f09428", name: "Team" },
+    { id: "enterprise" as const, badge: "💎", color: "#06b6d4", name: "Enterprise" },
+  ];
   const faq = [
     { q: "ref_faq1_q", qf: "Что такое Strategy AI?", a: "ref_faq1_a", af: "Платформа визуального стратегического планирования: карты, сценарии, таймлайн и AI-советник с учётом ваших данных." },
     { q: "ref_faq2_q", qf: "Чем AI отличается от ChatGPT?", a: "ref_faq2_a", af: "Советник опирается на ваши проекты, карты и шаги — не на общий шаблонный ответ." },
@@ -75,7 +82,7 @@ export function ReferenceLandingView({
   ];
 
   return(
-    <div ref={rootRef} className={`sa-ref-landing sa-strategy-ui ${dk} view on sa-v-landing`} style={{ position: "fixed", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "stretch", overflowY: "auto", overflowX: "hidden", fontFamily: "'Inter',system-ui,sans-serif" }}>
+    <div ref={rootRef} className={`sa-ref-landing sa-strategy-ui sa-landing-shell ${dk} view on sa-v-landing`} style={{ position: "fixed", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "stretch", overflowY: "auto", overflowX: "hidden", fontFamily: "'Inter',system-ui,sans-serif" }}>
       <StrategyShellBg/>
       <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", opacity: theme === "dark" ? 0.45 : 0.12 }}>
         <canvas id="stars-canvas" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden/>
@@ -228,6 +235,23 @@ export function ReferenceLandingView({
                 <tr><td>{t("ref_cmp_row5", "Бесплатный старт")}</td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
               </tbody>
             </table>
+          </div>
+          <div className="sr sr-up in" style={{ marginTop: 44 }}>
+            <div className="land-section-lbl">{t("nav_pricing", "Тарифы")}</div>
+            <div className="land-section-title" style={{ fontSize: "clamp(22px, 3.5vw, 28px)" }}>{t("ref_tiers_line", "Линейка тарифов")}</div>
+            <div className="land-section-sub" style={{ marginBottom: 22 }}>{t("ref_tiers_note", "Полные лимиты по проектам, картам и AI — в разделе «Учётная запись» после входа.")}</div>
+            <div className="land-tier-scroll">
+              {tierStrip.map((x)=>(
+                <div key={x.id} className="land-tier-card" style={{ borderTop: `3px solid ${x.color}` }}>
+                  <div className="land-tier-card-top">
+                    <span className="land-tier-badge" style={{ color: x.color }}>{x.badge}</span>
+                    <span className="land-tier-name">{x.name}</span>
+                  </div>
+                  <div className="land-tier-price">{t(`ref_tier_p_${x.id}`, "")}</div>
+                  <div className="land-tier-desc">{t(`ref_tier_d_${x.id}`, "")}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

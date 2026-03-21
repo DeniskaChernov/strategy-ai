@@ -34,22 +34,22 @@ import { StrategyShellSidebar, StrategyShellBg, type StrategyShellNav } from "./
 import { ReferenceLandingView } from "./reference-landing";
 
 const TIERS={
-  free:    {label:"Free",    price:"Бесплатно",  color:"#64748b",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
-  starter: {label:"Starter", price:"$9/мес",    color:"#10b981",badge:"◈", projects:3,  users:1,  maps:3,  scenarios:2,  templates:false,contentPlan:false,ai:"starter", clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для старта"},
-  pro:     {label:"Pro",     price:"$29/мес",   color:"#8b5cf6",badge:"◆", projects:10, users:3,  maps:5,  scenarios:5,  templates:false,contentPlan:true, ai:"advanced",clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для профессионалов"},
-  team:    {label:"Team",    price:"$59/мес",   color:"#f59e0b",badge:"✦", projects:25, users:10, maps:15, scenarios:15, templates:true, contentPlan:true, ai:"full",    clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для команд"},
+  free:    {label:"Free",    price:"Бесплатно",  color:"#9088b0",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
+  starter: {label:"Starter", price:"$9/мес",    color:"#12c482",badge:"◈", projects:3,  users:1,  maps:3,  scenarios:2,  templates:false,contentPlan:false,ai:"starter", clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для старта"},
+  pro:     {label:"Pro",     price:"$29/мес",   color:"#a050ff",badge:"◆", projects:10, users:3,  maps:5,  scenarios:5,  templates:false,contentPlan:true, ai:"advanced",clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для профессионалов"},
+  team:    {label:"Team",    price:"$59/мес",   color:"#f09428",badge:"✦", projects:25, users:10, maps:15, scenarios:15, templates:true, contentPlan:true, ai:"full",    clone:true, wl:false,api:false,report:false,pptx:false,desc:"Для команд"},
   enterprise:{label:"Enterprise",price:"$149+/мес",color:"#06b6d4",badge:"💎",projects:999,users:999,maps:999,scenarios:999,templates:true,contentPlan:true,ai:"priority",clone:true,wl:true,api:true,report:true,pptx:true,desc:"Для топ-команд"},
 };
-const ROLES_C  ={owner:"#6366f1",editor:"#10b981",viewer:"#94a3b8"};
-const STATUS  ={planning:{c:"#6366f1"},active:{c:"#0ea5e9"},completed:{c:"#10b981"},paused:{c:"#f59e0b"},blocked:{c:"#ef4444"}};
-const PRIORITY={low:{c:"#475569"},medium:{c:"#f59e0b"},high:{c:"#f97316"},critical:{c:"#ef4444"}};
-const ETYPE_C ={requires:{c:"#6366f1",d:"none"},affects:{c:"#8b5cf6",d:"8,4"},blocks:{c:"#ef4444",d:"4,3"},follows:{c:"#10b981",d:"12,4"}};
+const ROLES_C  ={owner:"#6836f5",editor:"#12c482",viewer:"#a8a4c8"};
+const STATUS  ={planning:{c:"#6836f5"},active:{c:"#06b6d4"},completed:{c:"#12c482"},paused:{c:"#f09428"},blocked:{c:"#f04458"}};
+const PRIORITY={low:{c:"#6c6480"},medium:{c:"#f09428"},high:{c:"#ea580c"},critical:{c:"#f04458"}};
+const ETYPE_C ={requires:{c:"#6836f5",d:"none"},affects:{c:"#a050ff",d:"8,4"},blocks:{c:"#f04458",d:"4,3"},follows:{c:"#12c482",d:"12,4"}};
 const getROLES=(t)=>({owner:t("role_owner","Владелец"),editor:t("role_editor","Редактор"),viewer:t("role_viewer","Зритель")});
-const getSTATUS=(t)=>({planning:{c:"#6366f1",label:t("status_planning","Планирование")},active:{c:"#0ea5e9",label:t("status_active","В работе")},completed:{c:"#10b981",label:t("completed","Выполнено")},paused:{c:"#f59e0b",label:t("status_paused","На паузе")},blocked:{c:"#ef4444",label:t("status_blocked","Заблокировано")}});
-const getPRIORITY=(t)=>({low:{c:"#475569",label:t("priority_low","Низкий")},medium:{c:"#f59e0b",label:t("priority_medium","Средний")},high:{c:"#f97316",label:t("priority_high","Высокий")},critical:{c:"#ef4444",label:t("priority_critical","Критично")}});
+const getSTATUS=(t)=>({planning:{c:"#6836f5",label:t("status_planning","Планирование")},active:{c:"#06b6d4",label:t("status_active","В работе")},completed:{c:"#12c482",label:t("completed","Выполнено")},paused:{c:"#f09428",label:t("status_paused","На паузе")},blocked:{c:"#f04458",label:t("status_blocked","Заблокировано")}});
+const getPRIORITY=(t)=>({low:{c:"#6c6480",label:t("priority_low","Низкий")},medium:{c:"#f09428",label:t("priority_medium","Средний")},high:{c:"#ea580c",label:t("priority_high","Высокий")},critical:{c:"#f04458",label:t("priority_critical","Критично")}});
 const getSTATUSES=(t)=>[{v:"planning",label:"📋 "+t("status_planning","Планирование")},{v:"active",label:"⚡ "+t("status_active","В работе")},{v:"completed",label:"✅ "+t("completed","Выполнено")},{v:"paused",label:"⏸ "+t("status_paused","На паузе")},{v:"blocked",label:"🔒 "+t("status_blocked","Заблокировано")}];
 const getPRIORITIES=(t)=>[{v:"low",label:"🟢 "+t("priority_low","Низкий")},{v:"medium",label:"🟡 "+t("priority_medium","Средний")},{v:"high",label:"🟠 "+t("priority_high","Высокий")},{v:"critical",label:"🔴 "+t("priority_critical","Критично")}];
-const getETYPE=(t)=>({requires:{c:"#6366f1",label:t("etype_requires","Требует"),d:"none"},affects:{c:"#8b5cf6",label:t("etype_affects","Влияет"),d:"8,4"},blocks:{c:"#ef4444",label:t("etype_blocks","Блокирует"),d:"4,3"},follows:{c:"#10b981",label:t("etype_follows","Следует"),d:"12,4"}});
+const getETYPE=(t)=>({requires:{c:"#6836f5",label:t("etype_requires","Требует"),d:"none"},affects:{c:"#a050ff",label:t("etype_affects","Влияет"),d:"8,4"},blocks:{c:"#f04458",label:t("etype_blocks","Блокирует"),d:"4,3"},follows:{c:"#12c482",label:t("etype_follows","Следует"),d:"12,4"}});
 const getTierPrice=(k,t)=>{const prices={free:t("free_plan","Бесплатно"),starter:"$9"+t("per_month_short","/мес"),pro:"$29"+t("per_month_short","/мес"),team:"$59"+t("per_month_short","/мес"),enterprise:"$149+"+t("per_month_short","/мес")};return prices[k]||"";};
 
 const {createContext,useContext}=React;
@@ -288,7 +288,7 @@ const AI_STRICT_RULES=`КРИТИЧНО — соблюдай всегда:
 
 // ── AI tier configs (МАКСИМАЛЬНАЯ глубина: chain-of-thought, распознавание намерений, структура) ──
 const AI_TIER={
-  free:{label:"Free",badge:"⬡",color:"#64748b",
+  free:{label:"Free",badge:"⬡",color:"#9088b0",
     system:(ctx,map,meta,fullCtx)=>`Ты — AI-помощник по стратегии. Глубоко понимай контекст и намерение пользователя.
 ${AI_STRICT_RULES}
 
@@ -302,7 +302,7 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 Ответ: по-русски, 2–4 предложения. Только конкретное действие + результат. Не предлагай шаг, если его блокирует незавершённый.
 <ADD>{"title":"Название шага (глагол+объект)","reason":"Зачем","action":"Что именно сделать","metric":"KPI/результат","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
   },
-  starter:{label:"Starter",badge:"◈",color:"#10b981",
+  starter:{label:"Starter",badge:"◈",color:"#12c482",
     system:(ctx,map,meta,fullCtx)=>`Ты — бизнес-консультант. Глубоко понимай пользователя и контекст.
 ${AI_STRICT_RULES}
 
@@ -316,7 +316,7 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 Формат: краткий диагноз → 2-3 КОНКРЕТНЫХ действия (что сделать + как измерить). Без общих фраз.
 <ADD>{"title":"Название шага","reason":"Зачем","action":"Что именно сделать","metric":"KPI","status":"planning","priority":"medium","progress":0,"tags":[]}</ADD>`,
   },
-  pro:{label:"Pro",badge:"◆",color:"#8b5cf6",
+  pro:{label:"Pro",badge:"◆",color:"#a050ff",
     system:(ctx,map,meta,fullCtx)=>`Ты — стратегический советник 15+ лет. МАКСИМАЛЬНАЯ ГЛУБИНА.
 ${AI_STRICT_RULES}
 
@@ -334,7 +334,7 @@ ${fullCtx?.stats?"СТАТИСТИКА: "+fullCtx.stats:""}
 Формат: **Диагноз** → **Рекомендация** (2-3 действия: что сделать + результат) → **Риск** → **Быстрая победа** (одно действие). Только действия и метрики.
 <ADD>{"title":"Название шага","reason":"Зачем","action":"Конкретное действие","metric":"KPI","status":"active","priority":"high","progress":0,"tags":[]}</ADD>`,
   },
-  team:{label:"Team",badge:"✦",color:"#f59e0b",
+  team:{label:"Team",badge:"✦",color:"#f09428",
     system:(ctx,map,meta,fullCtx)=>`Ты — партнёр McKinsey. МАКСИМАЛЬНАЯ ГЛУБИНА. Думай как senior partner.
 ${AI_STRICT_RULES}
 
@@ -563,7 +563,7 @@ function OfflineBanner(){
   },[]);
   if(online)return null;
   return(
-    <div style={{position:"fixed",top:0,left:0,right:0,zIndex:10000,background:"linear-gradient(135deg,#ef4444,#dc2626)",color:"#fff",padding:"10px 20px",fontSize:13,fontWeight:700,textAlign:"center",boxShadow:"0 4px 20px rgba(239,68,68,.4)",animation:"slideDown .2s ease"}}>
+    <div style={{position:"fixed",top:0,left:0,right:0,zIndex:10000,background:"linear-gradient(135deg,#f04458,#dc2626)",color:"#fff",padding:"10px 20px",fontSize:13,fontWeight:700,textAlign:"center",boxShadow:"0 4px 20px rgba(239,68,68,.4)",animation:"slideDown .2s ease"}}>
       📴 {typeof navigator!=="undefined"&&navigator.language?.startsWith("ru")?"Нет соединения. Проверьте интернет.":"No connection. Check your internet."}
     </div>
   );
@@ -602,7 +602,7 @@ function Toast({msg,type="info",onClose,action,onAction}){
     setClosing(true);
     setTimeout(()=>onClose(),260);
   }
-  const C={info:"var(--accent-1)",error:"#ef4444",success:"#10b981",warn:"#f59e0b"};
+  const C={info:"var(--accent-1)",error:"#f04458",success:"#12c482",warn:"#f09428"};
   const icons={error:"⚠",success:"✓",warn:"⚡",info:"ℹ"};
   const borderCol=type==="info"?"var(--accent-soft)":type==="error"?"rgba(239,68,68,.33)":type==="success"?"rgba(16,185,129,.33)":"rgba(245,158,11,.33)";
   return(
@@ -653,7 +653,7 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
         </div>
         <div style={{display:"flex",gap:10,padding:"0 24px 24px"}}>
           <button onClick={handleCancel} className="btn-interactive" style={{flex:1,padding:"12px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("cancel","Отмена")}</button>
-          <button onClick={handleConfirm} className="btn-interactive" style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:danger?"linear-gradient(135deg,#dc2626,#ef4444)":"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}}>{confirmLabel}</button>
+          <button onClick={handleConfirm} className="btn-interactive" style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:danger?"linear-gradient(135deg,#dc2626,#f04458)":"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:800,cursor:"pointer"}}>{confirmLabel}</button>
         </div>
       </div>
     </div>
@@ -729,10 +729,10 @@ const ALL_FEATURES=[
 ];
 
 const TIER_MKT={
-  free:{icon:"⬡",color:"#64748b",badge:null,headline:"Попробуй бесплатно",sub:"Без карты. Навсегда.",accent:"Для первых шагов",features:["1 проект","1 карта","AI-интервью","Gantt таймлайн","Экспорт PNG"],missing:["Команда","Сценарии","Конкурентный анализ"],gradient:"linear-gradient(135deg,#64748b22,#64748b08)",glow:"#64748b",popular:false},
-  starter:{icon:"◈",color:"#10b981",badge:"🌱 Новинка",headline:"Первый платный шаг",sub:"Мягкий вход в стратегию",accent:"Лучший старт за $9",features:["3 проекта","3 карты","2 сценария","Анализ рисков AI","Gantt + PNG"],missing:["Команда","Конкурентный анализ","Шаблоны"],gradient:"linear-gradient(135deg,#10b98118,#10b98108)",glow:"#10b981",popular:false},
-  pro:{icon:"◆",color:"#8b5cf6",badge:"🔥 Популярный",headline:"Для профессионала",sub:"Полная стратегическая мощь",accent:"73% платящих выбирают Pro",features:["10 проектов","5 карт","3 участника","Конкурентный анализ AI","OKR·SWOT·Риски","Клонирование карт"],missing:["Unit economics","Шаблоны","McKinsey-AI"],gradient:"linear-gradient(135deg,#8b5cf618,#8b5cf608)",glow:"#8b5cf6",popular:true},
-  team:{icon:"✦",color:"#f59e0b",badge:"⭐ Лучшая ценность",headline:"Для команд",sub:"Стратегия на уровне McKinsey",accent:"В 2× больше функций чем Pro",features:["25 проектов","15 карт","10 участников","Unit economics разбор","AI авто-связи","Шаблоны стратегий"],missing:["BCG·Porter·Blue Ocean","PowerPoint экспорт","AI-отчёты"],gradient:"linear-gradient(135deg,#f59e0b18,#f59e0b08)",glow:"#f59e0b",popular:false,highlight:true},
+  free:{icon:"⬡",color:"#9088b0",badge:null,headline:"Попробуй бесплатно",sub:"Без карты. Навсегда.",accent:"Для первых шагов",features:["1 проект","1 карта","AI-интервью","Gantt таймлайн","Экспорт PNG"],missing:["Команда","Сценарии","Конкурентный анализ"],gradient:"linear-gradient(135deg,#9088b022,#9088b008)",glow:"#9088b0",popular:false},
+  starter:{icon:"◈",color:"#12c482",badge:"🌱 Новинка",headline:"Первый платный шаг",sub:"Мягкий вход в стратегию",accent:"Лучший старт за $9",features:["3 проекта","3 карты","2 сценария","Анализ рисков AI","Gantt + PNG"],missing:["Команда","Конкурентный анализ","Шаблоны"],gradient:"linear-gradient(135deg,#12c48218,#12c48208)",glow:"#12c482",popular:false},
+  pro:{icon:"◆",color:"#a050ff",badge:"🔥 Популярный",headline:"Для профессионала",sub:"Полная стратегическая мощь",accent:"73% платящих выбирают Pro",features:["10 проектов","5 карт","3 участника","Конкурентный анализ AI","OKR·SWOT·Риски","Клонирование карт"],missing:["Unit economics","Шаблоны","McKinsey-AI"],gradient:"linear-gradient(135deg,#a050ff18,#a050ff08)",glow:"#a050ff",popular:true},
+  team:{icon:"✦",color:"#f09428",badge:"⭐ Лучшая ценность",headline:"Для команд",sub:"Стратегия на уровне McKinsey",accent:"В 2× больше функций чем Pro",features:["25 проектов","15 карт","10 участников","Unit economics разбор","AI авто-связи","Шаблоны стратегий"],missing:["BCG·Porter·Blue Ocean","PowerPoint экспорт","AI-отчёты"],gradient:"linear-gradient(135deg,#f0942818,#f0942808)",glow:"#f09428",popular:false,highlight:true},
   enterprise:{icon:"💎",color:"#06b6d4",badge:"💎 Топ-уровень",headline:"Без компромиссов",sub:"AI-директор по стратегии",accent:"Окупается за 1 решение",features:["∞ проектов и карт","∞ участников","AI = стратег+финансист+инвестор","BCG·Porter·Blue Ocean","PowerPoint экспорт","API-доступ"],missing:[],gradient:"linear-gradient(135deg,#06b6d418,#06b6d408)",glow:"#06b6d4",popular:false},
 };
 
@@ -743,7 +743,7 @@ const TIER_FEAT_KEY={free:"free",starter:"str",pro:"pro",team:"team",enterprise:
 
 function FeatureValue({val}){
   if(val===false)return <span style={{color:"var(--text6)",fontSize:13}}>—</span>;
-  if(val===true)return <span style={{color:"#10b981",fontWeight:700,fontSize:14}}>✓</span>;
+  if(val===true)return <span style={{color:"#12c482",fontWeight:700,fontSize:14}}>✓</span>;
   return <span style={{color:"var(--text2)",fontSize:13,fontWeight:500}}>{val}</span>;
 }
 
@@ -833,7 +833,7 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
             </div>
           ))}
           <div style={{display:"flex",gap:10,marginTop:16}}>
-            <button onClick={doReplace} disabled={!replaceId||loading} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:replaceId&&!loading?"linear-gradient(135deg,#dc2626,#ef4444)":"var(--surface2)",color:replaceId&&!loading?"#fff":"var(--text4)",fontSize:13,fontWeight:700,cursor:replaceId&&!loading?"pointer":"not-allowed"}}>{loading?t("replacing",t("replacing","Заменяю…")):t("replace_btn","🗑 Заменить")}</button>
+            <button onClick={doReplace} disabled={!replaceId||loading} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:replaceId&&!loading?"linear-gradient(135deg,#dc2626,#f04458)":"var(--surface2)",color:replaceId&&!loading?"#fff":"var(--text4)",fontSize:13,fontWeight:700,cursor:replaceId&&!loading?"pointer":"not-allowed"}}>{loading?t("replacing",t("replacing","Заменяю…")):t("replace_btn","🗑 Заменить")}</button>
             <button onClick={onUpgrade} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("upgrade_tier","✦ Расширить тариф")}</button>
           </div>
         </div>
@@ -1076,7 +1076,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
             </button>
           ))}
           <div style={{flex:1}}/>
-          <button onClick={onLogout} style={{padding:"11px 14px",border:"none",background:"transparent",color:"#ef4444",fontSize:13,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",gap:5}} onMouseOver={e=>e.currentTarget.style.opacity=".7"} onMouseOut={e=>e.currentTarget.style.opacity="1"}>
+          <button onClick={onLogout} style={{padding:"11px 14px",border:"none",background:"transparent",color:"#f04458",fontSize:13,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",gap:5}} onMouseOver={e=>e.currentTarget.style.opacity=".7"} onMouseOut={e=>e.currentTarget.style.opacity="1"}>
             <span>⎋</span> {t("logout","Выйти")}
           </button>
         </div>
@@ -1119,7 +1119,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   </div>
                 </div>
               </div>
-              {msg&&<div style={{marginTop:16,maxWidth:680,padding:"10px 15px",borderRadius:10,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#10b981":"#ef4444",fontSize:13.5}}>{msg.t}</div>}
+              {msg&&<div style={{marginTop:16,maxWidth:680,padding:"10px 15px",borderRadius:10,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#12c482":"#f04458",fontSize:13.5}}>{msg.t}</div>}
             </div>
           )}
 
@@ -1133,7 +1133,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                     <div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>✉️ Email</div>
                     <div style={{fontSize:12,color:"var(--text4)",marginTop:2}}>{user.email}</div>
                   </div>
-                  <div style={{padding:"4px 10px",borderRadius:8,background:user.emailVerified!==false?"rgba(16,185,129,.12)":"rgba(245,158,11,.12)",border:`1px solid ${user.emailVerified!==false?"rgba(16,185,129,.3)":"rgba(245,158,11,.3)"}`,color:user.emailVerified!==false?"#10b981":"#f59e0b",fontSize:12,fontWeight:700}}>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:user.emailVerified!==false?"rgba(16,185,129,.12)":"rgba(245,158,11,.12)",border:`1px solid ${user.emailVerified!==false?"rgba(16,185,129,.3)":"rgba(245,158,11,.3)"}`,color:user.emailVerified!==false?"#12c482":"#f09428",fontSize:12,fontWeight:700}}>
                     {user.emailVerified!==false?t("email_verified","Подтверждён"):t("email_not_verified","Не подтверждён")}
                   </div>
                 </div>
@@ -1154,7 +1154,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                     <div style={{fontSize:13,color:"var(--text4)",marginBottom:6}}>{t("pw_strength","Надёжность пароля")}</div>
                     <div style={{display:"flex",gap:3}}>
                       {[np.length>=6,/[A-Z]/.test(np),/[0-9]/.test(np),/[^a-zA-Z0-9]/.test(np)].map((ok,i)=>(
-                        <div key={i} style={{flex:1,height:4,borderRadius:2,background:ok?"#10b981":"var(--border2)",transition:"background .3s"}}/>
+                        <div key={i} style={{flex:1,height:4,borderRadius:2,background:ok?"#12c482":"var(--border2)",transition:"background .3s"}}/>
                       ))}
                     </div>
                     <div style={{fontSize:13,color:"var(--text5)",marginTop:4}}>{[np.length>=6&&t("chars_6plus","6+"),/[A-Z]/.test(np)&&t("uppercase_chars","A-Z"),/[0-9]/.test(np)&&"0-9",/[^a-zA-Z0-9]/.test(np)&&"!@#"].filter(Boolean).join(" · ")}</div>
@@ -1163,14 +1163,14 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 <button onClick={changePw} disabled={loading} style={{padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",marginBottom:12}}>
                   {loading?t("saving","Сохраняю…"):t("change_pw_btn","Изменить пароль")}
                 </button>
-                {msg&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#10b981":"#ef4444",fontSize:13.5}}>{msg.t}</div>}
+                {msg&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#12c482":"#f04458",fontSize:13.5}}>{msg.t}</div>}
 
                 <div style={{marginTop:24,paddingTop:24,borderTop:"1px solid var(--border)"}}>
-                  <div style={{fontSize:13,fontWeight:700,color:"#ef4444",marginBottom:8}}>{t("danger_zone","Опасная зона")}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#f04458",marginBottom:8}}>{t("danger_zone","Опасная зона")}</div>
                   <div style={{padding:"14px 16px",borderRadius:11,background:"rgba(239,68,68,.05)",border:"1px solid rgba(239,68,68,.15)"}}>
                     <div style={{fontSize:13.5,color:"var(--text)",fontWeight:600}}>{t("delete_account","Удалить аккаунт")}</div>
                     <div style={{fontSize:13.5,color:"var(--text4)",marginTop:3,marginBottom:10}}>{t("all_data_deleted","Все данные будут удалены безвозвратно")}</div>
-                    <button onClick={()=>setShowDeleteConfirm(true)} disabled={loading} style={{padding:"8px 16px",borderRadius:8,border:"1px solid rgba(239,68,68,.35)",background:"transparent",color:"#ef4444",fontSize:13,fontWeight:600,cursor:loading?"not-allowed":"pointer"}}>{loading?t("loading_short","Загрузка…"):t("delete_account","Удалить аккаунт")}</button>
+                    <button onClick={()=>setShowDeleteConfirm(true)} disabled={loading} style={{padding:"8px 16px",borderRadius:8,border:"1px solid rgba(239,68,68,.35)",background:"transparent",color:"#f04458",fontSize:13,fontWeight:600,cursor:loading?"not-allowed":"pointer"}}>{loading?t("loading_short","Загрузка…"):t("delete_account","Удалить аккаунт")}</button>
                   </div>
                 </div>
                 {showDeleteConfirm&&(
@@ -1180,7 +1180,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                       <div style={{fontSize:13.5,color:"var(--text3)",marginBottom:20}}>{t("delete_warning","Все данные будут удалены безвозвратно")}</div>
                       <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
                         <button onClick={()=>setShowDeleteConfirm(false)} style={{padding:"10px 20px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("cancel","Отмена")}</button>
-                        <button onClick={handleDeleteAccount} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"#ef4444",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("delete_forever","Удалить навсегда")}</button>
+                        <button onClick={handleDeleteAccount} style={{padding:"10px 20px",borderRadius:10,border:"none",background:"#f04458",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("delete_forever","Удалить навсегда")}</button>
                       </div>
                     </div>
                   </div>
@@ -1210,10 +1210,10 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                       <div style={{fontSize:11,color:"var(--text5)",marginBottom:6}}>{t("palette_hint","Цвет кнопок и акцентов")}</div>
                       <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                         {[
-                          {id:"indigo",label:"◆ Indigo",c1:"#5b6bc0",c2:"#7c8dd9"},
+                          {id:"indigo",label:"◆ Indigo",c1:"#6836f5",c2:"#a050ff"},
                           {id:"ocean",label:"◇ Ocean",c1:"#5b8fb9",c2:"#7ab8d4"},
                           {id:"forest",label:"◇ Forest",c1:"#5a8c7b",c2:"#6ba881"},
-                          {id:"orange",label:"◇ Orange",c1:"#ea580c",c2:"#f97316"},
+                          {id:"orange",label:"◇ Orange",c1:"#ea580c",c2:"#f09428"},
                           {id:"sunset",label:"◇ Sunset",c1:"#b88a6a",c2:"#c9a088"},
                           {id:"mono",label:"◇ Mono",c1:"#6b7a8a",c2:"#8a9baa"},
                         ].map(({id,label,c1,c2})=>(
@@ -1275,8 +1275,8 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 <button onClick={saveSettings} disabled={loading} style={{padding:"12px 28px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
                   {loading?t("saving","Сохраняю…"):t("save_settings","Сохранить настройки")}
                 </button>
-                {settingsSaved&&<div style={{fontSize:13,color:"#10b981",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> {t("settings_saved","Настройки сохранены")}</div>}
-                {msg&&!settingsSaved&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#10b981":"#ef4444",fontSize:13.5}}>{msg.t}</div>}
+                {settingsSaved&&<div style={{fontSize:13,color:"#12c482",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> {t("settings_saved","Настройки сохранены")}</div>}
+                {msg&&!settingsSaved&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#12c482":"#f04458",fontSize:13.5}}>{msg.t}</div>}
               </div>
             </div>
           )}
@@ -1290,9 +1290,9 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   {icon:"📁",label:t("billing_title","Тариф"),val:tier.label,color:tier.color},
                   {icon:"🗺",label:t("maps_available","Карт доступно"),val:fmt(tier.maps),color:"var(--accent-1)"},
                   {icon:"👥",label:t("members","Участников"),val:fmt(tier.users),color:"var(--accent-2)"},
-                  {icon:"⎇",label:t("scenarios_available","Сценариев"),val:fmt(tier.scenarios),color:"#0ea5e9"},
-                  {icon:"📁",label:t("projects_available","Проектов"),val:fmt(tier.projects),color:"#10b981"},
-                  {icon:"🤖",label:t("ai_level","AI уровень"),val:tier.ai,color:"#f59e0b"},
+                  {icon:"⎇",label:t("scenarios_available","Сценариев"),val:fmt(tier.scenarios),color:"#06b6d4"},
+                  {icon:"📁",label:t("projects_available","Проектов"),val:fmt(tier.projects),color:"#12c482"},
+                  {icon:"🤖",label:t("ai_level","AI уровень"),val:tier.ai,color:"#f09428"},
                 ].map(s=>(
                   <div key={s.label} className="icard icard-stat" style={{"--icard-color":s.color,"--icard-glow":s.color+"33","--icard-bg":s.color+"09",padding:"16px",borderRadius:14,background:"var(--surface)",border:"1px solid var(--border)"}}>
                     <div style={{fontSize:22,marginBottom:6}}>{s.icon}</div>
@@ -1316,7 +1316,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   ].map(f=>(
                     <div key={f.label} className="icard feat-row" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)"}}>
                       <span className="icard-title" style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>{f.label}</span>
-                      <span style={{fontSize:13,fontWeight:700,color:f.ok?"#10b981":"var(--text5)"}}>{f.ok?"✓ "+t("done","Включено"):"✗ —"}</span>
+                      <span style={{fontSize:13,fontWeight:700,color:f.ok?"#12c482":"var(--text5)"}}>{f.ok?"✓ "+t("done","Включено"):"✗ —"}</span>
                     </div>
                   ))}
                 </div>
@@ -1395,7 +1395,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                               const v=f[TIER_FEAT_KEY[k]];
                               return(
                                 <div key={k} style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",textAlign:"center"}}>
-                                  {v===false?<span style={{color:"var(--text6)"}}>—</span>:v===true?<span style={{color:"#10b981",fontWeight:700}}>✓</span>:<span style={{color:"var(--text2)"}}>{String(v)}</span>}
+                                  {v===false?<span style={{color:"var(--text6)"}}>—</span>:v===true?<span style={{color:"#12c482",fontWeight:700}}>✓</span>:<span style={{color:"var(--text2)"}}>{String(v)}</span>}
                                 </div>
                               );
                             })}
@@ -1412,14 +1412,14 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                           <input style={{...fi,marginBottom:0}} placeholder={t("card_expiry_ph","ММ/ГГ")} value={cardExp} onChange={e=>setCardExp(formatExp(e.target.value))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                           <input style={{...fi,marginBottom:0}} placeholder={t("card_cvv_ph","CVV")} value={cardCvv} onChange={e=>setCardCvv(e.target.value.replace(/\D/g,"").slice(0,4))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                         </div>
-                        {cardError&&<div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#ef4444",fontSize:13}}>⚠️ {cardError}</div>}
+                        {cardError&&<div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#f04458",fontSize:13}}>⚠️ {cardError}</div>}
                         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,paddingTop:12,marginTop:12,borderTop:"1px solid var(--border)"}}>
                           {["🔒 SSL","💳 Visa/MC","✓ PCI DSS"].map(b=><div key={b} style={{fontSize:13,color:"var(--text4)",fontWeight:500}}>{b}</div>)}
                         </div>
                       </div>
                     )}
                     {!isCurrentTier&&!isUpgrade&&(
-                      <div style={{marginBottom:12,padding:"12px 14px",borderRadius:10,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.25)",fontSize:13,color:"#f59e0b"}}>
+                      <div style={{marginBottom:12,padding:"12px 14px",borderRadius:10,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.25)",fontSize:13,color:"#f09428"}}>
                         <div style={{fontWeight:700,marginBottom:6}}>⚠️ {t("downgrade_warning","После смены тарифа часть данных может быть ограничена.")}</div>
                         {usage&&(usage.maps?.used>0||usage.projects?.used>0)&&(
                           <div style={{fontSize:12,marginBottom:6,opacity:.95}}>
@@ -1457,7 +1457,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   );
 }
 
-// ── Landing ──
+// ── AI: интервью и генерация карты (system prompts) ──
 const OB_SYS=`Ты — опытный стратегический консультант уровня McKinsey. ГЛУБОКОЕ интервью для персонального плана.
 
 ГЛУБИНА ПОНИМАНИЯ:
@@ -1496,67 +1496,6 @@ const MAP_GEN_SYS=`Создай стратегическую карту на о�
 {"nodes":[{"id":"n1","x":200,"y":270,"title":"...","reason":"...","metric":"...","status":"active","priority":"high","progress":35,"tags":[]}],"edges":[{"id":"e1","source":"n1","target":"n2","type":"requires","label":""}]}
 7–9 узлов, X:150–900, Y:80–520. Связи — логичные (воронка, pipeline, последовательность).`;
 
-function Landing({onStart,onLogin,hasSaved,theme="dark",onToggleTheme}){
-  const{t}=useLang();
-  const[showAuth,setShowAuth]=useState(false);
-  const FEATURES=[
-    {icon:"🧠",title:"AI-интервью",desc:"6 умных вопросов — и ваша стратегия уже на карте"},
-    {icon:"🗺",title:"Визуальная карта",desc:"Drag & drop, связи, статусы, прогресс в реальном времени"},
-    {icon:"⚡",title:"AI-советник",desc:"Задавайте вопросы прямо в контексте вашей карты"},
-    {icon:"📊",title:"Сценарии",desc:"Симулируйте разные стратегии без риска для основного плана"},
-  ];
-  return(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Inter',system-ui,sans-serif",position:"relative"}}>
-<div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(ellipse 80% 60% at 50% -20%,rgba(99,102,241,.12) 0%,transparent 60%),linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px)",backgroundSize:"auto,60px 60px,60px 60px",pointerEvents:"none"}}/>
-      <div style={{display:"flex",alignItems:"center",padding:"14px 28px",position:"relative",zIndex:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,flex:1}}>
-          <img src="/logo.png" alt="Strategy AI" style={{height:32,width:32,objectFit:"contain"}}/>
-          <span style={{fontSize:16,fontWeight:800,color:"var(--text)",letterSpacing:-.3}}>Strategy AI</span>
-        </div>
-        <div style={{display:"flex",gap:10}}>
-          <button onClick={onToggleTheme} style={{padding:"7px 12px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,cursor:"pointer"}}>{theme==="dark"?"☀️":"🌙"}</button>
-          <button onClick={()=>setShowAuth(true)} style={{padding:"7px 16px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("sign_in","Войти")}</button>
-          <button onClick={onStart} className="btn-interactive" style={{padding:"7px 18px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:13,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 16px var(--accent-glow)"}}>{t("start_free_arrow","Начать бесплатно →")}</button>
-        </div>
-      </div>
-      <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px",position:"relative",zIndex:10}}>
-        <div style={{textAlign:"center",maxWidth:680,marginBottom:40}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"5px 14px",borderRadius:20,background:"rgba(99,102,241,.1)",border:"1px solid rgba(99,102,241,.2)",marginBottom:20}}>
-            <span style={{width:6,height:6,borderRadius:"50%",background:"#10b981",animation:"pulse 2s infinite",display:"inline-block"}}/>
-            <span style={{fontSize:13,color:"#818cf8",fontWeight:600}}>AI-powered стратегическое планирование</span>
-          </div>
-          <h1 style={{fontSize:"clamp(32px,5vw,56px)",fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.1,marginBottom:16}}>
-            Ваша стратегия —<br/>
-            <span style={{background:"linear-gradient(135deg,var(--accent-1),var(--accent-2),var(--brand3))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>за 3 минуты</span>
-          </h1>
-          <p style={{fontSize:17,color:"var(--text3)",lineHeight:1.6,marginBottom:32}}>AI задаст 6 вопросов о вашем бизнесе и построит персональную стратегическую карту с приоритетами, метриками и связями.</p>
-          <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
-            <button onClick={onStart}
-              style={{padding:"14px 32px",borderRadius:14,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:15,fontWeight:900,cursor:"pointer",boxShadow:"0 8px 28px var(--accent-glow)",letterSpacing:-.3,transition:"all .2s"}}
-              onMouseOver={e=>e.currentTarget.style.transform="translateY(-2px)"}
-              onMouseOut={e=>e.currentTarget.style.transform="none"}>
-              ✦ Создать карту бесплатно
-            </button>
-            {hasSaved&&<button onClick={()=>setShowAuth(true)} style={{padding:"14px 28px",borderRadius:14,border:"1px solid var(--border2)",background:"var(--surface)",color:"var(--text)",fontSize:15,fontWeight:700,cursor:"pointer"}}>{t("continue_arrow","Продолжить →")}</button>}
-          </div>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:14,width:"100%",maxWidth:860}}>
-          {FEATURES.map(f=>(
-            <div key={f.title} className="icard" style={{padding:"18px 20px",borderRadius:16,background:"var(--card)",border:"1px solid var(--border)",backdropFilter:"blur(10px)"}}>
-              <div style={{fontSize:24,marginBottom:8}}>{f.icon}</div>
-              <div className="icard-title" style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:4}}>{f.title}</div>
-              <div className="icard-desc" style={{fontSize:13,lineHeight:1.55}}>{f.desc}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <LandingFooter/>
-      {showAuth&&<AuthModal theme={theme} onClose={()=>setShowAuth(false)} onAuth={(u:any)=>{setShowAuth(false);onLogin(u);}}/>}
-      <CookieConsent/>
-    </div>
-  );
-}
-
 // ── CookieConsent ──
 function CookieConsent(){
   const{t}=useLang();
@@ -1566,51 +1505,10 @@ function CookieConsent(){
   if(!shown)return null;
   function accept(){try{localStorage.setItem("sa_cookie_ok","1");}catch{}setShown(false);}
   return(
-    <div style={{position:"fixed",bottom:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:"rgba(15,23,42,.95)",backdropFilter:"blur(12px)",border:"1px solid rgba(99,102,241,.25)",borderRadius:14,padding:"14px 20px",display:"flex",alignItems:"center",gap:16,maxWidth:560,width:"92vw",boxShadow:"0 8px 32px rgba(0,0,0,.4)"}}>
-      <span style={{fontSize:12,color:"#94a3b8",flex:1,lineHeight:1.5}}>{t("cookie_text","🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей")} <a href="/privacy" target="_blank" style={{color:"#818cf8",textDecoration:"underline"}}>{t("cookie_policy","Политикой конфиденциальности")}</a>.</span>
+    <div style={{position:"fixed",bottom:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:"rgba(9,7,22,.92)",backdropFilter:"blur(20px) saturate(1.1)",WebkitBackdropFilter:"blur(20px)",border:"1px solid rgba(104,54,245,.28)",borderRadius:16,padding:"14px 20px",display:"flex",alignItems:"center",gap:16,maxWidth:560,width:"92vw",boxShadow:"0 8px 40px rgba(0,0,0,.45),0 0 0 .5px rgba(104,54,245,.12)"}}>
+      <span style={{fontSize:12,color:"rgba(188,186,224,.62)",flex:1,lineHeight:1.5}}>{t("cookie_text","🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей")} <a href="/privacy" target="_blank" style={{color:"#b4a3ff",textDecoration:"underline"}}>{t("cookie_policy","Политикой конфиденциальности")}</a>.</span>
       <button onClick={accept} className="btn-interactive" style={{padding:"8px 18px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:13,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("cookie_accept","Принять")}</button>
     </div>
-  );
-}
-
-// ── LandingFooter ──
-function LandingFooter(){
-  const{t}=useLang();
-  const cols=[
-    {titleKey:"footer_product",links:[{labelKey:"footer_features",href:"#features"},{labelKey:"footer_pricing_link",href:"#pricing"},{labelKey:"footer_templates",href:"#templates"},{labelKey:"footer_changelog",href:"/changelog"}]},
-    {titleKey:"footer_company",links:[{labelKey:"footer_about",href:"/about"},{labelKey:"footer_blog",href:"/blog"},{labelKey:"footer_careers",href:"/careers"},{labelKey:"footer_contact",href:"/contact"}]},
-    {titleKey:"footer_legal",links:[{labelKey:"footer_privacy",href:"/privacy"},{labelKey:"footer_terms",href:"/terms"},{labelKey:"footer_cookies",href:"/cookies"},{labelKey:"footer_gdpr",href:"/gdpr"}]},
-  ];
-  return(
-    <footer style={{background:"rgba(15,23,42,.8)",backdropFilter:"blur(8px)",borderTop:"1px solid rgba(99,102,241,.1)",padding:"28px 40px",marginTop:40}}>
-      <div style={{maxWidth:1100,margin:"0 auto",display:"flex",flexWrap:"wrap",gap:24,justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div>
-          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <img src="/logo.png" alt="Strategy AI" style={{height:28,width:28,objectFit:"contain"}}/>
-            <span style={{fontSize:15,fontWeight:800,color:"#f0eeff",letterSpacing:-.3}}>Strategy AI</span>
-          </div>
-          <p style={{fontSize:12,color:"#64748b",maxWidth:200,lineHeight:1.6,margin:0}}>{t("footer_tagline","Визуальное стратегическое планирование с AI-советником уровня McKinsey.")}</p>
-        </div>
-        {cols.map(col=>(
-          <div key={col.titleKey}>
-            <div style={{fontSize:12,fontWeight:700,color:"#94a3b8",marginBottom:10,textTransform:"uppercase",letterSpacing:.8}}>{t(col.titleKey)}</div>
-            {col.links.map(l=>(
-              <a key={l.labelKey} href={l.href} style={{display:"block",fontSize:13,color:"#64748b",marginBottom:6,textDecoration:"none",transition:"color .15s"}}
-                onMouseOver={e=>(e.target as HTMLElement).style.color="#818cf8"}
-                onMouseOut={e=>(e.target as HTMLElement).style.color="#64748b"}>{t(l.labelKey)}</a>
-            ))}
-          </div>
-        ))}
-      </div>
-      <div style={{maxWidth:1100,margin:"20px auto 0",paddingTop:16,borderTop:"1px solid rgba(99,102,241,.1)",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
-        <span style={{fontSize:12,color:"#475569"}}>{t("footer_rights","© 2026 Strategy AI. Все права защищены.")}</span>
-        <div style={{display:"flex",gap:14}}>
-          {[{icon:"𝕏",href:"https://twitter.com/strategyai"},{icon:"in",href:"https://linkedin.com/company/strategyai"},{icon:"💬",href:"https://t.me/strategyai"}].map(s=>(
-            <a key={s.icon} href={s.href} target="_blank" rel="noopener noreferrer" style={{width:30,height:30,borderRadius:8,background:"rgba(99,102,241,.1)",border:"1px solid rgba(99,102,241,.2)",display:"flex",alignItems:"center",justifyContent:"center",color:"#818cf8",fontSize:12,fontWeight:700,textDecoration:"none"}}>{s.icon}</a>
-          ))}
-        </div>
-      </div>
-    </footer>
   );
 }
 
@@ -1811,7 +1709,7 @@ function StatsPopup({nodes,edges,onClose,statusMap}){
     offset+=dashLen;
     return arc;
   });
-  const healthColor=healthScore>=70?"#10b981":healthScore>=40?"#f59e0b":"#ef4444";
+  const healthColor=healthScore>=70?"#12c482":healthScore>=40?"#f09428":"#f04458";
   return(
     <div className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.72))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:150,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
       <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{width:isMobile?"100%":"min(96vw,620px)",maxHeight:isMobile?"88vh":"none",overflowY:"auto",borderRadius:isMobile?"18px 18px 0 0":20,padding:"24px 26px"}} onClick={e=>e.stopPropagation()}>
@@ -1841,7 +1739,7 @@ function StatsPopup({nodes,edges,onClose,statusMap}){
           </div>
           {/* Key metrics */}
           <div style={{flex:1,display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            {[[done,"✅",t("completed","Выполнено"),"#10b981"],[active,"⚡",t("in_progress","В работе"),"#0ea5e9"],[blocked,"🔒","Блокировано","#ef4444"],[overdue,"⚠️",t("overdue","Просрочено"),"#f97316"],[critical,"🔴","Критичных","#ef4444"],[edges.length,"🔗","Связей","var(--accent-2)"]].map(([v,ic,lbl,col])=>(
+            {[[done,"✅",t("completed","Выполнено"),"#12c482"],[active,"⚡",t("in_progress","В работе"),"#06b6d4"],[blocked,"🔒","Блокировано","#f04458"],[overdue,"⚠️",t("overdue","Просрочено"),"#f09428"],[critical,"🔴","Критичных","#f04458"],[edges.length,"🔗","Связей","var(--accent-2)"]].map(([v,ic,lbl,col])=>(
               <div key={lbl} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)"}}>
                 <span style={{fontSize:13}}>{ic}</span>
                 <div>
@@ -1913,8 +1811,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
   const handleClose=()=>{if(exiting)return;setExiting(true);setTimeout(()=>onClose(),320);};
   const comments=node.comments||[];
   const history=node.history||[];
-  const accentPick=(STATUS.planning&&STATUS.planning.c)||"#5b6bc0";
-  const COLORS=["",accentPick,(ETYPE.affects&&ETYPE.affects.c)||"#8b5cf6","#0ea5e9","#10b981","#f59e0b","#ef4444","#ec4899","#06b6d4","#84cc16","#f97316"];
+  const accentPick=(STATUS.planning&&STATUS.planning.c)||"#6836f5";
+  const COLORS=["",accentPick,(ETYPE.affects&&ETYPE.affects.c)||"#a050ff","#06b6d4","#12c482","#f09428","#f04458","#ec4899","#0891b2","#84cc16","#ea580c"];
 
   async function aiRephrase(){
     if(aiRephrLoading)return;
@@ -2010,7 +1908,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
         <div style={{width:10,height:10,borderRadius:3,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
         <div style={{flex:1,fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>{node.title||"Без названия"}</div>
         {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>↗</button>}
-        <button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
+        <button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#f04458";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
       </div>
       <div style={{display:"flex",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,overflowX:"auto",padding:"0 10px"}}>
         {tabs.map(item=>{
@@ -2076,7 +1974,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
               <div style={{display:"flex",gap:6,paddingTop:4}}>
                 {onConnect&&<button onClick={()=>onConnect({startNode:node})} style={{flex:1,padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>⇒ {t("link_btn","Связать")}</button>}
                 <button onClick={doAutoConnect} disabled={autoConnLoading} style={{flex:1,padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:autoConnLoading?"var(--text4)":"var(--accent-2)",cursor:autoConnLoading?"wait":"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>{autoConnLoading?"…":"✦ AI"}</button>
-                <button onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"#ef4444",cursor:"pointer",fontSize:12,transition:"all .2s"}}>🗑</button>
+                <button onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"#f04458",cursor:"pointer",fontSize:12,transition:"all .2s"}}>🗑</button>
               </div>
             )}
           </div>
@@ -2303,7 +2201,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:10,alignItems:"flex-start",animation:"fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards"}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,marginTop:2,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div>}
-            <div style={{maxWidth:"88%",padding:m.role==="user"?"12px 16px":"12px 16px 12px 20px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--gradient-accent)":m.role==="sys"?"rgba(16,185,129,.12)":"rgba(255,255,255,.04)",backdropFilter:m.role==="user"?"none":"blur(10px)",border:m.role==="user"?"none":m.role==="sys"?"1px solid rgba(16,185,129,.25)":"1px solid var(--glass-border-accent,var(--border))",borderLeft:m.role==="ai"?"3px solid var(--accent-1)":"none",fontSize:13,lineHeight:1.6,color:m.role==="user"?"#fff":m.role==="sys"?"#10b981":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 12px var(--accent-glow)":m.role==="sys"?"none":"0 2px 12px rgba(0,0,0,.06)"}}>{m.text}</div>
+            <div style={{maxWidth:"88%",padding:m.role==="user"?"12px 16px":"12px 16px 12px 20px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--gradient-accent)":m.role==="sys"?"rgba(16,185,129,.12)":"rgba(255,255,255,.04)",backdropFilter:m.role==="user"?"none":"blur(10px)",border:m.role==="user"?"none":m.role==="sys"?"1px solid rgba(16,185,129,.25)":"1px solid var(--glass-border-accent,var(--border))",borderLeft:m.role==="ai"?"3px solid var(--accent-1)":"none",fontSize:13,lineHeight:1.6,color:m.role==="user"?"#fff":m.role==="sys"?"#12c482":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 12px var(--accent-glow)":m.role==="sys"?"none":"0 2px 12px rgba(0,0,0,.06)"}}>{m.text}</div>
           </div>
         ))}
         {load&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",borderRadius:"4px 14px 14px 14px",border:"1px solid var(--glass-border-accent,var(--border))"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`,opacity:.7}}/>)}</div></div>}
@@ -2362,16 +2260,16 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
   const st=STATUS[node.status]||STATUS.planning;
   const pr=PRIORITY[node.priority]||PRIORITY.medium;
   const isLight=theme==="light";
-  const glassBg=isLight?"rgba(255,255,255,.75)":"rgba(12,18,30,.72)";
+  const glassBg=isLight?"rgba(255,255,255,.78)":"rgba(9,7,22,.78)";
   const bg=node.color?node.color+(isLight?"28":"22"):glassBg;
-  const titleColor=selected?"var(--accent-1)":(isLight?"#0f172a":"#e2e8f0");
-  const reasonColor=isLight?"#64748b":"#94a3b8";
-  const statusColor=isLight?"#475569":"#94a3b8";
+  const titleColor=selected?"var(--accent-1)":(isLight?"#08061a":"#eaeaf8");
+  const reasonColor=isLight?"rgba(70,58,130,.48)":"rgba(188,186,224,.56)";
+  const statusColor=isLight?"rgba(35,28,80,.65)":"rgba(188,186,224,.56)";
   const metricColor="var(--accent-1)";
   const progressTrack=isLight?"rgba(0,0,0,.08)":"rgba(255,255,255,.08)";
   const tagBg="var(--accent-soft)";
   const tagColor="var(--accent-2)";
-  const dateColor=isLight?"#64748b":"#94a3b8";
+  const dateColor=isLight?"rgba(70,58,130,.48)":"rgba(148,144,196,.52)";
   const isOverdue=node.deadline&&new Date(node.deadline)<new Date()&&node.status!=="completed";
   const isConnSrc=connecting&&connectSource?.id===node.id;
   const commentCount=(node.comments||[]).length;
@@ -2396,7 +2294,7 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
       {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill="var(--accent-soft)" style={{filter:"blur(8px)"}}/>}
       {focused&&<rect x={-2} y={0} width={244} height={132} rx={14} fill="transparent" stroke="var(--accent-1)" strokeWidth={2} style={{filter:"drop-shadow(0 0 12px var(--accent-glow))"}}/>}
       <rect width={240} height={128} rx={12} fill={bg}
-        stroke={selected?"var(--accent-1)":isConnSrc?"#10b981":isOverdue?"#ef4444":isLight?(node.color||"rgba(0,0,0,.1)"):"rgba(255,255,255,.12)"}
+        stroke={selected?"var(--accent-1)":isConnSrc?"#12c482":isOverdue?"#f04458":isLight?(node.color||"rgba(0,0,0,.1)"):"rgba(255,255,255,.12)"}
         strokeWidth={selected||isConnSrc||isOverdue?2:1}
         filter={selected?"url(#glow)":"none"}/>
       {selected&&<rect width={240} height={128} rx={12} fill="var(--accent-soft)"/>}
@@ -2424,14 +2322,14 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
         </text></g>
       )}
       <rect x={14} y={progressY} width={212} height={progressBarH} rx={3} fill={progressTrack}/>
-      {progress>0&&<rect x={14} y={progressY} width={Math.min(212,progressW)} height={progressBarH} rx={3} fill={node.status==="completed"?"#10b981":st.c} opacity={.9}/>}
+      {progress>0&&<rect x={14} y={progressY} width={Math.min(212,progressW)} height={progressBarH} rx={3} fill={node.status==="completed"?"#12c482":st.c} opacity={.9}/>}
       <text x={228} y={progressCenterY} fontSize={8} fontWeight={700} fill={st.c} textAnchor="end" style={{fontFamily:"'JetBrains Mono',monospace",dominantBaseline:"middle"}}>{progress}%</text>
       <circle cx={14} cy={statusY} r={3} fill={st.c}/>
       <text x={22} y={statusY} fontSize={8.5} fill={statusColor} style={{fontFamily:"'Inter',system-ui,sans-serif",dominantBaseline:"middle"}}>{st.label}</text>
       {isOverdue&&(
         <>
           <rect x={98} y={statusY-6} width={64} height={12} rx={4} fill="rgba(239,68,68,.15)"/>
-          <text x={130} y={statusY} textAnchor="middle" fontSize={8} fontWeight={700} fill="#ef4444" style={{fontFamily:"'Inter',system-ui,sans-serif",dominantBaseline:"middle"}}>⚠ {t("overdue","просрочено")}</text>
+          <text x={130} y={statusY} textAnchor="middle" fontSize={8} fontWeight={700} fill="#f04458" style={{fontFamily:"'Inter',system-ui,sans-serif",dominantBaseline:"middle"}}>⚠ {t("overdue","просрочено")}</text>
         </>
       )}
       {node.deadline&&!isOverdue&&(
@@ -2451,7 +2349,7 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
           </g>
         )}
       </g>
-      {isConnSrc&&<rect x={-2} y={-2} width={244} height={132} rx={13} fill="none" stroke="#10b981" strokeWidth={2} strokeDasharray="6,3" opacity={.8}/>}
+      {isConnSrc&&<rect x={-2} y={-2} width={244} height={132} rx={13} fill="none" stroke="#12c482" strokeWidth={2} strokeDasharray="6,3" opacity={.8}/>}
     </g>
   );
 }
@@ -2497,9 +2395,9 @@ function GanttView({nodes,onClose,statusMap}){
               <div style={{width:130,fontSize:13.5,color:"var(--text3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flexShrink:0,fontWeight:600}} title={n.title}>{n.title}</div>
               <div style={{flex:1,height:20,background:"var(--surface)",borderRadius:4,position:"relative",overflow:"hidden"}}>
                 <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${Math.max(2,n.progress||0)}%`,background:st.c+"55",borderRadius:4}}/>
-                <div style={{position:"absolute",left:`${pct}%`,top:"50%",transform:"translate(-50%,-50%)",width:8,height:8,borderRadius:2,background:isPast?"#ef4444":st.c}}/>
+                <div style={{position:"absolute",left:`${pct}%`,top:"50%",transform:"translate(-50%,-50%)",width:8,height:8,borderRadius:2,background:isPast?"#f04458":st.c}}/>
               </div>
-              <div style={{width:80,fontSize:13,color:isPast?"#ef4444":daysLeft<=7?"#f59e0b":"var(--text4)",textAlign:"right",flexShrink:0,fontWeight:isPast||daysLeft<=7?700:400}}>
+              <div style={{width:80,fontSize:13,color:isPast?"#f04458":daysLeft<=7?"#f09428":"var(--text4)",textAlign:"right",flexShrink:0,fontWeight:isPast||daysLeft<=7?700:400}}>
                 {isPast?t("days_overdue","просрочено {n}д.").replace("{n}",String(-daysLeft)):daysLeft===0?t("today","Сегодня"):daysLeft===1?t("tomorrow_label","завтра"):t("days_left","{n}д.").replace("{n}",String(daysLeft))}
               </div>
             </div>
@@ -2546,9 +2444,9 @@ function EmailVerifyBanner({user,onVerified}:{user:any,onVerified?:()=>void}){
   }
   return(
     <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08))",borderBottom:"1px solid rgba(245,158,11,.3)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13}}>
-      <span style={{color:"#f59e0b",fontWeight:600}}>✉️ {t("verify_email_banner","Подтвердите ваш email для полного доступа.")}</span>
+      <span style={{color:"#f09428",fontWeight:600}}>✉️ {t("verify_email_banner","Подтвердите ваш email для полного доступа.")}</span>
       {sent?(
-        <span style={{color:"#10b981",fontWeight:600,fontSize:12}}>{t("verify_email_sent","Письмо отправлено! Проверьте почту.")}</span>
+        <span style={{color:"#12c482",fontWeight:600,fontSize:12}}>{t("verify_email_sent","Письмо отправлено! Проверьте почту.")}</span>
       ):(
         <button onClick={resend} disabled={loading} style={{padding:"4px 14px",borderRadius:7,border:"1px solid rgba(245,158,11,.4)",background:"rgba(245,158,11,.1)",color:"#fbbf24",fontSize:12,fontWeight:700,cursor:loading?"wait":"pointer"}}>
           {loading?"…":t("verify_email_resend","Отправить письмо")}
@@ -2577,7 +2475,7 @@ function DeadlineReminders({nodes,onGoToNode,onDismiss}:{nodes:any[],onGoToNode:
   return(
     <div style={{position:"fixed",bottom:80,right:20,zIndex:350,width:280,background:"var(--surface)",border:`1px solid ${overdue.length?"rgba(239,68,68,.4)":"rgba(245,158,11,.35)"}`,borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,.3)",overflow:"hidden"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid var(--border)",background:overdue.length?"rgba(239,68,68,.08)":"rgba(245,158,11,.08)"}}>
-        <span style={{fontSize:13,fontWeight:700,color:overdue.length?"#ef4444":"#f59e0b"}}>⏰ {t("deadline_reminder","Напоминания")}{all.length>1?` · ${all.length}`:""}</span>
+        <span style={{fontSize:13,fontWeight:700,color:overdue.length?"#f04458":"#f09428"}}>⏰ {t("deadline_reminder","Напоминания")}{all.length>1?` · ${all.length}`:""}</span>
         <button onClick={()=>onDismiss?.()} title={t("dismiss","Скрыть")} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:16}}>✕</button>
       </div>
       {all.slice(0,4).map(n=>{
@@ -2589,7 +2487,7 @@ function DeadlineReminders({nodes,onGoToNode,onDismiss}:{nodes:any[],onGoToNode:
             onMouseOver={e=>(e.currentTarget as HTMLElement).style.background="var(--hover)"}
             onMouseOut={e=>(e.currentTarget as HTMLElement).style.background="transparent"}>
             <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:2}}>{n.title}</div>
-            <div style={{fontSize:11,color:isOverdue?"#ef4444":"#f59e0b",fontWeight:600}}>
+            <div style={{fontSize:11,color:isOverdue?"#f04458":"#f09428",fontWeight:600}}>
               {isOverdue?t("days_overdue","просрочено {n}д.").replace("{n}",String(Math.abs(diff))):t("days_left","{n}д.").replace("{n}",String(diff))+" · "+n.deadline}
             </div>
           </div>
@@ -2697,9 +2595,9 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
             {[
               {label:t("total_steps","Всего"),value:nodes.length,color:"var(--accent-1)"},
-              {label:t("done","Выполнено"),value:done.length,color:"#10b981"},
-              {label:t("blocked","Заблокировано"),value:blocked.length,color:"#ef4444"},
-              {label:"Health",value:`${health}%`,color:health>=70?"#10b981":health>=40?"#f59e0b":"#ef4444"},
+              {label:t("done","Выполнено"),value:done.length,color:"#12c482"},
+              {label:t("blocked","Заблокировано"),value:blocked.length,color:"#f04458"},
+              {label:"Health",value:`${health}%`,color:health>=70?"#12c482":health>=40?"#f09428":"#f04458"},
             ].map(m=>(
               <div key={m.label} style={{textAlign:"center",padding:"12px 8px",borderRadius:12,background:"var(--bg2)",border:"1px solid var(--border)"}}>
                 <div style={{fontSize:22,fontWeight:800,color:m.color}}>{m.value}</div>
@@ -2728,7 +2626,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
               <div style={{fontSize:12,fontWeight:700,color:"#f87171",marginBottom:8}}>⚠️ Критичные незавершённые шаги</div>
               {critical.slice(0,3).map((n:any)=>(
                 <div key={n.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:9,background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.15)",marginBottom:6}}>
-                  <div style={{width:6,height:6,borderRadius:"50%",background:"#ef4444",flexShrink:0}}/>
+                  <div style={{width:6,height:6,borderRadius:"50%",background:"#f04458",flexShrink:0}}/>
                   <span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{n.title}</span>
                   {n.deadline&&<span style={{marginLeft:"auto",fontSize:11,color:"#f87171"}}>{n.deadline}</span>}
                 </div>
@@ -2748,13 +2646,13 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
 function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,theme,readOnly=false,aiChatMsgs,aiChatSetMsgs,focusNodeId=null,palette="indigo",onOpenContentPlanHub=null,onOpenContentPlanProject=null,onShellGlobalNav}){
   const{t,lang,setLang}=useLang();
   const isMobile=useIsMobile();
-  const[accHex,setAccHex]=useState({a1:"#5b6bc0",a2:"#7c8dd9"});
+  const[accHex,setAccHex]=useState({a1:"#6836f5",a2:"#a050ff"});
   useLayoutEffect(()=>{
     try{
       const s=getComputedStyle(document.body);
       setAccHex({
-        a1:(s.getPropertyValue("--accent-1")||"").trim()||"#5b6bc0",
-        a2:(s.getPropertyValue("--accent-2")||"").trim()||"#7c8dd9",
+        a1:(s.getPropertyValue("--accent-1")||"").trim()||"#6836f5",
+        a2:(s.getPropertyValue("--accent-2")||"").trim()||"#a050ff",
       });
     }catch{}
   },[palette,theme]);
@@ -3047,13 +2945,14 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     const title=mapData?.name||project?.name||"Strategy Map";
     const rows=nodes.map((n:any)=>`<tr><td>${sanitize(n.title)}</td><td>${sanitize(n.status)||"-"}</td><td>${n.progress!=null?n.progress+"%":"-"}</td><td>${sanitize(n.deadline)||"-"}</td><td>${sanitize(n.metric)||"-"}</td></tr>`).join("");
     const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${sanitize(title)}</title>
-<style>@page{margin:20mm 15mm}body{font-family:'Segoe UI',Arial,sans-serif;padding:0;color:#1e293b;font-size:13px}
-h1{font-size:22px;font-weight:700;color:#1e293b;margin:0 0 6px}
-.meta{color:#64748b;font-size:12px;margin-bottom:20px}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>@page{margin:20mm 15mm}body{font-family:'Inter',system-ui,sans-serif;padding:0;color:#08061a;font-size:13px;background:#fff}
+h1{font-size:22px;font-weight:700;color:#08061a;margin:0 0 6px;letter-spacing:-.02em}
+.meta{color:rgba(70,58,130,.55);font-size:12px;margin-bottom:20px}
 table{border-collapse:collapse;width:100%}
-th,td{border:1px solid #e2e8f0;padding:8px 11px;text-align:left}
-th{background:#f1f5f9;font-weight:600;font-size:12px}
-tr:nth-child(even){background:#f8fafc}
+th,td{border:1px solid rgba(104,80,220,.14);padding:8px 11px;text-align:left}
+th{background:rgba(104,54,245,.08);font-weight:600;font-size:12px;color:#232060}
+tr:nth-child(even){background:rgba(236,233,255,.35)}
 </style></head><body>
 <h1>${sanitize(title)}</h1>
 <p class="meta">${new Date().toLocaleDateString()} · ${nodes.length} ${t("steps_label","шагов")} · Strategy AI</p>
@@ -3075,16 +2974,16 @@ tr:nth-child(even){background:#f8fafc}
         pres.title=title;
         pres.author="Strategy AI";
         const titleSlide=pres.addSlide();
-        titleSlide.addText(title,{x:0.5,y:1.5,w:9,h:1,fontSize:44,bold:true,color:"1e293b"});
-        titleSlide.addText(`${t("strategy_map","Стратегическая карта")} · ${date} · ${nodes.length} ${t("steps_label","шагов")}`,{x:0.5,y:2.5,w:9,h:0.5,fontSize:18,color:"64748b"});
+        titleSlide.addText(title,{x:0.5,y:1.5,w:9,h:1,fontSize:44,bold:true,color:"08061a"});
+        titleSlide.addText(`${t("strategy_map","Стратегическая карта")} · ${date} · ${nodes.length} ${t("steps_label","шагов")}`,{x:0.5,y:2.5,w:9,h:0.5,fontSize:18,color:"9088b0"});
         for(let i=0;i<nodes.length;i++){
           const n=nodes[i];
           const slide=pres.addSlide();
-          slide.addText(sanitize(n.title||""),{x:0.5,y:0.3,w:9,h:0.8,fontSize:28,bold:true,color:"1e293b"});
-          slide.addText(`${n.status||"planning"} · ${n.priority||"medium"}`,{x:0.5,y:1.1,w:9,h:0.3,fontSize:12,color:"64748b"});
-          if(n.reason)slide.addText(sanitize(n.reason).slice(0,500),{x:0.5,y:1.5,w:9,h:1.5,fontSize:14,color:"475569",valign:"top"});
-          if(n.metric)slide.addText(`🎯 ${sanitize(n.metric)}`,{x:0.5,y:3.2,w:9,h:0.4,fontSize:14,color:"6366f1",bold:true});
-          slide.addText(`${n.progress||0}%${n.deadline?` · ${t("deadline","Дедлайн")}: ${n.deadline}`:""}`,{x:0.5,y:3.7,w:9,h:0.3,fontSize:12,color:"64748b"});
+          slide.addText(sanitize(n.title||""),{x:0.5,y:0.3,w:9,h:0.8,fontSize:28,bold:true,color:"08061a"});
+          slide.addText(`${n.status||"planning"} · ${n.priority||"medium"}`,{x:0.5,y:1.1,w:9,h:0.3,fontSize:12,color:"9088b0"});
+          if(n.reason)slide.addText(sanitize(n.reason).slice(0,500),{x:0.5,y:1.5,w:9,h:1.5,fontSize:14,color:"6c6480",valign:"top"});
+          if(n.metric)slide.addText(`🎯 ${sanitize(n.metric)}`,{x:0.5,y:3.2,w:9,h:0.4,fontSize:14,color:"6836f5",bold:true});
+          slide.addText(`${n.progress||0}%${n.deadline?` · ${t("deadline","Дедлайн")}: ${n.deadline}`:""}`,{x:0.5,y:3.7,w:9,h:0.3,fontSize:12,color:"9088b0"});
         }
         const fname=`${title.replace(/[^a-zA-Zа-яА-Я0-9\s-]/g,"").slice(0,40)}.pptx`;
         await pres.writeFile({fileName:fname});
@@ -3092,13 +2991,13 @@ tr:nth-child(even){background:#f8fafc}
       }catch(e:any){addToast(e?.message||t("save_error","Ошибка экспорта"),"error");}
       return;
     }
-    const statusColors:Record<string,string>={completed:"#10b981",active:"#6366f1",planning:"#64748b",paused:"#f59e0b",blocked:"#ef4444"};
-    const prioColors:Record<string,string>={critical:"#ef4444",high:"#f59e0b",medium:"#6366f1",low:"#94a3b8"};
+    const statusColors:Record<string,string>={completed:"#12c482",active:"#6836f5",planning:"#9088b0",paused:"#f09428",blocked:"#f04458"};
+    const prioColors:Record<string,string>={critical:"#f04458",high:"#f09428",medium:"#6836f5",low:"#a8a4c8"};
     const slides=nodes.map((n:any,i:number)=>`
       <div class="slide">
         <div class="slide-num">${i+1} / ${nodes.length}</div>
-        <div class="slide-tag" style="background:${statusColors[n.status]||"#64748b"}20;color:${statusColors[n.status]||"#64748b"};border:1px solid ${statusColors[n.status]||"#64748b"}40">${n.status||"planning"}</div>
-        <div class="prio-tag" style="background:${prioColors[n.priority]||"#64748b"}20;color:${prioColors[n.priority]||"#64748b"}">${n.priority||"medium"}</div>
+        <div class="slide-tag" style="background:${statusColors[n.status]||"#9088b0"}20;color:${statusColors[n.status]||"#9088b0"};border:1px solid ${statusColors[n.status]||"#9088b0"}40">${n.status||"planning"}</div>
+        <div class="prio-tag" style="background:${prioColors[n.priority]||"#9088b0"}20;color:${prioColors[n.priority]||"#9088b0"}">${n.priority||"medium"}</div>
         <h2>${sanitize(n.title)}</h2>
         ${n.reason?`<p class="reason">${sanitize(n.reason)}</p>`:""}
         ${n.metric?`<div class="metric">🎯 ${sanitize(n.metric)}</div>`:""}
@@ -3109,20 +3008,21 @@ tr:nth-child(even){background:#f8fafc}
 <style>
 @page{size:297mm 210mm landscape;margin:0}
 *{box-sizing:border-box}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;margin:0;padding:0}
-.title-slide{width:297mm;height:210mm;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e293b,#0f172a);page-break-after:always}
-.title-slide h1{font-size:42px;font-weight:800;color:#fff;margin:0 0 12px;text-align:center}
-.title-slide p{font-size:18px;color:#94a3b8;margin:0}
-.slide{width:297mm;height:210mm;padding:28mm 20mm 20mm;position:relative;display:flex;flex-direction:column;justify-content:center;page-break-after:always;border-top:4px solid #6366f1}
-.slide-num{position:absolute;top:12mm;right:14mm;font-size:11px;color:#94a3b8}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+body{font-family:'Inter',system-ui,sans-serif;background:#ece9ff;margin:0;padding:0}
+.title-slide{width:297mm;height:210mm;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(104,54,245,.35),transparent 55%),linear-gradient(145deg,#12081f 0%,#050410 48%,#0c0622 100%);page-break-after:always}
+.title-slide h1{font-size:42px;font-weight:800;color:#eaeaf8;margin:0 0 12px;text-align:center;letter-spacing:-.03em}
+.title-slide p{font-size:18px;color:rgba(188,186,224,.62);margin:0}
+.slide{width:297mm;height:210mm;padding:28mm 20mm 20mm;position:relative;display:flex;flex-direction:column;justify-content:center;page-break-after:always;border-top:4px solid #6836f5;background:#fff}
+.slide-num{position:absolute;top:12mm;right:14mm;font-size:11px;color:rgba(70,58,130,.45)}
 .slide-tag{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:8px;margin-right:6px}
 .prio-tag{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:8px}
-h2{font-size:32px;font-weight:800;color:#1e293b;margin:0 0 12px;line-height:1.2}
-.reason{font-size:16px;color:#475569;margin:0 0 16px;line-height:1.6}
-.metric{font-size:15px;color:#6366f1;font-weight:600;margin-bottom:16px;padding:10px 16px;background:#ede9fe;border-radius:10px;display:inline-block}
-.progress-wrap{height:10px;background:#e2e8f0;border-radius:5px;margin-bottom:6px;max-width:400px}
-.progress-bar{height:10px;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:5px;transition:width .3s}
-.prog-label{font-size:13px;color:#64748b}
+h2{font-size:32px;font-weight:800;color:#08061a;margin:0 0 12px;line-height:1.2;letter-spacing:-.02em}
+.reason{font-size:16px;color:rgba(35,28,80,.78);margin:0 0 16px;line-height:1.6}
+.metric{font-size:15px;color:#6836f5;font-weight:600;margin-bottom:16px;padding:10px 16px;background:rgba(104,54,245,.1);border:1px solid rgba(104,80,220,.18);border-radius:12px;display:inline-block}
+.progress-wrap{height:10px;background:rgba(104,80,220,.12);border-radius:5px;margin-bottom:6px;max-width:400px}
+.progress-bar{height:10px;background:linear-gradient(90deg,#6836f5,#a050ff);border-radius:5px;transition:width .3s}
+.prog-label{font-size:13px;color:rgba(70,58,130,.45)}
 @media print{.slide,.title-slide{display:flex!important}}
 </style></head><body>
 <div class="title-slide"><h1>${title}</h1><p>Стратегическая карта · ${date} · ${nodes.length} шагов</p></div>
@@ -3437,7 +3337,7 @@ ${ctx}
           <div className="tb-r">
             {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)}/>}
             {!readOnly&&(
-              <div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981"}}>
+              <div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,fontWeight:600,color:saveState==="saving"?"#f09428":saveState==="error"?"#f04458":"#12c482"}}>
                 {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<>✗ {t("save_error","Ошибка")}</>:<>✓ {t("saved_short","Сохранено")}</>}
               </div>
             )}
@@ -3468,7 +3368,7 @@ ${ctx}
             </button>
             <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}} title={connecting?t("cancel","Отмена"):t("link_mode_hint","Режим связи: клик на источник, затем на цель")}
               style={{height:40,padding:isMobile?"0 12px":"0 16px",borderRadius:12,border:"none",background:connecting?"var(--accent-soft)":"var(--surface)",color:connecting?"var(--accent-2)":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:6,transition:"all .2s"}}>
-              {connecting?<><span style={{color:"#ef4444"}}>✕</span> {isMobile?t("cancel_short","Отм."):t("cancel","Отмена")}</>:<>{isMobile?"⇒":t("link_btn","⇒ Связать")}</>}
+              {connecting?<><span style={{color:"#f04458"}}>✕</span> {isMobile?t("cancel_short","Отм."):t("cancel","Отмена")}</>:<>{isMobile?"⇒":t("link_btn","⇒ Связать")}</>}
             </button>
             {sep}
             {ib(!undoStack.length,"Отменить (Ctrl+Z)",undo,<>↩</>,{opacity:undoStack.length?.9:.35})}
@@ -3511,8 +3411,8 @@ ${ctx}
             </button>
             )}
             {!shellUi&&(
-            <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f59e0b":saveState==="error"?"#ef4444":"#10b981",transition:"color .25s ease, opacity .25s ease"}}>
-              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button className="btn-interactive" onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span style={{animation:"successPop .35s ease"}}>✓</span> {t("saved_short","Сохранено")}</>}
+            <div style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:saveState==="saving"?"#f09428":saveState==="error"?"#f04458":"#12c482",transition:"color .25s ease, opacity .25s ease"}}>
+              {saveState==="saving"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {t("saving","Сохраняю")}</>:saveState==="error"?<><span>✗</span> {t("save_error","Ошибка сохранения")} <button className="btn-interactive" onClick={retrySave} style={{marginLeft:4,padding:"2px 8px",borderRadius:6,border:"1px solid rgba(239,68,68,.4)",background:"rgba(239,68,68,.1)",color:"#f04458",cursor:"pointer",fontSize:12,fontWeight:700}}>{t("retry","Повторить")}</button></>:<><span style={{animation:"successPop .35s ease"}}>✓</span> {t("saved_short","Сохранено")}</>}
             </div>
             )}
               </>
@@ -3554,7 +3454,7 @@ ${ctx}
             {!isMobile&&<span style={{fontSize:shellUi?13:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:2}}>{t("bg_label","Фон")}</span>}
             {[["grid","⊞","Точки"],["stars","✦","Звёзды"],["none","○","Чисто"]].map(([m,icon,label])=>(
               <button key={m} onClick={()=>setBgMode(m)} title={`Фон: ${label}`}
-                style={{height:30,padding:"0 10px",borderRadius:8,border:"none",background:bgMode===m?"rgba(99,102,241,.15)":"transparent",color:bgMode===m?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:14,fontWeight:600,flexShrink:0,transition:"all .2s"}}>
+                style={{height:30,padding:"0 10px",borderRadius:8,border:"none",background:bgMode===m?"rgba(104,54,245,.15)":"transparent",color:bgMode===m?"#a5b4fc":"var(--text4)",cursor:"pointer",fontSize:14,fontWeight:600,flexShrink:0,transition:"all .2s"}}>
                 {icon}
               </button>
             ))}
@@ -3564,13 +3464,13 @@ ${ctx}
 
           {/* Panels */}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
-            {ib(showAI,t("ai_consultant_hint","AI-консультант (Ctrl+Shift+A)"),()=>setShowAI((a:boolean)=>!a),<>✦ AI</>,{width:"auto",padding:"0 10px",fontSize:13,fontWeight:600,color:showAI?"#818cf8":"#a78bfa",borderColor:showAI?"rgba(99,102,241,.5)":"rgba(139,92,246,.25)",background:showAI?"rgba(99,102,241,.14)":"rgba(139,92,246,.06)"})}
+            {ib(showAI,t("ai_consultant_hint","AI-консультант (Ctrl+Shift+A)"),()=>setShowAI((a:boolean)=>!a),<>✦ AI</>,{width:"auto",padding:"0 10px",fontSize:13,fontWeight:600,color:showAI?"#b4a3ff":"#c4b5ff",borderColor:showAI?"rgba(104,54,245,.5)":"rgba(104,54,245,.28)",background:showAI?"rgba(104,54,245,.14)":"rgba(104,54,245,.07)"})}
             {ib(showMini,t("minimap_hint","Миникарта"),()=>setShowMini((m:boolean)=>!m),<>🗺</>)}
             {ib(false,t("stats_title","Статистика"),()=>setShowStats(true),<>📊</>)}
             {ib(false,t("weekly_briefing","Еженедельный брифинг"),()=>setShowBriefing(true),<>📋</>)}
             {ib(showTour,t("map_tour","Тур по карте"),()=>setShowTour(true),<>🎯</>)}
             {ib(false,t("shortcuts_title","Горячие клавиши")+" (?)",()=>setShowShortcuts(true),<>⌨️</>)}
-            {!readOnly&&ib(showDeadlines,t("deadline_reminder","Напоминания о дедлайнах"),()=>setShowDeadlines((d:boolean)=>!d),<>⏰</>,{borderColor:showDeadlines?"rgba(245,158,11,.5)":"",background:showDeadlines?"rgba(245,158,11,.08)":"",color:showDeadlines?"#f59e0b":""})}
+            {!readOnly&&ib(showDeadlines,t("deadline_reminder","Напоминания о дедлайнах"),()=>setShowDeadlines((d:boolean)=>!d),<>⏰</>,{borderColor:showDeadlines?"rgba(245,158,11,.5)":"",background:showDeadlines?"rgba(245,158,11,.08)":"",color:showDeadlines?"#f09428":""})}
           </div>
 
           {sep}
@@ -3622,11 +3522,11 @@ ${ctx}
             {API_BASE&&mapData?.id&&(
               <>
                 {!readOnly&&<button onClick={saveVersion} title={t("save_version_btn","Сохранить версию")}
-                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.08)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-                  onMouseOver={e=>{e.currentTarget.style.background="rgba(99,102,241,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(99,102,241,.08)";}}>📸 {t("save_version_short","Версия")}</button>}
+                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(104,54,245,.3)",background:"rgba(104,54,245,.08)",color:"#b4a3ff",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+                  onMouseOver={e=>{e.currentTarget.style.background="rgba(104,54,245,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(104,54,245,.08)";}}>📸 {t("save_version_short","Версия")}</button>}
                 <button onClick={()=>setShowVersions(true)} title={t("version_history","История версий")}
-                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(99,102,241,.3)",background:"rgba(99,102,241,.08)",color:"#818cf8",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-                  onMouseOver={e=>{e.currentTarget.style.background="rgba(99,102,241,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(99,102,241,.08)";}}>
+                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(104,54,245,.3)",background:"rgba(104,54,245,.08)",color:"#b4a3ff",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
+                  onMouseOver={e=>{e.currentTarget.style.background="rgba(104,54,245,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(104,54,245,.08)";}}>
                   📜 {!isMobile&&t("version_history_short","История")}
                 </button>
               </>
@@ -3635,7 +3535,7 @@ ${ctx}
             {onlineUsers.length>0&&(
               <div style={{display:"flex",alignItems:"center",gap:4,padding:"0 8px",height:26,borderRadius:6,background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.25)"}}>
                 {onlineUsers.slice(0,3).map(u=>(
-                  <div key={u.email} title={u.name||u.email} style={{width:20,height:20,borderRadius:"50%",background:"linear-gradient(135deg,#10b981,#34d399)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#fff",border:"2px solid var(--surface)"}}>
+                  <div key={u.email} title={u.name||u.email} style={{width:20,height:20,borderRadius:"50%",background:"linear-gradient(135deg,#12c482,#34d399)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#fff",border:"2px solid var(--surface)"}}>
                     {(u.name||u.email||"?")[0].toUpperCase()}
                   </div>
                 ))}
@@ -3737,14 +3637,14 @@ ${ctx}
         {/* edge label editor */}
         {selEdge&&!selNode&&!readOnly&&(
           <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"var(--surface,#0d1829)",border:"1px solid var(--glass-border-accent,var(--border))",borderRadius:12,boxShadow:"var(--shadow,0 16px 40px rgba(0,0,0,.7))",zIndex:40,animation:"slideUp .2s ease"}}>
-            <span style={{fontSize:13,color:"#64748b",fontWeight:600}}>{t("edge_type","Тип связи:")}</span>
+            <span style={{fontSize:13,color:"var(--text4)",fontWeight:600}}>{t("edge_type","Тип связи:")}</span>
             <CustomSelect
               value={selEdge.type||"requires"}
               onChange={v=>{const ne={...selEdge,type:v};pushUndo(nodes,edges);setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}}
               options={Object.entries(ETYPE).map(([k,e])=>({value:k,label:e.label,dot:e.c}))}
             />
-            <input value={selEdge.label||""} onChange={e=>{const ne={...selEdge,label:e.target.value};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder="Подпись…" style={{fontSize:13,padding:"5px 10px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",borderRadius:8,color:"#e2e8f0",outline:"none",fontFamily:"inherit",width:120}}/>
-            <button onClick={()=>{pushUndo(nodes,edges);setEdgesUser(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:600}}>🗑 Удалить</button>
+            <input value={selEdge.label||""} onChange={e=>{const ne={...selEdge,label:e.target.value};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder="Подпись…" style={{fontSize:13,padding:"5px 10px",background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit",width:120}}/>
+            <button onClick={()=>{pushUndo(nodes,edges);setEdgesUser(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#f04458",cursor:"pointer",fontSize:13,fontWeight:600}}>🗑 Удалить</button>
           </div>
         )}
         {ctxMenu&&(
@@ -3757,7 +3657,7 @@ ${ctx}
                   <button onClick={()=>{duplicateNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📋 {t("duplicate","Дублировать")}</button>
                   <button onClick={()=>{setClipboard(ctxMenu.node);addToast(t("copied","📋 Скопировано"),"info");setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📄 {t("copy_short","Копировать")}</button>
                   <button onClick={()=>{startConnect(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>⇒ {t("link_btn","Связать")}</button>
-                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdgesUser(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"#ef4444",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
+                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdgesUser(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"#f04458",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
                 </>}
               </>
             ):(
@@ -3984,7 +3884,7 @@ function NotificationsCenterModal({open,onClose,isMobile,zIndex=220,notifs,setNo
                       {!n.is_read&&(
                         <button type="button" className="btn-interactive" aria-label={t("notif_mark_read","Прочитано")} onClick={()=>markReadIfNeeded(n)} style={{padding:"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>✓</button>
                       )}
-                      <button type="button" className="btn-interactive" aria-label={t("notif_delete","Удалить уведомление")} onClick={async()=>{await deleteNotification(n.id);setNotifs((xs:any[])=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread((u:number)=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:900}}>
+                      <button type="button" className="btn-interactive" aria-label={t("notif_delete","Удалить уведомление")} onClick={async()=>{await deleteNotification(n.id);setNotifs((xs:any[])=>xs.filter((x:any)=>x.id!==n.id));if(!n.is_read)setNotifUnread((u:number)=>Math.max(0,u-1));}} style={{padding:"6px 10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,fontWeight:900}}>
                         {deleteGlyph}
                       </button>
                       {n.link&&(
@@ -4379,6 +4279,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const[notifUnread,setNotifUnread]=useState(0);
   const[notifLoading,setNotifLoading]=useState(false);
   const[showAIHub,setShowAIHub]=useState(false);
+  const[showBriefing,setShowBriefing]=useState(false);
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
 
   const[loadErr,setLoadErr]=useState<string|null>(null);
@@ -4589,13 +4490,26 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
               <button onClick={()=>{if(atLimit){return;}setCreating(true);}} className="btn-smooth" style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,flexShrink:0,boxShadow:atLimit?"none":"0 2px 12px var(--accent-glow)"}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
             </div>
           </div>
-          {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
+          {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f09428",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
           {lastProj&&!loading&&onOpenMap&&(
-            <div className="glass-card" style={{marginBottom:16,padding:"16px 20px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",display:"flex",alignItems:"center",gap:12}}>
-              <span style={{fontSize:13,color:"var(--text3)"}}>{t("continue_last","Продолжить с")}</span>
-              <button onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"8px 16px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>
-                {lastMapData?`${lastProj.name} → ${lastMapData.name}`:lastProj.name}
-              </button>
+            <div style={{display:"flex",flexDirection:isMobile?"column":"row",gap:12,marginBottom:16,alignItems:"stretch"}}>
+              <div className="glass-card" style={{flex:1,minWidth:0,padding:"16px 20px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+                <span style={{fontSize:13,color:"var(--text3)"}}>{t("continue_last","Продолжить с")}</span>
+                <button onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"8px 16px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>
+                  {lastMapData?`${lastProj.name} → ${lastMapData.name}`:lastProj.name}
+                </button>
+              </div>
+              {lastMapData&&(
+                <div className="glass-card" style={{flex:1,minWidth:0,padding:"16px 20px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:14,flexWrap:isMobile?"wrap":"nowrap"}}>
+                  <div style={{minWidth:0}}>
+                    <div style={{fontSize:12,color:"var(--text4)",marginBottom:4}}>{t("projects_briefing_cta","Брифинг по последней карте")}</div>
+                    <div style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lastMapData.name||"—"}</div>
+                  </div>
+                  <button type="button" className="btn-interactive" onClick={()=>setShowBriefing(true)} style={{padding:"10px 16px",borderRadius:12,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",flexShrink:0}}>
+                    📋 {t("weekly_briefing","Еженедельный брифинг")}
+                  </button>
+                </div>
+              )}
             </div>
           )}
           {creating&&(
@@ -4642,7 +4556,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                         <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {(p.createdAt||p.created_at)?new Date(p.createdAt||p.created_at).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"}):"—"}</div>
                       </div>
                       {p.owner===user.email&&(
-                        <button onClick={e=>{e.stopPropagation();setDelId(p.id);}} style={{width:24,height:24,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:14,opacity:.7,display:"flex",alignItems:"center",justifyContent:"center"}} onMouseOver={e=>{e.stopPropagation();e.currentTarget.style.opacity="1";e.currentTarget.style.borderColor="rgba(239,68,68,.25)";e.currentTarget.style.background="rgba(239,68,68,.06)";e.currentTarget.style.color="#ef4444";}} onMouseOut={e=>{e.currentTarget.style.opacity=".7";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text4)";}}>×</button>
+                        <button onClick={e=>{e.stopPropagation();setDelId(p.id);}} style={{width:24,height:24,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:14,opacity:.7,display:"flex",alignItems:"center",justifyContent:"center"}} onMouseOver={e=>{e.stopPropagation();e.currentTarget.style.opacity="1";e.currentTarget.style.borderColor="rgba(239,68,68,.25)";e.currentTarget.style.background="rgba(239,68,68,.06)";e.currentTarget.style.color="#f04458";}} onMouseOut={e=>{e.currentTarget.style.opacity=".7";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text4)";}}>×</button>
                       )}
                     </div>
                     {/* Progress bar based on completed nodes */}
@@ -4656,10 +4570,10 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                         <div style={{marginBottom:10}}>
                           <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
                             <span style={{fontSize:13.5,color:"var(--text5)"}}>{t("progress","Прогресс")}</span>
-                            <span style={{fontSize:13.5,fontWeight:700,color:"#10b981"}}>{pct}%</span>
+                            <span style={{fontSize:13.5,fontWeight:700,color:"#12c482"}}>{pct}%</span>
                           </div>
                           <div style={{height:4,borderRadius:2,background:"var(--surface2)",overflow:"hidden"}}>
-                            <div style={{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#10b981,#34d399)",borderRadius:2}}/>
+                            <div style={{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#12c482,#34d399)",borderRadius:2}}/>
                           </div>
                         </div>
                       );
@@ -4685,6 +4599,16 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
         </div>
       </div>
       {delId&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message="Все карты и данные проекта будут удалены без возможности восстановления." confirmLabel="Удалить" onConfirm={()=>deleteProj(delId)} onCancel={()=>setDelId(null)} danger={true}/>}
+      {showBriefing&&lastMapData&&(
+        <WeeklyBriefingModal
+          nodes={lastMapData.nodes||[]}
+          mapName={lastMapData.name||t("map_default","Карта")}
+          user={user}
+          onClose={()=>setShowBriefing(false)}
+          theme={theme}
+          onError={(msg)=>{setToast({msg,type:"error"});setTimeout(()=>setToast(null),4000);}}
+        />
+      )}
 
       {showNotifs&&(
         <NotificationsCenterModal
@@ -4913,10 +4837,10 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
               <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
             </div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4,gap:8}}>
-              <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:11.5,fontWeight:700}}>
+              <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:11.5,fontWeight:700}}>
                 {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
               </div>
-              <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
+              <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
             </div>
           </div>
         ))}
@@ -4958,10 +4882,10 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                       {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
                     </div>
                   </div>
-                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
                     {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
                   </div>
-                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
+                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
                 </div>
               ))}
             </div>
@@ -4988,10 +4912,10 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                       {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
                     </div>
                   </div>
-                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
                     {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
                   </div>
-                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
+                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
                 </div>
               ))}
             </div>
@@ -5187,11 +5111,11 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                       {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
                     </div>
                   </div>
-                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",border:`1px solid ${it.status==="published"?"rgba(16,185,129,.3)":it.status==="scheduled"?"var(--glass-border-accent,var(--border))":"var(--border)"}`,color:it.status==="published"?"#10b981":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",border:`1px solid ${it.status==="published"?"rgba(16,185,129,.3)":it.status==="scheduled"?"var(--glass-border-accent,var(--border))":"var(--border)"}`,color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
                     {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft")}
                   </div>
                   <button type="button" onClick={()=>setEditId(it.id)} className="btn-interactive" title={t("edit","Редактировать")} aria-label={t("content_edit_item_aria","Редактировать: {title}").replace("{title}",(it.title||t("untitled","Без названия")).slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:700}}>✏️</button>
-                  <button type="button" onClick={()=>removeItem(it.id)} className="btn-interactive" title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",(it.title||"").slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:12,fontWeight:800}}>🗑</button>
+                  <button type="button" onClick={()=>removeItem(it.id)} className="btn-interactive" title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",(it.title||"").slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,fontWeight:800}}>🗑</button>
                 </div>
               ))}
             </div>
@@ -5451,7 +5375,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
     const prog=ns.length?Math.round(ns.reduce((s,n)=>s+(n.progress||0),0)/ns.length):0;
     const overdue=ns.filter(n=>n.deadline&&new Date(n.deadline)<new Date()&&n.status!=="completed").length;
     return(
-      <div className={"card-stagger sa-map-card"+(isSc?" sa-map-card--sc":"")} style={{padding:"20px 22px",cursor:"pointer",animationDelay:`${staggerIndex*0.05}s`,borderColor:isSc?"rgba(139,92,246,.35)":undefined}}
+      <div className={"card-stagger sa-map-card"+(isSc?" sa-map-card--sc":"")} style={{padding:"20px 22px",cursor:"pointer",animationDelay:`${staggerIndex*0.05}s`,borderColor:isSc?"rgba(104,54,245,.35)":undefined}}
         onClick={()=>onOpenMap(m,proj,false,myRole==="viewer")}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
           <div style={{width:34,height:34,borderRadius:9,background:"var(--accent-soft)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,border:"1px solid var(--glass-border-accent,var(--border))"}}>
@@ -5461,7 +5385,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
             <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name||"Без названия"}</div>
             <div style={{fontSize:13.5,color:"var(--text5)"}}>{ns.length} {t("steps_label","шагов")} • {t("updated_label","обновлено")} {m.updatedAt?new Date(m.updatedAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short"}):"—"}</div>
           </div>
-          {canEdit&&<button onClick={e=>{e.stopPropagation();delMap(m.id);}} aria-label={t("confirm_delete_map","Удалить карту?")} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}}
+          {canEdit&&<button onClick={e=>{e.stopPropagation();delMap(m.id);}} aria-label={t("confirm_delete_map","Удалить карту?")} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}}
             onMouseOver={e=>{e.currentTarget.style.opacity="1";}} onMouseOut={e=>{e.currentTarget.style.opacity="0";}}>🗑</button>}
         </div>
         {ns.length>0&&(
@@ -5475,7 +5399,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
             </div>
           </div>
         )}
-        {overdue>0&&<div style={{marginTop:7,fontSize:13.5,color:"var(--danger,#ef4444)",fontWeight:600}}>⚠ {overdue} просрочено</div>}
+        {overdue>0&&<div style={{marginTop:7,fontSize:13.5,color:"var(--danger,#f04458)",fontWeight:600}}>⚠ {overdue} просрочено</div>}
       </div>
     );
   }
@@ -5581,7 +5505,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               )}
             </div>
             {tier.scenarios===0?(
-              <div style={{textAlign:"center",padding:"50px 20px",border:"1px dashed rgba(139,92,246,.25)",borderRadius:16,background:"rgba(139,92,246,.03)"}}>
+              <div style={{textAlign:"center",padding:"50px 20px",border:"1px dashed rgba(104,54,245,.25)",borderRadius:16,background:"rgba(104,54,245,.03)"}}>
                 <div style={{fontSize:36,marginBottom:10}}>⎇</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("scenarios_pro","Сценарии доступны с Pro")}</div>
                 <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:300,margin:"0 auto 16px"}}>Создавайте альтернативные планы: «Что если потеряем ключевого клиента?» или «Что если вырастем ×3 за год?»</div>
@@ -5678,7 +5602,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                       <option value="editor">{t("role_editor","Редактор")}</option>
                       <option value="viewer">{t("observer","Наблюдатель")}</option>
                     </select>
-                    <button onClick={()=>removeMember(m.email)} style={{width:26,height:26,borderRadius:6,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#ef4444",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+                    <button onClick={()=>removeMember(m.email)} style={{width:26,height:26,borderRadius:6,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
                   </div>
                 )}
               </div>
@@ -5715,7 +5639,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               </div>
             </div>
             {isOwner&&(
-              <button onClick={()=>setDelProjConfirm(true)} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10}}>🗑 {t("delete_project","Удалить проект")}</button>
+              <button onClick={()=>setDelProjConfirm(true)} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"#f04458",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10}}>🗑 {t("delete_project","Удалить проект")}</button>
             )}
           </div>
         )}
@@ -5780,10 +5704,10 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                   <div style={{fontSize:13.5,color:"var(--text4)"}}>{t("start_ai_interview","Начать с чистой карты и AI-интервью")}</div>
                 </div>
               </button>
-              <button onClick={()=>{setShowScChoice(false);setShowScTmpls(true);}} style={{padding:"16px 18px",borderRadius:14,border:"1px solid rgba(139,92,246,.25)",background:"rgba(139,92,246,.06)",textAlign:"left",cursor:"pointer",display:"flex",gap:14,alignItems:"center",transition:"all .2s"}}
-                onMouseOver={e=>{e.currentTarget.style.background="rgba(139,92,246,.12)";e.currentTarget.style.borderColor="rgba(139,92,246,.5)";}}
-                onMouseOut={e=>{e.currentTarget.style.background="rgba(139,92,246,.06)";e.currentTarget.style.borderColor="rgba(139,92,246,.25)";}}>
-                <div style={{width:40,height:40,borderRadius:10,background:"rgba(139,92,246,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>✦</div>
+              <button onClick={()=>{setShowScChoice(false);setShowScTmpls(true);}} style={{padding:"16px 18px",borderRadius:14,border:"1px solid rgba(104,54,245,.25)",background:"rgba(104,54,245,.06)",textAlign:"left",cursor:"pointer",display:"flex",gap:14,alignItems:"center",transition:"all .2s"}}
+                onMouseOver={e=>{e.currentTarget.style.background="rgba(104,54,245,.12)";e.currentTarget.style.borderColor="rgba(104,54,245,.5)";}}
+                onMouseOut={e=>{e.currentTarget.style.background="rgba(104,54,245,.06)";e.currentTarget.style.borderColor="rgba(104,54,245,.25)";}}>
+                <div style={{width:40,height:40,borderRadius:10,background:"rgba(104,54,245,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>✦</div>
                 <div>
                   <div style={{fontSize:13,fontWeight:800,color:"var(--text)",marginBottom:3}}>AI шаблон сценария</div>
                   <div style={{fontSize:13.5,color:"var(--text4)"}}>8 типов: кризис, рост, инвестиции, пивот и другие</div>
@@ -5801,7 +5725,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
 
 // ── Scenario Templates Data ──
 const SC_TEMPLATES=[
-  {id:"saas_growth",icon:"📈",name:"SaaS рост",color:"#6366f1",
+  {id:"saas_growth",icon:"📈",name:"SaaS рост",color:"#6836f5",
    desc:"Масштабирование SaaS продукта: от PMF до $1M ARR",
    fields:[
      {key:"current_mrr",label:"Текущий MRR",ph:"Например: $8,000/мес"},
@@ -5819,7 +5743,7 @@ Churn: ${f.churn}
 Горизонт: ${f.timeline}
 Создай 7–8 конкретных узлов — от снижения churn до масштабирования каналов. Верни ТОЛЬКО JSON.`
   },
-  {id:"fundraising",icon:"💰",name:"Привлечение инвестиций",color:"#10b981",
+  {id:"fundraising",icon:"💰",name:"Привлечение инвестиций",color:"#12c482",
    desc:"Подготовка и проведение раунда финансирования",
    fields:[
      {key:"round",label:"Тип раунда",ph:"Например: Pre-seed $300k, Seed $1.5M"},
@@ -5837,7 +5761,7 @@ Churn: ${f.churn}
 Дедлайн: ${f.timeline}
 Создай 6–8 узлов — от подготовки материалов до закрытия сделки. Верни ТОЛЬКО JSON.`
   },
-  {id:"team_scaling",icon:"👥",name:"Масштабирование команды",color:"#8b5cf6",
+  {id:"team_scaling",icon:"👥",name:"Масштабирование команды",color:"#a050ff",
    desc:"Найм, структура и рост команды",
    fields:[
      {key:"current_team",label:"Текущая команда",ph:"Например: 2 фаундера + 1 джун разработчик"},
@@ -5855,7 +5779,7 @@ Churn: ${f.churn}
 Узкое место: ${f.bottleneck}
 Создай 6–8 узлов — процесс найма, онбординга, выстраивания процессов. Верни ТОЛЬКО JSON.`
   },
-  {id:"pivot",icon:"🔄",name:"Продуктовый пивот",color:"#f59e0b",
+  {id:"pivot",icon:"🔄",name:"Продуктовый пивот",color:"#f09428",
    desc:"Смена модели, аудитории или продукта",
    fields:[
      {key:"current_product",label:"Текущий продукт/модель",ph:"Например: B2C приложение для трекинга питания"},
@@ -5909,7 +5833,7 @@ Churn: ${f.churn}
 Риск: ${f.risk}
 Создай 6–8 узлов — от поиска до подписания договора. Верни ТОЛЬКО JSON.`
   },
-  {id:"cost_optimization",icon:"💡",name:"Оптимизация расходов",color:"#10b981",
+  {id:"cost_optimization",icon:"💡",name:"Оптимизация расходов",color:"#12c482",
    desc:"Снижение затрат без потери качества и роста",
    fields:[
      {key:"current_burn",label:"Текущий burn rate",ph:"Например: $40k/мес, из них $25k — зарплаты"},
@@ -6008,7 +5932,7 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
           <div style={{width:240,borderRight:"1px solid var(--border)",overflowY:"auto",padding:"10px 8px",display:"flex",flexDirection:"column",gap:4,flexShrink:0}}>
             {SC_TEMPLATES.map(tmpl=>(
               <div key={tmpl.id} onClick={()=>{setSelected(tmpl);setFields({});setError("");}}
-                style={{padding:"10px 12px",borderRadius:10,cursor:"pointer",background:selected?.id===tmpl.id?"rgba(99,102,241,.1)":"transparent",border:`1px solid ${selected?.id===tmpl.id?"rgba(99,102,241,.35)":"transparent"}`,transition:"all .15s"}}
+                style={{padding:"10px 12px",borderRadius:10,cursor:"pointer",background:selected?.id===tmpl.id?"rgba(104,54,245,.1)":"transparent",border:`1px solid ${selected?.id===tmpl.id?"rgba(104,54,245,.35)":"transparent"}`,transition:"all .15s"}}
                 onMouseOver={e=>{if(selected?.id!==tmpl.id){e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border)";}}}
                 onMouseOut={e=>{if(selected?.id!==tmpl.id){e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="transparent";}}}>
                 <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:3}}>
@@ -6043,7 +5967,7 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
                     <input value={fields[fld.key]||""} onChange={e=>setFields(f=>({...f,[fld.key]:e.target.value}))} placeholder={fld.ph} style={iS}/>
                   </div>
                 ))}
-                {error&&<div style={{padding:"9px 12px",borderRadius:9,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#ef4444",fontSize:13}}>{error}</div>}
+                {error&&<div style={{padding:"9px 12px",borderRadius:9,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#f04458",fontSize:13}}>{error}</div>}
                   <button onClick={build} disabled={generating} className="btn-interactive" style={{padding:"11px",borderRadius:11,border:"none",background:generating?"var(--surface2)":"var(--gradient-accent)",color:generating?"var(--text4)":"var(--accent-on-bg)",cursor:generating?"wait":"pointer",fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:generating?"none":"0 2px 14px var(--accent-glow)"}}>
                   {generating?(
                       <><div style={{display:"flex",gap:3}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>{t("ai_generating_map","AI генерирует карту…")}</>
@@ -6076,7 +6000,7 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
             <div style={{fontSize:15,fontWeight:900,color:"var(--text)"}}>{t("map_templates_modal_title","📋 Шаблоны карт")}</div>
             <div style={{fontSize:13,color:"var(--text4)",marginTop:2}}>{t("choose_template","Выберите готовую стратегическую карту или начните с нуля")}</div>
           </div>
-          {!canUse&&<div style={{padding:"4px 10px",borderRadius:8,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",color:"#f59e0b",fontSize:13,fontWeight:700}}>{t("templates_team_tier_badge","Team+ тариф")}</div>}
+          {!canUse&&<div style={{padding:"4px 10px",borderRadius:8,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",color:"#f09428",fontSize:13,fontWeight:700}}>{t("templates_team_tier_badge","Team+ тариф")}</div>}
           <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
         </div>
         <div style={{flex:1,overflowY:"auto",padding:"18px 22px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12,alignContent:"start"}}>
@@ -6094,7 +6018,7 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
                   <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{t("map_template_n_steps","{n} шагов").replace("{n}",String(tmpl.nodes.length))}</div>
                   <div style={{padding:"2px 7px",borderRadius:5,background:"var(--surface2)",border:"1px solid var(--border)",fontSize:13,color:"var(--text4)"}}>{t("map_template_n_edges","{n} связей").replace("{n}",String(tmpl.edges.length))}</div>
                 </div>
-                {locked&&<div style={{marginTop:6,fontSize:13,color:"#f59e0b",fontWeight:700}}>{t("templates_locked_team","🔒 Team+")}</div>}
+                {locked&&<div style={{marginTop:6,fontSize:13,color:"#f09428",fontWeight:700}}>{t("templates_locked_team","🔒 Team+")}</div>}
               </div>
             );
           })}
@@ -6277,15 +6201,15 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
 
   const isRunning=simState==="running",isPaused=simState==="paused",isFinished=simState==="finished";
   const progress=ordered.length?Math.round(Object.keys(results).length/ordered.length*100):0;
-  const OC={success:"#10b981",partial:"#f59e0b",fail:"#ef4444"};
+  const OC={success:"#12c482",partial:"#f09428",fail:"#f04458"};
   const fi={width:"100%",padding:"8px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"};
 
   return(
     <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.9))",display:"flex",flexDirection:"column",zIndex:300,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}}>
 <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <div style={{fontSize:15,fontWeight:900,color:"var(--text)",flex:1}}>⎇ Симуляция · {mapData.name||"Карта"}</div>
-        {isRunning&&<div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--text3)"}}><div style={{width:10,height:10,borderRadius:"50%",background:"#10b981",animation:"pulse 1s infinite"}}/>{progress}% завершено</div>}
-        {isFinished&&final&&<div style={{fontSize:13,color:final.avg>=60?"#10b981":"#f59e0b",fontWeight:700}}>{final.planAchievement.toUpperCase()} · {final.avg}%</div>}
+        {isRunning&&<div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--text3)"}}><div style={{width:10,height:10,borderRadius:"50%",background:"#12c482",animation:"pulse 1s infinite"}}/>{progress}% завершено</div>}
+        {isFinished&&final&&<div style={{fontSize:13,color:final.avg>=60?"#12c482":"#f09428",fontWeight:700}}>{final.planAchievement.toUpperCase()} · {final.avg}%</div>}
         <button onClick={onClose} style={{width:32,height:32,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>×</button>
       </div>
       <div style={{flex:1,display:"flex",overflow:"hidden"}}>
@@ -6319,9 +6243,9 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
           )}
           <div style={{display:"flex",flexDirection:"column",gap:6,marginTop:4}}>
             {!isRunning&&!isPaused&&<button onClick={startSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,var(--info),var(--accent-1))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Запустить</button>}
-            {isRunning&&<button onClick={pauseSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.08)",color:"#f59e0b",fontSize:13,fontWeight:700,cursor:"pointer"}}>⏸ Пауза</button>}
-            {isPaused&&<button onClick={resumeSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#10b981,#0ea5e9)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Продолжить</button>}
-            {(isRunning||isPaused)&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#ef4444",fontSize:13,fontWeight:700,cursor:"pointer"}}>■ Стоп</button>}
+            {isRunning&&<button onClick={pauseSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.08)",color:"#f09428",fontSize:13,fontWeight:700,cursor:"pointer"}}>⏸ Пауза</button>}
+            {isPaused&&<button onClick={resumeSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#12c482,#06b6d4)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Продолжить</button>}
+            {(isRunning||isPaused)&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#f04458",fontSize:13,fontWeight:700,cursor:"pointer"}}>■ Стоп</button>}
             {isFinished&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:700,cursor:"pointer"}}>↺ Заново</button>}
           </div>
         </div>
@@ -6330,7 +6254,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
           <div style={{display:"flex",gap:2,padding:"8px 12px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
             {[["map","🗺 Карта"],["gantt","📅 Ганнт"]].map(item=>{
               const k=item[0],lbl=item[1];
-              return <button key={k} onClick={()=>setCenterTab(k)} style={{padding:"5px 14px",borderRadius:8,border:`1px solid ${centerTab===k?"rgba(99,102,241,.4)":"transparent"}`,background:centerTab===k?"rgba(99,102,241,.1)":"transparent",color:centerTab===k?"#818cf8":"var(--text4)",cursor:"pointer",fontSize:13,fontWeight:centerTab===k?700:500}}>{lbl}</button>;
+              return <button key={k} onClick={()=>setCenterTab(k)} style={{padding:"5px 14px",borderRadius:8,border:`1px solid ${centerTab===k?"rgba(104,54,245,.4)":"transparent"}`,background:centerTab===k?"rgba(104,54,245,.1)":"transparent",color:centerTab===k?"#b4a3ff":"var(--text4)",cursor:"pointer",fontSize:13,fontWeight:centerTab===k?700:500}}>{lbl}</button>;
             })}
           </div>
           {centerTab==="gantt"&&(
@@ -6345,7 +6269,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
                   {(mapData.nodes||[]).filter(n=>n.deadline).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).map(n=>{
                     const st=STATUS[n.status]||STATUS.planning;
                     const r=results[n.id];
-                    const OC2={success:"#10b981",partial:"#f59e0b",fail:"#ef4444"};
+                    const OC2={success:"#12c482",partial:"#f09428",fail:"#f04458"};
                     return(
                       <div key={n.id} style={{display:"flex",gap:12,alignItems:"center",padding:"10px 12px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)"}}>
                         <div style={{width:8,height:8,borderRadius:2,background:r?OC2[r.outcome]:st.c,flexShrink:0}}/>
@@ -6374,13 +6298,13 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
                   const r=results[n.id];
                   const isActive=activeId===n.id;
                   const fillC=r?r.outcome==="success"?"rgba(16,185,129,.15)":r.outcome==="partial"?"rgba(245,158,11,.15)":"rgba(239,68,68,.12)":isActive?"rgba(14,165,233,.12)":"var(--surface)";
-                  const strokeC=r?OC[r.outcome]:isActive?"#0ea5e9":"var(--node-stroke)";
+                  const strokeC=r?OC[r.outcome]:isActive?"#06b6d4":"var(--node-stroke)";
                   return(
                     <g key={n.id}>
                       <rect x={n.x} y={n.y} width={240} height={64} rx={10} fill={fillC} stroke={strokeC} strokeWidth={isActive||r?2:1} style={isActive&&!r?{animation:"nodeBlink 1s infinite"}:{}}/>
                       <text x={n.x+12} y={n.y+22} fontSize={12} fontWeight={700} fill="var(--text)" style={{fontFamily:"'Inter',system-ui,sans-serif"}}>{(n.title||"").slice(0,24)}</text>
                       {r&&<text x={n.x+12} y={n.y+44} fontSize={11} fill={OC[r.outcome]} style={{fontFamily:"'Inter',system-ui,sans-serif"}}>{r.score}% · {r.outcome==="success"?"✅":r.outcome==="partial"?"⚠️":"❌"}</text>}
-                      {isActive&&!r&&<text x={n.x+12} y={n.y+44} fontSize={10} fill="#0ea5e9" style={{fontFamily:"'Inter',system-ui,sans-serif"}}>{t("analyzing_short","анализ…")}</text>}
+                      {isActive&&!r&&<text x={n.x+12} y={n.y+44} fontSize={10} fill="#06b6d4" style={{fontFamily:"'Inter',system-ui,sans-serif"}}>{t("analyzing_short","анализ…")}</text>}
                     </g>
                   );
                 })}
@@ -6417,7 +6341,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
         <div style={{width:300,flexShrink:0,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
           <div style={{flex:1,overflowY:"auto",padding:"12px",display:"flex",flexDirection:"column",gap:6}}>
             {log.map((entry,i)=>{
-              const colors={sys:"var(--text4)",start:"#0ea5e9",plan:"var(--accent-2)",step:"var(--text3)",result:"#f59e0b",ai:"var(--accent-2)",user:"var(--text)"};
+              const colors={sys:"var(--text4)",start:"#06b6d4",plan:"var(--accent-2)",step:"var(--text3)",result:"#f09428",ai:"var(--accent-2)",user:"var(--text)"};
               return <div key={i} style={{fontSize:13.5,lineHeight:1.6,color:colors[entry.role]||"var(--text3)",fontFamily:entry.role==="result"||entry.role==="start"?"'JetBrains Mono',monospace":"inherit"}}>{entry.text}</div>;
             })}
             {aiLoad&&<div style={{display:"flex",gap:4,padding:"6px 0"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div>}
@@ -6524,7 +6448,7 @@ ${mapHint} X:150–900, Y:80–520.`;
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10}}>
             {m.role==="ai"&&<div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,flexShrink:0,marginTop:2,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div>}
-            <div style={{maxWidth:"80%",padding:"10px 14px",borderRadius:m.role==="user"?"12px 12px 3px 12px":"3px 12px 12px 12px",background:m.role==="user"?"rgba(99,102,241,.18)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(99,102,241,.3)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>{m.text}</div>
+            <div style={{maxWidth:"80%",padding:"10px 14px",borderRadius:m.role==="user"?"12px 12px 3px 12px":"3px 12px 12px 12px",background:m.role==="user"?"rgba(104,54,245,.18)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(104,54,245,.3)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>{m.text}</div>
           </div>
         ))}
         {(loading||generating)&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 12px 12px 12px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
@@ -6552,7 +6476,7 @@ ${mapHint} X:150–900, Y:80–520.`;
             <div style={{fontSize:13.5,color:"var(--text3)",marginBottom:20}}>Карта будет создана с примерными шагами. AI-интервью помогает сделать её персонализированной.</div>
             <div style={{display:"flex",gap:10,justifyContent:"center"}}>
               <button onClick={()=>setShowSkipConfirm(false)} style={{padding:"9px 20px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("continue_btn","Продолжить")}</button>
-              <button onClick={onSkip} style={{padding:"9px 20px",borderRadius:9,border:"none",background:"rgba(239,68,68,.1)",color:"#ef4444",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("skip","Пропустить")}</button>
+              <button onClick={onSkip} style={{padding:"9px 20px",borderRadius:9,border:"none",background:"rgba(239,68,68,.1)",color:"#f04458",cursor:"pointer",fontSize:13,fontWeight:700}}>{t("skip","Пропустить")}</button>
             </div>
           </div>
         </div>

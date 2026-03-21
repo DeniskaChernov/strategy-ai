@@ -22,7 +22,7 @@
   <meta name="twitter:image" content="/logo.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/global.css"/>
   <link rel="stylesheet" href="/landing.css"/>
   <link rel="stylesheet" href="/strategy-shell.css"/>
@@ -30,16 +30,16 @@
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{width:100%;height:100%}
     #root{width:100%;height:100%}
-    body{font-family:'Inter','Plus Jakarta Sans',sans-serif;background:#050410;color:#eaeaf8;-webkit-font-smoothing:antialiased}
+    body{font-family:'Inter',system-ui,sans-serif;background:#050410;color:#eaeaf8;-webkit-font-smoothing:antialiased}
     body[data-theme="dark"]{background:#050410;color:#eaeaf8}
-    body[data-theme="light"]{background:#d8d4ff;color:#0a0818}
+    body[data-theme="light"]{background:#ece9ff;color:#08061a}
     #splash{position:fixed;inset:0;background:#050410;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
     #splash-logo{margin-bottom:20px}
     #splash-logo img{width:72px;height:72px;object-fit:contain}
-    #splash p{font-size:14px;color:#475569;margin-top:12px;letter-spacing:1px}
-    @keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(99,102,241,.4)}50%{box-shadow:0 0 80px rgba(99,102,241,.7)}}
+    #splash p{font-size:14px;color:rgba(148,144,196,.62);margin-top:12px;letter-spacing:.06em}
+    @keyframes pulse{0%,100%{box-shadow:0 0 36px rgba(104,54,245,.35)}50%{box-shadow:0 0 72px rgba(104,54,245,.55)}}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .loader{width:28px;height:28px;border:2px solid rgba(91,107,192,.2);border-top-color:var(--accent-1,#5b6bc0);border-radius:50%;animation:spin .8s linear infinite;margin-top:16px}
+    .loader{width:28px;height:28px;border:2px solid rgba(104,54,245,.22);border-top-color:#6836f5;border-radius:50%;animation:spin .8s linear infinite;margin-top:16px}
   </style>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebApplication","name":"Strategy AI","description":"Визуальное стратегическое планирование с AI-советником уровня McKinsey","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
@@ -58,11 +58,11 @@
       try{
         var sp=document.getElementById('splash');
         if(sp&&localStorage.getItem('sa_theme')==='light'){
-          sp.style.background='#d8d4ff';
+          sp.style.background='#ece9ff';
           var h=document.getElementById('splash-heading');
-          if(h) h.style.color='#0a0818';
+          if(h) h.style.color='#08061a';
           var sub=sp.querySelector('p');
-          if(sub) sub.style.color='rgba(40,32,90,.55)';
+          if(sub) sub.style.color='rgba(70,58,130,.52)';
         }
       }catch(_){}
     })();
