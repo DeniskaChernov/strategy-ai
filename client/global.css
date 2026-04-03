@@ -1295,11 +1295,25 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   align-items:center;
   min-height:100vh;
   width:100%;
-  max-width:min(1120px,100%);
+  max-width:min(1280px,100%);
   margin:0 auto;
-  padding:max(88px,env(safe-area-inset-top)) clamp(16px,4vw,32px) max(32px,env(safe-area-inset-bottom));
+  min-width:0;
+  padding:max(88px,env(safe-area-inset-top)) clamp(16px,4vw,40px) max(32px,env(safe-area-inset-bottom));
   box-sizing:border-box;
   gap:clamp(12px,3vw,28px);
+}
+.sa-horizon-sticky::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:3;
+  background:linear-gradient(90deg,rgba(3,2,10,.2) 0%,transparent 14%,transparent 86%,rgba(3,2,10,.2) 100%);
+  opacity:.55;
+}
+.sa-horizon-hero--lt .sa-horizon-sticky::after{
+  background:linear-gradient(90deg,rgba(250,248,255,.35) 0%,transparent 14%,transparent 86%,rgba(250,248,255,.35) 100%);
+  opacity:.4;
 }
 .sa-horizon-side{
   grid-area:side;

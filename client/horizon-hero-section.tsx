@@ -155,6 +155,7 @@ export function HorizonHeroSection({
       store.camera.position.set(0, smoothCam.current.y, smoothCam.current.z);
 
       store.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      store.renderer.setClearColor(0x030208, 0);
       store.renderer.setSize(w(), h());
       store.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       store.renderer.toneMapping = THREE.ACESFilmicToneMapping;

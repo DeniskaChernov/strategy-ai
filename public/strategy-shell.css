@@ -1268,3 +1268,25 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
 }
 .sa-app-topbar .sa-back-ic:hover{background:var(--card2);color:var(--t1);border-color:var(--bh)}
 .sa-app-topbar .sa-back-ic:active{transform:scale(.96)}
+
+/* Лендинг: герой на всю ширину (не сжимать flex-элементы), шапка на весь экран */
+.sa-v-landing{align-items:stretch!important}
+#land-nav-fixed{
+  left:0!important;right:0!important;transform:none!important;
+  width:100%!important;max-width:none!important;
+  padding:18px clamp(16px,4vw,40px)!important;
+  padding-left:max(18px,env(safe-area-inset-left))!important;
+  padding-right:max(18px,env(safe-area-inset-right))!important;
+}
+#land-nav-fixed .land-nav-links{display:flex;gap:clamp(14px,2.5vw,26px);align-items:center;flex-wrap:wrap;justify-content:center;flex:1;min-width:0}
+#land-nav-fixed .footer-link{font-size:14px;font-weight:600;color:var(--t2)}
+#land-nav-fixed.scrolled{
+  padding:12px clamp(16px,4vw,40px)!important;
+  padding-left:max(12px,env(safe-area-inset-left))!important;
+  padding-right:max(12px,env(safe-area-inset-right))!important;
+}
+.sa-strategy-ui.lt #land-nav-fixed.scrolled{
+  padding:12px clamp(16px,4vw,40px)!important;
+  padding-left:max(12px,env(safe-area-inset-left))!important;
+  padding-right:max(12px,env(safe-area-inset-right))!important;
+}

@@ -133,7 +133,7 @@ export function ReferenceLandingView({
           <div className="land-gem">SA</div>
           <span className="land-brand">Strategy AI</span>
         </div>
-        <div style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}>
+        <div className="land-nav-links">
           <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-features")} onKeyDown={e=>{if(e.key==="Enter")scrollToId("land-features");}}>{t("nav_features", "Возможности")}</span>
           <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-how")} onKeyDown={e=>{if(e.key==="Enter")scrollToId("land-how");}}>{t("nav_process", "Как это работает")}</span>
           <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-pricing")} onKeyDown={e=>{if(e.key==="Enter")scrollToId("land-pricing");}}>{t("nav_pricing", "Тарифы")}</span>

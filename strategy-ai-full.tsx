@@ -6709,7 +6709,6 @@ function LandingPage({onGetStarted,onSignIn,onToggleTheme,theme,lang="ru",onChan
         onSignIn={onSignIn}
         onGetStarted={onGetStarted}
       />
-      <FloatingAiAssistant t={t} onCta={onGetStarted} />
       <CookieConsent/>
     </>
   );
