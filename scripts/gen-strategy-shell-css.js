@@ -132,6 +132,28 @@ const appOverrides = `
 .sa-ws-feat .sf-ic{font-size:16px;line-height:1;flex-shrink:0}
 .sa-ws-feat .sf-txt{font-size:12.5px;font-weight:600;color:var(--t2);line-height:1.35}
 
+/* Welcome: одна строка фичи с ротацией вместо сетки */
+.sa-ws-feat-rotator{min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px 4px 2px;margin-top:2px}
+.sa-ws-feat-rotator-inner{display:inline-flex;align-items:center;gap:10px;max-width:100%;animation:sa-ws-feat-in .48s cubic-bezier(.22,1,.36,1) both}
+.sa-ws-feat-rotator-ic{font-size:20px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 10px rgba(160,80,255,.2))}
+.sa-ws-feat-rotator-txt{font-size:14px;font-weight:600;color:var(--t2);letter-spacing:.01em;line-height:1.35;text-align:left}
+@keyframes sa-ws-feat-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.sa-ws-auth-back{display:block;width:100%;margin-bottom:12px;padding:9px 12px;border-radius:12px;border:.5px solid var(--b1);background:var(--inp);color:var(--t3);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .18s,color .18s,border-color .18s}
+.sa-ws-auth-back:hover{background:var(--card2);color:var(--t2);border-color:var(--bh)}
+.sa-ws-auth-form .modal-inp{margin-bottom:10px}
+.sa-ws-auth-form .modal-btn{margin-top:2px}
+.sa-ws-auth-form-wrap{border-top:.5px solid var(--b1);padding-top:16px;margin-top:14px}
+.sa-ws-phase-enter{animation:sa-ws-phase-in .38s cubic-bezier(.22,1,.36,1) both}
+.sa-ws-cta-block{animation:sa-ws-phase-in .26s cubic-bezier(.22,1,.36,1) both}
+@keyframes sa-ws-phase-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sa-ws-card-region{width:100%}
+.sa-ws-auth-form #welcome-auth-title:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){
+  .sa-ws-phase-enter,.sa-ws-cta-block{animation:none!important}
+  .sa-ws-feat-rotator-inner{animation:none!important}
+  .sa-ws-feat-rotator--static .sa-ws-feat-rotator-inner{animation:none!important}
+}
+
 /* Топбар полноэкранных экранов без shell — как sa-topbar */
 .sa-app-topbar{
   display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;row-gap:10px;

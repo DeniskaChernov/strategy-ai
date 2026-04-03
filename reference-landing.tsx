@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StrategyShellBg } from "./strategy-shell-sidebar";
+import { HorizonHeroSection } from "./client/horizon-hero-section";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -33,6 +34,49 @@ export function ReferenceLandingView({
   const rootRef = useRef<HTMLDivElement>(null);
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const testimonials = [TESTI1, TESTI2, TESTI3];
+  const testiTrackRef = useRef<HTMLDivElement>(null);
+  const [testiActive, setTestiActive] = useState(0);
+
+  const syncTestiActive = useCallback(() => {
+    const track = testiTrackRef.current;
+    if (!track) return;
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let best = 0;
+    let bestDist = Infinity;
+    Array.from(track.children).forEach((child, i) => {
+      const el = child as HTMLElement;
+      const cx = el.offsetLeft + el.offsetWidth / 2;
+      const d = Math.abs(cx - center);
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    });
+    setTestiActive(best);
+  }, []);
+
+  const goTesti = useCallback((i: number) => {
+    const track = testiTrackRef.current;
+    const slide = track?.children[i] as HTMLElement | undefined;
+    if (!track || !slide) return;
+    const target = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
+    track.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
+    const track = testiTrackRef.current;
+    if (!track) return;
+    const onScroll = () => syncTestiActive();
+    track.addEventListener("scroll", onScroll, { passive: true });
+    syncTestiActive();
+    const onResize = () => syncTestiActive();
+    window.addEventListener("resize", onResize);
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [syncTestiActive]);
 
   useEffect(() => {
     /* Скролл только у .sa-ref-landing; body остаётся overflow:hidden (#root) — иначе два вертикальных скролла */
@@ -84,9 +128,6 @@ export function ReferenceLandingView({
   return(
     <div ref={rootRef} className={`sa-ref-landing sa-strategy-ui sa-landing-shell ${dk} view on sa-v-landing`} style={{ position: "fixed", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "stretch", overflowY: "auto", overflowX: "hidden", fontFamily: "'Inter',system-ui,sans-serif" }}>
       <StrategyShellBg/>
-      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", opacity: theme === "dark" ? 0.45 : 0.12 }}>
-        <canvas id="stars-canvas" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block" }} aria-hidden/>
-      </div>
       <nav id="land-nav-fixed" className={navScrolled ? "scrolled" : ""} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 600 }}>
         <div className="land-logo">
           <div className="land-gem">SA</div>
@@ -113,25 +154,17 @@ export function ReferenceLandingView({
         </div>
       </nav>
 
+      <div style={{ position: "relative", zIndex: 5, width: "100%" }}>
+        <HorizonHeroSection
+          scrollRef={rootRef}
+          t={t}
+          theme={theme}
+          onGetStarted={onGetStarted}
+          onScrollToMockup={()=>scrollToId("land-mockup")}
+        />
+      </div>
+
       <div className="land-inner" style={{ position: "relative", zIndex: 5 }}>
-        <div className="land-nav-spacer"/>
-
-        <div className="hero" id="hero-section">
-          <div className="hero-badge"><span>{t("ref_hero_badge", "✦ AI-стратегия · визуальные карты")}</span></div>
-          <h1 className="hero-h1" dangerouslySetInnerHTML={{ __html: t("ref_hero_h1_html", "Стратегия,<br/><span class=\"grad-text\">которая думает с вами</span>") }}/>
-          <p className="hero-sub">{t("ref_hero_sub", "Визуальные карты целей и инициатив, сценарии «что если», таймлайн и AI-советник — в одном рабочем пространстве.")}</p>
-          <div className="hero-btns">
-            <button type="button" className="btn-p lg" onClick={onGetStarted}>{t("hero_cta", "Начать бесплатно — без карты")}</button>
-            <button type="button" className="btn-g lg" onClick={()=>scrollToId("land-mockup")}>{t("ref_demo", "Смотреть интерфейс ↗")}</button>
-          </div>
-          <div style={{ marginTop: 18, fontSize: 11.5, color: "var(--t3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
-            <span>{t("trust_1", "✓ Бесплатный тариф")}</span>
-            <span>{t("trust_2", "✓ Без карты")}</span>
-            <span>{t("trust_3", "✓ Старт за пару минут")}</span>
-            <span>{t("trust_4", "✓ Отмена в любой момент")}</span>
-          </div>
-        </div>
-
         <div className="land-stats stagger" id="land-stats-section" style={{ marginBottom: 64 }}>
           <div className="stat-item sr sr-up in">
             <div className="stat-val" style={{ color: "var(--acc)" }}>2,400+</div>
@@ -214,7 +247,7 @@ export function ReferenceLandingView({
           </div>
         </div>
 
-        <div id="land-pricing">
+        <div id="land-compare">
           <div className="land-section-lbl sr sr-up in">{t("ref_sec_cmp_lbl", "Сравнение")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_sec_cmp_title", "Почему Strategy AI")}</div>
           <div className="land-section-sub sr sr-up in">{t("ref_sec_cmp_sub", "Специализация на стратегии: карта + сценарии + таймлайн + контекстный AI.")}</div>
@@ -236,39 +269,82 @@ export function ReferenceLandingView({
               </tbody>
             </table>
           </div>
-          <div className="sr sr-up in" style={{ marginTop: 44 }}>
-            <div className="land-section-lbl">{t("nav_pricing", "Тарифы")}</div>
-            <div className="land-section-title" style={{ fontSize: "clamp(22px, 3.5vw, 28px)" }}>{t("ref_tiers_line", "Линейка тарифов")}</div>
-            <div className="land-section-sub" style={{ marginBottom: 22 }}>{t("ref_tiers_note", "Полные лимиты по проектам, картам и AI — в разделе «Учётная запись» после входа.")}</div>
-            <div className="land-tier-scroll">
-              {tierStrip.map((x)=>(
-                <div key={x.id} className="land-tier-card" style={{ borderTop: `3px solid ${x.color}` }}>
-                  <div className="land-tier-card-top">
-                    <span className="land-tier-badge" style={{ color: x.color }}>{x.badge}</span>
-                    <span className="land-tier-name">{x.name}</span>
+        </div>
+
+        <div id="land-testimonials">
+          <div className="land-section-lbl sr sr-up in">{t("ref_testi_lbl", "Отзывы")}</div>
+          <div className="land-section-title sr sr-up in">{t("ref_testi_title", "Нам доверяют команды")}</div>
+          <div className="land-section-sub sr sr-up in" style={{ marginBottom: 28 }}>{t("ref_testi_sub", "Структура вместо разрозненных таблиц и чатов.")}</div>
+          <div
+            className="testi-glass-wrap stagger sr sr-up in"
+            role="region"
+            aria-roledescription={t("ref_testi_carousel_label", "Карусель отзывов")}
+            aria-label={t("ref_testi_title", "Нам доверяют команды")}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                goTesti((testiActive + testimonials.length - 1) % testimonials.length);
+              } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                goTesti((testiActive + 1) % testimonials.length);
+              }
+            }}
+          >
+            <div className="testi-glass-viewport">
+              <button
+                type="button"
+                className="testi-glass-nav testi-glass-nav--prev"
+                aria-label={t("ref_testi_prev", "Предыдущий отзыв")}
+                onClick={() => goTesti((testiActive + testimonials.length - 1) % testimonials.length)}
+              >
+                <span aria-hidden>‹</span>
+              </button>
+              <div ref={testiTrackRef} className="testi-glass-track">
+                {testimonials.map((x, i) => (
+                  <div key={i} className="testi-glass-slide" data-active={testiActive === i ? "true" : undefined}>
+                    <article className="testi-glass-card">
+                      <div className="testi-glass-quote" aria-hidden>
+                        “
+                      </div>
+                      <div className="testi-stars">★★★★★</div>
+                      <p className="testi-text">{t(x.qk, x.qf)}</p>
+                      <div className="testi-author">
+                        <div className="testi-av" style={x.avs}>
+                          {x.ini}
+                        </div>
+                        <div>
+                          <div className="testi-name">{t(x.nk, x.nf)}</div>
+                          <div className="testi-role">{t(x.rk, x.rf)}</div>
+                        </div>
+                      </div>
+                    </article>
                   </div>
-                  <div className="land-tier-price">{t(`ref_tier_p_${x.id}`, "")}</div>
-                  <div className="land-tier-desc">{t(`ref_tier_d_${x.id}`, "")}</div>
-                </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="testi-glass-nav testi-glass-nav--next"
+                aria-label={t("ref_testi_next", "Следующий отзыв")}
+                onClick={() => goTesti((testiActive + 1) % testimonials.length)}
+              >
+                <span aria-hidden>›</span>
+              </button>
+            </div>
+            <div className="testi-glass-dots" role="tablist" aria-label={t("ref_testi_choose", "Выбор отзыва")}>
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  role="tab"
+                  aria-selected={testiActive === i}
+                  className={"testi-glass-dot" + (testiActive === i ? " is-active" : "")}
+                  onClick={() => goTesti(i)}
+                  aria-label={t("ref_testi_goto", "Отзыв {n}").replace("{n}", String(i + 1))}
+                />
               ))}
             </div>
           </div>
-        </div>
-
-        <div className="land-section-lbl sr sr-up in">{t("ref_testi_lbl", "Отзывы")}</div>
-        <div className="land-section-title sr sr-up in">{t("ref_testi_title", "Нам доверяют команды")}</div>
-        <div className="land-section-sub sr sr-up in" style={{ marginBottom: 32 }}>{t("ref_testi_sub", "Структура вместо разрозненных таблиц и чатов.")}</div>
-        <div className="testi-grid stagger">
-          {[TESTI1, TESTI2, TESTI3].map((x, i)=>(
-            <div key={i} className="testi-card sr sr-up in">
-              <div className="testi-stars">★★★★★</div>
-              <div className="testi-text">{t(x.qk, x.qf)}</div>
-              <div className="testi-author">
-                <div className="testi-av" style={x.avs}>{x.ini}</div>
-                <div><div className="testi-name">{t(x.nk, x.nf)}</div><div className="testi-role">{t(x.rk, x.rf)}</div></div>
-              </div>
-            </div>
-          ))}
         </div>
 
         <div id="land-faq">
@@ -287,6 +363,46 @@ export function ReferenceLandingView({
           </div>
         </div>
 
+        <section id="land-pricing" className="sa-land-pricing sr sr-up in">
+          <div className="tier-wrap">
+            <div className="tier-header">
+              <div className="land-section-lbl">{t("tag_pricing_label", "Тарифы")}</div>
+              <div className="tier-h">{t("ref_tiers_line", "Линейка тарифов")}</div>
+              <div className="tier-s">{t("ref_tiers_note", "Полные лимиты по проектам, картам и AI — в разделе «Учётная запись» после входа.")}</div>
+            </div>
+            <div className="tier-grid">
+              {tierStrip.map((x)=>(
+                <div
+                  key={x.id}
+                  className={"tier-card" + (x.id === "pro" ? " popular" : "")}
+                  style={{ borderTop: `3px solid ${x.color}` }}
+                >
+                  {x.id === "pro" && (
+                    <div className="tier-pop-badge">{t("pricing_hot_badge", "★ TOP")}</div>
+                  )}
+                  <div className="tc-name">{x.name}</div>
+                  <div className="tc-price" style={{ color: x.id === "free" ? "var(--t2)" : "var(--t1)" }}>{t(`ref_tier_p_${x.id}`, "")}</div>
+                  <div className="tc-sub">{x.id === "free" ? "\u00a0" : t("per_month_short", "/мес")}</div>
+                  <div className="tc-features">
+                    <div className="tc-feat">{t(`ref_tier_d_${x.id}`, "")}</div>
+                  </div>
+                  <button
+                    type="button"
+                    className={"tier-btn " + (x.id === "free" ? "tier-btn-free" : "tier-btn-paid")}
+                    onClick={onGetStarted}
+                  >
+                    {x.id === "free"
+                      ? t("start_free_cta", "Начать бесплатно")
+                      : x.id === "enterprise"
+                        ? t("tier_enterprise_cta", "Связаться с нами")
+                        : t("ref_cta_btn", "Создать аккаунт →")}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <div className="land-cta sr sr-scale in">
           <div className="cta-title" dangerouslySetInnerHTML={{ __html: t("ref_cta_title_html", "Готовы к стратегии,<br/>которая доходит до исполнения?") }}/>
           <div className="cta-sub">{t("ref_cta_sub", "Бесплатный тариф. Создайте аккаунт и первую карту за пару минут.")}</div>
@@ -303,6 +419,7 @@ export function ReferenceLandingView({
           </div>
           <div className="footer-links">
             <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-features")}>{t("nav_features", "Возможности")}</span>
+            <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-compare")}>{t("ref_sec_cmp_lbl", "Сравнение")}</span>
             <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-pricing")}>{t("nav_pricing", "Тарифы")}</span>
             <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-faq")}>FAQ</span>
             <a className="footer-link" href="/privacy">{t("footer_privacy", "Конфиденциальность")}</a>

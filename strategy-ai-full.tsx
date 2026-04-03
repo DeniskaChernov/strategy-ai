@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from "re
 import { io as ioClient } from "socket.io-client";
 import pptxgen from "pptxgenjs";
 import { NW, NH, fmt, sleep, uid, snap } from "./client/lib/util";
+import { consumePendingAiPrompt } from "./client/lib/ai-pending-prompt";
 import {
   API_BASE,
   apiFetch,
@@ -32,6 +33,10 @@ import {
 import { makeTfn } from "./client/i18n/makeTfn";
 import { StrategyShellSidebar, StrategyShellBg, type StrategyShellNav } from "./strategy-shell-sidebar";
 import { ReferenceLandingView } from "./reference-landing";
+import { GlowCard } from "./client/glow-card";
+import { FloatingAiAssistant } from "./client/floating-ai-assistant";
+import { SplashLoaderScreen } from "./client/splash-loader";
+import { GlassCalendar, dateToYMD } from "./client/glass-calendar";
 
 const TIERS={
   free:    {label:"Free",    price:"Бесплатно",  color:"#9088b0",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
@@ -56,6 +61,18 @@ const {createContext,useContext}=React;
 const LangCtx=createContext({lang:'ru',setLang:()=>{},t:(k,fb)=>fb||k});
 const useLang=()=>useContext(LangCtx);
 const useIsMobile=()=>{const[m,setM]=useState(()=>window.innerWidth<=640);useEffect(()=>{const h=()=>setM(window.innerWidth<=640);window.addEventListener("resize",h,{passive:true});return()=>window.removeEventListener("resize",h);},[]);return m;};
+const usePrefersReducedMotion=()=>{
+  const[reduced,setReduced]=useState(false);
+  useEffect(()=>{
+    if(typeof window==="undefined"||!window.matchMedia)return;
+    const mq=window.matchMedia("(prefers-reduced-motion: reduce)");
+    const fn=()=>setReduced(!!mq.matches);
+    fn();
+    mq.addEventListener("change",fn);
+    return()=>mq.removeEventListener("change",fn);
+  },[]);
+  return reduced;
+};
 
 // ── CustomSelect ──
 function CustomSelect({value,onChange,options,style={},disabled=false}){
@@ -84,7 +101,7 @@ function CustomSelect({value,onChange,options,style={},disabled=false}){
         <span style={{fontSize:12,color:"var(--text4)",marginLeft:4,transform:open?"rotate(180deg)":"none",transition:"transform .15s"}}>▼</span>
       </button>
       {open&&(
-        <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,minWidth:"100%",background:"var(--surface,#0d1829)",border:"1px solid var(--accent-1)",borderRadius:11,boxShadow:"var(--shadow,0 16px 48px rgba(0,0,0,.8))",zIndex:9999,overflow:"hidden",animation:"slideDown .12s ease"}}>
+        <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,minWidth:"100%",background:"var(--surface)",border:"1px solid var(--accent-1)",borderRadius:11,boxShadow:"var(--shadow,0 16px 48px rgba(0,0,0,.8))",zIndex:9999,overflow:"hidden",animation:"slideDown .12s ease"}}>
           {options.map(o=>{
             const isSel=o.value===value;
             return(
@@ -261,6 +278,13 @@ const AI_KNOWLEDGE=`ОТРАСЛИ И МЕТРИКИ (глубоко):
 • ICE/RICE: приоритизация идей (Impact, Confidence, Ease / Reach, Impact, Confidence, Effort)
 • North Star Metric: одна метрика, которая ведёт к успеху
 
+АКТУАЛЬНО (2025+):
+• Капитальная эффективность: runway, burn multiple, payback, «делать больше с меньшим» до ясного PMF
+• AI как со-пилот решений: проверяй факты, фиксируй допущения; не делегируй ответственность за решение модели
+• Качество решений: pre-mortem («что убьёт план»), second-order effects, сценарии downside/base/upside
+• Регуляторика и данные: GDPR-подобные ожидания, прозрачность AI в процессах, риски vendor lock-in у LLM
+• Геополитика и цепочки: альтернативные поставщики, локализация критичных сервисов
+
 РИСКИ: технологический, рыночный, операционный, финансовый, регуляторный, ключевой человек, конкурентный, execution risk, reputational, supply chain
 
 ПСИХОЛОГИЯ И ПРИНЯТИЕ РЕШЕНИЙ:
@@ -284,7 +308,8 @@ const AI_KNOWLEDGE=`ОТРАСЛИ И МЕТРИКИ (глубоко):
 const AI_STRICT_RULES=`КРИТИЧНО — соблюдай всегда:
 • ЗАПРЕЩЕНО: общие фразы ("важно понять", "следует обратить внимание"), мотивация без действия, советы без конкретики.
 • РАЗРЕШЕНО: только конкретные ДЕЙСТВИЯ — что именно сделать (кто, что, когда, как), пример действия, измеримый РЕЗУЛЬТАТ (число, срок, метрика).
-• Каждый совет = одно действие + как измерить результат. Без воды.`;
+• Каждый совет = одно действие + как измерить результат. Без воды.
+• Если рекомендация опирается на допущения — явно пометь «допущение: …» в одной короткой фразе.`;
 
 // ── AI tier configs (МАКСИМАЛЬНАЯ глубина: chain-of-thought, распознавание намерений, структура) ──
 const AI_TIER={
@@ -660,45 +685,81 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
   );
 }
 
+// ── Auth: общая форма (модалка или встроенная в welcome) ──
+function AuthFormContent({initialTab="login",onAuth,theme='dark',title,subtitle,variant="modal",titleId="auth-modal-title"}){
+  const{lang,setLang,t}=useLang();
+  const[tab,setTab]=useState(initialTab);
+  useEffect(()=>{setTab(initialTab);},[initialTab]);
+  const[email,setEmail]=useState(""),[pw,setPw]=useState(""),[name,setName]=useState(""),[err,setErr]=useState(""),[loading,setLoading]=useState(false);
+  async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
+  const inline=variant==="inline";
+  return(
+    <div className={inline?"sa-ws-auth-form":undefined}>
+      <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:inline?12:14}}>
+        <div className="tabs" role="tablist" aria-label={t("auth_tabs_aria","Вход или регистрация")}>
+          <button type="button" role="tab" aria-selected={tab==="login"} className={"tab"+(tab==="login"?" on":"")} onClick={()=>{setTab("login");setErr("");}}>{t("login","Войти")}</button>
+          <button type="button" role="tab" aria-selected={tab==="register"} className={"tab"+(tab==="register"?" on":"")} onClick={()=>{setTab("register");setErr("");}}>{t("register","Регистрация")}</button>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}} role="group" aria-label={t("select_language","Язык")}>
+          <div style={{display:"flex",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:22,padding:3,gap:1}}>
+            {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
+              <button key={code} type="button" aria-pressed={lang===code} className={"land-lang-btn"+(lang===code?" on":"")} onClick={()=>setLang(code)}>{label}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+      {inline?(
+        <div style={{textAlign:"center",marginBottom:14}}>
+          <div id={titleId} tabIndex={-1} className="modal-title" style={{fontSize:"clamp(17px,3.5vw,20px)",marginTop:0,marginBottom:subtitle?6:0,outline:"none"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
+          {subtitle&&<div className="modal-sub" style={{marginBottom:0}}>{subtitle}</div>}
+        </div>
+      ):(
+        <div style={{textAlign:"center",marginBottom:20}}>
+          <div className="modal-gem" style={{marginLeft:"auto",marginRight:"auto"}}><img src="/logo.png" alt="" width={28} height={28} style={{objectFit:"contain"}}/></div>
+          <div id={titleId} className="modal-title" style={{marginTop:14}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
+          {subtitle&&<div className="modal-sub">{subtitle}</div>}
+        </div>
+      )}
+      {tab==="register"&&<input className="modal-inp" placeholder={t("name","Имя")} value={name} onChange={e=>setName(e.target.value)} autoComplete="name"/>}
+      <input type="email" className="modal-inp" placeholder={t("email","Email")} value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete="email"/>
+      <input type="password" className="modal-inp" placeholder={t("password","Пароль")} value={pw} onChange={e=>setPw(e.target.value)} style={{marginBottom:err?8:4}} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete={tab==="login"?"current-password":"new-password"}/>
+      {err?<div className="modal-err" style={{marginBottom:10}}>{err}</div>:null}
+      <button type="button" className="modal-btn" onClick={submit} disabled={loading} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,opacity:loading?.65:1,cursor:loading?"wait":"pointer"}}>
+        {loading&&<span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.35)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite",flexShrink:0}}/>}
+        {tab==="login"?t("sign_in","Войти"):t("sign_up","Зарегистрироваться")}
+      </button>
+    </div>
+  );
+}
+
 // ── AuthModal (классы overlay/modal-box из strategy-reference / strategy-shell.css) ──
 function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitle}){
-  const{lang,setLang,t}=useLang();
-  const[tab,setTab]=useState(initialTab),[email,setEmail]=useState(""),[pw,setPw]=useState(""),[name,setName]=useState(""),[err,setErr]=useState(""),[loading,setLoading]=useState(false);
+  const{t}=useLang();
   const[closing,setClosing]=useState(false);
+  const boxRef=useRef<HTMLDivElement|null>(null);
+  const handleCloseRef=useRef<()=>void>(()=>{});
   const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
-  async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
+  handleCloseRef.current=handleClose;
+  useEffect(()=>{
+    const h=(e:KeyboardEvent)=>{if(e.key==="Escape"){e.preventDefault();handleCloseRef.current();}};
+    window.addEventListener("keydown",h);
+    return()=>window.removeEventListener("keydown",h);
+  },[]);
+  useEffect(()=>{
+    const root=boxRef.current;
+    if(!root)return;
+    const email=root.querySelector<HTMLInputElement>('input[type="email"]');
+    const closeBtn=root.querySelector<HTMLButtonElement>(".modal-close");
+    const target=email||closeBtn;
+    requestAnimationFrame(()=>target?.focus({preventScroll:true}));
+  },[]);
   const dk=theme==="dark"?"dk":"lt";
   return(
     <div className={`sa-strategy-ui ${dk} sa-modal-host`} data-theme={theme}>
       <div className={"overlay open"+(closing?" sa-overlay-fade-out":"")} style={{zIndex:1}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-        <div className={"modal-box"+(closing?" sa-modal-shrink-out":"")} style={{width:"min(440px,calc(100vw - 32px))",maxWidth:"100%",boxSizing:"border-box",maxHeight:"88vh",overflowY:"auto",position:"relative",paddingTop:26}} onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+        <div ref={boxRef} className={"modal-box"+(closing?" sa-modal-shrink-out":"")} style={{width:"min(440px,calc(100vw - 32px))",maxWidth:"100%",boxSizing:"border-box",maxHeight:"88vh",overflowY:"auto",position:"relative",paddingTop:26}} onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
           {onClose&&<button type="button" className="modal-close" onClick={handleClose} aria-label={t("close","Закрыть")}>×</button>}
-          <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:14}}>
-            <div className="tabs" role="tablist">
-              <button type="button" role="tab" className={"tab"+(tab==="login"?" on":"")} onClick={()=>{setTab("login");setErr("");}}>{t("login","Войти")}</button>
-              <button type="button" role="tab" className={"tab"+(tab==="register"?" on":"")} onClick={()=>{setTab("register");setErr("");}}>{t("register","Регистрация")}</button>
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <div style={{display:"flex",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:22,padding:3,gap:1}}>
-                {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
-                  <button key={code} type="button" className={"land-lang-btn"+(lang===code?" on":"")} onClick={()=>setLang(code)}>{label}</button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div style={{textAlign:"center",marginBottom:20}}>
-            <div className="modal-gem" style={{marginLeft:"auto",marginRight:"auto"}}><img src="/logo.png" alt="" width={28} height={28} style={{objectFit:"contain"}}/></div>
-            <div id="auth-modal-title" className="modal-title" style={{marginTop:14}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
-            {subtitle&&<div className="modal-sub">{subtitle}</div>}
-          </div>
-          {tab==="register"&&<input className="modal-inp" placeholder={t("name","Имя")} value={name} onChange={e=>setName(e.target.value)} autoComplete="name"/>}
-          <input type="email" className="modal-inp" placeholder={t("email","Email")} value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete="email"/>
-          <input type="password" className="modal-inp" placeholder={t("password","Пароль")} value={pw} onChange={e=>setPw(e.target.value)} style={{marginBottom:err?8:4}} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete={tab==="login"?"current-password":"new-password"}/>
-          {err?<div className="modal-err" style={{marginBottom:10}}>{err}</div>:null}
-          <button type="button" className="modal-btn" onClick={submit} disabled={loading} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,opacity:loading?.65:1,cursor:loading?"wait":"pointer"}}>
-            {loading&&<span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.35)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite",flexShrink:0}}/>}
-            {tab==="login"?t("sign_in","Войти"):t("sign_up","Зарегистрироваться")}
-          </button>
+          <AuthFormContent initialTab={initialTab} onAuth={onAuth} theme={theme} title={title} subtitle={subtitle} variant="modal"/>
         </div>
       </div>
     </div>
@@ -749,6 +810,7 @@ function FeatureValue({val}){
 
 function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",onSelect,onBack}){
   const{t}=useLang();
+  const isMobile=useIsMobile();
   const curTier=currentUser?.tier||"free";
   const[selected,setSelected]=useState(()=>{const idx=TIER_ORDER.indexOf(curTier);return TIER_ORDER[Math.min(idx+1,TIER_ORDER.length-1)]||"pro";});
   const[loading,setLoading]=useState(false);
@@ -768,14 +830,14 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",on
         </div>
         {!isNew&&onBack&&<button type="button" className="btn-g" onClick={onBack}>{t("back_btn","← Назад")}</button>}
       </div>
-      <div style={{position:"relative",zIndex:1,maxWidth:1300,width:"100%",margin:"0 auto",padding:"0 24px 80px",flex:1}}>
-        <div style={{textAlign:"center",padding:"40px 0 44px"}}>
-          <h1 style={{fontSize:52,fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.05,marginBottom:10,animation:"slideUp .4s .1s both"}}>
+      <div style={{position:"relative",zIndex:1,maxWidth:1300,width:"100%",margin:"0 auto",padding:isMobile?"0 16px 56px":"0 24px 80px",flex:1}}>
+        <div style={{textAlign:"center",padding:isMobile?"28px 0 24px":"40px 0 44px"}}>
+          <h1 style={{fontSize:isMobile?"clamp(26px,7vw,36px)":52,fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.05,marginBottom:10,animation:"slideUp .4s .1s both"}}>
             Выберите<br/>
             <span style={{background:`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}99,var(--accent-1))`,backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite"}}>свой тариф</span>
           </h1>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:14,marginBottom:36,alignItems:"stretch"}}>
+        <div style={{display:"grid",gridTemplateColumns:isMobile?"minmax(0,1fr)":"repeat(auto-fill,minmax(200px,1fr))",gap:14,marginBottom:36,alignItems:"stretch",maxWidth:isMobile?420:"none",marginLeft:isMobile?"auto":"",marginRight:isMobile?"auto":""}}>
           {TIER_ORDER.map((k,cardIdx)=>{
             const v=TIERS[k],m=TIER_MKT[k];
             const isSel=selected===k,isCurr=k===curTier,isLower=TIER_ORDER.indexOf(k)<curIdx&&!isCurr,isHov=hovered===k&&!isSel;
@@ -819,8 +881,8 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
   async function doReplace(){if(!replaceId)return;setLoading(true);await onReplace(replaceId);}
   const mapsAllowed=tierMapsCount!=null?tierMapsCount:1;
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(10px)",padding:16}}>
-      <div style={{width:"min(95vw,480px)",maxHeight:"90vh",overflowY:"auto",background:"var(--bg2)",border:"1px solid rgba(239,68,68,.3)",borderRadius:22,boxShadow:"0 40px 80px rgba(0,0,0,.85)"}}>
+    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(16px)",padding:16}}>
+      <div className="glass-panel" style={{width:"min(95vw,480px)",maxHeight:"90vh",overflowY:"auto",background:"var(--glass-panel-bg,var(--bg2))",border:"1px solid rgba(239,68,68,.35)",borderRadius:"var(--r-xl)",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.55)"}}>
         <div style={{padding:"22px 24px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:16,fontWeight:700,color:"var(--text)"}}>{t("map_limit","Лимит карт исчерпан")}</div>
           <div style={{fontSize:13,color:"var(--text3)",marginTop:4}}>На тарифе {tierLabel} разрешено карт: {mapsAllowed}</div>
@@ -845,9 +907,12 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
 function SavingScreen({theme='dark'}){
   const{t}=useLang();
   return(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:18}}>
-<div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite"}}>✦</div>
-      <div style={{fontSize:16,fontWeight:600,color:"var(--text)"}}>Сохраняю карту…</div>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:18,position:"relative",overflow:"hidden"}}>
+      <StrategyShellBg/>
+      <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:18}}>
+        <div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite",boxShadow:"0 8px 28px var(--accent-glow)"}}>✦</div>
+        <div style={{fontSize:16,fontWeight:600,color:"var(--text)"}}>{t("saving_map","Сохраняю карту")}</div>
+      </div>
     </div>
   );
 }
@@ -1054,7 +1119,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":isMobile?"":"modal-content-pop"}`} style={{position:"relative",width:isMobile?"100%":"min(96vw,980px)",height:isMobile?"90vh":680,minHeight:520,borderRadius:20,display:"flex",flexDirection:"column",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":"none",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
 
         {/* Header */}
-        <div style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)"}}>
+        <div className="sa-profile-header" style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)",position:"relative",overflow:"hidden"}}>
           <div style={{width:44,height:44,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"var(--accent-on-bg)",boxShadow:"0 6px 18px var(--accent-glow)"}}>{(user.name||user.email)[0].toUpperCase()}</div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>{user.name||t("user_word","Пользователь")}</div>
@@ -1069,9 +1134,9 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
         </div>
 
         {/* Tab bar */}
-        <div style={{display:"flex",gap:0,padding:"0 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--bg2)"}}>
+        <div className="sa-profile-tabs" style={{display:"flex",gap:4,padding:"8px 20px 0",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--bg2)"}}>
           {TABS.map(([k,icon,label])=>(
-            <button key={k} onClick={()=>{setTab(k);setMsg(null);}} style={{padding:"11px 14px",border:"none",background:"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13.5,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?`2px solid ${tier.color}`:"2px solid transparent",transition:"all .15s",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
+            <button key={k} type="button" className={"sa-profile-tab"+(tab===k?" on":"")} onClick={()=>{setTab(k);setMsg(null);}} style={{padding:"10px 14px",border:"none",background:tab===k?"var(--accent-soft)":"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13.5,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?`2px solid ${tier.color}`:"2px solid transparent",borderRadius:"10px 10px 0 0",transition:"all .15s",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
               <span style={{fontSize:13}}>{icon}</span>{label}
             </button>
           ))}
@@ -1268,6 +1333,11 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                   <div style={{fontSize:12,fontWeight:800,color:"var(--text4)",textTransform:"uppercase",letterSpacing:1,marginTop:14,marginBottom:10}}>{t("notifications_title","Уведомления")}</div>
                   <Toggle val={notifEmail} onChange={setNotifEmail} label={t("email_notifications","Email уведомления")} desc={t("notif_email_desc","Важные обновления на почту")}/>
                   <Toggle val={notifPush} onChange={setNotifPush} label={t("push_notifications","Push уведомления")} desc={t("notif_push_desc","Уведомления в браузере")}/>
+                  <div style={{fontSize:11.5,lineHeight:1.5,color:"var(--text5)",marginTop:8,padding:"10px 12px",borderRadius:11,border:"1px dashed var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.03)"}}>{t("notif_backend_note","Отправка писем и push на сервере появится после подключения уведомлений.")}</div>
+                  <div style={{fontSize:11.5,lineHeight:1.5,color:"var(--text4)",marginTop:12,padding:"10px 12px",borderRadius:11,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)"}}>
+                    <span style={{fontWeight:700,color:"var(--accent-2)"}}>{t("weekly_briefing","Еженедельный брифинг")}</span>
+                    {" — "}{t("weekly_briefing_settings_hint","откройте на странице «Мои проекты» или в меню карты.")}
+                  </div>
                 </div>
               </div>
 
@@ -2078,19 +2148,28 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   const endRef=useRef(null);
   const inpRef=useRef<HTMLInputElement>(null);
   const initRef=useRef(false);
+  useLayoutEffect(()=>{
+    const pending=consumePendingAiPrompt();
+    if(pending)setInp(pending);
+  },[]);
+  const panelHealth=useMemo(()=>{
+    const done=nodes.filter((n:any)=>n.status==="completed").length;
+    const h=nodes.length?Math.round((done/nodes.length)*100):0;
+    return{h,done};
+  },[nodes]);
 
   // Только при первом открытии — приветствие, если чат пуст. Чат НЕ очищается при смене tier или закрытии панели.
   useEffect(()=>{
     if(msgs.length>0)return;
     const greetings={
-      free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг. Быстрые подсказки ниже.",
-      starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",
-      pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",
-      team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",
-      enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves.",
+      free:t("ai_greet_free","Привет! Я AI-стратег: помогу выбрать следующий шаг и метрику. Чипы ниже — быстрый старт."),
+      starter:t("ai_greet_starter","Привет! Я ваш стратегический помощник: риски, маркетинг, продажи — в привязке к карте. Спросите или нажмите чип."),
+      pro:t("ai_greet_pro","Привет! Режим Pro: SWOT, Porter, OKR, CAC/LTV, MEDDIC. Дам диагноз → действия → риск → быструю победу."),
+      team:t("ai_greet_team","Добрый день. Партнёрский режим: GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты по вашей карте."),
+      enterprise:t("ai_greet_enterprise","Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Ищем non-obvious ходы и слепые зоны."),
     };
     if(!initRef.current){initRef.current=true;setMsgs([{role:"ai",text:greetings[tier]||greetings.free}]);}
-  },[tier]);
+  },[tier,t]);
 
   // Inject external messages (e.g. from autoConnect)
   useEffect(()=>{
@@ -2104,11 +2183,11 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   useEffect(()=>{if(!load)inpRef.current?.focus();},[load]);
 
   const quickByTier={
-    free:["Что добавить?","Главные риски?","Следующий шаг?","Не знаю с чего начать","Застрял — что делать?","Что не так?"],
-    starter:["Проанализируй карту","Найди риски","Предложи шаги","Маркетинг-совет","Продажи-совет","С чего начать?","Что не так?","Что упускаю?"],
-    pro:["Полный анализ","Узкие места","Риски и контрмеры","Приоритизируй","CAC/LTV оптимизация","Sales pipeline","С чего начать?","Что я упускаю?","Что не так?"],
-    team:["Стратегический аудит","Unit economics","GTM рекомендации","Конкурентный анализ","Точки масштабирования","Blue Ocean","С чего начать?","Non-obvious совет","Strategic blind spots"],
-    enterprise:["Executive audit","BCG анализ","OKR для карты","Blue Ocean","Due diligence","CMO/CRO угол","С чего начать?","Strategic blind spots","Non-obvious move"],
+    free:["Что добавить?","Главные риски?","Pre-mortem: что убьёт план?","Один эксперимент на неделю","Следующий шаг?","Застрял — что делать?","Что не так?"],
+    starter:["Проанализируй карту","Second-order эффекты","Найди риски","Предложи шаги","Маркетинг / продажи","С чего начать?","Что упускаю?","Что не так?"],
+    pro:["Полный анализ","Second-order effects","Узкие места","Риски и контрмеры","Приоритизируй","CAC/LTV и runway","Sales pipeline","Что я упускаю?","Pre-mortem"],
+    team:["Стратегический аудит","Unit economics","GTM рекомендации","Конкурентный анализ","Точки масштабирования","Blue Ocean","Non-obvious риск","Strategic blind spots","Капитальная эффективность"],
+    enterprise:["Executive audit","BCG / сценарии","OKR для карты","Due diligence угол","CMO/CRO угол","Reg / data риск","Strategic blind spots","Non-obvious move","Pre-mortem сценарий"],
   };
   const allQuick=quickByTier[tier]||quickByTier.free;
   const QUICK_SHOW=4;
@@ -2169,35 +2248,56 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     : (isMobile
         ? {position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}
         : {position:"absolute" as const,right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"});
+  const showCtxStrip=Boolean((mapName||"").trim()||(projectName||"").trim()||nodes.length>0);
   return(
-    <div className={`glass-panel ${embedded?"":"panel-slide"} ${exiting&&!embedded?"panel-slide-out":""}`.trim()} style={{...aiPanelStyle,background:"var(--glass-panel-bg)",backdropFilter:"blur(24px)"}}>
-      <div style={{display:"flex",alignItems:"center",gap:12,padding:"16px 18px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(12px)"}}>
-        <div style={{width:36,height:36,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0,border:"1px solid rgba(255,255,255,.2)"}}>◆</div>
+    <div className={`glass-panel sa-ai-panel ${embedded?"":"panel-slide"} ${exiting&&!embedded?"panel-slide-out":""}`.trim()} style={{...aiPanelStyle,background:"var(--glass-panel-bg)",backdropFilter:"blur(24px)"}}>
+      <div className="sa-ai-panel-header" style={{display:"flex",alignItems:"center",gap:12,padding:"16px 18px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(12px)",position:"relative"}}>
+        <div style={{width:36,height:36,borderRadius:10,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,boxShadow:"0 2px 12px var(--accent-glow)",flexShrink:0,border:"1px solid rgba(255,255,255,.2)"}}>✦</div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:14,fontWeight:900,color:"var(--text)",letterSpacing:"-0.02em"}}>{t("ai_consultant","AI Советник")}</div>
           <div style={{fontSize:11,color:"var(--accent-2)",fontWeight:600,marginTop:1}}>{tierCfg.badge} {tierCfg.label}</div>
         </div>
         <div style={{display:"flex",gap:6}}>
-          <button onClick={()=>{const g={free:"Привет! Я AI-советник по стратегии. Задайте вопрос — дам конкретный совет и следующий шаг.",starter:"Привет! Я ваш стратегический помощник. Анализирую карту, маркетинг, продажи. Укажу риски и предложу действия.",pro:"Привет! Я AI-советник Pro. SWOT, Porter, OKR, CAC/LTV, MEDDIC. Диагноз → рекомендация → риск → быстрая победа.",team:"Добрый день. Я стратегический партнёр (McKinsey-уровень). GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты.",enterprise:"Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Critical findings и non-obvious moves."};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"6px 10px",borderRadius:8,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:11,fontWeight:600}}>↻</button>
+          <button onClick={()=>{const g={free:t("ai_greet_free","Привет! Я AI-стратег: помогу выбрать следующий шаг и метрику. Чипы ниже — быстрый старт."),starter:t("ai_greet_starter","Привет! Я ваш стратегический помощник: риски, маркетинг, продажи — в привязке к карте. Спросите или нажмите чип."),pro:t("ai_greet_pro","Привет! Режим Pro: SWOT, Porter, OKR, CAC/LTV, MEDDIC. Дам диагноз → действия → риск → быструю победу."),team:t("ai_greet_team","Добрый день. Партнёрский режим: GTM, unit economics, Blue Ocean. Executive insight и топ-приоритеты по вашей карте."),enterprise:t("ai_greet_enterprise","Добрый день. Коллегиум C-level: стратегия, маркетинг, продажи, финансы. Ищем non-obvious ходы и слепые зоны.")};setMsgs([{role:"ai",text:g[tier]||g.free}]);}} title={t("clear_chat","Очистить чат")} style={{padding:"6px 10px",borderRadius:8,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:11,fontWeight:600}}>↻</button>
           {!embedded&&<button onClick={handleClose} style={{width:32,height:32,borderRadius:8,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>}
         </div>
       </div>
+      {showCtxStrip&&(
+        <div style={{padding:"12px 18px 10px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0}}>
+          <div className="sa-ai-panel-ctx">{t("ai_panel_context_lbl","Контекст")}</div>
+          <div className="sa-ai-panel-strip">
+            {(mapName||"").trim()?(
+              <span><span aria-hidden>📍</span>{(mapName||"").trim()}</span>
+            ):(projectName||"").trim()?(
+              <span><span aria-hidden>📁</span>{(projectName||"").trim()}</span>
+            ):null}
+            {nodes.length>0&&(
+              <>
+                <span aria-hidden>·</span>
+                <span><span className="sa-ai-hp">{panelHealth.h}%</span> {t("ai_health_short","Health")}</span>
+                <span aria-hidden>·</span>
+                <span>{nodes.length} {t("steps_label","шагов")}</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
       <div style={{padding:"12px 16px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"transparent"}}>
         <div style={{fontSize:10,fontWeight:700,color:"var(--text5)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>{t("ai_quick_questions","Быстрые вопросы")}</div>
-        <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {quick.map(q=>(
-            <button key={q} className="btn-interactive" onClick={()=>send(q)} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",color:"var(--text2)",cursor:"pointer",fontSize:11.5,fontWeight:600,transition:"all .2s"}}
+            <button key={q} className="btn-interactive sa-ai-chip" onClick={()=>send(q)} style={{padding:"8px 12px",borderRadius:999,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",color:"var(--text2)",cursor:"pointer",fontSize:11,fontWeight:600,transition:"all .2s"}}
               onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";e.currentTarget.style.transform="translateY(-1px)";}}
               onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="var(--glass-border-accent,var(--border))";e.currentTarget.style.color="var(--text2)";e.currentTarget.style.transform="";}}>{q}</button>
           ))}
           {allQuick.length>QUICK_SHOW&&(
-            <button onClick={()=>setShowMoreQuick(s=>!s)} style={{padding:"8px 12px",borderRadius:10,border:"1px dashed var(--border)",background:"transparent",color:"var(--text4)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
+            <button onClick={()=>setShowMoreQuick(s=>!s)} className="btn-interactive sa-ai-chip" style={{padding:"8px 12px",borderRadius:999,border:"1px dashed var(--border)",background:"transparent",color:"var(--text4)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
               {showMoreQuick?"▲ Свернуть":"+ Ещё…"}
             </button>
           )}
         </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"14px 18px",display:"flex",flexDirection:"column",gap:14,background:"linear-gradient(180deg,transparent 0%,rgba(var(--accent-rgb,91,107,192),.02) 100%)"}}>
+      <div className="sa-ai-msg-scroll" style={{flex:1,overflowY:"auto",padding:"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:10,alignItems:"flex-start",animation:"fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards"}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,marginTop:2,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div>}
@@ -2209,9 +2309,9 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
       </div>
       <div style={{padding:"16px 18px",borderTop:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(8px)",flexDirection:"column",display:"flex",gap:10}}>
         {aiFreeTier&&<div className="glass-card" style={{padding:"10px 14px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",color:"var(--text3)",fontSize:12}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</div>}
-        <div style={{display:"flex",gap:10}}>
-          <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,padding:"12px 16px",fontSize:13,background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",border:"1px solid var(--glass-border-accent,var(--input-border))",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"'Inter',system-ui,sans-serif",transition:"all .2s",opacity:aiFreeTier?.7:1}}/>
-          <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:44,height:44,borderRadius:12,border:"none",background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"rgba(255,255,255,.06)",color:!aiFreeTier&&inp.trim()&&!load?"#fff":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>
+        <div className="sa-ai-input-wrap" style={{opacity:aiFreeTier?.65:1,width:"100%"}}>
+          <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,minWidth:0,padding:"10px 4px 10px 0",fontSize:13,color:"var(--text)",outline:"none",fontFamily:"'Inter',system-ui,sans-serif",transition:"opacity .2s",opacity:aiFreeTier?.7:1}}/>
+          <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:44,height:44,borderRadius:12,border:"none",flexShrink:0,background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"rgba(255,255,255,.06)",color:!aiFreeTier&&inp.trim()&&!load?"#fff":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>
         </div>
       </div>
     </div>
@@ -2570,7 +2670,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
     const ctx=`Карта: ${mapName}. Всего шагов: ${nodes.length}. Выполнено: ${done.length}. Заблокировано: ${blocked.length}. Критичных незавершённых: ${critical.length}. Health score: ${health}%. Шаги: ${nodes.slice(0,10).map((n:any)=>`${n.title}(${n.status})`).join(", ")}`;
     try{
       const r=await callAI([{role:"user",content:`Дай еженедельный брифинг по стратегии. ${ctx}`}],
-        `Ты AI-советник. ГЛУБОКИЙ анализ: шаги, статусы, блокировки, дедлайны, health, связи — как «погоду». Читай между строк — что критично, но не очевидно. Брифинг: 1) что сделано 2) что заблокировано 3) главная рекомендация (КОНКРЕТНОЕ действие: что, зачем, как измерить). Учитывай зависимости. Non-obvious insight — что пользователь упускает? Без списков, 3-4 предложения.`,250);
+        `Ты AI-советник. ГЛУБОКИЙ анализ: шаги, статусы, блокировки, дедлайны, health, связи — как «погоду». Учитывай риски capital efficiency и second-order effects. Читай между строк — что критично, но не очевидно. Брифинг: 1) что сделано 2) что заблокировано 3) главная рекомендация (КОНКРЕТНОЕ действие: что, зачем, как измерить). Учитывай зависимости. Non-obvious insight — что пользователь упускает? Без списков, 3-4 предложения.`,250);
       setSummary(r);
     }catch(e:any){
       setSummary(errMsg);
@@ -2878,7 +2978,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
       const svg=svgRef.current;
       const svgClone=svg.cloneNode(true);
       const isDark=theme!=="light";
-      const bg=isDark?"#070b14":"#f4f6fb";
+      const bg=isDark?"#050410":"#ece9ff";
       const bgRect=document.createElementNS("http://www.w3.org/2000/svg","rect");
       bgRect.setAttribute("width","100%");bgRect.setAttribute("height","100%");bgRect.setAttribute("fill",bg);
       svgClone.insertBefore(bgRect,svgClone.firstChild);
@@ -3332,6 +3432,7 @@ ${ctx}
             <div className="tb-title-wrap">
               <span className="tb-title">{mapData?.name||t("shell_strategy_map","Карта стратегии")}</span>
               <span className="tb-sub">{project?.name||""}</span>
+              <span className="tb-flow">{t("workspace_flow_hint_map","Шаги и связи — контекст для сценариев, Gantt и AI.")}</span>
             </div>
           </div>
           <div className="tb-r">
@@ -3636,7 +3737,7 @@ ${ctx}
         )}
         {/* edge label editor */}
         {selEdge&&!selNode&&!readOnly&&(
-          <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"var(--surface,#0d1829)",border:"1px solid var(--glass-border-accent,var(--border))",borderRadius:12,boxShadow:"var(--shadow,0 16px 40px rgba(0,0,0,.7))",zIndex:40,animation:"slideUp .2s ease"}}>
+          <div style={{position:"absolute",bottom:16,left:"50%",transform:"translateX(-50%)",display:"flex",alignItems:"center",gap:8,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--glass-border-accent,var(--border))",borderRadius:12,boxShadow:"var(--shadow,0 16px 40px rgba(0,0,0,.7))",zIndex:40,animation:"slideUp .2s ease"}}>
             <span style={{fontSize:13,color:"var(--text4)",fontWeight:600}}>{t("edge_type","Тип связи:")}</span>
             <CustomSelect
               value={selEdge.type||"requires"}
@@ -3807,15 +3908,18 @@ ${ctx}
           showContentPlan={!!onOpenContentPlanHub}
           onContentPlan={onOpenContentPlanHub||undefined}
           showTrialBanner={(user?.tier||"free")==="free"}
+          onLogoClick={() => onShellGlobalNav?.("projects")}
           t={t}
         />
         <div className="sa-main" style={{flex:1,minWidth:0,minHeight:0,display:"flex",flexDirection:"column",overflow:"hidden"}}>{_mapMain}</div>
+        <FloatingAiAssistant t={t} variant="app" onOpenFullChat={() => setShowAI(true)} />
       </div>
     </div>
   ):(
     <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",height:"100vh",display:"flex",flexDirection:"column",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden",boxSizing:"border-box"}}>
       <StrategyShellBg/>
       <div style={{flex:1,minHeight:0,position:"relative",zIndex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>{_mapMain}</div>
+      <FloatingAiAssistant t={t} variant="app" onOpenFullChat={() => setShowAI(true)} />
     </div>
   );
 }
@@ -4000,7 +4104,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
       )}
       <div style={{flex:1,overflowY:"auto",padding:isMobile?16:28,position:"relative",zIndex:5}}>
         <div style={{maxWidth:"min(1240px,100%)",width:"100%",margin:"0 auto"}}>
-          <div className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1" style={{marginBottom:24,padding:isMobile?"18px 16px":"24px 28px",background:"linear-gradient(135deg,var(--accent-soft),transparent)"}}>
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1" style={{marginBottom:24}}>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
               <span className="sa-cp-hub-hero-ic" style={{width:44,height:44,borderRadius:14,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 4px 20px var(--accent-glow)"}}>✍️</span>
               <div style={{flex:1,minWidth:0}}>
@@ -4019,7 +4123,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
                 </div>
               </div>
             )}
-          </div>
+          </GlowCard>
           {loading?(
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:14}}>
               {[1,2,3].map(i=><div key={i} style={{height:130,borderRadius:16,background:"var(--surface)",animation:"pulse 1.5s ease infinite",border:"1px solid var(--border)"}}/>)}
@@ -4106,6 +4210,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
           <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={t("cp_hub_title","Контент-план")} mapName="" userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
         </AiHubModal>
       )}
+      <FloatingAiAssistant t={t} variant="app" onOpenFullChat={() => setShowAIHub(true)} />
     </div></div>
   );
 }
@@ -4200,7 +4305,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
             </div>
           </div>
         ):(
-          <div className="sa-page-reveal sa-pr-d1"><ContentPlanTab projectId={project.id} projectName={project.name||""} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/></div>
+          <div className="sa-page-reveal sa-pr-d1"><ContentPlanTab projectId={project.id} projectName={project.name||""} maps={maps} user={user} theme={theme} lang={lang} t={t} onChangeTier={onChangeTier}/></div>
         )}
       </div>
 
@@ -4255,6 +4360,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
           <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={project?.name||""} mapName={t("cp_doc_suffix","Контент-план")} userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
         </AiHubModal>
       )}
+      <FloatingAiAssistant t={t} variant="app" onOpenFullChat={() => setShowAIHub(true)} />
     </div></div>
   );
 }
@@ -4419,6 +4525,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             <div className="tb-title-wrap">
               <span className="tb-title">{t("your_projects","Мои проекты")}</span>
               <span className="tb-sub">{myCount}{tier.projects==="∞"?"":" / "+tier.projects} · {tier.label}</span>
+              <span className="tb-flow">{t("workspace_flow_hint_projects","Проект → карта → сценарии, таймлайн и AI — одна логика работы.")}</span>
             </div>
           </div>
           <div className="tb-r" style={{flexWrap:"wrap",justifyContent:"flex-end"}}>
@@ -4675,6 +4782,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           />
         </AiHubModal>
       )}
+      <FloatingAiAssistant t={t} variant="app" onOpenFullChat={() => setShowAIHub(true)} />
     </>
   );
   return shellUi?(
@@ -4700,6 +4808,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           showContentPlan={!!onOpenContentPlanHub}
           onContentPlan={onOpenContentPlanHub?()=>onOpenContentPlanHub():undefined}
           showTrialBanner={(user?.tier||"free")==="free"}
+          onLogoClick={() => { try { document.querySelector(".sa-main .scr")?.scrollTo({ top: 0, behavior: "smooth" }); } catch {} }}
           t={t}
         />
         <div className="sa-main" style={{flex:1,minWidth:0,minHeight:0,display:"flex",flexDirection:"column",overflow:"hidden"}}>{_projMain}</div>
@@ -4737,7 +4846,7 @@ const CONTENT_TYPES=[{id:"post",labelKey:"content_type_post"},{id:"story",labelK
 const CONTENT_CHANNELS=[{id:"blog",labelKey:"content_channel_blog"},{id:"instagram",labelKey:"content_channel_instagram"},{id:"telegram",labelKey:"content_channel_telegram"},{id:"vk",labelKey:"content_channel_vk"},{id:"youtube",labelKey:"content_channel_youtube"},{id:"email",labelKey:"content_channel_email"}];
 const CONTENT_STATUSES=[{id:"draft",labelKey:"content_status_draft"},{id:"scheduled",labelKey:"content_status_scheduled"},{id:"published",labelKey:"content_status_published"}];
 
-function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
+function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTier}:{projectId:string;projectName:string;maps:any[];user:any;theme:string;lang:string;t:(k:string,fb?:string)=>string;onChangeTier:(tier:string)=>void}){
   const [items,setItems]=useState<any[]>([]);
   const [loading,setLoading]=useState(true);
   const [editId,setEditId]=useState<string|null>(null);
@@ -4745,6 +4854,8 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
   const [viewMode,setViewMode]=useState<"calendar"|"map"|"list"|"tree">("calendar");
   const [aiSuggesting,setAiSuggesting]=useState(false);
   const [pendingDeleteId,setPendingDeleteId]=useState<string|null>(null);
+  const [cpCalendarDate,setCpCalendarDate]=useState(()=>new Date());
+  const [newItemPresetDate,setNewItemPresetDate]=useState<string>("");
   const isMobile=useIsMobile();
   const treePrefsKey=`sa_cp_tree_${projectId}`;
   const [treeExpandedAll,setTreeExpandedAll]=useState<Record<string,boolean>>({});
@@ -4761,6 +4872,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
   },[treePrefsKey,treeCollapsed]);
 
   useEffect(()=>{(async()=>{setLoading(true);const list=await getContentPlan(projectId);setItems(Array.isArray(list)?list:[]);setLoading(false);})();},[projectId]);
+  useEffect(()=>{if(editId===null)setNewItemPresetDate("");},[editId]);
 
   const allNodes=maps.flatMap((m:any)=>(m.nodes||[]).map((n:any)=>({...n,mapName:m.name})));
   const filtered=filterStatus==="all"?items:items.filter((x:any)=>x.status===filterStatus);
@@ -4815,6 +4927,11 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
     setAiSuggesting(false);
   }
 
+  function openNewPublication(presetDate=""){
+    setNewItemPresetDate(presetDate);
+    setEditId("new");
+  }
+
   const editingItem=editId?items.find((x:any)=>x.id===editId):null;
 
   function ContentMap({filtered,CHANNEL_LABEL,CONTENT_TYPES,CONTENT_STATUSES,setEditId,removeItem,t,isMobile}:any){
@@ -4848,79 +4965,81 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
     );
   }
 
-  function ContentCalendar({filtered,CHANNEL_LABEL,STATUS_LABEL,CONTENT_TYPES,CONTENT_CHANNELS,CONTENT_STATUSES,setEditId,removeItem,t,isMobile}:any){
-    const byDate:Record<string,any[]>= {};
-    filtered.forEach((it:any)=>{
-      const d=it.scheduledDate||"";
-      const key=d||"_nodate";
-      if(!byDate[key])byDate[key]=[];
-      byDate[key].push(it);
-    });
-    const dates=Object.keys(byDate).filter(k=>k!=="_nodate").sort();
-    const nodate=byDate["_nodate"]||[];
-    const fmtDate=(s:string)=>s?new Date(s+"T12:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"}):"";
+  function ContentCalendar({filtered,CHANNEL_LABEL,CONTENT_TYPES,CONTENT_STATUSES,setEditId,removeItem,t,isMobile,cpCalendarDate,setCpCalendarDate,openNewPublication,theme,lang}:any){
+    const loc=lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru-RU";
+    const selectedKey=dateToYMD(cpCalendarDate);
+    const forSelected=filtered.filter((it:any)=>(it.scheduledDate||"")===selectedKey);
+    const nodate=filtered.filter((it:any)=>!(it.scheduledDate||""));
+    const otherDates=[...new Set(filtered.map((it:any)=>it.scheduledDate).filter(Boolean))].filter((d:string)=>d!==selectedKey).sort();
+    const byDate:Record<string,any[]>={};
+    otherDates.forEach((d:string)=>{byDate[d]=filtered.filter((it:any)=>(it.scheduledDate||"")===d);});
+    const fmtDate=(s:string)=>s?new Date(s+"T12:00:00").toLocaleDateString(loc,{day:"numeric",month:"short",year:"numeric"}):"";
+    const fmtLong=(d:Date)=>d.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    function row(it:any){
+      return(
+        <div key={it.id} className="btn-interactive" role="button" tabIndex={0}
+          aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
+          style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",outline:"none"}}
+          onClick={()=>setEditId(it.id)}
+          onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
+          onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
+          onBlur={e=>{e.currentTarget.style.boxShadow="none";}}>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
+            <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
+              <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+              <span>·</span>
+              <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
+              {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
+            </div>
+          </div>
+          <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
+            {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
+          </div>
+          <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
+        </div>
+      );
+    }
     return(
-      <div style={{display:"flex",flexDirection:"column",gap:16}}>
-        {nodate.length>0&&(
+      <div style={{display:"flex",flexDirection:isMobile?"column":"row",gap:20,alignItems:"flex-start"}}>
+        <div style={{flexShrink:0,width:"100%",maxWidth:360}}>
+          <GlassCalendar
+            selectedDate={cpCalendarDate}
+            onDateSelect={(d:Date)=>setCpCalendarDate(d)}
+            lang={lang}
+            theme={theme==="dark"?"dark":"light"}
+            labels={{
+              weekly:t("cp_cal_weekly","Неделя"),
+              monthly:t("cp_cal_monthly","Месяц"),
+              addNote:t("cp_cal_add_note","Заметка…"),
+              newEvent:t("cp_cal_new_event","Событие"),
+            }}
+            onNewNote={()=>openNewPublication(dateToYMD(cpCalendarDate))}
+            onNewEvent={()=>openNewPublication(dateToYMD(cpCalendarDate))}
+          />
+        </div>
+        <div style={{flex:1,minWidth:0,width:"100%",display:"flex",flexDirection:"column",gap:16}}>
           <div className="glass-card" style={{padding:isMobile?"14px 14px":"18px 20px"}}>
-            <div style={{fontSize:13,fontWeight:800,color:"var(--text4)",marginBottom:12,textTransform:"uppercase",letterSpacing:.5}}>📋 {t("content_no_date","Без даты")}</div>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {nodate.map((it:any)=>(
-                <div key={it.id} className="btn-interactive" role="button" tabIndex={0}
-                  aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
-                  style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",outline:"none"}}
-                  onClick={()=>setEditId(it.id)}
-                  onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
-                  onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
-                  onBlur={e=>{e.currentTarget.style.boxShadow="none";}}>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
-                    <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
-                      <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
-                      <span>·</span>
-                      <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
-                      {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
-                    </div>
-                  </div>
-                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
-                    {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
-                  </div>
-                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
-                </div>
-              ))}
-            </div>
+            <div style={{fontSize:13,fontWeight:800,color:"var(--accent-1)",marginBottom:12}}>📅 {fmtLong(cpCalendarDate)}</div>
+            {forSelected.length===0?(
+              <div style={{fontSize:12.5,color:"var(--text5)",lineHeight:1.5}}>{t("cp_cal_empty_day","Нет публикаций на этот день")}</div>
+            ):(
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>{forSelected.map((it:any)=>row(it))}</div>
+            )}
           </div>
-        )}
-        {dates.map((d:string)=>(
-          <div key={d} className="glass-card" style={{padding:isMobile?"14px 14px":"18px 20px"}}>
-            <div style={{fontSize:13,fontWeight:800,color:"var(--accent-1)",marginBottom:12}}>📅 {fmtDate(d)}</div>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {byDate[d].map((it:any)=>(
-                <div key={it.id} className="btn-interactive" role="button" tabIndex={0}
-                  aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
-                  style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",outline:"none"}}
-                  onClick={()=>setEditId(it.id)}
-                  onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
-                  onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
-                  onBlur={e=>{e.currentTarget.style.boxShadow="none";}}>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
-                    <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
-                      <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
-                      <span>·</span>
-                      <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
-                      {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
-                    </div>
-                  </div>
-                  <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
-                    {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
-                  </div>
-                  <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
-                </div>
-              ))}
+          {nodate.length>0&&(
+            <div className="glass-card" style={{padding:isMobile?"14px 14px":"18px 20px"}}>
+              <div style={{fontSize:13,fontWeight:800,color:"var(--text4)",marginBottom:12,textTransform:"uppercase",letterSpacing:.5}}>📋 {t("content_no_date","Без даты")}</div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>{nodate.map((it:any)=>row(it))}</div>
             </div>
-          </div>
-        ))}
+          )}
+          {otherDates.map((d:string)=>(
+            <div key={d} className="glass-card" style={{padding:isMobile?"14px 14px":"18px 20px"}}>
+              <div style={{fontSize:13,fontWeight:800,color:"var(--accent-1)",marginBottom:12}}>📅 {fmtDate(d)}</div>
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>{(byDate[d]||[]).map((it:any)=>row(it))}</div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -4947,7 +5066,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
             <div style={{fontSize:13,fontWeight:800,color:"var(--text)"}}>🌳 {t("content_tree_title","Дерево контент‑плана")}</div>
             <div style={{fontSize:12,color:"var(--text4)",marginTop:2}}>{t("content_tree_hint","Проект → канал → статус → публикации. Нажмите на карточку, чтобы редактировать.")}</div>
           </div>
-          <button type="button" className="btn-interactive" onClick={()=>setEditId("new")} title={t("add_content_item_tip","Новая запись в плане")} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:12.5,fontWeight:800,whiteSpace:"nowrap",boxShadow:"0 2px 12px var(--accent-glow)"}}>
+          <button type="button" className="btn-interactive" onClick={()=>openNewPublication()} title={t("add_content_item_tip","Новая запись в плане")} style={{padding:"8px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:12.5,fontWeight:800,whiteSpace:"nowrap",boxShadow:"0 2px 12px var(--accent-glow)"}}>
             {t("add_content_item","+ Публикация")}
           </button>
         </div>
@@ -5058,7 +5177,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
                 {t("content_ai_suggest_need_steps","✨ AI: нужны шаги на карте")}
               </button>
             )}
-            <button type="button" className="btn-interactive" onClick={()=>setEditId("new")} title={t("add_content_item_tip","Новая запись в плане: пост, рассылка, видео…")} style={{padding:"8px 18px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
+            <button type="button" className="btn-interactive" onClick={()=>openNewPublication()} title={t("add_content_item_tip","Новая запись в плане: пост, рассылка, видео…")} style={{padding:"8px 18px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
           </div>
         </div>
       </div>
@@ -5088,11 +5207,11 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
           <div style={{fontSize:36,marginBottom:10}}>✍️</div>
           <div style={{fontSize:14,fontWeight:700,color:"var(--text3)",marginBottom:6}}>{t("content_plan_empty_title","Планируйте публикации")}</div>
           <div style={{fontSize:13,color:"var(--text5)",marginBottom:16,maxWidth:320,margin:"0 auto 16px",lineHeight:1.5}}>{t("content_plan_empty_desc","Добавьте посты, видео и рассылки. AI предложит идеи на основе шагов вашей стратегии.")}</div>
-          <button type="button" className="btn-interactive" onClick={()=>setEditId("new")} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
+          <button type="button" className="btn-interactive" onClick={()=>openNewPublication()} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("add_content_item","+ Публикация")}</button>
         </div>
       ):(
         viewMode==="calendar"
-          ? <ContentCalendar filtered={filtered} CHANNEL_LABEL={CHANNEL_LABEL} STATUS_LABEL={STATUS_LABEL} CONTENT_TYPES={CONTENT_TYPES} CONTENT_CHANNELS={CONTENT_CHANNELS} CONTENT_STATUSES={CONTENT_STATUSES} setEditId={setEditId} removeItem={removeItem} t={t} isMobile={isMobile}/>
+          ? <ContentCalendar filtered={filtered} CHANNEL_LABEL={CHANNEL_LABEL} CONTENT_TYPES={CONTENT_TYPES} CONTENT_STATUSES={CONTENT_STATUSES} setEditId={setEditId} removeItem={removeItem} t={t} isMobile={isMobile} cpCalendarDate={cpCalendarDate} setCpCalendarDate={setCpCalendarDate} openNewPublication={openNewPublication} theme={theme} lang={lang}/>
           : viewMode==="map"
           ? <ContentMap filtered={filtered} CHANNEL_LABEL={CHANNEL_LABEL} CONTENT_TYPES={CONTENT_TYPES} CONTENT_STATUSES={CONTENT_STATUSES} setEditId={setEditId} removeItem={removeItem} t={t} isMobile={isMobile}/>
           : viewMode==="tree"
@@ -5125,7 +5244,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,t,onChangeTier}){
       {(editId==="new"||editingItem)&&(
         <ContentPlanItemModal
           formKey={editId||""}
-          item={editingItem||{title:"",type:"post",channel:"blog",status:"draft",brief:"",scheduledDate:"",strategyStepId:"",strategyStepTitle:""}}
+          item={editingItem||{title:"",type:"post",channel:"blog",status:"draft",brief:"",scheduledDate:newItemPresetDate||"",strategyStepId:"",strategyStepTitle:""}}
           allNodes={allNodes}
           t={t}
           theme={theme}
@@ -5547,7 +5666,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                     <button type="button" className="btn-interactive" onClick={()=>onOpenContentPlanProject(proj,maps)} style={{padding:"10px 18px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",boxShadow:"0 2px 14px var(--accent-glow)",flexShrink:0}}>{t("cp_open_workspace","Открыть раздел →")}</button>
                   </div>
                 )}
-                <ContentPlanTab projectId={proj.id} projectName={proj.name||"Проект"} maps={maps} user={user} theme={theme} t={t} onChangeTier={onChangeTier}/>
+                <ContentPlanTab projectId={proj.id} projectName={proj.name||"Проект"} maps={maps} user={user} theme={theme} lang={lang} t={t} onChangeTier={onChangeTier}/>
               </>
             )}
           </div>
@@ -6517,35 +6636,26 @@ function SplashScreen({onDone,theme,authReady=false}){
   const readyRef=useRef(false);
   useEffect(()=>{
     if(pct>=100&&authReady&&!readyRef.current){readyRef.current=true;setTimeout(onDone,150);}
-  },[pct,authReady]);
+  },[pct,authReady,onDone]);
   useEffect(()=>{
-    const tid=setTimeout(()=>{
-      let p=0;
-      const iv=setInterval(()=>{
-        p+=Math.random()*18+8;
-        setPct(Math.min(100,Math.round(p)));
-      },100);
-      return()=>clearInterval(iv);
-    },300);
-    return()=>clearTimeout(tid);
+    let iv: ReturnType<typeof setInterval> | null = null;
+    const tid = setTimeout(() => {
+      let p = 0;
+      iv = setInterval(() => {
+        p += Math.random() * 18 + 8;
+        setPct(Math.min(100, Math.round(p)));
+      }, 100);
+    }, 300);
+    return () => {
+      clearTimeout(tid);
+      if (iv) clearInterval(iv);
+    };
   },[]);
-  const dk=theme==="dark"?"dk":"lt";
+  const th=theme==="dark"?"dark":"light";
+  const letterText=t("splash_loader_text","Loading");
+  const brandLabel=t("splash_brand_name","Strategy AI");
   return(
-    <div className={"sa-strategy-ui "+dk} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
-      <StrategyShellBg/>
-      <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
-        <div style={{animation:"float 3s ease infinite",marginBottom:28}}>
-          <div className="modal-gem" style={{width:88,height:88,borderRadius:20,marginBottom:0}}>
-            <img src="/logo.png" alt="Strategy AI" style={{width:44,height:44,objectFit:"contain"}}/>
-          </div>
-        </div>
-        <div className="modal-title" style={{fontSize:"clamp(26px,5vw,34px)",marginBottom:8,animation:"slideUp .5s ease"}}>Strategy AI</div>
-        <div style={{width:240,maxWidth:"min(260px,72vw)",height:3,borderRadius:2,background:"var(--inp)",border:".5px solid var(--b1)",overflow:"hidden"}}>
-          <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,var(--acc),var(--acc2))",borderRadius:2,transition:"width .1s linear"}}/>
-        </div>
-        <div className="modal-sub" style={{marginTop:12,marginBottom:0,fontWeight:600}}>{pct < 100 ? t("loading",t("loading_short","Загрузка…")) : "✓"}</div>
-      </div>
-    </div>
+    <SplashLoaderScreen theme={th} text={letterText} size={180} progressPct={pct} brandLabel={brandLabel} />
   );
 }
 // ── SparklesCanvas ──
@@ -6599,49 +6709,107 @@ function LandingPage({onGetStarted,onSignIn,onToggleTheme,theme,lang="ru",onChan
         onSignIn={onSignIn}
         onGetStarted={onGetStarted}
       />
+      <FloatingAiAssistant t={t} onCta={onGetStarted} />
       <CookieConsent/>
     </>
   );
 }
+// ── Welcome: ротация строк «что входит бесплатно» (одна строка, смена по таймеру) ──
+function WelcomeFeatureRotator({items,reducedMotion}:{items:[string,string][];reducedMotion?:boolean}){
+  const[idx,setIdx]=useState(0);
+  useEffect(()=>{
+    if(reducedMotion||items.length<2)return;
+    const id=setInterval(()=>setIdx(i=>(i+1)%items.length),2600);
+    return()=>clearInterval(id);
+  },[items.length,reducedMotion]);
+  const row=items[idx]||items[0];
+  return(
+    <div className={"sa-ws-feat-rotator"+(reducedMotion?" sa-ws-feat-rotator--static":"")} aria-live={reducedMotion?"off":"polite"} aria-atomic="true">
+      <div key={reducedMotion?0:idx} className="sa-ws-feat-rotator-inner">
+        <span className="sa-ws-feat-rotator-ic" aria-hidden>{row[0]}</span>
+        <span className="sa-ws-feat-rotator-txt">{row[1]}</span>
+      </div>
+    </div>
+  );
+}
+
 // ── WelcomeScreen — тот же визуальный язык, что лендинг / strategy-reference ──
-function WelcomeScreen({onLogin,onRegister,onBack,theme}){
+function WelcomeScreen({onAuth,onBack,theme}){
   const{t}=useLang();
   const isMobile=useIsMobile();
+  const reducedMotion=usePrefersReducedMotion();
   const cosmic=theme==="dark";
+  const[phase,setPhase]=useState<"cta"|"form">("cta");
+  const[authTab,setAuthTab]=useState<"login"|"register">("login");
+  const ctaRef=useRef<HTMLDivElement|null>(null);
+  const welcomeFirstPaint=useRef(true);
+  const featItems=useMemo(()=>[
+    ["🗺️",t("ws_feat1","Карты целей")],
+    ["✨",t("ws_feat2","AI советник")],
+    ["🗓️",t("ws_feat3","Gantt-план")],
+    ["⬇️",t("ws_feat4","PNG/JSON экспорт")],
+    ["✍️",t("ws_feat5","1 сценарий")],
+    ["📌",t("ws_feat6","До 5 шагов")],
+  ] as [string,string][],[t]);
+  useEffect(()=>{
+    if(phase!=="form")return;
+    const id=window.setTimeout(()=>{
+      const el=document.getElementById("welcome-auth-title");
+      (el as HTMLElement|undefined)?.focus?.({preventScroll:true});
+    },100);
+    return()=>clearTimeout(id);
+  },[phase]);
+  useEffect(()=>{
+    if(phase!=="form")return;
+    const h=(e:KeyboardEvent)=>{if(e.key==="Escape"){e.preventDefault();setPhase("cta");}};
+    window.addEventListener("keydown",h);
+    return()=>window.removeEventListener("keydown",h);
+  },[phase]);
+  useEffect(()=>{
+    if(phase!=="cta")return;
+    if(welcomeFirstPaint.current){welcomeFirstPaint.current=false;return;}
+    const id=window.setTimeout(()=>ctaRef.current?.querySelector<HTMLButtonElement>("button")?.focus({preventScroll:true}),60);
+    return()=>clearTimeout(id);
+  },[phase]);
   return(
     <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
       <StrategyShellBg/>
       {cosmic&&(
-        <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}}>
+        <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}} aria-hidden>
           <SparklesCanvas density={150} speed={0.38} minSz={0.3} maxSz={1.05} color="#ffffff" style={{opacity:.32}}/>
         </div>
       )}
-      <button type="button" className="btn-g" onClick={onBack} style={{position:"absolute",top:20,left:20,zIndex:2}}>{t("back_btn","← Назад")}</button>
-      <div style={{width:"100%",maxWidth:460,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
+      <button type="button" className="btn-g" onClick={onBack} style={{position:"absolute",top:20,left:20,zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
+      <main id="sa-welcome-main" style={{width:"100%",maxWidth:460,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         <div style={{textAlign:"center",marginBottom:22}}>
-          <img src="/logo.png" alt="Strategy AI" style={{width:72,height:72,objectFit:"contain",margin:"0 auto 14px",display:"block",animation:"float 3s ease infinite"}}/>
-          <div className="modal-title" style={{fontSize:"clamp(22px,4vw,28px)",marginBottom:8}}>Strategy AI</div>
-          <div className="modal-sub" style={{marginBottom:0}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</div>
+          <img src="/logo.png" alt="" width={72} height={72} style={{objectFit:"contain",margin:"0 auto 14px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
+          <h1 id="welcome-brand-title" className="modal-title" style={{fontSize:"clamp(22px,4vw,28px)",marginBottom:8,fontWeight:800}}>Strategy AI</h1>
+          <p className="modal-sub" style={{marginBottom:0}}>{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
         </div>
-        <div className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
-          <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:22}}>
-            <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={onRegister}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
-            <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={onLogin}>{t("ws_login_btn","Уже есть аккаунт — Войти →")}</button>
-          </div>
-          <div className="modal-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
-          <div className="sa-ws-feat-grid" style={{marginTop:18}}>
-            {[["🗺",t("ws_feat1","Карты целей")],["✦",t("ws_feat2","AI советник")],["📅",t("ws_feat3","Gantt-план")],["⬇",t("ws_feat4","PNG/JSON экспорт")],["⎇",t("ws_feat5","1 сценарий")],["📌",t("ws_feat6","До 5 шагов")]].map(([ic,lbl])=>(
-              <div key={lbl} className="sa-ws-feat">
-                <span className="sf-ic" aria-hidden>{ic}</span>
-                <span className="sf-txt">{lbl}</span>
+        <div role="region" aria-labelledby="welcome-brand-title" className="sa-ws-card-region">
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
+            {phase==="cta"&&(
+              <div ref={ctaRef} className="sa-ws-cta-block" style={{display:"flex",flexDirection:"column",gap:12,marginBottom:16}}>
+                <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setAuthTab("register");setPhase("form");}}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
+                <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setAuthTab("login");setPhase("form");}}>{t("ws_login_btn","Уже есть аккаунт — Войти →")}</button>
               </div>
-            ))}
-          </div>
+            )}
+            {phase==="form"&&(
+              <button type="button" className="sa-ws-auth-back" style={{marginBottom:14}} onClick={()=>setPhase("cta")}>{t("ws_back_choice","← К кнопкам")}</button>
+            )}
+            <div className="modal-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
+            <WelcomeFeatureRotator items={featItems} reducedMotion={reducedMotion}/>
+            {phase==="form"&&(
+              <div className="sa-ws-auth-form-wrap sa-ws-phase-enter">
+                <AuthFormContent initialTab={authTab} onAuth={onAuth} theme={theme} variant="inline" titleId="welcome-auth-title"/>
+              </div>
+            )}
+          </GlowCard>
         </div>
-        <div className="modal-sub" style={{textAlign:"center",marginTop:18,marginBottom:0,fontSize:12}}>
+        <p className="modal-sub" style={{textAlign:"center",marginTop:18,marginBottom:0,fontSize:12}}>
           {t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
-        </div>
-      </div>
+        </p>
+      </main>
     </div>
   );
 }
@@ -7022,8 +7190,7 @@ export default function App(){
         )}
         {screen==="welcome"&&(
           <div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}>
-            <WelcomeScreen theme={theme} onBack={()=>setScreen("landing")} onLogin={()=>{setAuthTab("login");setShowAuth(true);}} onRegister={()=>{setAuthTab("register");setShowAuth(true);}}/>
-            {showAuth&&<AuthModal initialTab={authTab} theme={theme} onClose={()=>setShowAuth(false)} onAuth={handleAuth}/>}
+            <WelcomeScreen theme={theme} onBack={()=>setScreen("landing")} onAuth={handleAuth}/>
           </div>
         )}
         {screen==="projects"&&user&&(

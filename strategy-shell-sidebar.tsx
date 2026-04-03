@@ -33,6 +33,7 @@ export function StrategyShellSidebar({
   showContentPlan,
   onContentPlan,
   showTrialBanner,
+  onLogoClick,
   t,
 }: {
   theme: string;
@@ -54,13 +55,22 @@ export function StrategyShellSidebar({
   showContentPlan?: boolean;
   onContentPlan?: () => void;
   showTrialBanner?: boolean;
+  /** Клик по бренду в шапке сайдбара (например «домой» → проекты) */
+  onLogoClick?: () => void;
   t: TFn;
 }){
   void _tierColor;
   const initial = (userName || userEmail || "?").trim().split(/\s+/).map(s => s[0]).join("").slice(0, 2).toUpperCase();
   return(
     <aside className="sa-sb">
-      <div className="sb-logo">
+      <div
+        className={"sb-logo"+(onLogoClick?" sb-logo--click":"")}
+        onClick={onLogoClick}
+        onKeyDown={e=>{if(onLogoClick&&(e.key==="Enter"||e.key===" ")){e.preventDefault();onLogoClick();}}}
+        role={onLogoClick?"button":undefined}
+        tabIndex={onLogoClick?0:undefined}
+        aria-label={onLogoClick? t("shell_logo_home","Перейти к проектам"):undefined}
+      >
         <div className="sb-gem">SA</div>
         <span className="sb-name">Strategy AI</span>
         <div className="tpill" onClick={onToggleTheme} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onToggleTheme();}} aria-label={t("toggle_theme", "Тема")}>
