@@ -1185,6 +1185,7 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
 .sa-ws-auth-back:hover{background:var(--card2);color:var(--t2);border-color:var(--bh)}
 .sa-ws-auth-form .modal-inp{margin-bottom:10px}
 .sa-ws-auth-form .modal-btn{margin-top:2px}
+.sa-ws-contact-form textarea{margin-bottom:0}
 .sa-ws-auth-form-wrap{border-top:.5px solid var(--b1);padding-top:16px;margin-top:14px}
 .sa-ws-phase-enter{animation:sa-ws-phase-in .38s cubic-bezier(.22,1,.36,1) both}
 .sa-ws-cta-block{animation:sa-ws-phase-in .26s cubic-bezier(.22,1,.36,1) both}

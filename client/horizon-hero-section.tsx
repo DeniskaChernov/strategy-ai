@@ -496,7 +496,8 @@ export function HorizonHeroSection({
           </div>
         )}
 
-        <div className="sa-horizon-ui sa-strategy-ui">
+        {/* без sa-strategy-ui: у него solid --bg и появляется «столб» по центру поверх WebGL */}
+        <div className="sa-horizon-ui">
           <div ref={menuRef} className="sa-horizon-side" style={{ visibility: reduced || webglOk ? "visible" : "hidden" }}>
             <div className="sa-horizon-side-track" aria-hidden>
               {sideLetters.map((ch, i) => (
