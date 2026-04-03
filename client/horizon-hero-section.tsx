@@ -4,9 +4,6 @@
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import gsap from "gsap";
 
 type TFn = (key: string, fallback?: string) => string;
@@ -15,11 +12,11 @@ type ThreeStore = {
   scene: THREE.Scene | null;
   camera: THREE.PerspectiveCamera | null;
   renderer: THREE.WebGLRenderer | null;
-  composer: EffectComposer | null;
   stars: THREE.Points[];
   nebula: THREE.Mesh | null;
   mountains: THREE.Mesh[];
   atmosphere: THREE.Mesh | null;
+  sky: THREE.Mesh | null;
   animationId: number | null;
   targetCameraX: number;
   targetCameraY: number;
@@ -32,11 +29,11 @@ function createThreeStore(): ThreeStore {
     scene: null,
     camera: null,
     renderer: null,
-    composer: null,
     stars: [],
     nebula: null,
     mountains: [],
     atmosphere: null,
+    sky: null,
     animationId: null,
     targetCameraX: 0,
     targetCameraY: 28,
@@ -149,22 +146,60 @@ export function HorizonHeroSection({
 
     const init = (): void => {
       store.scene = new THREE.Scene();
-      store.scene.fog = new THREE.FogExp2(theme === "dark" ? 0x030208 : 0xe8e4f5, 0.00022);
 
       store.camera = new THREE.PerspectiveCamera(72, w() / h(), 0.1, 2500);
       store.camera.position.set(0, smoothCam.current.y, smoothCam.current.z);
 
-      store.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      store.renderer.setClearColor(0x030208, 0);
+      store.renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        premultipliedAlpha: false,
+      });
+      store.renderer.setClearColor(0x000000, 0);
       store.renderer.setSize(w(), h());
       store.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       store.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      store.renderer.toneMappingExposure = theme === "dark" ? 0.55 : 0.45;
+      store.renderer.toneMappingExposure = theme === "dark" ? 0.52 : 0.48;
+      store.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-      store.composer = new EffectComposer(store.renderer);
-      store.composer.addPass(new RenderPass(store.scene, store.camera));
-      const bloom = new UnrealBloomPass(new THREE.Vector2(w(), h()), 0.55, 0.35, 0.88);
-      store.composer.addPass(bloom);
+      /* Небесная сфера: заполняет кадр градиентом (без «чёрной колонки» от fog/composer) */
+      const skyGeo = new THREE.SphereGeometry(2000, 48, 48);
+      const topC = new THREE.Color(theme === "dark" ? 0x18102c : 0xe4dcff);
+      const botC = new THREE.Color(theme === "dark" ? 0x05030e : 0xf0ecff);
+      const skyMat = new THREE.ShaderMaterial({
+        uniforms: {
+          topColor: { value: topC },
+          bottomColor: { value: botC },
+          horizonGlow: { value: new THREE.Color(theme === "dark" ? 0x3a1a6e : 0xc4b0ff) },
+        },
+        vertexShader: `
+          varying vec3 vDir;
+          void main() {
+            vDir = normalize(position);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }`,
+        fragmentShader: `
+          varying vec3 vDir;
+          uniform vec3 topColor;
+          uniform vec3 bottomColor;
+          uniform vec3 horizonGlow;
+          void main() {
+            float t = vDir.y * 0.5 + 0.5;
+            vec3 col = mix(bottomColor, topColor, t);
+            float h = 1.0 - abs(vDir.y);
+            col += horizonGlow * h * h * 0.12;
+            gl_FragColor = vec4(col, 1.0);
+          }`,
+        side: THREE.BackSide,
+        depthWrite: false,
+        depthTest: true,
+      });
+      const sky = new THREE.Mesh(skyGeo, skyMat);
+      sky.frustumCulled = false;
+      sky.renderOrder = -500;
+      store.scene.add(sky);
+      store.sky = sky;
 
       const starCount = 3200;
       for (let layer = 0; layer < 2; layer++) {
@@ -335,20 +370,19 @@ export function HorizonHeroSection({
       setWebglOk(true);
     }
 
-    if (!store.renderer || !store.composer) {
+    if (!store.renderer) {
       return () => {
         threeRefs.current = createThreeStore();
       };
     }
 
     const onResize = () => {
-      if (!store.camera || !store.renderer || !store.composer) return;
+      if (!store.camera || !store.renderer) return;
       const ww = w();
       const hh = h();
       store.camera.aspect = ww / hh;
       store.camera.updateProjectionMatrix();
       store.renderer.setSize(ww, hh);
-      store.composer.setSize(ww, hh);
     };
     window.addEventListener("resize", onResize);
 
@@ -382,8 +416,8 @@ export function HorizonHeroSection({
         );
         store.camera.lookAt(0, 12, -620);
       }
-      if (store.composer && store.renderer && store.scene && store.camera) {
-        store.composer.render();
+      if (store.renderer && store.scene && store.camera) {
+        store.renderer.render(store.scene, store.camera);
       }
     };
     animate();
@@ -407,6 +441,10 @@ export function HorizonHeroSection({
       if (store.atmosphere) {
         store.atmosphere.geometry.dispose();
         (store.atmosphere.material as THREE.Material).dispose();
+      }
+      if (store.sky) {
+        store.sky.geometry.dispose();
+        (store.sky.material as THREE.Material).dispose();
       }
       store.renderer?.dispose();
       threeRefs.current = createThreeStore();
