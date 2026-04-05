@@ -807,7 +807,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     calc(var(--x,0)*1px) calc(var(--y,0)*1px),
     hsl(var(--hue) calc(var(--saturation,100)*1%) calc(var(--lightness,50)*1%) / var(--border-spot-opacity,.85)),transparent 100%
   );
-  filter:brightness(1.35);
+  filter:brightness(2);
 }
 [data-glow].glow-card::after{
   background-image:radial-gradient(
