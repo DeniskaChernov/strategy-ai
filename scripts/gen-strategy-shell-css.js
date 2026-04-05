@@ -249,5 +249,15 @@ const appOverrides = `
 }
 `;
 const out = path.join(root, "client", "strategy-shell.css");
+if (fs.existsSync(out)) {
+  const prev = fs.readFileSync(out, "utf8");
+  if (prev.includes("sa-welcome-retro") && process.env.FORCE_GEN !== "1") {
+    console.error(
+      "gen-strategy-shell-css: отмена: client/strategy-shell.css содержит ручной блок Welcome Win95 (sa-welcome-retro). " +
+        "Полная перезапись удалит его. Сохраните фрагмент из git или запустите с FORCE_GEN=1."
+    );
+    process.exit(1);
+  }
+}
 fs.writeFileSync(out, css + appOverrides, "utf8");
 console.log("wrote", out, "(" + Math.round((css + appOverrides).length / 1024) + " KB)");
