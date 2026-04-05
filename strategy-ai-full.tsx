@@ -613,7 +613,7 @@ function Toast({msg,type="info",onClose,action,onAction}){
       if(pct<=0){
         closingRef.current=true;
         setClosing(true);
-        setTimeout(()=>onCloseRef.current(),260);
+        setTimeout(()=>onCloseRef.current?.(),260);
         return;
       }
       rafId=requestAnimationFrame(tick);
@@ -625,7 +625,7 @@ function Toast({msg,type="info",onClose,action,onAction}){
     if(closingRef.current)return;
     closingRef.current=true;
     setClosing(true);
-    setTimeout(()=>onClose(),260);
+    setTimeout(()=>onClose?.(),260);
   }
   const C={info:"var(--accent-1)",error:"#f04458",success:"#12c482",warn:"#f09428"};
   const icons={error:"⚠",success:"✓",warn:"⚡",info:"ℹ"};
@@ -660,8 +660,8 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
   const onConfirmRef=useRef(onConfirm);
   onCancelRef.current=onCancel;
   onConfirmRef.current=onConfirm;
-  const handleCancel=()=>{if(closing)return;setClosing(true);setTimeout(()=>onCancelRef.current(),220);};
-  const handleConfirm=()=>{if(closing)return;setClosing(true);setTimeout(()=>onConfirmRef.current(),220);};
+  const handleCancel=()=>{if(closing)return;setClosing(true);setTimeout(()=>onCancelRef.current?.(),220);};
+  const handleConfirm=()=>{if(closing)return;setClosing(true);setTimeout(()=>onConfirmRef.current?.(),220);};
   useEffect(()=>{
     const h=(e:KeyboardEvent)=>{if(e.key==="Escape")handleCancel();if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))handleConfirm();};
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
@@ -1121,7 +1121,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
 
         {/* Header */}
         <div className="sa-profile-header" style={{display:"flex",alignItems:"center",gap:14,padding:"18px 24px",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--surface)",position:"relative",overflow:"hidden"}}>
-          <div style={{width:44,height:44,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"var(--accent-on-bg)",boxShadow:"0 6px 18px var(--accent-glow)"}}>{(user.name||user.email)[0].toUpperCase()}</div>
+          <div style={{width:44,height:44,borderRadius:"50%",background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:900,color:"var(--accent-on-bg)",boxShadow:"0 6px 18px var(--accent-glow)"}}>{(user.name||user.email||"?")[0].toUpperCase()}</div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>{user.name||t("user_word","Пользователь")}</div>
             <div style={{fontSize:13,color:"var(--text4)",marginTop:1}}>{user.email}</div>
@@ -4092,7 +4092,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
           </button>
           {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
           <button type="button" className="btn-g" onClick={onProfile} style={{height:32,padding:"0 12px",gap:8,display:"inline-flex",alignItems:"center",maxWidth:isMobile?44:220}}>
-            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</span>
+            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email||"?")[0].toUpperCase()}</span>
             {!isMobile&&<><span style={{fontSize:12,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase"}}>{tier.label}</span></>}
           </button>
           <button type="button" className="btn-g" onClick={onLogout} style={{height:32,fontSize:11.5,color:"var(--red)"}}>{t("logout","Выйти")}</button>
@@ -4283,7 +4283,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
           </button>
           {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
           <button type="button" className="btn-g" onClick={onProfile} style={{height:32,padding:"0 12px",gap:8,display:"inline-flex",alignItems:"center",maxWidth:isMobile?40:200}}>
-            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</span>
+            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email||"?")[0].toUpperCase()}</span>
             {!isMobile&&<><span style={{fontSize:12,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase"}}>{tier.label}</span></>}
           </button>
           <button type="button" className="btn-g" onClick={onLogout} style={{height:32,fontSize:11.5,color:"var(--red)"}}>{t("logout","Выйти")}</button>
@@ -4513,7 +4513,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           </button>
           {API_BASE&&<NotifBell unread={notifUnread} onClick={()=>setShowNotifs(true)} className="btn-ic"/>}
           <button type="button" className="btn-g" onClick={onProfile} style={{height:32,padding:"0 12px",gap:8,display:"inline-flex",alignItems:"center",maxWidth:isMobile?44:220}}>
-            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email)[0].toUpperCase()}</span>
+            <span style={{width:22,height:22,borderRadius:"50%",background:"linear-gradient(135deg,var(--acc),var(--acc2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,color:"#fff",flexShrink:0}}>{(user.name||user.email||"?")[0].toUpperCase()}</span>
             {!isMobile&&<><span style={{fontSize:12,fontWeight:600,color:"var(--t1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{user.name||user.email.split("@")[0]}</span><span style={{fontSize:10,fontWeight:700,color:"var(--t3)",textTransform:"uppercase"}}>{tier.label}</span></>}
           </button>
           <button type="button" className="btn-g" onClick={onLogout} style={{height:32,fontSize:11.5,color:"var(--red)"}}>{t("logout","Выйти")}</button>
