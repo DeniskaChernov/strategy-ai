@@ -116,7 +116,6 @@ export function ReferenceLandingView({
       <StrategyShellBg/>
       <LandingStarsCanvas theme={theme} />
       <AnimatedLandingNav
-        scrollRootRef={rootRef}
         t={t}
         lang={lang}
         onChangeLang={onChangeLang}

@@ -270,9 +270,6 @@ body:has(.sa-ref-landing) .screen-wrap{
 .sa-ref-landing .sa-animated-nav-pill{
   position:relative;
 }
-.sa-ref-landing .sa-animated-nav-links--disabled{
-  pointer-events:none;
-}
 .sa-ref-landing .sa-animated-nav-link{
   background:transparent;
   border:none;
