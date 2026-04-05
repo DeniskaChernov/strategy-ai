@@ -136,17 +136,29 @@ export function AnimatedLandingNav({
     { id: "land-faq", label: t("nav_faq", "FAQ") },
   ];
 
+  const wrapPos = isExpanded
+    ? {
+        left: "50%" as const,
+        right: "auto" as const,
+        transform: "translateX(-50%)",
+        maxWidth: "min(96vw, 1100px)",
+      }
+    : {
+        left: "auto" as const,
+        right: "max(16px, env(safe-area-inset-right))",
+        transform: "none",
+        maxWidth: "none",
+      };
+
   return (
     <div
       className="sa-animated-nav-wrap"
       style={{
         position: "fixed",
-        top: 24,
-        left: "50%",
-        transform: "translateX(-50%)",
+        top: "max(24px, env(safe-area-inset-top))",
         zIndex: 600,
-        maxWidth: "min(96vw, 1100px)",
         width: "auto",
+        ...wrapPos,
       }}
     >
       <motion.nav
@@ -184,6 +196,7 @@ export function AnimatedLandingNav({
             paddingLeft: 16,
             paddingRight: 8,
             color: "var(--acc)",
+            pointerEvents: isExpanded ? "auto" : "none",
           }}
         >
           <Compass aria-hidden size={22} strokeWidth={2} />
@@ -198,6 +211,7 @@ export function AnimatedLandingNav({
             gap: "clamp(6px, 1.5vw, 16px)",
             paddingRight: 12,
             flexWrap: "wrap",
+            pointerEvents: isExpanded ? "auto" : "none",
           }}
         >
           {navItems.map((item) => (
@@ -226,6 +240,7 @@ export function AnimatedLandingNav({
             borderLeft: "0.5px solid var(--b0)",
             paddingLeft: 12,
             flexShrink: 0,
+            pointerEvents: isExpanded ? "auto" : "none",
           }}
         >
           <div
@@ -276,6 +291,7 @@ export function AnimatedLandingNav({
           </button>
         </motion.div>
 
+        {/* В свёрнутом виде перехватываем клики (иначе они проходят к tpill/кнопкам под opacity:0) */}
         <div
           style={{
             position: "absolute",
@@ -283,8 +299,17 @@ export function AnimatedLandingNav({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            pointerEvents: "none",
+            pointerEvents: isExpanded ? "none" : "auto",
+            zIndex: 3,
           }}
+          onClick={(e) => {
+            if (!isExpanded) {
+              e.stopPropagation();
+              expandedRef.current = true;
+              setExpanded(true);
+            }
+          }}
+          aria-hidden={isExpanded}
         >
           <motion.div variants={collapsedIconVariants} animate={isExpanded ? "expanded" : "collapsed"}>
             <Menu aria-hidden size={22} strokeWidth={2} style={{ color: "var(--t1)" }} />
