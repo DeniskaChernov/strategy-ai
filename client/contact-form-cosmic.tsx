@@ -55,46 +55,64 @@ function SubmitArrow() {
   );
 }
 
-const inpRow: React.CSSProperties = {
+/** Как в Prebuilt UI: фиксированная высота строки, pill-бордер, focus ring indigo. */
+const inpRow = (focused: boolean): React.CSSProperties => ({
   display: "flex",
   alignItems: "center",
   gap: 10,
   width: "100%",
+  height: 40,
+  minHeight: 40,
+  boxSizing: "border-box",
   background: "var(--inp)",
-  border: "0.5px solid var(--b1)",
+  border: "1px solid var(--b1)",
   borderRadius: 999,
-  padding: "0 14px 0 12px",
-  marginBottom: 14,
+  padding: "0 12px",
+  marginBottom: 16,
   transition: "border-color .18s, box-shadow .18s",
-};
+  overflow: "hidden",
+  boxShadow: focused ? "0 0 0 2px color-mix(in srgb, var(--acc) 45%, transparent)" : undefined,
+  borderColor: focused ? "color-mix(in srgb, var(--acc) 55%, var(--b1))" : undefined,
+});
 
 const inpBare: React.CSSProperties = {
   flex: 1,
   minWidth: 0,
+  height: "100%",
   background: "transparent",
   border: "none",
   outline: "none",
-  padding: "11px 0",
-  fontSize: 13,
+  padding: "0 8px",
+  fontSize: 14,
   color: "var(--t1)",
   fontFamily: "inherit",
 };
 
-const textareaStyle: React.CSSProperties = {
+const textareaStyle = (focused: boolean): React.CSSProperties => ({
   width: "100%",
   marginTop: 8,
   marginBottom: 4,
-  padding: "12px 14px",
-  minHeight: 100,
+  padding: "10px 12px",
+  minHeight: 96,
   resize: "none" as const,
   background: "var(--inp)",
-  border: "0.5px solid var(--b1)",
-  borderRadius: 14,
-  fontSize: 13,
+  border: "1px solid var(--b1)",
+  borderRadius: 10,
+  fontSize: 14,
   color: "var(--t1)",
   fontFamily: "inherit",
   outline: "none",
   transition: "border-color .18s, box-shadow .18s",
+  boxShadow: focused ? "0 0 0 2px color-mix(in srgb, var(--acc) 45%, transparent)" : undefined,
+  borderColor: focused ? "color-mix(in srgb, var(--acc) 55%, var(--b1))" : undefined,
+});
+
+const fieldLbl: React.CSSProperties = {
+  display: "block",
+  fontSize: 14,
+  fontWeight: 500,
+  color: "var(--t1)",
+  marginBottom: 8,
 };
 
 type ContactFormCosmicProps = {
@@ -142,51 +160,49 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
   const pid = fieldIdPrefix;
 
   return (
-    <div className="sa-ws-contact-form sa-ws-auth-form">
-      <div style={{ textAlign: "center", marginBottom: 14 }}>
+    <div className="sa-ws-contact-form sa-ws-auth-form" style={{ maxWidth: 384, width: "100%", margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: 0 }}>
         <p
           style={{
             display: "inline-block",
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: 600,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            padding: "6px 14px",
+            padding: "6px 12px",
             borderRadius: 999,
-            background: "linear-gradient(135deg, rgba(104,54,245,.25), rgba(160,80,255,.18))",
-            color: "#c4b5fd",
-            border: "0.5px solid rgba(139,92,246,.35)",
-            marginBottom: 12,
+            background: "color-mix(in srgb, var(--acc) 18%, var(--bg))",
+            color: "var(--acc)",
+            marginBottom: 0,
           }}
         >
           {t("contact_badge", "Связаться с нами")}
         </p>
-        <h2 id={titleId} tabIndex={-1} className="modal-title" style={{ fontSize: "clamp(18px, 4vw, 22px)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 8 }}>
+        <h2
+          id={titleId}
+          tabIndex={-1}
+          className="modal-title"
+          style={{
+            fontSize: "clamp(28px, 6vw, 36px)",
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            margin: "16px 0",
+            lineHeight: 1.15,
+          }}
+        >
           {t("contact_title", "Давайте на связи")}
         </h2>
-        <p style={{ fontSize: 13, color: "var(--t3)", lineHeight: 1.55, margin: 0 }}>
+        <p style={{ fontSize: 14, color: "var(--t3)", lineHeight: 1.55, margin: "0 0 40px" }}>
           {t("contact_or_write", "Или напишите на")}{" "}
-          <a href="mailto:hello@strategy.ai" style={{ color: "var(--acc)", fontWeight: 600, textDecoration: "none" }}>
+          <a href="mailto:hello@strategy.ai" style={{ color: "var(--acc)", fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 3 }}>
             hello@strategy.ai
           </a>
         </p>
       </div>
 
-      <div className="modal-divider" style={{ margin: "8px 0 14px" }}>
-        <span>{t("contact_divider", "форма обратной связи")}</span>
-      </div>
-
       <form onSubmit={handleSubmit}>
-        <label className="modal-lbl" htmlFor={`${pid}-name`}>
-          {t("name", "Имя")}
+        <label htmlFor={`${pid}-name`} style={{ ...fieldLbl, marginTop: 0 }}>
+          {t("contact_label_fullname", "Полное имя")}
         </label>
-        <div
-          style={{
-            ...inpRow,
-            borderColor: rowFocus("name") ? "rgba(104,54,245,.5)" : undefined,
-            boxShadow: rowFocus("name") ? "0 0 0 3px rgba(104,54,245,.12)" : undefined,
-          }}
-        >
+        <div style={inpRow(rowFocus("name"))}>
           <FieldIconUser />
           <input
             id={`${pid}-name`}
@@ -201,16 +217,10 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
           />
         </div>
 
-        <label className="modal-lbl" htmlFor={`${pid}-email`}>
-          {t("email", "Email")}
+        <label htmlFor={`${pid}-email`} style={{ ...fieldLbl, marginTop: 16 }}>
+          {t("contact_label_email", "Email")}
         </label>
-        <div
-          style={{
-            ...inpRow,
-            borderColor: rowFocus("email") ? "rgba(104,54,245,.5)" : undefined,
-            boxShadow: rowFocus("email") ? "0 0 0 3px rgba(104,54,245,.12)" : undefined,
-          }}
-        >
+        <div style={inpRow(rowFocus("email"))}>
           <FieldIconMail />
           <input
             id={`${pid}-email`}
@@ -218,14 +228,14 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
             type="email"
             autoComplete="email"
             required
-            placeholder="you@company.com"
+            placeholder={t("contact_placeholder_email", "you@company.com")}
             style={inpBare}
             onFocus={() => setFocus("email")}
             onBlur={() => setFocus(null)}
           />
         </div>
 
-        <label className="modal-lbl" htmlFor={`${pid}-message`}>
+        <label htmlFor={`${pid}-message`} style={{ ...fieldLbl, marginTop: 16 }}>
           {t("contact_label_message", "Сообщение")}
         </label>
         <textarea
@@ -234,11 +244,7 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
           rows={4}
           required
           placeholder={t("contact_placeholder_msg", "Кратко опишите запрос")}
-          style={{
-            ...textareaStyle,
-            borderColor: focus === "message" ? "rgba(104,54,245,.5)" : undefined,
-            boxShadow: focus === "message" ? "0 0 0 3px rgba(104,54,245,.12)" : undefined,
-          }}
+          style={textareaStyle(focus === "message")}
           onFocus={() => setFocus("message")}
           onBlur={() => setFocus(null)}
         />
@@ -252,7 +258,8 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            marginTop: 10,
+            marginTop: 20,
+            borderRadius: 9999,
             cursor: loading ? "wait" : "pointer",
             opacity: loading ? 0.65 : 1,
             boxShadow: "0 6px 24px rgba(104,54,245,.5), 0 0 40px rgba(139,92,246,.25)",
@@ -354,16 +361,10 @@ export default function ContactFormCosmic({ eyebrow = "Напишите нам �
             <span>форма обратной связи</span>
           </div>
 
-          <label className="modal-lbl" htmlFor="contact-name-page">
+          <label htmlFor="contact-name-page" style={{ ...fieldLbl, marginTop: 0 }}>
             Имя
           </label>
-          <div
-            style={{
-              ...inpRow,
-              borderColor: rowFocus("name") ? "rgba(104,54,245,.5)" : undefined,
-              boxShadow: rowFocus("name") ? "0 0 0 3px rgba(104,54,245,.12)" : undefined,
-            }}
-          >
+          <div style={inpRow(rowFocus("name"))}>
             <FieldIconUser />
             <input
               id="contact-name-page"
@@ -378,16 +379,10 @@ export default function ContactFormCosmic({ eyebrow = "Напишите нам �
             />
           </div>
 
-          <label className="modal-lbl" htmlFor="contact-email-page">
+          <label className="modal-lbl" htmlFor="contact-email-page" style={{ ...fieldLbl, marginTop: 16 }}>
             Email
           </label>
-          <div
-            style={{
-              ...inpRow,
-              borderColor: rowFocus("email") ? "rgba(104,54,245,.5)" : undefined,
-              boxShadow: rowFocus("email") ? "0 0 0 3px rgba(104,54,245,.12)" : undefined,
-            }}
-          >
+          <div style={inpRow(rowFocus("email"))}>
             <FieldIconMail />
             <input
               id="contact-email-page"
@@ -402,7 +397,7 @@ export default function ContactFormCosmic({ eyebrow = "Напишите нам �
             />
           </div>
 
-          <label className="modal-lbl" htmlFor="contact-message-page">
+          <label className="modal-lbl" htmlFor="contact-message-page" style={{ ...fieldLbl, marginTop: 16 }}>
             Сообщение
           </label>
           <textarea
@@ -411,11 +406,7 @@ export default function ContactFormCosmic({ eyebrow = "Напишите нам �
             rows={4}
             required
             placeholder="Кратко опишите запрос"
-            style={{
-              ...textareaStyle,
-              borderColor: focus === "message" ? "rgba(104,54,245,.5)" : undefined,
-              boxShadow: focus === "message" ? "0 0 0 3px rgba(104,54,245,.12)" : undefined,
-            }}
+            style={textareaStyle(focus === "message")}
             onFocus={() => setFocus("message")}
             onBlur={() => setFocus(null)}
           />
@@ -429,7 +420,8 @@ export default function ContactFormCosmic({ eyebrow = "Напишите нам �
               alignItems: "center",
               justifyContent: "center",
               gap: 8,
-              marginTop: 10,
+              marginTop: 20,
+              borderRadius: 9999,
               cursor: loading ? "wait" : "pointer",
               opacity: loading ? 0.65 : 1,
               boxShadow: "0 6px 24px rgba(104,54,245,.5), 0 0 40px rgba(139,92,246,.25)",
