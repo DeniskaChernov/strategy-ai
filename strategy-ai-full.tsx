@@ -34,7 +34,6 @@ import { makeTfn } from "./client/i18n/makeTfn";
 import { StrategyShellSidebar, StrategyShellBg, type StrategyShellNav } from "./strategy-shell-sidebar";
 import { ReferenceLandingView } from "./reference-landing";
 import { GlowCard } from "./client/glow-card";
-import { ContactFormEmbedded } from "./client/contact-form-cosmic";
 import { FloatingAiAssistant } from "./client/floating-ai-assistant";
 import { SplashLoaderScreen } from "./client/splash-loader";
 import { GlassCalendar, dateToYMD } from "./client/glass-calendar";
@@ -6741,7 +6740,6 @@ function WelcomeScreen({onAuth,onBack,theme}){
   const cosmic=theme==="dark";
   const[phase,setPhase]=useState<"cta"|"form">("cta");
   const[authTab,setAuthTab]=useState<"login"|"register">("login");
-  const[welcomeForm,setWelcomeForm]=useState<"auth"|"contact">("auth");
   const ctaRef=useRef<HTMLDivElement|null>(null);
   const welcomeFirstPaint=useRef(true);
   const featItems=useMemo(()=>[
@@ -6755,15 +6753,11 @@ function WelcomeScreen({onAuth,onBack,theme}){
   useEffect(()=>{
     if(phase!=="form")return;
     const id=window.setTimeout(()=>{
-      if(welcomeForm==="contact"){
-        document.getElementById("welcome-contact-name")?.focus?.({preventScroll:true});
-      }else{
-        const el=document.getElementById("welcome-auth-title");
-        (el as HTMLElement|undefined)?.focus?.({preventScroll:true});
-      }
+      const el=document.getElementById("welcome-auth-title");
+      (el as HTMLElement|undefined)?.focus?.({preventScroll:true});
     },100);
     return()=>clearTimeout(id);
-  },[phase,welcomeForm]);
+  },[phase]);
   useEffect(()=>{
     if(phase!=="form")return;
     const h=(e:KeyboardEvent)=>{if(e.key==="Escape"){e.preventDefault();setPhase("cta");}};
@@ -6786,57 +6780,34 @@ function WelcomeScreen({onAuth,onBack,theme}){
       )}
       <button type="button" className="btn-g sa-welcome-topbar-back" onClick={onBack} style={{position:"fixed",top:"max(20px, env(safe-area-inset-top))",left:"max(20px, env(safe-area-inset-left))",zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
       <div className="sa-welcome-body">
-      <main id="sa-welcome-main" className={"sa-welcome-main"+(phase==="form"&&welcomeForm==="contact"?" sa-welcome-main--contact-fit":"")} style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
+      <main id="sa-welcome-main" className="sa-welcome-main" style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         <div className="sa-welcome-header">
           <img src="/logo.png" alt="" width={80} height={80} className="sa-welcome-logo" style={{objectFit:"contain",margin:"0 auto 16px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
           <h1 id="welcome-brand-title" className="modal-title sa-welcome-brand">{t("app_name","Strategy AI")}</h1>
-          <p className="modal-sub sa-welcome-tagline">{phase==="form"&&welcomeForm==="contact"?t("ws_subtitle_contact","Напишите нам — ответим в рабочие часы"):t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
+          <p className="modal-sub sa-welcome-tagline">{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
         </div>
         <div role="region" aria-labelledby="welcome-brand-title" className="sa-ws-card-region">
-          <GlowCard panelVariant glowColor="accent" customSize width="100%" className={"sa-ref-panel sa-ws-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1"+(phase==="form"&&welcomeForm==="contact"?" sa-ws-panel--contact-fit":"")}>
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ws-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
             {phase==="cta"&&(
               <div ref={ctaRef} className="sa-ws-cta-block" style={{display:"flex",flexDirection:"column",gap:14,marginBottom:16}}>
-                <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("auth");setAuthTab("register");setPhase("form");}}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
-                <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("auth");setAuthTab("login");setPhase("form");}}>{t("ws_login_btn","Уже есть аккаунт — Войти →")}</button>
-                <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("contact");setPhase("form");}}>{t("ws_contact_btn","Связаться с нами →")}</button>
+                <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setAuthTab("register");setPhase("form");}}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
+                <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setAuthTab("login");setPhase("form");}}>{t("ws_login_btn","Уже есть аккаунт — Войти →")}</button>
               </div>
             )}
             {phase==="form"&&(
-              <button type="button" className="sa-ws-auth-back" onClick={()=>{setPhase("cta");setWelcomeForm("auth");}}>{t("ws_back_choice","← К кнопкам")}</button>
+              <button type="button" className="sa-ws-auth-back" onClick={()=>{setPhase("cta");}}>{t("ws_back_choice","← К кнопкам")}</button>
             )}
             <div className="modal-divider sa-ws-welcome-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
-            {!(phase==="form"&&welcomeForm==="contact")&&(
-              <WelcomeFeatureRotator items={featItems} reducedMotion={reducedMotion}/>
-            )}
+            <WelcomeFeatureRotator items={featItems} reducedMotion={reducedMotion}/>
             {phase==="form"&&(
               <div className="sa-ws-auth-form-wrap sa-ws-phase-enter">
-                <div className="sa-ws-form-mode-row">
-                  <div className="tabs sa-ws-seg-tabs" role="tablist" aria-label={t("ws_form_mode_aria","Вход или форма связи")}>
-                    <button type="button" role="tab" aria-selected={welcomeForm==="auth"} className={"tab"+(welcomeForm==="auth"?" on":"")} onClick={()=>setWelcomeForm("auth")}>{t("ws_tab_account","Аккаунт")}</button>
-                    <button type="button" role="tab" aria-selected={welcomeForm==="contact"} className={"tab"+(welcomeForm==="contact"?" on":"")} onClick={()=>setWelcomeForm("contact")}>{t("ws_tab_contact","Связаться")}</button>
-                  </div>
-                </div>
-                {welcomeForm==="auth"?(
-                  <AuthFormContent initialTab={authTab} onAuth={onAuth} theme={theme} variant="inline" titleId="welcome-auth-title"/>
-                ):(
-                  <ContactFormEmbedded
-                    t={t}
-                    compact
-                    titleId="welcome-contact-title"
-                    fieldIdPrefix="welcome-contact"
-                    onSubmit={(data)=>{
-                      const subj=encodeURIComponent(`Strategy AI — ${data.name}`);
-                      const body=encodeURIComponent(`${data.message}\n\n— ${data.name}, ${data.email}`);
-                      window.location.href=`mailto:hello@strategy.ai?subject=${subj}&body=${body}`;
-                    }}
-                  />
-                )}
+                <AuthFormContent initialTab={authTab} onAuth={onAuth} theme={theme} variant="inline" titleId="welcome-auth-title"/>
               </div>
             )}
           </GlowCard>
         </div>
         <p className="modal-sub sa-welcome-footer-terms">
-          {phase==="form"&&welcomeForm==="contact"?t("ws_contact_terms","Нажимая «Отправить», вы соглашаетесь с обработкой данных для ответа на обращение."):t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
+          {t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
         </p>
       </main>
       </div>
