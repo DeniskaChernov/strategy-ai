@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StrategyShellBg } from "./strategy-shell-sidebar";
 import { LandingStarsCanvas } from "./client/landing-stars-canvas";
 import { AnimatedLandingNav } from "./client/animated-landing-nav";
+import { GlowCard } from "./client/glow-card";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -130,69 +131,78 @@ export function ReferenceLandingView({
         <div className="land-nav-spacer"/>
 
         <div className="hero" id="hero-section">
-          <h1
-            className="hero-h1"
-            dangerouslySetInnerHTML={{
-              __html: t(
-                "ref_hero_h1_html",
-                "Стратегия,<br/><span class=\"grad-text\">которая думает с вами</span>"
-              ),
-            }}
-          />
-          <p className="hero-sub">
-            {t(
-              "ref_hero_sub",
-              "Визуальные карты целей и инициатив, сценарии «что если», таймлайн и AI-советник — в одном рабочем пространстве."
-            )}
-          </p>
-          <div className="hero-btns">
-            <button type="button" className="btn-p lg" onClick={onGetStarted}>
-              {t("hero_cta", "Начать бесплатно — без карты")}
-            </button>
-            <button type="button" className="btn-g lg" onClick={() => scrollToId("land-mockup")}>
-              {t("ref_demo", "Смотреть интерфейс ↗")}
-            </button>
-          </div>
-          <div
-            style={{
-              marginTop: 18,
-              fontSize: 11.5,
-              color: "var(--t3)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 16,
-              flexWrap: "wrap",
-            }}
+          <GlowCard
+            panelVariant
+            glowColor="accent"
+            customSize
+            width="100%"
+            className="sa-land-hero-glow sr sr-up in"
+            style={{ display: "block", padding: "28px 22px 24px", maxWidth: 820, margin: "0 auto", boxSizing: "border-box" }}
           >
-            <span>{t("trust_1", "✓ Бесплатный тариф")}</span>
-            <span>{t("trust_2", "✓ Без карты")}</span>
-            <span>{t("trust_3", "✓ Старт за пару минут")}</span>
-            <span>{t("trust_4", "✓ Отмена в любой момент")}</span>
-          </div>
+            <h1
+              className="hero-h1"
+              dangerouslySetInnerHTML={{
+                __html: t(
+                  "ref_hero_h1_html",
+                  "Стратегия,<br/><span class=\"grad-text\">которая думает с вами</span>"
+                ),
+              }}
+            />
+            <p className="hero-sub">
+              {t(
+                "ref_hero_sub",
+                "Визуальные карты целей и инициатив, сценарии «что если», таймлайн и AI-советник — в одном рабочем пространстве."
+              )}
+            </p>
+            <div className="hero-btns">
+              <button type="button" className="btn-p lg" onClick={onGetStarted}>
+                {t("hero_cta", "Начать бесплатно — без карты")}
+              </button>
+              <button type="button" className="btn-g lg" onClick={() => scrollToId("land-mockup")}>
+                {t("ref_demo", "Смотреть интерфейс ↗")}
+              </button>
+            </div>
+            <div
+              style={{
+                marginTop: 18,
+                fontSize: 11.5,
+                color: "var(--t3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 16,
+                flexWrap: "wrap",
+              }}
+            >
+              <span>{t("trust_1", "✓ Бесплатный тариф")}</span>
+              <span>{t("trust_2", "✓ Без карты")}</span>
+              <span>{t("trust_3", "✓ Старт за пару минут")}</span>
+              <span>{t("trust_4", "✓ Отмена в любой момент")}</span>
+            </div>
+          </GlowCard>
         </div>
 
         <div className="land-stats stagger" id="land-stats-section" style={{ marginBottom: 64 }}>
-          <div className="stat-item sr sr-up in">
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="stat-item sr sr-up in" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20, margin: 0 }}>
             <div className="stat-val" style={{ color: "var(--acc)" }}>2,400+</div>
             <div className="stat-lbl">{t("ref_stat_teams", "Команд")}</div>
-          </div>
-          <div className="stat-item sr sr-up in">
+          </GlowCard>
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="stat-item sr sr-up in" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20, margin: 0 }}>
             <div className="stat-val" style={{ color: "var(--green)" }}>18K+</div>
             <div className="stat-lbl">{t("ref_stat_maps", "Карт стратегии")}</div>
-          </div>
-          <div className="stat-item sr sr-up in">
+          </GlowCard>
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="stat-item sr sr-up in" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20, margin: 0 }}>
             <div className="stat-val" style={{ color: "var(--amber)" }}>94%</div>
             <div className="stat-lbl">{t("ref_stat_sat", "Удовлетворённость")}</div>
-          </div>
-          <div className="stat-item sr sr-up in">
+          </GlowCard>
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="stat-item sr sr-up in" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20, margin: 0 }}>
             <div className="stat-val">4.9 ⭐</div>
             <div className="stat-lbl">Product Hunt</div>
-          </div>
+          </GlowCard>
         </div>
 
         <div className="mockup-wrap sr sr-scale in" id="land-mockup">
-          <div className="mockup-glow"/>
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-land-mockup-glow" style={{ display: "block", padding: 0, overflow: "visible", marginBottom: 0 }}>
           <div className="mockup-frame">
             <div className="mockup-bar">
               <div className="mkbar-dot" style={{ background: "#f04458" }}/>
@@ -221,6 +231,7 @@ export function ReferenceLandingView({
               </div>
             </div>
           </div>
+          </GlowCard>
         </div>
 
         <div id="land-features">
@@ -229,12 +240,19 @@ export function ReferenceLandingView({
           <div className="land-section-sub sr sr-up in">{t("ref_sec_feat_sub", "От соло-основателя до команды — один инструмент для карты, сценариев и исполнения.")}</div>
           <div className="features-grid stagger" style={{ marginBottom: 64 }}>
             {feats.map(f=>(
-              <div key={f.titleKey} className="feat-card sr sr-up in">
-                <div className="feat-card-glow"/>
+              <GlowCard
+                key={f.titleKey}
+                panelVariant
+                glowColor="accent"
+                customSize
+                width="100%"
+                className="feat-card sr sr-up in"
+                style={{ display: "flex", flexDirection: "column", gap: 0, padding: 20, height: "100%", boxSizing: "border-box" }}
+              >
                 <div className="feat-icon">{f.icon}</div>
                 <div className="feat-title">{t(f.titleKey, f.titleFb)}</div>
                 <div className="feat-desc">{t(f.descKey, f.descFb)}</div>
-              </div>
+              </GlowCard>
             ))}
           </div>
         </div>
@@ -245,11 +263,19 @@ export function ReferenceLandingView({
           <div className="land-section-sub sr sr-up in">{t("ref_sec_how_sub", "Четыре шага без перегруза классическими инструментами.")}</div>
           <div className="how-steps stagger">
             {steps.map(s=>(
-              <div key={s.n} className="how-step sr sr-up in">
+              <GlowCard
+                key={s.n}
+                panelVariant
+                glowColor="accent"
+                customSize
+                width="100%"
+                className="how-step sr sr-up in"
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 14px", margin: 0, boxSizing: "border-box" }}
+              >
                 <div className="how-num">{s.n}</div>
                 <div className="how-title">{t(s.tk, s.tf)}</div>
                 <div className="how-desc">{t(s.dk, s.df)}</div>
-              </div>
+              </GlowCard>
             ))}
           </div>
         </div>
@@ -258,7 +284,7 @@ export function ReferenceLandingView({
           <div className="land-section-lbl sr sr-up in">{t("ref_sec_cmp_lbl", "Сравнение")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_sec_cmp_title", "Почему Strategy AI")}</div>
           <div className="land-section-sub sr sr-up in">{t("ref_sec_cmp_sub", "Специализация на стратегии: карта + сценарии + таймлайн + контекстный AI.")}</div>
-          <div className="compare-wrap sr sr-scale in">
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="compare-wrap sr sr-scale in" style={{ display: "block", padding: 0, overflow: "auto", marginBottom: 64 }}>
             <table className="compare-table">
               <thead><tr>
                 <th>{t("ref_cmp_feat", "Функция")}</th>
@@ -275,14 +301,18 @@ export function ReferenceLandingView({
                 <tr><td>{t("ref_cmp_row5", "Бесплатный старт")}</td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
               </tbody>
             </table>
-          </div>
+          </GlowCard>
         </div>
 
         <div id="land-testimonials">
           <div className="land-section-lbl sr sr-up in">{t("ref_testi_lbl", "Отзывы")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_testi_title", "Нам доверяют команды")}</div>
           <div className="land-section-sub sr sr-up in" style={{ marginBottom: 28 }}>{t("ref_testi_sub", "Структура вместо разрозненных таблиц и чатов.")}</div>
-          <div
+          <GlowCard
+            panelVariant
+            glowColor="accent"
+            customSize
+            width="100%"
             className="testi-glass-wrap stagger sr sr-up in"
             role="region"
             aria-roledescription={t("ref_testi_carousel_label", "Карусель отзывов")}
@@ -297,6 +327,7 @@ export function ReferenceLandingView({
                 goTesti((testiActive + 1) % testimonials.length);
               }
             }}
+            style={{ display: "block", padding: "20px 16px 16px", boxSizing: "border-box", overflow: "visible" }}
           >
             <div className="testi-glass-viewport">
               <button
@@ -351,7 +382,7 @@ export function ReferenceLandingView({
                 />
               ))}
             </div>
-          </div>
+          </GlowCard>
         </div>
 
         <div id="land-faq">
@@ -360,12 +391,22 @@ export function ReferenceLandingView({
           <div className="land-section-sub sr sr-up in" style={{ marginBottom: 28 }}>{t("ref_faq_sub", "Коротко о продукте.")}</div>
           <div className="faq-list">
             {faq.map((item, i)=>(
-              <div key={i} className={"faq-item sr sr-up in"+(openFaq===i?" open":"")} role="button" tabIndex={0}
+              <GlowCard
+                key={i}
+                panelVariant
+                glowColor="accent"
+                customSize
+                width="100%"
+                className={"faq-item sr sr-up in"+(openFaq===i?" open":"")}
+                role="button"
+                tabIndex={0}
                 onClick={()=>setOpenFaq(openFaq===i?null:i)}
-                onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")setOpenFaq(openFaq===i?null:i);}}>
+                onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")setOpenFaq(openFaq===i?null:i);}}
+                style={{ display: "block", padding: 0, margin: 0 }}
+              >
                 <div className="faq-q">{t(item.q, item.qf)}<span className="faq-icon">+</span></div>
                 <div className="faq-a">{t(item.a, item.af)}</div>
-              </div>
+              </GlowCard>
             ))}
           </div>
         </div>
@@ -379,10 +420,24 @@ export function ReferenceLandingView({
             </div>
             <div className="tier-grid">
               {tierStrip.map((x)=>(
-                <div
+                <GlowCard
                   key={x.id}
+                  panelVariant
+                  glowColor="accent"
+                  customSize
+                  width="100%"
                   className={"tier-card" + (x.id === "pro" ? " popular" : "")}
-                  style={{ borderTop: `3px solid ${x.color}` }}
+                  style={{
+                    borderTop: `3px solid ${x.color}`,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "stretch",
+                    minHeight: 0,
+                    padding: x.id === "pro" ? "22px 12px 14px" : "16px 12px 14px",
+                    margin: 0,
+                    cursor: "default",
+                    overflow: "visible",
+                  }}
                 >
                   {x.id === "pro" && (
                     <div className="tier-pop-badge">{t("pricing_hot_badge", "★ TOP")}</div>
@@ -404,20 +459,27 @@ export function ReferenceLandingView({
                         ? t("tier_enterprise_cta", "Связаться с нами")
                         : t("ref_cta_btn", "Создать аккаунт →")}
                   </button>
-                </div>
+                </GlowCard>
               ))}
             </div>
           </div>
         </section>
 
-        <div className="land-cta sr sr-scale in">
+        <GlowCard
+          panelVariant
+          glowColor="accent"
+          customSize
+          width="100%"
+          className="land-cta sr sr-scale in"
+          style={{ display: "block", padding: "clamp(36px,6vw,56px) clamp(24px,4vw,48px)", marginBottom: 48, textAlign: "center", boxSizing: "border-box" }}
+        >
           <div className="cta-title" dangerouslySetInnerHTML={{ __html: t("ref_cta_title_html", "Готовы к стратегии,<br/>которая доходит до исполнения?") }}/>
           <div className="cta-sub">{t("ref_cta_sub", "Бесплатный тариф. Создайте аккаунт и первую карту за пару минут.")}</div>
           <div className="cta-btns">
             <button type="button" className="btn-p lg" onClick={onGetStarted}>{t("ref_cta_btn", "Создать аккаунт →")}</button>
             <button type="button" className="btn-g lg" onClick={()=>scrollToId("land-mockup")}>{t("ref_cta_demo", "Интерфейс")}</button>
           </div>
-        </div>
+        </GlowCard>
 
         <div className="land-footer">
           <div className="land-logo" style={{ gap: 8 }}>

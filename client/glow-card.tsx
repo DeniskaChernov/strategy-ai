@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, ReactNode, CSSProperties } from "react";
+import React, { useEffect, useRef, ReactNode, CSSProperties, HTMLAttributes } from "react";
 import { subscribeGlowPointer } from "./lib/glow-pointer";
 
-export interface GlowCardProps {
+export interface GlowCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "className" | "style"> {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
@@ -41,6 +41,7 @@ export function GlowCard({
   width,
   height,
   customSize = false,
+  ...rest
 }: GlowCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const { base, spread } = glowColorMap[glowColor];
@@ -145,6 +146,7 @@ export function GlowCard({
       data-glow
       className={`glow-card${panelVariant ? " glow-card--panel" : ""} ${className}`.trim()}
       style={getInlineStyles()}
+      {...rest}
     >
       <div data-glow aria-hidden className="glow-card-inner-glow" />
       {children}
