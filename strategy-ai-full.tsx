@@ -6777,7 +6777,7 @@ function WelcomeScreen({onAuth,onBack,theme}){
     return()=>clearTimeout(id);
   },[phase]);
   return(
-    <div className={"sa-strategy-ui sa-welcome-retro "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:'Tahoma,"MS Sans Serif","Segoe UI",sans-serif',position:"relative",overflow:"hidden"}}>
+    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
       <StrategyShellBg/>
       {cosmic&&(
         <div className="sa-welcome-sparkles" style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}} aria-hidden>
