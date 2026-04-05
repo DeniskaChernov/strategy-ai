@@ -83,30 +83,32 @@ export function GlowCard({
   }, []);
 
   const getInlineStyles = (): CSSProperties => {
-    const radius = panelVariant ? 20 : 14;
-    const borderToken = panelVariant ? 1 : 3;
+    /** Базовый режим: rounded-2xl ≈ 16px. Толщина «кольца» glow — --gc-border (не путать с токеном цвета --border). */
+    const radius = panelVariant ? 20 : 16;
+    /** 3px — как у не-панели: заметное кольцо spotlight у ::before/::after при тонкой рамке панели. */
+    const gcBorder = 3;
 
     const baseStyles: CSSProperties = {
       "--base": base,
       "--spread": spread,
       "--radius": radius,
-      "--border": borderToken,
+      "--gc-border": gcBorder,
       "--backdrop": "hsl(0 0% 60% / 0.12)",
       "--backup-border": panelVariant ? "var(--glass-border-accent, var(--border))" : "var(--backdrop)",
-      "--size": 200,
+      "--size": panelVariant ? 240 : 200,
       "--outer": 1,
       "--saturation": 100,
       "--lightness": panelVariant ? 68 : 70,
-      "--bg-spot-opacity": panelVariant ? 0.14 : 0.1,
-      "--border-spot-opacity": 1,
-      "--border-light-opacity": 1,
-      "--border-size": "calc(var(--border, 2) * 1px)",
+      "--bg-spot-opacity": panelVariant ? 0.26 : 0.1,
+      "--border-spot-opacity": panelVariant ? 0.95 : 1,
+      "--border-light-opacity": panelVariant ? 0.55 : 1,
+      "--border-size": "calc(var(--gc-border, 3) * 1px)",
       "--spotlight-size": "calc(var(--size, 200) * 1px)",
       backgroundImage: `radial-gradient(
         var(--spotlight-size) var(--spotlight-size) at
         calc(var(--x, 0) * 1px)
         calc(var(--y, 0) * 1px),
-        hsl(var(--hue) calc(var(--saturation, 100) * 1%) calc(var(--lightness, 70) * 1%) / var(--bg-spot-opacity, 0.1)),
+        hsl(var(--hue, 210) calc(var(--saturation, 100) * 1%) calc(var(--lightness, 70) * 1%) / var(--bg-spot-opacity, 0.1)),
         transparent
       )`,
       backgroundColor: panelVariant ? "var(--sb, var(--surface))" : "var(--backdrop, transparent)",
