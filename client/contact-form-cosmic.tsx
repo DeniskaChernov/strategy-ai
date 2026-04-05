@@ -155,7 +155,7 @@ function useContactSubmitState(
   return { focus, setFocus, loading, handleSubmit };
 }
 
-/** Форма связи для WelcomeScreen: без отдельного фона, внутри GlowCard. */
+/** Компактная форма связи для встраивания (без отдельного фона; при необходимости внутри GlowCard). */
 export function ContactFormEmbedded({
   t,
   onSubmit,
