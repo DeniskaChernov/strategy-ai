@@ -10,28 +10,23 @@ function cn(...parts: (string | false | undefined)[]): string {
 
 const EXPAND_SCROLL_THRESHOLD = 80;
 
+/** Без `when: "afterChildren"` — иначе ширина ждёт детей и пилюля долго остаётся «пустой полосой». */
 const containerVariants = {
   expanded: {
     y: 0,
     opacity: 1,
-    width: "auto",
     transition: {
       y: { type: "spring" as const, damping: 18, stiffness: 250 },
-      opacity: { duration: 0.3 },
-      staggerChildren: 0.07,
-      delayChildren: 0.08,
+      opacity: { duration: 0.25 },
+      staggerChildren: 0.05,
+      delayChildren: 0.04,
     },
   },
   collapsed: {
     y: 0,
     opacity: 1,
-    width: "3rem",
     transition: {
-      type: "spring" as const,
-      damping: 20,
-      stiffness: 300,
-      when: "afterChildren" as const,
-      staggerChildren: 0.05,
+      staggerChildren: 0.03,
       staggerDirection: -1,
     },
   },
@@ -48,16 +43,11 @@ const itemVariants = {
 };
 
 const collapsedIconVariants = {
-  expanded: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
+  expanded: { opacity: 0, scale: 0.92, transition: { duration: 0.15 } },
   collapsed: {
     opacity: 1,
     scale: 1,
-    transition: {
-      type: "spring" as const,
-      damping: 15,
-      stiffness: 300,
-      delay: 0.15,
-    },
+    transition: { type: "spring" as const, damping: 20, stiffness: 380, delay: 0.04 },
   },
 };
 
@@ -162,13 +152,12 @@ export function AnimatedLandingNav({
       }}
     >
       <motion.nav
-        layout
         aria-label={t("nav_main", "Основная навигация")}
         initial={{ y: -80, opacity: 0 }}
         animate={isExpanded ? "expanded" : "collapsed"}
         variants={containerVariants}
-        whileHover={!isExpanded ? { scale: 1.06 } : {}}
-        whileTap={!isExpanded ? { scale: 0.95 } : {}}
+        whileHover={!isExpanded ? { scale: 1.04 } : {}}
+        whileTap={!isExpanded ? { scale: 0.97 } : {}}
         onClick={handleNavClick}
         className="sa-animated-nav-pill"
         style={{
@@ -184,6 +173,9 @@ export function AnimatedLandingNav({
           minHeight: 48,
           cursor: !isExpanded ? "pointer" : undefined,
           justifyContent: !isExpanded ? "center" : undefined,
+          width: isExpanded ? "auto" : "3rem",
+          maxWidth: isExpanded ? "min(96vw, 1100px)" : "3rem",
+          transition: "width 0.32s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
         <motion.div
@@ -193,10 +185,14 @@ export function AnimatedLandingNav({
             flexShrink: 0,
             display: "flex",
             alignItems: "center",
-            paddingLeft: 16,
-            paddingRight: 8,
+            paddingLeft: isExpanded ? 16 : 0,
+            paddingRight: isExpanded ? 8 : 0,
             color: "var(--acc)",
             pointerEvents: isExpanded ? "auto" : "none",
+            minWidth: isExpanded ? undefined : 0,
+            maxWidth: isExpanded ? undefined : 0,
+            overflow: "hidden",
+            flex: isExpanded ? undefined : "0 0 0",
           }}
         >
           <Compass aria-hidden size={22} strokeWidth={2} />
@@ -209,9 +205,13 @@ export function AnimatedLandingNav({
             display: "flex",
             alignItems: "center",
             gap: "clamp(6px, 1.5vw, 16px)",
-            paddingRight: 12,
+            paddingRight: isExpanded ? 12 : 0,
             flexWrap: "wrap",
             pointerEvents: isExpanded ? "auto" : "none",
+            minWidth: isExpanded ? undefined : 0,
+            maxWidth: isExpanded ? undefined : 0,
+            overflow: "hidden",
+            flex: isExpanded ? undefined : "0 0 0",
           }}
         >
           {navItems.map((item) => (
@@ -236,11 +236,15 @@ export function AnimatedLandingNav({
             display: "flex",
             alignItems: "center",
             gap: 8,
-            paddingRight: 14,
-            borderLeft: "0.5px solid var(--b0)",
-            paddingLeft: 12,
+            paddingRight: isExpanded ? 14 : 0,
+            borderLeft: isExpanded ? "0.5px solid var(--b0)" : "none",
+            paddingLeft: isExpanded ? 12 : 0,
             flexShrink: 0,
             pointerEvents: isExpanded ? "auto" : "none",
+            minWidth: isExpanded ? undefined : 0,
+            maxWidth: isExpanded ? undefined : 0,
+            overflow: "hidden",
+            flex: isExpanded ? undefined : "0 0 0",
           }}
         >
           <div
