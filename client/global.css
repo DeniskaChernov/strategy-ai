@@ -260,7 +260,7 @@ body:has(.sa-ref-landing) .screen-wrap{
   box-sizing:border-box !important;
 }
 .sa-ref-landing .land-inner{
-  max-width:min(960px,100%) !important;
+  max-width:min(1080px,100%) !important;
   width:100% !important;
   margin-left:auto !important;
   margin-right:auto !important;
@@ -320,7 +320,8 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   padding:10px 24px !important;
 }
 .sa-ref-landing .features-grid{
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr)) !important;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr)) !important;
+  gap:22px !important;
 }
 .sa-ref-landing .testi-glass-wrap{
   max-width:min(960px,100%);
@@ -343,7 +344,7 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
 @media (max-width:900px){
   .sa-ref-landing .how-steps{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:16px!important;
+    gap:24px!important;
   }
   .sa-ref-landing .how-steps::before{display:none!important;}
 }
@@ -355,9 +356,9 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
 /* Тарифы — сетка как в strategy-reference (tier select), внизу лендинга */
 .sa-ref-landing .sa-land-pricing{
   width:100%;
-  max-width:min(960px,100%);
-  margin:0 auto 56px;
-  padding:8px 0 0;
+  max-width:min(1080px,100%);
+  margin:0 auto 72px;
+  padding:16px 0 0;
   box-sizing:border-box;
 }
 .sa-ref-landing .sa-land-pricing .tier-wrap{width:100%;max-width:900px;margin:0 auto;position:relative;z-index:1}
@@ -412,7 +413,7 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
 .sa-ref-landing .sa-land-pricing .tier-btn-paid:hover{box-shadow:0 6px 22px rgba(104,54,245,.55);transform:translateY(-1px)}
 .sa-ref-landing .land-footer{
   width:100%;
-  max-width:min(960px,100%);
+  max-width:min(1080px,100%);
   margin-left:auto;
   margin-right:auto;
   box-sizing:border-box;

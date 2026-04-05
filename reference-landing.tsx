@@ -156,13 +156,13 @@ export function ReferenceLandingView({
           </div>
           <div
             style={{
-              marginTop: 18,
+              marginTop: 28,
               fontSize: 11.5,
               color: "var(--t3)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 16,
+              gap: 20,
               flexWrap: "wrap",
             }}
           >
@@ -173,7 +173,7 @@ export function ReferenceLandingView({
           </div>
         </div>
 
-        <div className="land-stats stagger" id="land-stats-section" style={{ marginBottom: 64 }}>
+        <div className="land-stats stagger" id="land-stats-section" style={{ marginBottom: 88 }}>
           <div className="stat-item sr sr-up in">
             <div className="stat-val" style={{ color: "var(--acc)" }}>2,400+</div>
             <div className="stat-lbl">{t("ref_stat_teams", "Команд")}</div>
@@ -228,7 +228,7 @@ export function ReferenceLandingView({
           <div className="land-section-lbl sr sr-up in">{t("ref_sec_feat_lbl", "Всё необходимое")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_sec_feat_title", "Для стратегического мышления")}</div>
           <div className="land-section-sub sr sr-up in">{t("ref_sec_feat_sub", "От соло-основателя до команды — один инструмент для карты, сценариев и исполнения.")}</div>
-          <div className="features-grid stagger" style={{ marginBottom: 64 }}>
+          <div className="features-grid stagger" style={{ marginBottom: 88 }}>
             {feats.map(f=>(
               <GlowCard
                 key={f.titleKey}
@@ -237,7 +237,7 @@ export function ReferenceLandingView({
                 customSize
                 width="100%"
                 className="feat-card sr sr-up in"
-                style={{ display: "flex", flexDirection: "column", gap: 0, padding: 20, height: "100%", boxSizing: "border-box" }}
+                style={{ display: "flex", flexDirection: "column", gap: 0, padding: 24, height: "100%", boxSizing: "border-box" }}
               >
                 <div className="feat-card-glow"/>
                 <div className="feat-icon">{f.icon}</div>
@@ -267,7 +267,7 @@ export function ReferenceLandingView({
           <div className="land-section-lbl sr sr-up in">{t("ref_sec_cmp_lbl", "Сравнение")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_sec_cmp_title", "Почему Strategy AI")}</div>
           <div className="land-section-sub sr sr-up in">{t("ref_sec_cmp_sub", "Специализация на стратегии: карта + сценарии + таймлайн + контекстный AI.")}</div>
-          <div className="compare-wrap sr sr-scale in" style={{ marginBottom: 64 }}>
+          <div className="compare-wrap sr sr-scale in" style={{ marginBottom: 88 }}>
             <table className="compare-table">
               <thead><tr>
                 <th>{t("ref_cmp_feat", "Функция")}</th>
@@ -290,7 +290,7 @@ export function ReferenceLandingView({
         <div id="land-testimonials">
           <div className="land-section-lbl sr sr-up in">{t("ref_testi_lbl", "Отзывы")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_testi_title", "Нам доверяют команды")}</div>
-          <div className="land-section-sub sr sr-up in" style={{ marginBottom: 28 }}>{t("ref_testi_sub", "Структура вместо разрозненных таблиц и чатов.")}</div>
+          <div className="land-section-sub sr sr-up in" style={{ marginBottom: 40 }}>{t("ref_testi_sub", "Структура вместо разрозненных таблиц и чатов.")}</div>
           <div
             className="testi-glass-wrap stagger sr sr-up in"
             role="region"
@@ -306,7 +306,7 @@ export function ReferenceLandingView({
                 goTesti((testiActive + 1) % testimonials.length);
               }
             }}
-            style={{ padding: "20px 16px 16px", boxSizing: "border-box", overflow: "visible" }}
+            style={{ padding: "28px 20px 20px", boxSizing: "border-box", overflow: "visible" }}
           >
             <div className="testi-glass-viewport">
               <button
@@ -367,7 +367,7 @@ export function ReferenceLandingView({
         <div id="land-faq">
           <div className="land-section-lbl sr sr-up in">{t("ref_faq_lbl", "Вопросы")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_faq_title", "FAQ")}</div>
-          <div className="land-section-sub sr sr-up in" style={{ marginBottom: 28 }}>{t("ref_faq_sub", "Коротко о продукте.")}</div>
+          <div className="land-section-sub sr sr-up in" style={{ marginBottom: 40 }}>{t("ref_faq_sub", "Коротко о продукте.")}</div>
           <div className="faq-list">
             {faq.map((item, i)=>(
               <div
