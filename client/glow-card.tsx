@@ -44,6 +44,7 @@ export function GlowCard({
   ...rest
 }: GlowCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const { ref: _refIgnored, ...domRest } = rest as typeof rest & { ref?: React.Ref<HTMLDivElement | null> };
   const { base, spread } = glowColorMap[glowColor];
   const sz = sizePx[size];
 
@@ -146,7 +147,7 @@ export function GlowCard({
       data-glow
       className={`glow-card${panelVariant ? " glow-card--panel" : ""} ${className}`.trim()}
       style={getInlineStyles()}
-      {...rest}
+      {...domRest}
     >
       <div data-glow aria-hidden className="glow-card-inner-glow" />
       {children}

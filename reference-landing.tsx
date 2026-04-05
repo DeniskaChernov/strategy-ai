@@ -401,7 +401,13 @@ export function ReferenceLandingView({
                 role="button"
                 tabIndex={0}
                 onClick={()=>setOpenFaq(openFaq===i?null:i)}
-                onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")setOpenFaq(openFaq===i?null:i);}}
+                onKeyDown={e=>{
+                  if(e.key==="Enter"||e.key===" "){
+                    e.preventDefault();
+                    setOpenFaq(openFaq===i?null:i);
+                  }
+                }}
+                aria-expanded={openFaq===i}
                 style={{ display: "block", padding: 0, margin: 0 }}
               >
                 <div className="faq-q">{t(item.q, item.qf)}<span className="faq-icon">+</span></div>

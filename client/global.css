@@ -330,6 +330,16 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
 .sa-ref-landing .compare-wrap{
   max-width:100%;
 }
+@media (max-width:720px){
+  .sa-ref-landing .land-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media (max-width:400px){
+  .sa-ref-landing .land-stats{
+    grid-template-columns:1fr!important;
+  }
+}
 /* Тарифы — сетка как в strategy-reference (tier select), внизу лендинга */
 .sa-ref-landing .sa-land-pricing{
   width:100%;
