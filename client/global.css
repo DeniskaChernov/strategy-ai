@@ -320,9 +320,30 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   padding:10px 24px !important;
 }
 .sa-ref-landing .features-grid{
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr)) !important;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr)) !important;
+  grid-auto-rows:auto !important;
   align-items:start !important;
-  gap:20px !important;
+  justify-items:stretch !important;
+  gap:16px !important;
+}
+/* Компактные карточки фич: без растягивания по высоте строки */
+.sa-ref-landing .features-grid > [data-glow].glow-card.feat-card{
+  align-self:start !important;
+  width:100% !important;
+  min-height:0 !important;
+  height:auto !important;
+}
+.sa-ref-landing .features-grid .feat-icon{
+  font-size:22px;
+  margin-bottom:10px;
+}
+.sa-ref-landing .features-grid .feat-title{
+  font-size:13px;
+  margin-bottom:6px;
+}
+.sa-ref-landing .features-grid .feat-desc{
+  font-size:12px;
+  line-height:1.45;
 }
 .sa-ref-landing .testi-glass-wrap{
   max-width:min(960px,100%);
@@ -859,7 +880,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sa-strategy-ui.lt [data-glow].glow-card .glow-card-spotlight{
   mix-blend-mode:normal;
 }
-[data-glow].glow-card > :not(.glow-card-inner-glow):not(.glow-card-spotlight){
+[data-glow].glow-card > :not(.glow-card-inner-glow):not(.glow-card-spotlight):not(.feat-card-glow){
   position:relative;
   z-index:2;
 }
@@ -873,6 +894,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 /* Карточки фич на лендинге: без clip — иначе ::before/::after и край spotlight обрезаются */
 [data-glow].glow-card.feat-card{
   overflow:visible !important;
+  --size:200;
 }
 [data-glow].glow-card.feat-card:hover{
   --bg-spot-opacity:0.4;

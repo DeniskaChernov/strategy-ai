@@ -241,9 +241,10 @@ export function ReferenceLandingView({
                   display: "flex",
                   flexDirection: "column",
                   gap: 0,
-                  padding: 20,
+                  padding: "14px 16px 16px",
                   boxSizing: "border-box",
                   alignSelf: "start",
+                  justifyContent: "flex-start",
                 }}
               >
                 <div className="feat-card-glow"/>
