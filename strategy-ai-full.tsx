@@ -6784,7 +6784,7 @@ function WelcomeScreen({onAuth,onBack,theme}){
         <div className="sa-welcome-header">
           <img src="/logo.png" alt="" width={80} height={80} className="sa-welcome-logo" style={{objectFit:"contain",margin:"0 auto 16px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
           <h1 id="welcome-brand-title" className="modal-title sa-welcome-brand">{t("app_name","Strategy AI")}</h1>
-          <p className="modal-sub sa-welcome-tagline">{t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
+          <p className="modal-sub sa-welcome-tagline">{phase==="cta"?t("welcome_sub","От целей до результатов — с AI"):t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
         </div>
         <div role="region" aria-labelledby="welcome-brand-title" className="sa-ws-card-region">
           <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ws-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
@@ -6807,7 +6807,9 @@ function WelcomeScreen({onAuth,onBack,theme}){
           </GlowCard>
         </div>
         <p className="modal-sub sa-welcome-footer-terms">
-          {t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
+          {phase==="cta"
+            ?t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")
+            :t("ws_terms_form","Продолжая вход или регистрацию, вы соглашаетесь с условиями использования")}
         </p>
       </main>
       </div>

@@ -49,12 +49,21 @@ export function GlowCard({
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    el.style.setProperty("--x", String(cx));
-    el.style.setProperty("--y", String(cy));
-    el.style.setProperty("--xp", (cx / Math.max(window.innerWidth, 1)).toFixed(4));
-    el.style.setProperty("--yp", (cy / Math.max(window.innerHeight, 1)).toFixed(4));
+    const syncCenter = () => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      el.style.setProperty("--x", String(cx));
+      el.style.setProperty("--y", String(cy));
+      el.style.setProperty("--xp", (cx / Math.max(window.innerWidth, 1)).toFixed(4));
+      el.style.setProperty("--yp", (cy / Math.max(window.innerHeight, 1)).toFixed(4));
+    };
+    syncCenter();
+    window.addEventListener("resize", syncCenter);
+    window.addEventListener("orientationchange", syncCenter);
+    return () => {
+      window.removeEventListener("resize", syncCenter);
+      window.removeEventListener("orientationchange", syncCenter);
+    };
   }, [base, spread]);
 
   useEffect(() => {
@@ -101,7 +110,7 @@ export function GlowCard({
       backgroundAttachment: "fixed",
       border: panelVariant ? "0.5px solid var(--border)" : "var(--border-size) solid var(--backup-border)",
       position: "relative",
-      touchAction: "none",
+      touchAction: "manipulation",
       display: "grid",
       gridTemplateRows: "1fr auto",
       gap: panelVariant ? 12 : 16,
