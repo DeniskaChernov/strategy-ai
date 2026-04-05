@@ -696,8 +696,8 @@ function AuthFormContent({initialTab="login",onAuth,theme='dark',title,subtitle,
   const inline=variant==="inline";
   return(
     <div className={inline?"sa-ws-auth-form":undefined}>
-      <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:inline?12:14}}>
-        <div className="tabs" role="tablist" aria-label={t("auth_tabs_aria","Вход или регистрация")}>
+      <div className={inline?"sa-ws-auth-toolbar":undefined} style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:inline?16:14}}>
+        <div className={"tabs"+(inline?" sa-ws-seg-tabs":"")} role="tablist" aria-label={t("auth_tabs_aria","Вход или регистрация")}>
           <button type="button" role="tab" aria-selected={tab==="login"} className={"tab"+(tab==="login"?" on":"")} onClick={()=>{setTab("login");setErr("");}}>{t("login","Войти")}</button>
           <button type="button" role="tab" aria-selected={tab==="register"} className={"tab"+(tab==="register"?" on":"")} onClick={()=>{setTab("register");setErr("");}}>{t("register","Регистрация")}</button>
         </div>
@@ -710,8 +710,8 @@ function AuthFormContent({initialTab="login",onAuth,theme='dark',title,subtitle,
         </div>
       </div>
       {inline?(
-        <div style={{textAlign:"center",marginBottom:14}}>
-          <div id={titleId} tabIndex={-1} className="modal-title" style={{fontSize:"clamp(17px,3.5vw,20px)",marginTop:0,marginBottom:subtitle?6:0,outline:"none"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
+        <div style={{textAlign:"center",marginBottom:18}}>
+          <div id={titleId} tabIndex={-1} className="modal-title" style={{fontSize:"clamp(18px,3.8vw,22px)",marginTop:0,marginBottom:subtitle?6:0,outline:"none",letterSpacing:"-0.02em"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
           {subtitle&&<div className="modal-sub" style={{marginBottom:0}}>{subtitle}</div>}
         </div>
       ):(
@@ -6794,21 +6794,21 @@ function WelcomeScreen({onAuth,onBack,theme}){
         <div role="region" aria-labelledby="welcome-brand-title" className="sa-ws-card-region">
           <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
             {phase==="cta"&&(
-              <div ref={ctaRef} className="sa-ws-cta-block" style={{display:"flex",flexDirection:"column",gap:12,marginBottom:16}}>
+              <div ref={ctaRef} className="sa-ws-cta-block" style={{display:"flex",flexDirection:"column",gap:14,marginBottom:16}}>
                 <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("auth");setAuthTab("register");setPhase("form");}}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
                 <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("auth");setAuthTab("login");setPhase("form");}}>{t("ws_login_btn","Уже есть аккаунт — Войти →")}</button>
                 <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("contact");setPhase("form");}}>{t("ws_contact_btn","Связаться с нами →")}</button>
               </div>
             )}
             {phase==="form"&&(
-              <button type="button" className="sa-ws-auth-back" style={{marginBottom:14}} onClick={()=>{setPhase("cta");setWelcomeForm("auth");}}>{t("ws_back_choice","← К кнопкам")}</button>
+              <button type="button" className="sa-ws-auth-back" onClick={()=>{setPhase("cta");setWelcomeForm("auth");}}>{t("ws_back_choice","← К кнопкам")}</button>
             )}
-            <div className="modal-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
+            <div className="modal-divider sa-ws-welcome-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
             <WelcomeFeatureRotator items={featItems} reducedMotion={reducedMotion}/>
             {phase==="form"&&(
               <div className="sa-ws-auth-form-wrap sa-ws-phase-enter">
-                <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:12}}>
-                  <div className="tabs" role="tablist" aria-label={t("ws_form_mode_aria","Вход или форма связи")}>
+                <div className="sa-ws-form-mode-row">
+                  <div className="tabs sa-ws-seg-tabs" role="tablist" aria-label={t("ws_form_mode_aria","Вход или форма связи")}>
                     <button type="button" role="tab" aria-selected={welcomeForm==="auth"} className={"tab"+(welcomeForm==="auth"?" on":"")} onClick={()=>setWelcomeForm("auth")}>{t("ws_tab_account","Аккаунт")}</button>
                     <button type="button" role="tab" aria-selected={welcomeForm==="contact"} className={"tab"+(welcomeForm==="contact"?" on":"")} onClick={()=>setWelcomeForm("contact")}>{t("ws_tab_contact","Связаться")}</button>
                   </div>
