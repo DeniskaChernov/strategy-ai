@@ -738,13 +738,14 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitl
   const[closing,setClosing]=useState(false);
   const boxRef=useRef<HTMLDivElement|null>(null);
   const handleCloseRef=useRef<()=>void>(()=>{});
-  const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),220);};
+  const handleClose=()=>{if(closing||!onClose)return;setClosing(true);setTimeout(()=>onClose(),220);};
   handleCloseRef.current=handleClose;
   useEffect(()=>{
+    if(!onClose)return;
     const h=(e:KeyboardEvent)=>{if(e.key==="Escape"){e.preventDefault();handleCloseRef.current();}};
     window.addEventListener("keydown",h);
     return()=>window.removeEventListener("keydown",h);
-  },[]);
+  },[onClose]);
   useEffect(()=>{
     const root=boxRef.current;
     if(!root)return;
