@@ -163,6 +163,7 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
     <div className="sa-ws-contact-form sa-ws-auth-form" style={{ maxWidth: 384, width: "100%", margin: "0 auto" }}>
       <div style={{ textAlign: "center", marginBottom: 0 }}>
         <p
+          className="sa-ws-contact-badge"
           style={{
             display: "inline-block",
             fontSize: 12,
@@ -202,7 +203,7 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
         <label htmlFor={`${pid}-name`} style={{ ...fieldLbl, marginTop: 0 }}>
           {t("contact_label_fullname", "Полное имя")}
         </label>
-        <div style={inpRow(rowFocus("name"))}>
+        <div className="sa-ws-contact-field-wrap" style={inpRow(rowFocus("name"))}>
           <FieldIconUser />
           <input
             id={`${pid}-name`}
@@ -243,6 +244,7 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
           name="message"
           rows={4}
           required
+          className="sa-ws-contact-textarea"
           placeholder={t("contact_placeholder_msg", "Кратко опишите запрос")}
           style={textareaStyle(focus === "message")}
           onFocus={() => setFocus("message")}

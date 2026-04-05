@@ -702,7 +702,7 @@ function AuthFormContent({initialTab="login",onAuth,theme='dark',title,subtitle,
           <button type="button" role="tab" aria-selected={tab==="register"} className={"tab"+(tab==="register"?" on":"")} onClick={()=>{setTab("register");setErr("");}}>{t("register","Регистрация")}</button>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:8}} role="group" aria-label={t("select_language","Язык")}>
-          <div style={{display:"flex",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:22,padding:3,gap:1}}>
+          <div className="sa-ws-lang-switch" style={{display:"flex",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:22,padding:3,gap:1}}>
             {[["RU","ru"],["EN","en"],["UZ","uz"]].map(([label,code])=>(
               <button key={code} type="button" aria-pressed={lang===code} className={"land-lang-btn"+(lang===code?" on":"")} onClick={()=>setLang(code)}>{label}</button>
             ))}
@@ -6777,14 +6777,14 @@ function WelcomeScreen({onAuth,onBack,theme}){
     return()=>clearTimeout(id);
   },[phase]);
   return(
-    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Inter',system-ui,sans-serif",position:"relative",overflow:"hidden"}}>
+    <div className={"sa-strategy-ui sa-welcome-retro "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:'Tahoma,"MS Sans Serif","Segoe UI",sans-serif',position:"relative",overflow:"hidden"}}>
       <StrategyShellBg/>
       {cosmic&&(
-        <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}} aria-hidden>
+        <div className="sa-welcome-sparkles" style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}} aria-hidden>
           <SparklesCanvas density={180} speed={0.32} minSz={0.25} maxSz={1.1} color="#e8e4ff" style={{opacity:.38}}/>
         </div>
       )}
-      <button type="button" className="btn-g" onClick={onBack} style={{position:"absolute",top:20,left:20,zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
+      <button type="button" className="btn-g sa-welcome-topbar-back" onClick={onBack} style={{position:"absolute",top:20,left:20,zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
       <main id="sa-welcome-main" className="sa-welcome-main" style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         <div className="sa-welcome-header">
           <img src="/logo.png" alt="" width={80} height={80} className="sa-welcome-logo" style={{objectFit:"contain",margin:"0 auto 16px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
