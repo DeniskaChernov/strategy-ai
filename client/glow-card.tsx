@@ -82,6 +82,33 @@ export function GlowCard({
     });
   }, []);
 
+  /** Локальные координаты курсора для слоя spotlight — не смешивать с backdrop-filter на корне. */
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const setCenter = () => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--lx", `${Math.round(r.width / 2)}px`);
+      el.style.setProperty("--ly", `${Math.round(r.height / 2)}px`);
+    };
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect();
+      el.style.setProperty("--lx", `${(e.clientX - r.left).toFixed(1)}px`);
+      el.style.setProperty("--ly", `${(e.clientY - r.top).toFixed(1)}px`);
+    };
+    const onLeave = () => setCenter();
+    el.addEventListener("pointermove", onMove);
+    el.addEventListener("pointerleave", onLeave);
+    setCenter();
+    const ro = new ResizeObserver(() => setCenter());
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerleave", onLeave);
+      ro.disconnect();
+    };
+  }, []);
+
   const getInlineStyles = (): CSSProperties => {
     /** Базовый режим: rounded-2xl ≈ 16px. Толщина «кольца» glow — --gc-border (не путать с токеном цвета --border). */
     const radius = panelVariant ? 20 : 16;
@@ -99,22 +126,12 @@ export function GlowCard({
       "--outer": 1,
       "--saturation": 100,
       "--lightness": panelVariant ? 68 : 70,
-      "--bg-spot-opacity": panelVariant ? 0.26 : 0.1,
+      "--bg-spot-opacity": panelVariant ? 0.34 : 0.1,
       "--border-spot-opacity": panelVariant ? 0.95 : 1,
       "--border-light-opacity": panelVariant ? 0.55 : 1,
       "--border-size": "calc(var(--gc-border, 3) * 1px)",
       "--spotlight-size": "calc(var(--size, 200) * 1px)",
-      backgroundImage: `radial-gradient(
-        var(--spotlight-size) var(--spotlight-size) at
-        calc(var(--x, 0) * 1px)
-        calc(var(--y, 0) * 1px),
-        hsl(var(--hue, 210) calc(var(--saturation, 100) * 1%) calc(var(--lightness, 70) * 1%) / var(--bg-spot-opacity, 0.1)),
-        transparent
-      )`,
       backgroundColor: panelVariant ? "var(--sb, var(--surface))" : "var(--backdrop, transparent)",
-      backgroundSize: "calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)))",
-      backgroundPosition: "50% 50%",
-      backgroundAttachment: "fixed",
       border: panelVariant ? "0.5px solid var(--border)" : "var(--border-size) solid var(--backup-border)",
       position: "relative",
       touchAction: "manipulation",
@@ -146,6 +163,20 @@ export function GlowCard({
     return { ...baseStyles, ...styleProp };
   };
 
+  const spotlightStyle: CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    borderRadius: "inherit",
+    pointerEvents: "none",
+    zIndex: 1,
+    overflow: "hidden",
+    backgroundImage: `radial-gradient(
+      var(--spotlight-size) var(--spotlight-size) at var(--lx, 50%) var(--ly, 50%),
+      hsl(var(--hue, 210) calc(var(--saturation, 100) * 1%) calc(var(--lightness, 70) * 1%) / var(--bg-spot-opacity, 0.1)),
+      transparent
+    )`,
+  };
+
   return (
     <div
       ref={cardRef}
@@ -155,6 +186,7 @@ export function GlowCard({
       {...domRest}
     >
       <div data-glow aria-hidden className="glow-card-inner-glow" />
+      <div aria-hidden className="glow-card-spotlight" style={spotlightStyle} />
       {children}
     </div>
   );

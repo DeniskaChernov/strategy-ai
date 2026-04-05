@@ -842,6 +842,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 [data-glow].glow-card .glow-card-inner-glow{
   position:absolute;
   inset:0;
+  z-index:0;
   will-change:filter;
   opacity:var(--outer,1);
   border-radius:calc(var(--radius,16)*1px);
@@ -850,6 +851,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   background:none;
   pointer-events:none;
   border:none;
+}
+/* Слой spotlight отдельно от backdrop — иначе градиент не виден поверх стекла */
+[data-glow].glow-card .glow-card-spotlight{
+  mix-blend-mode:screen;
+}
+.sa-strategy-ui.lt [data-glow].glow-card .glow-card-spotlight{
+  mix-blend-mode:normal;
+}
+[data-glow].glow-card > :not(.glow-card-inner-glow):not(.glow-card-spotlight){
+  position:relative;
+  z-index:2;
 }
 [data-theme="light"] [data-glow].glow-card{
   box-shadow:0 1rem 2rem -1rem rgba(78,55,180,.18);
