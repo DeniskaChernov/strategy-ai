@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StrategyShellBg } from "./strategy-shell-sidebar";
-import { HorizonHeroSection } from "./client/horizon-hero-section";
+import { LandingStarsCanvas } from "./client/landing-stars-canvas";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -128,6 +128,7 @@ export function ReferenceLandingView({
   return(
     <div ref={rootRef} className={`sa-ref-landing sa-strategy-ui sa-landing-shell ${dk} view on sa-v-landing`} style={{ position: "fixed", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "stretch", overflowY: "auto", overflowX: "hidden", fontFamily: "'Inter',system-ui,sans-serif" }}>
       <StrategyShellBg/>
+      <LandingStarsCanvas theme={theme} />
       <nav id="land-nav-fixed" className={navScrolled ? "scrolled" : ""} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 600 }}>
         <div className="land-logo">
           <div className="land-gem">SA</div>
@@ -154,17 +155,55 @@ export function ReferenceLandingView({
         </div>
       </nav>
 
-      <div style={{ position: "relative", zIndex: 5, width: "100%" }}>
-        <HorizonHeroSection
-          scrollRef={rootRef}
-          t={t}
-          theme={theme}
-          onGetStarted={onGetStarted}
-          onScrollToMockup={()=>scrollToId("land-mockup")}
-        />
-      </div>
-
       <div className="land-inner" style={{ position: "relative", zIndex: 5 }}>
+        <div className="land-nav-spacer" />
+
+        <div className="hero" id="hero-section">
+          <div className="hero-badge">
+            <span>{t("ref_hero_badge", "✦ AI-стратегия · визуальные карты")}</span>
+          </div>
+          <h1
+            className="hero-h1"
+            dangerouslySetInnerHTML={{
+              __html: t(
+                "ref_hero_h1_html",
+                "Стратегия,<br/><span class=\"grad-text\">которая думает с вами</span>"
+              ),
+            }}
+          />
+          <p className="hero-sub">
+            {t(
+              "ref_hero_sub",
+              "Визуальные карты целей и инициатив, сценарии «что если», таймлайн и AI-советник — в одном рабочем пространстве."
+            )}
+          </p>
+          <div className="hero-btns">
+            <button type="button" className="btn-p lg" onClick={onGetStarted}>
+              {t("hero_cta", "Начать бесплатно — без карты")}
+            </button>
+            <button type="button" className="btn-g lg" onClick={() => scrollToId("land-mockup")}>
+              {t("ref_demo", "Смотреть интерфейс ↗")}
+            </button>
+          </div>
+          <div
+            style={{
+              marginTop: 18,
+              fontSize: 11.5,
+              color: "var(--t3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 16,
+              flexWrap: "wrap",
+            }}
+          >
+            <span>{t("trust_1", "✓ Бесплатный тариф")}</span>
+            <span>{t("trust_2", "✓ Без карты")}</span>
+            <span>{t("trust_3", "✓ Старт за пару минут")}</span>
+            <span>{t("trust_4", "✓ Отмена в любой момент")}</span>
+          </div>
+        </div>
+
         <div className="land-stats stagger" id="land-stats-section" style={{ marginBottom: 64 }}>
           <div className="stat-item sr sr-up in">
             <div className="stat-val" style={{ color: "var(--acc)" }}>2,400+</div>
