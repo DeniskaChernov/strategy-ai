@@ -83,20 +83,6 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
 
 /* HERO — NO entry animations, prevents ghost rendering */
 .hero{text-align:center;margin-bottom:64px;position:relative;padding-top:20px}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(104,54,245,.12);border:.5px solid rgba(104,54,245,.28);
-  border-radius:20px;padding:5px 13px;font-size:11.5px;font-weight:600;
-  color:rgba(168,128,255,.9);margin-bottom:24px;letter-spacing:-.01em;
-  position:relative;overflow:hidden;
-}
-.hero-badge::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(168,128,255,.18),transparent);
-  transform:translateX(-100%);animation:badge-shine 3.5s ease 0s infinite
-}
-@keyframes badge-shine{0%,20%{transform:translateX(-100%)}45%,100%{transform:translateX(220%)}}
-.sa-strategy-ui.lt .hero-badge{background:rgba(104,54,245,.1);color:#5526d6}
 .hero-h1{
   font-size:clamp(36px,5vw,62px);font-weight:800;color:var(--t1);line-height:1.06;
   letter-spacing:-.04em;margin-bottom:20px;

@@ -130,9 +130,6 @@ export function ReferenceLandingView({
         <div className="land-nav-spacer"/>
 
         <div className="hero" id="hero-section">
-          <div className="hero-badge">
-            <span>{t("ref_hero_badge", "✦ AI-стратегия · визуальные карты")}</span>
-          </div>
           <h1
             className="hero-h1"
             dangerouslySetInnerHTML={{
