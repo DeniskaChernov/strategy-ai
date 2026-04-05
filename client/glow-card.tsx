@@ -1,5 +1,30 @@
 import React, { useEffect, useRef, ReactNode, CSSProperties, HTMLAttributes } from "react";
-import { subscribeGlowPointer } from "./lib/glow-pointer";
+import { getLastGlowPointer, subscribeGlowPointer } from "./lib/glow-pointer";
+
+type Pos = { x: number; y: number };
+
+/** Локальные % относительно padding-box (как у слоя spotlight с inset:0), не border-box. */
+function applyGlowPointer(el: HTMLElement, p: Pos | null) {
+  const r = el.getBoundingClientRect();
+  if (r.width < 1 || r.height < 1) return;
+  const bl = el.clientLeft;
+  const bt = el.clientTop;
+  const iw = el.clientWidth;
+  const ih = el.clientHeight;
+  const inside =
+    p != null && p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom;
+  if (inside && p) {
+    const px = p.x - r.left - bl;
+    const py = p.y - r.top - bt;
+    const lx = (px / Math.max(iw, 1)) * 100;
+    const ly = (py / Math.max(ih, 1)) * 100;
+    el.style.setProperty("--lx", `${lx.toFixed(2)}%`);
+    el.style.setProperty("--ly", `${ly.toFixed(2)}%`);
+  } else {
+    el.style.setProperty("--lx", "50%");
+    el.style.setProperty("--ly", "50%");
+  }
+}
 
 export interface GlowCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "className" | "style"> {
   children: ReactNode;
@@ -79,32 +104,17 @@ export function GlowCard({
       el.style.setProperty("--xp", (p.x / Math.max(window.innerWidth, 1)).toFixed(4));
       el.style.setProperty("--y", p.y.toFixed(2));
       el.style.setProperty("--yp", (p.y / Math.max(window.innerHeight, 1)).toFixed(4));
-
-      const r = el.getBoundingClientRect();
-      if (r.width < 1 || r.height < 1) return;
-      const inside = p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom;
-      if (inside) {
-        el.style.setProperty("--lx", `${(p.x - r.left).toFixed(1)}px`);
-        el.style.setProperty("--ly", `${(p.y - r.top).toFixed(1)}px`);
-      } else {
-        el.style.setProperty("--lx", `${Math.round(r.width / 2)}px`);
-        el.style.setProperty("--ly", `${Math.round(r.height / 2)}px`);
-      }
+      applyGlowPointer(el, p);
     });
   }, []);
 
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
-    const syncLocalCenter = () => {
-      const r = el.getBoundingClientRect();
-      if (r.width < 1 || r.height < 1) return;
-      el.style.setProperty("--lx", `${Math.round(r.width / 2)}px`);
-      el.style.setProperty("--ly", `${Math.round(r.height / 2)}px`);
-    };
-    const ro = new ResizeObserver(syncLocalCenter);
+    const syncAfterLayout = () => applyGlowPointer(el, getLastGlowPointer());
+    const ro = new ResizeObserver(syncAfterLayout);
     ro.observe(el);
-    syncLocalCenter();
+    syncAfterLayout();
     return () => ro.disconnect();
   }, []);
 
@@ -134,9 +144,19 @@ export function GlowCard({
       border: panelVariant ? "0.5px solid var(--border)" : "var(--border-size) solid var(--backup-border)",
       position: "relative",
       touchAction: "manipulation",
-      display: "grid",
-      gridTemplateRows: "1fr auto",
-      gap: panelVariant ? 12 : 16,
+      ...(panelVariant
+        ? {
+            display: "flex",
+            flexDirection: "column" as const,
+            alignItems: "stretch",
+            gap: 12,
+            minHeight: 0,
+          }
+        : {
+            display: "grid",
+            gridTemplateRows: "1fr auto",
+            gap: 16,
+          }),
       padding: panelVariant ? 28 : 16,
       borderRadius: panelVariant ? "var(--r-xl, 20px)" : radius,
       boxShadow: panelVariant ? "0 28px 70px rgba(0,0,0,.42)" : "0 1rem 2rem -1rem #000",
