@@ -858,6 +858,27 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   box-shadow:0 28px 70px rgba(78,55,180,.22);
 }
 
+/* Карточки фич на лендинге: без clip — иначе ::before/::after и край spotlight обрезаются */
+[data-glow].glow-card.feat-card{
+  overflow:visible !important;
+}
+[data-glow].glow-card.feat-card:hover{
+  --bg-spot-opacity:0.4;
+  --border-spot-opacity:1;
+  --border-light-opacity:0.72;
+  --size:280;
+  box-shadow:
+    0 28px 70px rgba(0,0,0,.48),
+    0 0 0 1px rgba(104,54,245,.35),
+    0 0 52px rgba(104,54,245,.2);
+}
+.sa-strategy-ui.lt [data-glow].glow-card.feat-card:hover{
+  box-shadow:
+    0 24px 56px rgba(78,55,180,.18),
+    0 0 0 1px rgba(104,80,220,.28),
+    0 0 40px rgba(104,54,245,.14);
+}
+
 /* ── Floating AI assistant (лендинг, без Tailwind) ── */
 .sa-fai-root{
   position:fixed;

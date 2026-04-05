@@ -148,12 +148,12 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
 .sa-strategy-ui.lt .feat-card::after{background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(255,255,255,.05) 42%,transparent 68%)}
 .sa-strategy-ui.lt .feat-card{background:rgba(255,255,255,.76);border-color:rgba(104,80,220,.18)}
 .feat-card .feat-card-glow{
-  position:absolute;width:120px;height:120px;border-radius:50%;
-  background:radial-gradient(circle,rgba(104,54,245,.15),transparent 70%);
+  position:absolute;left:50%;top:30%;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(104,54,245,.22),transparent 70%);
   pointer-events:none;transform:translate(-50%,-50%);
-  transition:opacity .3s;opacity:0;
+  transition:opacity .35s ease,transform .35s ease;opacity:0;
 }
-.feat-card:hover .feat-card-glow{opacity:1}
+.feat-card:hover .feat-card-glow{opacity:1;transform:translate(-50%,-50%) scale(1.05)}
 .feat-icon{font-size:26px;margin-bottom:14px;display:inline-block;transition:transform .3s}
 .feat-card:hover .feat-icon{transform:scale(1.2) rotate(-5deg)}
 .feat-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:8px;letter-spacing:-.01em}
