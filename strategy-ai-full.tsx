@@ -6781,18 +6781,18 @@ function WelcomeScreen({onAuth,onBack,theme}){
       <StrategyShellBg/>
       {cosmic&&(
         <div style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}} aria-hidden>
-          <SparklesCanvas density={150} speed={0.38} minSz={0.3} maxSz={1.05} color="#ffffff" style={{opacity:.32}}/>
+          <SparklesCanvas density={180} speed={0.32} minSz={0.25} maxSz={1.1} color="#e8e4ff" style={{opacity:.38}}/>
         </div>
       )}
       <button type="button" className="btn-g" onClick={onBack} style={{position:"absolute",top:20,left:20,zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
-      <main id="sa-welcome-main" style={{width:"100%",maxWidth:460,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
-        <div style={{textAlign:"center",marginBottom:22}}>
-          <img src="/logo.png" alt="" width={72} height={72} style={{objectFit:"contain",margin:"0 auto 14px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
-          <h1 id="welcome-brand-title" className="modal-title" style={{fontSize:"clamp(22px,4vw,28px)",marginBottom:8,fontWeight:800}}>Strategy AI</h1>
-          <p className="modal-sub" style={{marginBottom:0}}>{phase==="form"&&welcomeForm==="contact"?t("ws_subtitle_contact","Напишите нам — ответим в рабочие часы"):t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
+      <main id="sa-welcome-main" className="sa-welcome-main" style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
+        <div className="sa-welcome-header">
+          <img src="/logo.png" alt="" width={80} height={80} className="sa-welcome-logo" style={{objectFit:"contain",margin:"0 auto 16px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
+          <h1 id="welcome-brand-title" className="modal-title sa-welcome-brand">{t("app_name","Strategy AI")}</h1>
+          <p className="modal-sub sa-welcome-tagline">{phase==="form"&&welcomeForm==="contact"?t("ws_subtitle_contact","Напишите нам — ответим в рабочие часы"):t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
         </div>
         <div role="region" aria-labelledby="welcome-brand-title" className="sa-ws-card-region">
-          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ws-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
             {phase==="cta"&&(
               <div ref={ctaRef} className="sa-ws-cta-block" style={{display:"flex",flexDirection:"column",gap:14,marginBottom:16}}>
                 <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("auth");setAuthTab("register");setPhase("form");}}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
@@ -6831,7 +6831,7 @@ function WelcomeScreen({onAuth,onBack,theme}){
             )}
           </GlowCard>
         </div>
-        <p className="modal-sub" style={{textAlign:"center",marginTop:18,marginBottom:0,fontSize:12}}>
+        <p className="modal-sub sa-welcome-footer-terms">
           {phase==="form"&&welcomeForm==="contact"?t("ws_contact_terms","Нажимая «Отправить», вы соглашаетесь с обработкой данных для ответа на обращение."):t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
         </p>
       </main>

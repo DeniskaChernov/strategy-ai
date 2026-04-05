@@ -1164,6 +1164,49 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
 }
 .sa-strategy-ui.lt .sa-ref-panel{box-shadow:0 28px 70px rgba(78,55,180,.22)}
 
+/* ── Welcome: премиальная карточка, шапка, поля ── */
+.sa-welcome-header{text-align:center;margin-bottom:26px}
+.sa-welcome-logo{filter:drop-shadow(0 10px 28px rgba(104,54,245,.4))}
+.sa-strategy-ui.dk .sa-welcome-brand{
+  font-size:clamp(26px,5vw,34px)!important;font-weight:800!important;letter-spacing:-0.04em!important;
+  margin:0 0 12px!important;line-height:1.08!important;padding:0 8px;
+  background:linear-gradient(180deg,#fff 0%,#c4b8e8 55%,#9088c4 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.sa-strategy-ui.lt .sa-welcome-brand{
+  font-size:clamp(26px,5vw,34px)!important;font-weight:800!important;letter-spacing:-0.04em!important;
+  margin:0 0 12px!important;color:var(--t1)!important;line-height:1.08!important;
+}
+.sa-welcome-tagline{font-size:14px!important;line-height:1.55!important;max-width:340px!important;margin:0 auto!important;color:var(--t3)!important}
+.sa-strategy-ui.dk .sa-ws-card-region .sa-ref-panel.sa-ws-panel,
+.sa-strategy-ui.dk .sa-ws-card-region [data-glow].glow-card.sa-ws-panel{
+  border-radius:26px!important;
+  padding:30px 26px 32px!important;
+  background:
+    linear-gradient(165deg,rgba(255,255,255,.07) 0%,transparent 50%),
+    linear-gradient(180deg,rgba(104,54,245,.16) 0%,transparent 38%),
+    linear-gradient(180deg,rgba(5,4,16,.95),rgba(8,6,22,.88))!important;
+  border:1px solid rgba(124,92,255,.32)!important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 1px 0 rgba(255,255,255,.07) inset,
+    0 36px 90px rgba(0,0,0,.62),
+    0 0 120px -40px rgba(104,54,245,.45)!important;
+}
+.sa-strategy-ui.lt .sa-ws-card-region .sa-ref-panel.sa-ws-panel,
+.sa-strategy-ui.lt .sa-ws-card-region [data-glow].glow-card.sa-ws-panel{
+  border-radius:26px!important;padding:30px 26px 32px!important;
+  background:linear-gradient(165deg,rgba(255,255,255,.95) 0%,rgba(248,246,255,.88) 100%)!important;
+  border:1px solid rgba(104,80,220,.2)!important;
+  box-shadow:0 28px 70px rgba(78,55,180,.18),0 0 0 1px rgba(255,255,255,.6) inset!important;
+}
+.sa-ws-cta-block .btn-p.lg{
+  box-shadow:0 8px 28px rgba(104,54,245,.45),0 0 40px rgba(139,92,246,.2)!important;
+  font-weight:700!important;letter-spacing:.02em!important;
+}
+.sa-ws-cta-block .btn-g.lg{border-color:rgba(255,255,255,.12)!important;background:rgba(255,255,255,.05)!important}
+.sa-strategy-ui.lt .sa-ws-cta-block .btn-g.lg{background:rgba(255,255,255,.72)!important;border-color:rgba(104,80,220,.14)!important}
+
 /* Сетка фич на welcome — как мини feat-card */
 .sa-ws-feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px}
 .sa-ws-feat{
@@ -1181,45 +1224,82 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
 .sa-ws-feat-rotator-ic{font-size:20px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 10px rgba(160,80,255,.2))}
 .sa-ws-feat-rotator-txt{font-size:14px;font-weight:600;color:var(--t2);letter-spacing:.01em;line-height:1.35;text-align:left}
 @keyframes sa-ws-feat-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-/* Кнопка «назад» в карточке welcome — текстовая, без светлой плашки */
+/* «Назад» в карточке — тёмное стекло, без белой плашки */
 .sa-ws-card-region .sa-ws-auth-back{
-  display:inline-flex;align-items:center;gap:6px;width:auto;max-width:100%;
-  margin:0 0 14px;padding:4px 2px;border:none;border-radius:8px;
-  background:transparent;color:var(--t3);font-size:12.5px;font-weight:500;letter-spacing:.01em;
-  cursor:pointer;font-family:inherit;text-align:left;line-height:1.35;
-  transition:color .2s,transform .2s;
+  display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;
+  margin:0 0 18px;padding:11px 14px;border-radius:14px;cursor:pointer;font-family:inherit;text-align:left;
+  border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.32);
+  color:var(--t2);font-size:13px;font-weight:500;letter-spacing:.01em;line-height:1.35;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:background .2s,border-color .2s,color .2s,box-shadow .2s;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset;
 }
-.sa-ws-card-region .sa-ws-auth-back:hover{background:transparent;color:var(--acc);border:none;transform:translateX(-1px)}
-.sa-ws-card-region .sa-ws-auth-back:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:6px}
+.sa-ws-card-region .sa-ws-auth-back:hover{
+  background:rgba(104,54,245,.14);border-color:rgba(124,92,255,.35);color:var(--t1);
+  box-shadow:0 0 24px rgba(104,54,245,.15);
+}
+.sa-ws-card-region .sa-ws-auth-back:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.sa-strategy-ui.lt .sa-ws-card-region .sa-ws-auth-back{
+  background:rgba(104,80,220,.06);border-color:rgba(104,80,220,.14);color:var(--t2);
+}
+.sa-strategy-ui.lt .sa-ws-card-region .sa-ws-auth-back:hover{background:rgba(104,54,245,.1);border-color:rgba(104,54,245,.28)}
 .sa-ws-auth-back{display:block;width:100%;margin-bottom:12px;padding:9px 12px;border-radius:12px;border:.5px solid var(--b1);background:var(--inp);color:var(--t3);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .18s,color .18s,border-color .18s}
 .sa-ws-auth-back:hover{background:var(--card2);color:var(--t2);border-color:var(--bh)}
-.sa-ws-welcome-divider{margin:6px 0 12px}
-.sa-ws-welcome-divider::before,.sa-ws-welcome-divider::after{opacity:.55}
-.sa-ws-welcome-divider span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.72}
-.sa-ws-card-region .sa-ws-feat-rotator{
-  min-height:44px;margin:0 0 4px;padding:10px 14px;
-  background:rgba(104,54,245,.07);border:1px solid rgba(104,54,245,.14);border-radius:14px;
+.sa-ws-welcome-divider{margin:4px 0 14px;gap:14px}
+.sa-ws-welcome-divider::before,.sa-ws-welcome-divider::after{
+  opacity:1;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(139,92,246,.35),transparent)!important;
 }
-.sa-strategy-ui.lt .sa-ws-card-region .sa-ws-feat-rotator{background:rgba(104,54,245,.06);border-color:rgba(104,80,220,.14)}
+.sa-ws-welcome-divider span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.55;color:var(--t3)}
+.sa-ws-card-region .sa-ws-feat-rotator{
+  min-height:48px;margin:0 0 6px;padding:12px 16px;
+  background:linear-gradient(135deg,rgba(104,54,245,.14),rgba(40,20,80,.25));
+  border:1px solid rgba(139,92,246,.22);border-radius:16px;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 8px 32px rgba(0,0,0,.2);
+}
+.sa-ws-card-region .sa-ws-feat-rotator-txt{color:var(--t1)!important;font-weight:600!important}
+.sa-strategy-ui.lt .sa-ws-card-region .sa-ws-feat-rotator{
+  background:linear-gradient(135deg,rgba(104,80,220,.1),rgba(255,255,255,.5));
+  border-color:rgba(104,80,220,.16);
+}
 .sa-ws-form-mode-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
 /* Единый pill-segmented для вкладок welcome */
-.sa-ws-seg-tabs{background:rgba(0,0,0,.14)!important;border:1px solid var(--b0)!important;border-radius:999px!important;padding:4px!important;gap:3px!important}
-.sa-strategy-ui.lt .sa-ws-seg-tabs{background:rgba(104,80,220,.06)!important;border-color:rgba(104,80,220,.12)!important}
-.sa-ws-seg-tabs .tab{font-size:12px;padding:7px 16px;border-radius:999px;border:none;background:transparent}
+.sa-ws-seg-tabs{background:rgba(0,0,0,.22)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:999px!important;padding:5px!important;gap:4px!important}
+.sa-strategy-ui.lt .sa-ws-seg-tabs{background:rgba(104,80,220,.07)!important;border-color:rgba(104,80,220,.12)!important}
+.sa-ws-seg-tabs .tab{font-size:12px;padding:8px 18px;border-radius:999px;border:none;background:transparent;color:var(--t3)}
+.sa-ws-seg-tabs .tab:hover{color:var(--t2)}
 .sa-ws-seg-tabs .tab.on{
-  background:linear-gradient(145deg,rgba(104,54,245,.35),rgba(160,80,255,.22))!important;
-  color:#f0edff!important;font-weight:600!important;
-  box-shadow:0 2px 12px rgba(104,54,245,.35),inset 0 1px 0 rgba(255,255,255,.12)!important;
+  background:linear-gradient(145deg,#7c3aed,#a050ff)!important;
+  color:#fff!important;font-weight:600!important;
+  box-shadow:0 4px 20px rgba(104,54,245,.45),inset 0 1px 0 rgba(255,255,255,.18)!important;
 }
 .sa-strategy-ui.lt .sa-ws-seg-tabs .tab.on{
-  background:rgba(255,255,255,.95)!important;color:var(--acc)!important;
-  box-shadow:0 2px 10px rgba(104,54,245,.18)!important;
+  background:linear-gradient(145deg,#6836f5,#a050ff)!important;color:#fff!important;
+  box-shadow:0 4px 16px rgba(104,54,245,.28)!important;
 }
 .sa-ws-auth-toolbar{align-items:flex-start}
-.sa-ws-auth-form .modal-inp{margin-bottom:12px;border-radius:14px;padding:12px 14px;font-size:13.5px}
-.sa-ws-auth-form .modal-btn{margin-top:6px;border-radius:999px}
+.sa-ws-auth-form .modal-inp{
+  margin-bottom:12px;border-radius:14px;padding:13px 15px;font-size:14px;
+  background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.1)!important;
+  transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.sa-strategy-ui.lt .sa-ws-auth-form .modal-inp{background:rgba(255,255,255,.72)!important;border-color:rgba(104,80,220,.14)!important}
+.sa-ws-auth-form .modal-inp:focus{
+  border-color:rgba(139,92,246,.55)!important;
+  box-shadow:0 0 0 3px rgba(104,54,245,.14),0 0 28px rgba(104,54,245,.12)!important;
+}
+.sa-ws-auth-form .modal-btn{
+  margin-top:10px;border-radius:999px;font-weight:700!important;letter-spacing:.02em!important;
+  box-shadow:0 10px 36px rgba(104,54,245,.48),0 0 48px rgba(139,92,246,.22)!important;
+  transition:transform .18s,box-shadow .2s!important;
+}
+.sa-ws-auth-form .modal-btn:hover:not(:disabled){
+  transform:translateY(-1px);
+  box-shadow:0 14px 44px rgba(104,54,245,.55),0 0 56px rgba(139,92,246,.28)!important;
+}
 .sa-ws-contact-form textarea{margin-bottom:0}
-.sa-ws-auth-form-wrap{border-top:none;padding-top:2px;margin-top:12px}
+.sa-ws-auth-form-wrap{border-top:none;padding-top:4px;margin-top:8px}
+.sa-welcome-footer-terms{text-align:center;margin-top:22px!important;margin-bottom:0!important;font-size:11.5px!important;line-height:1.45!important;opacity:.72!important;max-width:360px!important;margin-left:auto!important;margin-right:auto!important}
 .sa-ws-phase-enter{animation:sa-ws-phase-in .38s cubic-bezier(.22,1,.36,1) both}
 .sa-ws-cta-block{animation:sa-ws-phase-in .26s cubic-bezier(.22,1,.36,1) both}
 @keyframes sa-ws-phase-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
