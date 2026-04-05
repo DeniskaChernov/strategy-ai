@@ -6777,14 +6777,15 @@ function WelcomeScreen({onAuth,onBack,theme}){
     return()=>clearTimeout(id);
   },[phase]);
   return(
-    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
+    <div className={"sa-strategy-ui sa-welcome-screen "+(theme==="dark"?"dk":"lt")} data-theme={theme}>
       <StrategyShellBg/>
       {cosmic&&(
         <div className="sa-welcome-sparkles" style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}} aria-hidden>
           <SparklesCanvas density={180} speed={0.32} minSz={0.25} maxSz={1.1} color="#e8e4ff" style={{opacity:.38}}/>
         </div>
       )}
-      <button type="button" className="btn-g sa-welcome-topbar-back" onClick={onBack} style={{position:"absolute",top:20,left:20,zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
+      <button type="button" className="btn-g sa-welcome-topbar-back" onClick={onBack} style={{position:"fixed",top:"max(20px, env(safe-area-inset-top))",left:"max(20px, env(safe-area-inset-left))",zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
+      <div className="sa-welcome-scroll">
       <main id="sa-welcome-main" className="sa-welcome-main" style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         <div className="sa-welcome-header">
           <img src="/logo.png" alt="" width={80} height={80} className="sa-welcome-logo" style={{objectFit:"contain",margin:"0 auto 16px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
@@ -6835,6 +6836,7 @@ function WelcomeScreen({onAuth,onBack,theme}){
           {phase==="form"&&welcomeForm==="contact"?t("ws_contact_terms","Нажимая «Отправить», вы соглашаетесь с обработкой данных для ответа на обращение."):t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")}
         </p>
       </main>
+      </div>
     </div>
   );
 }

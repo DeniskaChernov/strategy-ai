@@ -1164,6 +1164,37 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
   margin:0 0 12px!important;color:var(--t1)!important;line-height:1.08!important;
 }
 .sa-welcome-tagline{font-size:14px!important;line-height:1.55!important;max-width:340px!important;margin:0 auto!important;color:var(--t3)!important}
+/* WelcomeScreen: колонка на высоту вьюпорта; длинный контент (форма «Связаться») прокручивается внутри */
+.sa-welcome-screen{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  position:relative;
+  height:100vh;
+  height:100dvh;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.sa-welcome-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  display:flex;
+  flex-direction:row;
+  justify-content:center;
+  align-items:flex-start;
+  padding-top:max(8px,env(safe-area-inset-top));
+  padding-bottom:max(16px,env(safe-area-inset-bottom));
+  padding-left:max(16px,env(safe-area-inset-left));
+  padding-right:max(16px,env(safe-area-inset-right));
+  box-sizing:border-box;
+}
 .sa-strategy-ui.dk .sa-ws-card-region .sa-ref-panel.sa-ws-panel,
 .sa-strategy-ui.dk .sa-ws-card-region [data-glow].glow-card.sa-ws-panel{
   border-radius:26px!important;

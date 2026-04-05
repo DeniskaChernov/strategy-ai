@@ -191,7 +191,7 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
         >
           {t("contact_title", "Давайте на связи")}
         </h2>
-        <p style={{ fontSize: 14, color: "var(--t3)", lineHeight: 1.55, margin: "0 0 40px" }}>
+        <p style={{ fontSize: 14, color: "var(--t3)", lineHeight: 1.55, margin: "0 0 24px" }}>
           {t("contact_or_write", "Или напишите на")}{" "}
           <a href="mailto:hello@strategy.ai" style={{ color: "var(--acc)", fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 3 }}>
             hello@strategy.ai
