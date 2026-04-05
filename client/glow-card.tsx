@@ -69,7 +69,7 @@ export function GlowCard({
       window.removeEventListener("resize", syncCenter);
       window.removeEventListener("orientationchange", syncCenter);
     };
-  }, [base, spread]);
+  }, []);
 
   useEffect(() => {
     return subscribeGlowPointer((p) => {
@@ -79,34 +79,33 @@ export function GlowCard({
       el.style.setProperty("--xp", (p.x / Math.max(window.innerWidth, 1)).toFixed(4));
       el.style.setProperty("--y", p.y.toFixed(2));
       el.style.setProperty("--yp", (p.y / Math.max(window.innerHeight, 1)).toFixed(4));
+
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
+      const inside = p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom;
+      if (inside) {
+        el.style.setProperty("--lx", `${(p.x - r.left).toFixed(1)}px`);
+        el.style.setProperty("--ly", `${(p.y - r.top).toFixed(1)}px`);
+      } else {
+        el.style.setProperty("--lx", `${Math.round(r.width / 2)}px`);
+        el.style.setProperty("--ly", `${Math.round(r.height / 2)}px`);
+      }
     });
   }, []);
 
-  /** Локальные координаты курсора для слоя spotlight — не смешивать с backdrop-filter на корне. */
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
-    const setCenter = () => {
+    const syncLocalCenter = () => {
       const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) return;
       el.style.setProperty("--lx", `${Math.round(r.width / 2)}px`);
       el.style.setProperty("--ly", `${Math.round(r.height / 2)}px`);
     };
-    const onMove = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty("--lx", `${(e.clientX - r.left).toFixed(1)}px`);
-      el.style.setProperty("--ly", `${(e.clientY - r.top).toFixed(1)}px`);
-    };
-    const onLeave = () => setCenter();
-    el.addEventListener("pointermove", onMove);
-    el.addEventListener("pointerleave", onLeave);
-    setCenter();
-    const ro = new ResizeObserver(() => setCenter());
+    const ro = new ResizeObserver(syncLocalCenter);
     ro.observe(el);
-    return () => {
-      el.removeEventListener("pointermove", onMove);
-      el.removeEventListener("pointerleave", onLeave);
-      ro.disconnect();
-    };
+    syncLocalCenter();
+    return () => ro.disconnect();
   }, []);
 
   const getInlineStyles = (): CSSProperties => {
