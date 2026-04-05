@@ -44,7 +44,10 @@ export function GlowCard({
   ...rest
 }: GlowCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const { ref: _refIgnored, ...domRest } = rest as typeof rest & { ref?: React.Ref<HTMLDivElement | null> };
+  const { ref: _refIgnored, style: _styleIgnored, ...domRest } = rest as typeof rest & {
+    ref?: React.Ref<HTMLDivElement | null>;
+    style?: CSSProperties;
+  };
   const { base, spread } = glowColorMap[glowColor];
   const sz = sizePx[size];
 
