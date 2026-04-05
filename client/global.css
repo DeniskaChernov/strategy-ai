@@ -266,6 +266,32 @@ body:has(.sa-ref-landing) .screen-wrap{
   margin-right:auto !important;
   box-sizing:border-box;
 }
+/* Плавающий pill-навбар (AnimatedLandingNav, framer-motion) */
+.sa-ref-landing .sa-animated-nav-pill{
+  position:relative;
+}
+.sa-ref-landing .sa-animated-nav-links--disabled{
+  pointer-events:none;
+}
+.sa-ref-landing .sa-animated-nav-link{
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  font-size:clamp(11px,1.15vw,14px);
+  font-weight:600;
+  color:var(--t2);
+  padding:6px 8px;
+  border-radius:8px;
+  white-space:nowrap;
+  font-family:inherit;
+}
+.sa-ref-landing .sa-animated-nav-link:hover{
+  color:var(--t1);
+  background:rgba(104,54,245,.12);
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-animated-nav-link:hover{
+  background:rgba(104,54,245,.08);
+}
 /* Навбар на всю ширину вьюпорта (раньше max-width:960 + центр давали «поля» и сдвиг) */
 #land-nav-fixed{
   top:0 !important;

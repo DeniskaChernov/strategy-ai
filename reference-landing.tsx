@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { StrategyShellBg } from "./strategy-shell-sidebar";
 import { LandingStarsCanvas } from "./client/landing-stars-canvas";
+import { AnimatedLandingNav } from "./client/animated-landing-nav";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -32,7 +33,6 @@ export function ReferenceLandingView({
   onGetStarted: () => void;
 }){
   const rootRef = useRef<HTMLDivElement>(null);
-  const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const testimonials = [TESTI1, TESTI2, TESTI3];
   const testiTrackRef = useRef<HTMLDivElement>(null);
@@ -78,20 +78,6 @@ export function ReferenceLandingView({
     };
   }, [syncTestiActive]);
 
-  useEffect(() => {
-    /* Скролл только у .sa-ref-landing; body остаётся overflow:hidden (#root) — иначе два вертикальных скролла */
-    const el = rootRef.current;
-    const onScroll = () => {
-      const top = el ? el.scrollTop : 0;
-      setNavScrolled(top > 60);
-    };
-    onScroll();
-    el?.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      el?.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-
   const dk = theme === "dark" ? "dk" : "lt";
   const feats = [
     { icon: "🗺️", titleKey: "ref_feat_maps_t", titleFb: "Визуальные карты стратегии", descKey: "ref_feat_maps_d", descFb: "Узлы целей, инициатив, KPI, задач и рисков. Типизированные связи между узлами." },
@@ -129,34 +115,20 @@ export function ReferenceLandingView({
     <div ref={rootRef} className={`sa-ref-landing sa-strategy-ui sa-landing-shell ${dk} view on sa-v-landing`} style={{ position: "fixed", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "stretch", overflowY: "auto", overflowX: "hidden", fontFamily: "'Inter',system-ui,sans-serif" }}>
       <StrategyShellBg/>
       <LandingStarsCanvas theme={theme} />
-      <nav id="land-nav-fixed" className={navScrolled ? "scrolled" : ""} style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 600 }}>
-        <div className="land-logo">
-          <div className="land-gem">SA</div>
-          <span className="land-brand">Strategy AI</span>
-        </div>
-        <div className="land-nav-links">
-          <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-features")} onKeyDown={e=>{if(e.key==="Enter")scrollToId("land-features");}}>{t("nav_features", "Возможности")}</span>
-          <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-how")} onKeyDown={e=>{if(e.key==="Enter")scrollToId("land-how");}}>{t("nav_process", "Как это работает")}</span>
-          <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-pricing")} onKeyDown={e=>{if(e.key==="Enter")scrollToId("land-pricing");}}>{t("nav_pricing", "Тарифы")}</span>
-          <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-faq")} onKeyDown={e=>{if(e.key==="Enter")scrollToId("land-faq");}}>{t("nav_faq", "FAQ")}</span>
-        </div>
-        <div className="land-nav-r">
-          <div style={{ display: "flex", background: "var(--inp)", border: ".5px solid var(--b1)", borderRadius: 22, padding: 3, gap: 1 }}>
-            {(["en","ru","uz"] as const).map(code=>(
-              <button key={code} type="button" className={`land-lang-btn${lang === code ? " on" : ""}`} onClick={()=>onChangeLang(code)}>{code.toUpperCase()}</button>
-            ))}
-          </div>
-          <div className="tpill" onClick={onToggleTheme} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onToggleTheme();}} aria-label={t("toggle_theme", "Тема")}>
-            <div className={`tpi${theme==="dark"?" on":""}`}>☽</div>
-            <div className={`tpi${theme==="light"?" on":""}`}>☀</div>
-          </div>
-          <button type="button" className="btn-g" onClick={onSignIn}>{t("sign_in", "Войти")}</button>
-          <button type="button" className="btn-p" onClick={onGetStarted}>{t("nav_getstarted", "Начать бесплатно")}</button>
-        </div>
-      </nav>
+      <AnimatedLandingNav
+        scrollRootRef={rootRef}
+        t={t}
+        lang={lang}
+        onChangeLang={onChangeLang}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
+        onSignIn={onSignIn}
+        onGetStarted={onGetStarted}
+        scrollToId={scrollToId}
+      />
 
       <div className="land-inner" style={{ position: "relative", zIndex: 5 }}>
-        <div className="land-nav-spacer" />
+        <div className="land-nav-spacer"/>
 
         <div className="hero" id="hero-section">
           <div className="hero-badge">
