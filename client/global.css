@@ -320,8 +320,9 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   padding:10px 24px !important;
 }
 .sa-ref-landing .features-grid{
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr)) !important;
-  gap:22px !important;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr)) !important;
+  align-items:start !important;
+  gap:20px !important;
 }
 .sa-ref-landing .testi-glass-wrap{
   max-width:min(960px,100%);
@@ -813,10 +814,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   inset:calc(var(--border-size)*-1);
   border:var(--border-size) solid transparent;
   border-radius:calc(var(--radius,16)*1px);
-  background-attachment:fixed;
-  background-size:calc(100% + (2*var(--border-size))) calc(100% + (2*var(--border-size)));
   background-repeat:no-repeat;
-  background-position:50% 50%;
   mask:linear-gradient(transparent,transparent),linear-gradient(#fff,#fff);
   mask-clip:padding-box,border-box;
   -webkit-mask:linear-gradient(transparent,transparent),linear-gradient(#fff,#fff);
@@ -824,10 +822,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   mask-composite:intersect;
   -webkit-mask-composite:source-in;
 }
+/* Центр градиента — локальные --lx/--ly (как у .glow-card-spotlight), не вьюпортные --x/--y:
+   иначе «пятно» рисуется за пределами карточки и визуально прилипает к верхнему левому углу. */
 [data-glow].glow-card::before{
   background-image:radial-gradient(
     calc(var(--spotlight-size)*0.75) calc(var(--spotlight-size)*0.75) at
-    calc(var(--x,0)*1px) calc(var(--y,0)*1px),
+    var(--lx,50%) var(--ly,50%),
     hsl(var(--hue) calc(var(--saturation,100)*1%) calc(var(--lightness,50)*1%) / var(--border-spot-opacity,.85)),transparent 100%
   );
   filter:brightness(2);
@@ -835,7 +835,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 [data-glow].glow-card::after{
   background-image:radial-gradient(
     calc(var(--spotlight-size)*0.5) calc(var(--spotlight-size)*0.5) at
-    calc(var(--x,0)*1px) calc(var(--y,0)*1px),
+    var(--lx,50%) var(--ly,50%),
     hsl(0 100% 100% / var(--border-light-opacity,.35)),transparent 100%
   );
 }

@@ -237,7 +237,14 @@ export function ReferenceLandingView({
                 customSize
                 width="100%"
                 className="feat-card sr sr-up in"
-                style={{ display: "flex", flexDirection: "column", gap: 0, padding: 24, height: "100%", boxSizing: "border-box" }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0,
+                  padding: 20,
+                  boxSizing: "border-box",
+                  alignSelf: "start",
+                }}
               >
                 <div className="feat-card-glow"/>
                 <div className="feat-icon">{f.icon}</div>
