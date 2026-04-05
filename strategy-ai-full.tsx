@@ -6785,15 +6785,15 @@ function WelcomeScreen({onAuth,onBack,theme}){
         </div>
       )}
       <button type="button" className="btn-g sa-welcome-topbar-back" onClick={onBack} style={{position:"fixed",top:"max(20px, env(safe-area-inset-top))",left:"max(20px, env(safe-area-inset-left))",zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
-      <div className="sa-welcome-scroll">
-      <main id="sa-welcome-main" className="sa-welcome-main" style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
+      <div className="sa-welcome-body">
+      <main id="sa-welcome-main" className={"sa-welcome-main"+(phase==="form"&&welcomeForm==="contact"?" sa-welcome-main--contact-fit":"")} style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
         <div className="sa-welcome-header">
           <img src="/logo.png" alt="" width={80} height={80} className="sa-welcome-logo" style={{objectFit:"contain",margin:"0 auto 16px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
           <h1 id="welcome-brand-title" className="modal-title sa-welcome-brand">{t("app_name","Strategy AI")}</h1>
           <p className="modal-sub sa-welcome-tagline">{phase==="form"&&welcomeForm==="contact"?t("ws_subtitle_contact","Напишите нам — ответим в рабочие часы"):t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
         </div>
         <div role="region" aria-labelledby="welcome-brand-title" className="sa-ws-card-region">
-          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ws-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
+          <GlowCard panelVariant glowColor="accent" customSize width="100%" className={"sa-ref-panel sa-ws-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1"+(phase==="form"&&welcomeForm==="contact"?" sa-ws-panel--contact-fit":"")}>
             {phase==="cta"&&(
               <div ref={ctaRef} className="sa-ws-cta-block" style={{display:"flex",flexDirection:"column",gap:14,marginBottom:16}}>
                 <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setWelcomeForm("auth");setAuthTab("register");setPhase("form");}}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
@@ -6805,7 +6805,9 @@ function WelcomeScreen({onAuth,onBack,theme}){
               <button type="button" className="sa-ws-auth-back" onClick={()=>{setPhase("cta");setWelcomeForm("auth");}}>{t("ws_back_choice","← К кнопкам")}</button>
             )}
             <div className="modal-divider sa-ws-welcome-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
-            <WelcomeFeatureRotator items={featItems} reducedMotion={reducedMotion}/>
+            {!(phase==="form"&&welcomeForm==="contact")&&(
+              <WelcomeFeatureRotator items={featItems} reducedMotion={reducedMotion}/>
+            )}
             {phase==="form"&&(
               <div className="sa-ws-auth-form-wrap sa-ws-phase-enter">
                 <div className="sa-ws-form-mode-row">
@@ -6819,6 +6821,7 @@ function WelcomeScreen({onAuth,onBack,theme}){
                 ):(
                   <ContactFormEmbedded
                     t={t}
+                    compact
                     titleId="welcome-contact-title"
                     fieldIdPrefix="welcome-contact"
                     onSubmit={(data)=>{

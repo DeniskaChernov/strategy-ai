@@ -123,6 +123,8 @@ type ContactFormCosmicProps = {
 type ContactFormEmbeddedProps = {
   t: TFn;
   onSubmit?: (data: { name: string; email: string; message: string }) => void | Promise<void>;
+  /** Компактная вёрстка для Welcome (влезает в экран без прокрутки) */
+  compact?: boolean;
   /** id для заголовка блока (a11y) */
   titleId?: string;
   /** префикс id полей, чтобы не конфликтовать с другими формами */
@@ -154,21 +156,41 @@ function useContactSubmitState(
 }
 
 /** Форма связи для WelcomeScreen: без отдельного фона, внутри GlowCard. */
-export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-title", fieldIdPrefix = "welcome-contact" }: ContactFormEmbeddedProps) {
+export function ContactFormEmbedded({
+  t,
+  onSubmit,
+  compact = false,
+  titleId = "welcome-contact-title",
+  fieldIdPrefix = "welcome-contact",
+}: ContactFormEmbeddedProps) {
   const { focus, setFocus, loading, handleSubmit } = useContactSubmitState(onSubmit);
   const rowFocus = (k: "name" | "email") => focus === k;
   const pid = fieldIdPrefix;
+  const rowGap = compact ? 8 : 16;
+  const lblGap = compact ? 8 : 16;
+  const inpRowC = (focused: boolean) =>
+    ({
+      ...inpRow(focused),
+      marginBottom: rowGap,
+      ...(compact ? { height: 34, minHeight: 34, padding: "0 10px" } : {}),
+    }) as React.CSSProperties;
+  const textareaStyleC = (focused: boolean) => ({
+    ...textareaStyle(focused),
+    minHeight: compact ? 52 : 96,
+    marginTop: compact ? 4 : 8,
+    marginBottom: compact ? 2 : 4,
+  });
 
   return (
-    <div className="sa-ws-contact-form sa-ws-auth-form" style={{ maxWidth: 384, width: "100%", margin: "0 auto" }}>
-      <div style={{ textAlign: "center", marginBottom: 0 }}>
+    <div className={"sa-ws-contact-form sa-ws-auth-form"+(compact?" sa-ws-contact-form--compact":"")} style={{ maxWidth: 384, width: "100%", margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: compact ? 4 : 0 }}>
         <p
           className="sa-ws-contact-badge"
           style={{
             display: "inline-block",
-            fontSize: 12,
+            fontSize: compact ? 11 : 12,
             fontWeight: 600,
-            padding: "6px 12px",
+            padding: compact ? "4px 10px" : "6px 12px",
             borderRadius: 999,
             background: "color-mix(in srgb, var(--acc) 18%, var(--bg))",
             color: "var(--acc)",
@@ -182,16 +204,16 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
           tabIndex={-1}
           className="modal-title"
           style={{
-            fontSize: "clamp(28px, 6vw, 36px)",
+            fontSize: compact ? "clamp(18px, 4.2vw, 24px)" : "clamp(28px, 6vw, 36px)",
             fontWeight: 700,
             letterSpacing: "-0.02em",
-            margin: "16px 0",
+            margin: compact ? "6px 0 4px" : "16px 0",
             lineHeight: 1.15,
           }}
         >
           {t("contact_title", "Давайте на связи")}
         </h2>
-        <p style={{ fontSize: 14, color: "var(--t3)", lineHeight: 1.55, margin: "0 0 24px" }}>
+        <p style={{ fontSize: compact ? 12 : 14, color: "var(--t3)", lineHeight: 1.45, margin: compact ? "0 0 10px" : "0 0 24px" }}>
           {t("contact_or_write", "Или напишите на")}{" "}
           <a href="mailto:hello@strategy.ai" style={{ color: "var(--acc)", fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 3 }}>
             hello@strategy.ai
@@ -200,10 +222,10 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
       </div>
 
       <form onSubmit={handleSubmit}>
-        <label htmlFor={`${pid}-name`} style={{ ...fieldLbl, marginTop: 0 }}>
+        <label htmlFor={`${pid}-name`} style={{ ...fieldLbl, marginTop: 0, fontSize: compact ? 12 : 14, marginBottom: compact ? 4 : 8 }}>
           {t("contact_label_fullname", "Полное имя")}
         </label>
-        <div className="sa-ws-contact-field-wrap" style={inpRow(rowFocus("name"))}>
+        <div className="sa-ws-contact-field-wrap" style={inpRowC(rowFocus("name"))}>
           <FieldIconUser />
           <input
             id={`${pid}-name`}
@@ -218,10 +240,10 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
           />
         </div>
 
-        <label htmlFor={`${pid}-email`} style={{ ...fieldLbl, marginTop: 16 }}>
+        <label htmlFor={`${pid}-email`} style={{ ...fieldLbl, marginTop: lblGap, fontSize: compact ? 12 : 14, marginBottom: compact ? 4 : 8 }}>
           {t("contact_label_email", "Email")}
         </label>
-        <div style={inpRow(rowFocus("email"))}>
+        <div className={compact ? "sa-ws-contact-field-wrap" : undefined} style={inpRowC(rowFocus("email"))}>
           <FieldIconMail />
           <input
             id={`${pid}-email`}
@@ -236,17 +258,17 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
           />
         </div>
 
-        <label htmlFor={`${pid}-message`} style={{ ...fieldLbl, marginTop: 16 }}>
+        <label htmlFor={`${pid}-message`} style={{ ...fieldLbl, marginTop: lblGap, fontSize: compact ? 12 : 14, marginBottom: compact ? 4 : 8 }}>
           {t("contact_label_message", "Сообщение")}
         </label>
         <textarea
           id={`${pid}-message`}
           name="message"
-          rows={4}
+          rows={compact ? 2 : 4}
           required
           className="sa-ws-contact-textarea"
           placeholder={t("contact_placeholder_msg", "Кратко опишите запрос")}
-          style={textareaStyle(focus === "message")}
+          style={textareaStyleC(focus === "message")}
           onFocus={() => setFocus("message")}
           onBlur={() => setFocus(null)}
         />
@@ -260,7 +282,9 @@ export function ContactFormEmbedded({ t, onSubmit, titleId = "welcome-contact-ti
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            marginTop: 20,
+            marginTop: compact ? 10 : 20,
+            minHeight: compact ? 40 : undefined,
+            padding: compact ? "10px 16px" : undefined,
             borderRadius: 9999,
             cursor: loading ? "wait" : "pointer",
             opacity: loading ? 0.65 : 1,
