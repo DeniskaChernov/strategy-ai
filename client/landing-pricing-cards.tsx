@@ -20,7 +20,7 @@ export type LandingTier = {
 
 type Props = {
   t: TFn;
-  theme: string;
+  theme?: string;
   tierStrip: LandingTier[];
   onGetStarted: () => void;
 };
@@ -46,9 +46,7 @@ function parseFeatures(t: TFn, id: LandingTier["id"]): string[] {
   return raw.split("|").map((s) => s.trim()).filter(Boolean);
 }
 
-export function LandingPricingCards({ t, theme, tierStrip, onGetStarted }: Props) {
-  const lt = theme === "light";
-
+export function LandingPricingCards({ t, tierStrip, onGetStarted }: Props) {
   return (
     <div className="sa-lp-grid">
       {tierStrip.map((x) => {
@@ -78,24 +76,17 @@ export function LandingPricingCards({ t, theme, tierStrip, onGetStarted }: Props
             className={"sa-lp-card" + (isPro ? " sa-lp-card--popular" : "")}
             aria-labelledby={titleId}
           >
-            {isPro && (
-              <>
-                <span className="sa-lp-sr-only">{t("ref_pricing_popular_plan", "Популярный тариф.")}</span>
-                <div className="sa-lp-pop-badge" aria-hidden>
-                  {t("pricing_hot_badge", "★ ТОП")}
-                </div>
-              </>
-            )}
-
-            <div className={"sa-lp-card__mesh" + (lt ? " sa-lp-card__mesh--lt" : "")} aria-hidden />
-
-            {isPro && (
-              <div className="sa-lp-spin" aria-hidden>
-                <div className="sa-lp-spin__beam" />
-              </div>
-            )}
-
             <div className="sa-lp-card__inner">
+              <div className={"sa-lp-badge-row" + (isPro ? " sa-lp-badge-row--active" : "")}>
+                {isPro && (
+                  <>
+                    <span className="sa-lp-sr-only">{t("ref_pricing_popular_plan", "Популярный тариф.")}</span>
+                    <div className="sa-lp-pop-badge" role="status">
+                      {t("pricing_hot_badge", "★ ТОП")}
+                    </div>
+                  </>
+                )}
+              </div>
               <div className="sa-lp-head">
                 <div
                   className="sa-lp-icon"
@@ -104,7 +95,7 @@ export function LandingPricingCards({ t, theme, tierStrip, onGetStarted }: Props
                     background: `linear-gradient(145deg, ${x.color}22, ${x.color}08)`,
                   }}
                 >
-                  <Icon size={22} strokeWidth={1.75} color={x.color} aria-hidden />
+                  <Icon size={24} strokeWidth={1.75} color={x.color} aria-hidden />
                 </div>
                 <div className="sa-lp-head-text">
                   <h3 id={titleId} className="sa-lp-name">
@@ -126,7 +117,7 @@ export function LandingPricingCards({ t, theme, tierStrip, onGetStarted }: Props
                 {features.map((line, idx) => (
                   <li key={idx}>
                     <span className="sa-lp-check" aria-hidden>
-                      <Check size={11} strokeWidth={3} />
+                      <Check size={12} strokeWidth={2.75} />
                     </span>
                     <span>{line}</span>
                   </li>

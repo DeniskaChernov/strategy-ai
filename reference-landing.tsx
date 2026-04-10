@@ -419,7 +419,7 @@ export function ReferenceLandingView({
               <div className="tier-h">{t("ref_tiers_line", "Линейка тарифов")}</div>
               <div className="tier-s">{t("ref_tiers_note", "Полные лимиты по проектам, картам и AI — в разделе «Учётная запись» после входа.")}</div>
             </div>
-            <LandingPricingCards t={t} theme={theme} tierStrip={tierStrip} onGetStarted={onGetStarted} />
+            <LandingPricingCards t={t} tierStrip={tierStrip} onGetStarted={onGetStarted} />
           </div>
         </section>
 
