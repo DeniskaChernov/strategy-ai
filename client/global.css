@@ -396,6 +396,18 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   padding-bottom:18px;
   will-change:transform;
 }
+@keyframes sa-testi-marquee{
+  from{transform:translate3d(0,0,0);}
+  to{transform:translate3d(0,-50%,0);}
+}
+.sa-ref-landing .testi-col__track--marquee{
+  animation:sa-testi-marquee var(--testi-marquee-dur,20s) linear infinite;
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .testi-col__track--marquee{
+    animation:none!important;
+  }
+}
 .sa-ref-landing .testi-col__card{
   flex-shrink:0;
   padding:22px 20px 20px;

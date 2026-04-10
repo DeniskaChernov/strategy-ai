@@ -1,5 +1,4 @@
 import React from "react";
-import { motion, useReducedMotion } from "framer-motion";
 
 export type LandingTestimonialColumnItem = {
   text: string;
@@ -16,7 +15,6 @@ type ColumnProps = {
 };
 
 export function TestimonialsColumn({ className = "", testimonials, duration = 14 }: ColumnProps) {
-  const reduce = useReducedMotion();
   if (testimonials.length === 0) return null;
 
   const blocks = [0, 1].map((blockIdx) => (
@@ -42,17 +40,11 @@ export function TestimonialsColumn({ className = "", testimonials, duration = 14
   ));
 
   return (
-    <div className={"testi-col " + className}>
-      <motion.div
-        className="testi-col__track"
-        initial={false}
-        animate={reduce ? { y: "0%" } : { y: ["0%", "-50%"] }}
-        transition={
-          reduce ? { duration: 0 } : { duration, repeat: Infinity, ease: "linear" }
-        }
-      >
-        {blocks}
-      </motion.div>
+    <div
+      className={"testi-col " + className}
+      style={{ ["--testi-marquee-dur"]: `${duration}s` } as React.CSSProperties}
+    >
+      <div className="testi-col__track testi-col__track--marquee">{blocks}</div>
     </div>
   );
 }
