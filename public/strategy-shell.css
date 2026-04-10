@@ -342,6 +342,7 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
 .btn-g.lg{height:48px;font-size:14px;padding:0 24px;border-radius:28px}
 .sa-strategy-ui.lt .btn-p{box-shadow:0 4px 16px rgba(104,54,245,.3)}
 .tpill{display:flex;background:var(--inp);border:.5px solid var(--b1);border-radius:20px;padding:3px;gap:1px;cursor:pointer}
+button.tpill{font:inherit;color:inherit;text-align:inherit}
 .tpi{width:22px;height:22px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--t3);transition:all .2s}
 .tpi.on{background:rgba(104,54,245,.18);color:var(--acc)}
 
@@ -1320,8 +1321,31 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
   box-shadow:0 14px 44px rgba(104,54,245,.55),0 0 56px rgba(139,92,246,.28)!important;
 }
 .sa-ws-contact-form textarea{margin-bottom:0}
-.sa-ws-auth-form-wrap{border-top:none;padding-top:4px;margin-top:8px}
-.sa-welcome-footer-terms{text-align:center;margin-top:22px!important;margin-bottom:0!important;font-size:11.5px!important;line-height:1.45!important;opacity:.72!important;max-width:360px!important;margin-left:auto!important;margin-right:auto!important}
+.sa-ws-auth-form-wrap{
+  border-top:.5px solid rgba(255,255,255,.1);
+  padding-top:16px;
+  margin-top:14px;
+}
+.sa-strategy-ui.lt .sa-ws-auth-form-wrap{
+  border-top-color:rgba(104,80,220,.14);
+}
+.sa-welcome-footer-terms{
+  text-align:center;
+  margin-top:22px!important;
+  margin-bottom:0!important;
+  font-size:12px!important;
+  line-height:1.5!important;
+  max-width:380px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  opacity:1!important;
+}
+.sa-strategy-ui.dk .sa-welcome-footer-terms{
+  color:rgba(196,192,224,.88)!important;
+}
+.sa-strategy-ui.lt .sa-welcome-footer-terms{
+  color:rgba(72,62,120,.78)!important;
+}
 .sa-ws-phase-enter{animation:sa-ws-phase-in .38s cubic-bezier(.22,1,.36,1) both}
 .sa-ws-cta-block{animation:sa-ws-phase-in .26s cubic-bezier(.22,1,.36,1) both}
 @keyframes sa-ws-phase-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}

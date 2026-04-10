@@ -363,6 +363,171 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   margin-left:auto;
   margin-right:auto;
 }
+/* Карусель отзывов: горизонтальный скролл + стрелки по краям (стили классов раньше отсутствовали) */
+.sa-ref-landing .testi-glass-viewport{
+  position:relative;
+  display:block;
+  width:100%;
+}
+.sa-ref-landing .testi-glass-track{
+  display:flex;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  gap:0;
+  width:100%;
+  min-width:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  padding:6px clamp(44px,5vw,52px) 14px;
+  box-sizing:border-box;
+  scrollbar-width:thin;
+}
+.sa-ref-landing .testi-glass-track::-webkit-scrollbar{
+  height:5px;
+}
+.sa-ref-landing .testi-glass-track::-webkit-scrollbar-thumb{
+  background:rgba(104,54,245,.35);
+  border-radius:99px;
+}
+.sa-ref-landing .testi-glass-slide{
+  flex:0 0 100%;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  scroll-snap-align:center;
+  scroll-snap-stop:always;
+  box-sizing:border-box;
+  padding:0 8px;
+  display:flex;
+  justify-content:center;
+}
+.sa-ref-landing .testi-glass-card{
+  width:100%;
+  max-width:520px;
+  background:var(--card);
+  backdrop-filter:blur(20px);
+  border:.5px solid var(--b1);
+  border-radius:18px;
+  padding:20px 22px 18px;
+  box-shadow:var(--shc);
+  box-sizing:border-box;
+  text-align:left;
+}
+.sa-strategy-ui.lt .sa-ref-landing .testi-glass-card{
+  background:rgba(255,255,255,.78);
+  border-color:rgba(104,80,220,.16);
+}
+.sa-ref-landing .testi-glass-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px 14px;
+  margin-bottom:10px;
+}
+.sa-ref-landing .testi-glass-quote{
+  font-size:26px;
+  line-height:1;
+  font-family:Georgia,"Times New Roman",serif;
+  color:var(--acc);
+  opacity:.9;
+}
+.sa-ref-landing .testi-glass-card .testi-stars{
+  margin:0;
+  font-size:13px;
+  letter-spacing:2px;
+  color:var(--amber);
+}
+.sa-ref-landing .testi-glass-card .testi-text{
+  margin:0 0 16px;
+  font-size:14px;
+  line-height:1.65;
+  color:var(--t2);
+  font-style:italic;
+}
+.sa-ref-landing .testi-glass-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:3;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  border:.5px solid var(--b1);
+  background:rgba(12,10,24,.65);
+  backdrop-filter:blur(12px);
+  color:var(--t1);
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  transition:background .18s,border-color .18s,transform .12s;
+  box-shadow:0 4px 18px rgba(0,0,0,.2);
+}
+.sa-strategy-ui.lt .sa-ref-landing .testi-glass-nav{
+  background:rgba(255,255,255,.9);
+}
+.sa-ref-landing .testi-glass-nav:hover{
+  background:rgba(104,54,245,.2);
+  border-color:rgba(104,54,245,.45);
+}
+.sa-ref-landing .testi-glass-nav:active{
+  transform:translateY(-50%) scale(.96);
+}
+.sa-ref-landing .testi-glass-nav--prev{
+  left:4px;
+}
+.sa-ref-landing .testi-glass-nav--next{
+  right:4px;
+}
+@media (max-width:520px){
+  .sa-ref-landing .testi-glass-track{
+    padding-left:42px;
+    padding-right:42px;
+  }
+  .sa-ref-landing .testi-glass-nav{
+    width:36px;
+    height:36px;
+    font-size:20px;
+  }
+}
+.sa-ref-landing .testi-glass-dots{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  margin-top:6px;
+  padding-top:4px;
+}
+.sa-ref-landing .testi-glass-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  background:rgba(255,255,255,.22);
+  transition:transform .15s,background .15s;
+}
+.sa-ref-landing .testi-glass-dot:hover{
+  background:rgba(255,255,255,.38);
+}
+.sa-ref-landing .testi-glass-dot.is-active{
+  background:var(--acc);
+  transform:scale(1.15);
+}
+.sa-strategy-ui.lt .sa-ref-landing .testi-glass-dot{
+  background:rgba(40,32,90,.25);
+}
+.sa-strategy-ui.lt .sa-ref-landing .testi-glass-dot.is-active{
+  background:rgba(104,54,245,.85);
+}
 .sa-ref-landing .compare-wrap{
   max-width:100%;
 }

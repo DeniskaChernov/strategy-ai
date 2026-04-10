@@ -84,7 +84,7 @@ export function ReferenceLandingView({
     { icon: "🗺️", titleKey: "ref_feat_maps_t", titleFb: "Визуальные карты стратегии", descKey: "ref_feat_maps_d", descFb: "Узлы целей, инициатив, KPI, задач и рисков. Типизированные связи между узлами." },
     { icon: "⚖️", titleKey: "ref_feat_scen_t", titleFb: "Сценарии", descKey: "ref_feat_scen_d", descFb: "Несколько версий будущего и сравнение последствий на одной карте." },
     { icon: "🤖", titleKey: "ref_feat_ai_t", titleFb: "AI-советник", descKey: "ref_feat_ai_d", descFb: "Контекст ваших карт и шагов — ответы привязаны к делу, а не к шаблонам." },
-    { icon: "📈", titleKey: "ref_feat_gantt_t", titleFb: "Gantt-таймлайн", descKey: "ref_feat_gantt_d", descFb: "Временная шкала инициатив, пересечения и прогресс по дорожной карте." },
+    { icon: "📊", titleKey: "ref_feat_gantt_t", titleFb: "Gantt-таймлайн", descKey: "ref_feat_gantt_d", descFb: "Временная шкала инициатив, пересечения и прогресс по дорожной карте." },
     { icon: "💡", titleKey: "ref_feat_insight_t", titleFb: "Инсайты", descKey: "ref_feat_insight_d", descFb: "Оценка здоровья стратегии, пробелы и приоритеты." },
     { icon: "👥", titleKey: "ref_feat_team_t", titleFb: "Командная работа", descKey: "ref_feat_team_d", descFb: "Роли, комментарии, совместное редактирование и автосохранение." },
     { icon: "🔗", titleKey: "ref_feat_crm_t", titleFb: "CRM (в планах)", descKey: "ref_feat_crm_d", descFb: "Интеграция пайплайна со стратегическими целями — в развитии продукта." },
@@ -329,10 +329,14 @@ export function ReferenceLandingView({
                 {testimonials.map((x, i) => (
                   <div key={i} className="testi-glass-slide" data-active={testiActive === i ? "true" : undefined}>
                     <article className="testi-glass-card">
-                      <div className="testi-glass-quote" aria-hidden>
-                        “
+                      <div className="testi-glass-head">
+                        <span className="testi-glass-quote" aria-hidden>
+                          “
+                        </span>
+                        <div className="testi-stars" aria-hidden>
+                          ★★★★★
+                        </div>
                       </div>
-                      <div className="testi-stars">★★★★★</div>
                       <p className="testi-text">{t(x.qk, x.qf)}</p>
                       <div className="testi-author">
                         <div className="testi-av" style={x.avs}>

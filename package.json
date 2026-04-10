@@ -5,7 +5,8 @@
   "main": "server/index.js",
   "scripts": {
     "build": "node build.js",
-    "ci": "node build.js && node scripts/verify-build-artifacts.js",
+    "typecheck": "tsc --noEmit",
+    "ci": "node build.js && tsc --noEmit && node scripts/verify-build-artifacts.js",
     "start": "node server/index.js",
     "dev": "node scripts/sync-css.js && nodemon server/index.js",
     "seed": "node server/seed.js",
@@ -18,7 +19,7 @@
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.25.0",
     "express": "^4.18.3",
     "express-rate-limit": "^7.2.0",
     "framer-motion": "^12.38.0",
@@ -37,8 +38,11 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "husky": "^9.1.7",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "typescript": "^5.4.5"
   },
   "engines": {
     "node": ">=18.0.0"

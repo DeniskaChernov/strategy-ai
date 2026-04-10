@@ -9,5 +9,12 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["strategy-ai-full.tsx", "client/**/*.ts", "client/**/*.tsx"]
+  "include": [
+    "strategy-ai-full.tsx",
+    "reference-landing.tsx",
+    "strategy-shell-sidebar.tsx",
+    "client/**/*.ts",
+    "client/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "public", "server"]
 }

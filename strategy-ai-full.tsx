@@ -19,6 +19,7 @@ import {
   register,
   login,
   patchUser,
+  hashPw,
   normalizeProject,
   getProjects,
   saveProject,
@@ -58,7 +59,12 @@ const getETYPE=(t)=>({requires:{c:"#6836f5",label:t("etype_requires","Требу
 const getTierPrice=(k,t)=>{const prices={free:t("free_plan","Бесплатно"),starter:"$9"+t("per_month_short","/мес"),pro:"$29"+t("per_month_short","/мес"),team:"$59"+t("per_month_short","/мес"),enterprise:"$149+"+t("per_month_short","/мес")};return prices[k]||"";};
 
 const {createContext,useContext}=React;
-const LangCtx=createContext({lang:'ru',setLang:()=>{},t:(k,fb)=>fb||k});
+type LangValue = { lang: string; setLang: (code: string) => void; t: (k: string, fb?: string) => string };
+const LangCtx = createContext<LangValue>({
+  lang: "ru",
+  setLang: () => {},
+  t: (k, fb) => fb || k,
+});
 const useLang=()=>useContext(LangCtx);
 const useIsMobile=()=>{const[m,setM]=useState(()=>window.innerWidth<=640);useEffect(()=>{const h=()=>setM(window.innerWidth<=640);window.addEventListener("resize",h,{passive:true});return()=>window.removeEventListener("resize",h);},[]);return m;};
 const usePrefersReducedMotion=()=>{
@@ -230,7 +236,8 @@ function topSort(nodes,edges){
   nodes.forEach(n=>{if(!out.find(x=>x.id===n.id))out.push(n);});return out;
 }
 
-function simNode(node,params,depResults,incomingEdges){
+type SimNodeResult={score:number;outcome:"success"|"partial"|"fail";depPenalty:number;autoFail?:boolean};
+function simNode(node,params,depResults,incomingEdges):SimNodeResult{
   const progBase=node.progress||0;
   const statusK={completed:1.0,active:0.82,planning:0.55,paused:0.45,blocked:0.15}[node.status]??0.5;
   const prioBonus={low:8,medium:4,high:0,critical:-4}[node.priority]??0;
@@ -247,7 +254,7 @@ function simNode(node,params,depResults,incomingEdges){
       else if(edge.type==="follows"){if(dep.outcome==="fail")depPenalty+=20;else if(dep.outcome==="partial")depPenalty+=9;}
     }
   }
-  if(autoFail)return{score:Math.floor(Math.random()*18)+2,outcome:"fail",autoFail:true};
+  if(autoFail)return{score:Math.floor(Math.random()*18)+2,outcome:"fail",autoFail:true,depPenalty:Math.round(depPenalty)};
   const raw=(progBase*statusK)+prioBonus-depPenalty;
   const sc=Math.max(2,Math.min(98,Math.round(raw*resourceFactor+(Math.random()-.5)*16)));
   return{score:sc,outcome:sc>=70?"success":sc>=42?"partial":"fail",depPenalty:Math.round(depPenalty)};
@@ -595,7 +602,7 @@ function OfflineBanner(){
 }
 
 // ── Toast ──
-function Toast({msg,type="info",onClose,action,onAction}){
+function Toast({msg,type="info",onClose,action=undefined,onAction=undefined}){
   const[progress,setProgress]=useState(100);
   const[closing,setClosing]=useState(false);
   const DURATION=4000;
@@ -686,7 +693,7 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
 }
 
 // ── Auth: общая форма (модалка или встроенная в welcome) ──
-function AuthFormContent({initialTab="login",onAuth,theme='dark',title,subtitle,variant="modal",titleId="auth-modal-title"}){
+function AuthFormContent({initialTab="login",onAuth,theme='dark',title="",subtitle="",variant="modal",titleId="auth-modal-title"}){
   const{lang,setLang,t}=useLang();
   const[tab,setTab]=useState(initialTab);
   useEffect(()=>{setTab(initialTab);},[initialTab]);
@@ -733,7 +740,7 @@ function AuthFormContent({initialTab="login",onAuth,theme='dark',title,subtitle,
 }
 
 // ── AuthModal (классы overlay/modal-box из strategy-reference / strategy-shell.css) ──
-function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title,subtitle}){
+function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title="",subtitle=""}){
   const{t}=useLang();
   const[closing,setClosing]=useState(false);
   const boxRef=useRef<HTMLDivElement|null>(null);
@@ -946,7 +953,7 @@ function PostOnboardFlow({pendingMap,currentUser,theme='dark',onComplete,onBack}
   if(saving)return <SavingScreen theme={theme}/>;
   if(step==="auth")return(
     <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
-<AuthModal initialTab="register" theme={theme} title="Сохранить карту" subtitle="Создайте аккаунт — карта сохранится автоматически" onAuth={afterAuth}/>
+<AuthModal initialTab="register" theme={theme} title="Сохранить карту" subtitle="Создайте аккаунт — карта сохранится автоматически" onAuth={afterAuth} onClose={onBack}/>
       <button onClick={onBack} style={{position:"absolute",top:16,left:16,padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>
     </div>
   );
@@ -1972,7 +1979,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
 
   const panelRight=isMobile?0:aiPanelOpen?360:0;
   const panelWidth=isMobile?"100%":aiPanelOpen?320:340;
-  const panelStyle=isMobile?{position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute" as const,right:panelRight,top:0,bottom:0,width:panelWidth,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
+  const panelStyle: React.CSSProperties=isMobile?{position:"fixed",left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute",right:panelRight,top:0,bottom:0,width:panelWidth,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
     <div className={`glass-panel panel-slide ${exiting?"panel-slide-out":""}`.trim()} style={panelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 16px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(12px)"}}>
@@ -2012,10 +2019,10 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
               <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>{t("status","Статус")}</div>
-                <CustomSelect value={node.status||"planning"} onChange={v=>!readOnly&&onUpdate({status:v})} disabled={readOnly} style={{width:"100%"}} options={Object.entries(STATUS).map(([k,s])=>({value:k,label:s.label,dot:s.c}))}/>
+                <CustomSelect value={node.status||"planning"} onChange={v=>!readOnly&&onUpdate({status:v})} disabled={readOnly} style={{width:"100%"}} options={Object.entries(STATUS).map(([k,s]:[string,{label:string;c:string}])=>({value:k,label:s.label,dot:s.c}))}/>
               </div>
               <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>{t("priority","Приоритет")}</div>
-                <CustomSelect value={node.priority||"medium"} onChange={v=>!readOnly&&onUpdate({priority:v})} disabled={readOnly} style={{width:"100%"}} options={Object.entries(PRIORITY).map(([k,p])=>({value:k,label:p.label,dot:p.c}))}/>
+                <CustomSelect value={node.priority||"medium"} onChange={v=>!readOnly&&onUpdate({priority:v})} disabled={readOnly} style={{width:"100%"}} options={Object.entries(PRIORITY).map(([k,p]:[string,{label:string;c:string}])=>({value:k,label:p.label,dot:p.c}))}/>
               </div>
             </div>
             <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>Прогресс <span style={{color:"var(--accent-1)",fontWeight:700}}>{node.progress||0}%</span></div>
@@ -2196,7 +2203,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   const quick=showMoreQuick?allQuick:allQuick.slice(0,QUICK_SHOW);
 
   const aiFreeTier=tier==="free";
-  async function send(text){
+  async function send(text?: string){
     const q=text||inp.trim();
     if(!q||load)return;
     if(aiFreeTier){
@@ -2244,11 +2251,11 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     inpRef.current?.focus();
   }
 
-  const aiPanelStyle=embedded
-    ? {position:"relative" as const,width:"100%",height:isMobile?560:680,display:"flex",flexDirection:"column",zIndex:1,borderRadius:18,overflow:"hidden"}
+  const aiPanelStyle: React.CSSProperties=embedded
+    ? {position:"relative",width:"100%",height:isMobile?560:680,display:"flex",flexDirection:"column",zIndex:1,borderRadius:18,overflow:"hidden"}
     : (isMobile
-        ? {position:"fixed" as const,left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}
-        : {position:"absolute" as const,right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"});
+        ? {position:"fixed",left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}
+        : {position:"absolute",right:0,top:0,bottom:0,width:360,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:45,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"});
   const showCtxStrip=Boolean((mapName||"").trim()||(projectName||"").trim()||nodes.length>0);
   return(
     <div className={`glass-panel sa-ai-panel ${embedded?"":"panel-slide"} ${exiting&&!embedded?"panel-slide-out":""}`.trim()} style={{...aiPanelStyle,background:"var(--glass-panel-bg)",backdropFilter:"blur(24px)"}}>
@@ -2471,10 +2478,10 @@ function GanttView({nodes,onClose,statusMap}){
       <button onClick={handleClose} className="btn-interactive" style={{padding:"8px 18px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("close","Закрыть")}</button>
     </div>
   );
-  const sorted=[...withDates].sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  const sorted=[...withDates].sort((a,b)=>new Date(a.deadline).getTime()-new Date(b.deadline).getTime());
   const minDate=new Date(sorted[0].deadline);
   const maxDate=new Date(sorted[sorted.length-1].deadline);
-  const range=Math.max(1,(maxDate-minDate)/864e5);
+  const range=Math.max(1,(maxDate.getTime()-minDate.getTime())/864e5);
 
   return(
     <div className={exiting?"gantt-panel-out":""} style={{position:"absolute",bottom:0,left:0,right:0,height:220,background:"var(--bg2)",borderTop:"1px solid var(--border)",zIndex:30,display:"flex",flexDirection:"column",animation:exiting?"none":"slideUp .28s cubic-bezier(0.22,1,0.36,1)"}}>
@@ -2487,10 +2494,10 @@ function GanttView({nodes,onClose,statusMap}){
         {sorted.map(n=>{
           const st=STATUS[n.status]||STATUS.planning;
           const dl=new Date(n.deadline);
-          const daysFromStart=Math.max(0,(dl-minDate)/864e5);
+          const daysFromStart=Math.max(0,(dl.getTime()-minDate.getTime())/864e5);
           const pct=Math.min(100,(daysFromStart/range)*100);
           const isPast=dl<now;
-          const daysLeft=Math.ceil((dl-now)/864e5);
+          const daysLeft=Math.ceil((dl.getTime()-now.getTime())/864e5);
           return(
             <div key={n.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:6,minWidth:500}}>
               <div style={{width:130,fontSize:13.5,color:"var(--text3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flexShrink:0,fontWeight:600}} title={n.title}>{n.title}</div>
@@ -2936,7 +2943,9 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     const r=new FileReader();
     r.onload=ev=>{
       try{
-        const d=JSON.parse(ev.target.result);
+        const raw=ev.target?.result;
+        if(typeof raw!=="string")return;
+        const d=JSON.parse(raw);
         if(d.nodes||d.edges){
           pushUndo(nodes,edges);
           const newEdges=d.edges||[];
@@ -3397,7 +3406,7 @@ ${ctx}
     </button>
   );
   const tb=(active,onClick,children,titleOrStyle?:string|object,extraStyle={})=>{
-    const opts=typeof titleOrStyle==="string"?{title:titleOrStyle,...extraStyle}:{...titleOrStyle as object,...extraStyle};
+    const opts: {title?: string} & Record<string, unknown>=typeof titleOrStyle==="string"?{title:titleOrStyle,...extraStyle}:{...(titleOrStyle && typeof titleOrStyle==="object"?titleOrStyle:{}),...extraStyle};
     const {title,...style}=opts;
     return (
     <button onClick={onClick} title={title} style={{height:38,padding:"0 16px",borderRadius:12,border:"none",background:active?"var(--accent-soft)":"transparent",color:active?"var(--accent-2)":"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,transition:"all .2s",display:"flex",alignItems:"center",gap:8,...style}}
@@ -4208,7 +4217,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
 
       {showAIHub&&(
         <AiHubModal open={showAIHub} onClose={()=>setShowAIHub(false)} isMobile={isMobile} t={t} hint={t("ai_hub_hint_cp","Тот же чат, что в стратегии. Контекст — проекты и карты, открытые в разделе контент-плана.")}>
-          <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={t("cp_hub_title","Контент-план")} mapName="" userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
+          <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={t("cp_hub_title","Контент-план")} mapName="" userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}} statusMap={getSTATUS(t)}/>
         </AiHubModal>
       )}
       <FloatingAiAssistant t={t} variant="app" onOpenFullChat={() => setShowAIHub(true)} />
@@ -4358,7 +4367,7 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
 
       {showAIHub&&(
         <AiHubModal open={showAIHub} onClose={()=>setShowAIHub(false)} isMobile={isMobile} t={t} hint={t("ai_hub_hint_cp_project","Контекст — карты и шаги текущего проекта в режиме контент-плана.")}>
-          <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={project?.name||""} mapName={t("cp_doc_suffix","Контент-план")} userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}}/>
+          <AiPanel embedded={true} isMobile={isMobile} nodes={aiNodes} edges={aiEdges} ctx={aiCtx} tier={user?.tier||"free"} projectName={project?.name||""} mapName={t("cp_doc_suffix","Контент-план")} userName={user?.name||user?.email||""} msgs={aiChatMsgs||[]} onMsgsChange={aiChatSetMsgs||(()=>{})} onAddNode={()=>{}} onClose={()=>{}} externalMsgs={[]} onClearExternal={()=>{}} onError={()=>{}} statusMap={getSTATUS(t)}/>
         </AiHubModal>
       )}
       <FloatingAiAssistant t={t} variant="app" onOpenFullChat={() => setShowAIHub(true)} />
@@ -4780,6 +4789,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
             externalMsgs={[]}
             onClearExternal={()=>{}}
             onError={()=>{}}
+            statusMap={getSTATUS(t)}
           />
         </AiHubModal>
       )}
@@ -5702,6 +5712,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               externalMsgs={[]}
               onClearExternal={()=>{}}
               onError={(msg)=>setToast({msg,type:"error"})}
+              statusMap={getSTATUS(t)}
             />
           </div>
         )}
@@ -6244,7 +6255,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
   async function startSim(){
     if(runRef.current)return;
     runRef.current=true;pauseRef.current=false;
-    const acc={},sacc={};
+    const acc: Record<string, SimNodeResult>={},sacc: Record<string, SimNodeResult>={};
     setSimState("running");setActiveId(null);setResults({});setSecResults({});setFinal(null);
     const p=pRef.current;
     const inEdges=buildInEdges(mapData.edges||[]);
@@ -6386,7 +6397,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
                 </div>
               ):(
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                  {(mapData.nodes||[]).filter(n=>n.deadline).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).map(n=>{
+                  {(mapData.nodes||[]).filter(n=>n.deadline).sort((a,b)=>new Date(a.deadline).getTime()-new Date(b.deadline).getTime()).map(n=>{
                     const st=STATUS[n.status]||STATUS.planning;
                     const r=results[n.id];
                     const OC2={success:"#12c482",partial:"#f09428",fail:"#f04458"};
@@ -6440,7 +6451,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
                 </div>
               ):(
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                  {(mapData.nodes||[]).filter(n=>n.deadline).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).map(n=>{
+                  {(mapData.nodes||[]).filter(n=>n.deadline).sort((a,b)=>new Date(a.deadline).getTime()-new Date(b.deadline).getTime()).map(n=>{
                     const st=STATUS[n.status]||STATUS.planning;
                     const r=results[n.id];
                     return(
@@ -6617,9 +6628,15 @@ function useImportJSON(onImport,onError?:(msg:string)=>void){
         const r=new FileReader();
         r.onload=ev=>{
           try{
-            const d=JSON.parse(ev.target.result);
+            const raw=ev.target?.result;
+            if(typeof raw!=="string")return;
+            const d=JSON.parse(raw);
             if(d.nodes||d.edges){onImport({nodes:d.nodes||[],edges:d.edges||[],name:d.name||f.name.replace(".json","")});}
-          }catch{onError?.(t("json_invalid","Некорректный формат JSON"))||console.warn("Invalid JSON");}
+          }catch{
+            const msg=t("json_invalid","Некорректный формат JSON");
+            if(onError)onError(msg);
+            else console.warn("Invalid JSON");
+          }
           e.target.value="";
         };
         r.readAsText(f);
@@ -7188,6 +7205,7 @@ export default function App(){
             onBack={()=>{setSharedMapData(null);setScreen("landing");if(typeof window!=="undefined")window.history.replaceState("","",window.location.pathname);}}
             onProfile={()=>{}}
             onToggleTheme={toggleTheme}
+            onShellGlobalNav={()=>{}}
             aiChatMsgs={aiChatMsgs}
             aiChatSetMsgs={setAiChatMsgs}
           />

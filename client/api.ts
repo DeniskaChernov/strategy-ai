@@ -176,7 +176,8 @@ export const store = {
   },
 };
 
-const hashPw = (e: string, p: string) => btoa(`${e}:${p}:sa2026`);
+/** Хеш пароля для локального режима без API (должен совпадать с проверкой в login/register). */
+export const hashPw = (e: string, p: string) => btoa(`${e}:${p}:sa2026`);
 
 export async function getSession() {
   if (API_BASE) {
