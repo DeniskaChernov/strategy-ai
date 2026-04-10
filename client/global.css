@@ -563,18 +563,62 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   flex:1;
   min-width:0;
   position:relative;
+  cursor:grab;
+}
+.sa-ref-landing .land-map-demo__canvas--drag{
+  cursor:grabbing;
+}
+.sa-ref-landing .land-map-demo__reset{
+  position:absolute;
+  top:8px;
+  left:8px;
+  z-index:2;
+  font-size:10px;
+  font-weight:700;
+  padding:4px 8px;
+  border-radius:8px;
+  border:.5px solid var(--b1);
+  background:var(--card);
+  color:var(--t2);
+  cursor:pointer;
+  font-family:inherit;
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-map-demo__reset{
+  background:rgba(255,255,255,.85);
+}
+.sa-ref-landing .land-map-demo__reset:hover{
+  border-color:var(--bh);
+  color:var(--t1);
 }
 .sa-ref-landing .land-map-demo__svg{
   display:block;
   width:100%;
   height:100%;
+  user-select:none;
 }
 .sa-ref-landing .land-map-demo__hint{
   text-align:center;
+  padding:12px 14px 14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+.sa-ref-landing .land-map-demo__hint-text{
   font-size:12px;
+  font-weight:600;
+  color:var(--t2);
+  margin:0;
+}
+.sa-ref-landing .land-map-demo__hint-sub{
+  font-size:11px;
   color:var(--t3);
   margin:0;
-  padding:12px 14px 14px;
+  max-width:420px;
+  line-height:1.45;
+}
+.sa-ref-landing .land-map-demo__try{
+  margin-top:4px;
 }
 /* Отзывы: три колонки + marquee — client/landing-testimonials-columns.tsx */
 .sa-ref-landing .testi-cols-grid{

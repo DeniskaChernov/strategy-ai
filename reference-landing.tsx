@@ -203,7 +203,7 @@ export function ReferenceLandingView({
 
         <div className="mockup-wrap sr sr-scale in" id="land-mockup">
           <div className="mockup-glow"/>
-          <LandingMapDemo theme={theme} t={t} />
+          <LandingMapDemo theme={theme} t={t} onTry={onGetStarted} />
         </div>
 
         <div id="land-features">

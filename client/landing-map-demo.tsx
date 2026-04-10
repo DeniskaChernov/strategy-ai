@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -12,7 +12,6 @@ type DemoNode = {
   tf: string;
   progress: number;
   stroke: string;
-  grad?: boolean;
   fillBar: string;
 };
 
@@ -22,6 +21,9 @@ const EDGES: [string, string][] = [
   ["n2", "n4"],
   ["n3", "n4"],
 ];
+
+const VB_W = 900;
+const VB_H = 420;
 
 function center(n: DemoNode): { x: number; y: number } {
   return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
@@ -39,8 +41,16 @@ function edgePath(a: DemoNode, b: DemoNode): string {
   return `M ${p1.x} ${p1.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
 }
 
-/** Визуальная демо-карты Strategy AI на лендинге (без API, только просмотр). */
-export function LandingMapDemo({ theme, t }: { theme: string; t: TFn }) {
+/** Демо-карта на лендинге: панорама, зум, hover по узлам; без API. */
+export function LandingMapDemo({
+  theme,
+  t,
+  onTry,
+}: {
+  theme: string;
+  t: TFn;
+  onTry?: () => void;
+}) {
   const nodes = useMemo<DemoNode[]>(
     () => [
       {
@@ -53,7 +63,6 @@ export function LandingMapDemo({ theme, t }: { theme: string; t: TFn }) {
         tf: "Цель: рост MRR",
         progress: 44,
         stroke: "#8864ff",
-        grad: true,
         fillBar: "url(#land-demo-bar-purple)",
       },
       {
@@ -90,7 +99,6 @@ export function LandingMapDemo({ theme, t }: { theme: string; t: TFn }) {
         tf: "Масштабирование",
         progress: 58,
         stroke: "#06b6d4",
-        grad: true,
         fillBar: "url(#land-demo-bar-cyan)",
       },
     ],
@@ -104,8 +112,69 @@ export function LandingMapDemo({ theme, t }: { theme: string; t: TFn }) {
   const t1 = isDark ? "#eaeaf8" : "#08061a";
   const t3 = isDark ? "rgba(148,144,196,.55)" : "rgba(70,58,130,.5)";
 
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [hoverId, setHoverId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef(false);
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const wheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const factor = Math.exp(-e.deltaY * 0.0012);
+      setZoom((z) => Math.min(2.25, Math.max(0.55, z * factor)));
+    };
+    svg.addEventListener("wheel", wheel, { passive: false });
+    return () => svg.removeEventListener("wheel", wheel);
+  }, []);
+
+  const cx = VB_W / 2;
+  const cy = VB_H / 2;
+  const gTransform = useMemo(
+    () => `translate(${pan.x} ${pan.y}) translate(${cx} ${cy}) scale(${zoom}) translate(${-cx} ${-cy})`,
+    [pan.x, pan.y, zoom, cx, cy]
+  );
+
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    dragRef.current = true;
+    setDragging(true);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }, []);
+
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect || rect.width < 1) return;
+    const dx = (e.movementX / rect.width) * VB_W;
+    const dy = (e.movementY / rect.height) * VB_H;
+    setPan((p) => ({ x: p.x + dx, y: p.y + dy }));
+  }, []);
+
+  const onPointerUp = useCallback((e: React.PointerEvent) => {
+    dragRef.current = false;
+    setDragging(false);
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      /* noop */
+    }
+  }, []);
+
+  const resetView = useCallback(() => {
+    setPan({ x: 0, y: 0 });
+    setZoom(1);
+  }, []);
+
   return (
-    <div className="land-map-demo" aria-label={t("ref_demo_aria", "Демонстрация интерфейса карты стратегии, только просмотр")}>
+    <div
+      className="land-map-demo"
+      aria-label={t("ref_demo_aria", "Демонстрация карты: перетащите холст, колёсико — масштаб")}
+    >
       <div className="land-map-demo__badge" aria-hidden>
         {t("ref_demo_badge", "DEMO")}
       </div>
@@ -145,8 +214,24 @@ export function LandingMapDemo({ theme, t }: { theme: string; t: TFn }) {
             {t("shell_insights", "Инсайты")}
           </div>
         </aside>
-        <div className="land-map-demo__canvas" style={{ background: canvasBg }}>
-          <svg className="land-map-demo__svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden>
+        <div
+          className={"land-map-demo__canvas" + (dragging ? " land-map-demo__canvas--drag" : "")}
+          style={{ background: canvasBg, touchAction: "none" }}
+        >
+          <button type="button" className="land-map-demo__reset" onClick={resetView} title={t("ref_demo_reset", "Сбросить вид")}>
+            {t("ref_demo_reset_short", "1:1")}
+          </button>
+          <svg
+            ref={svgRef}
+            className="land-map-demo__svg"
+            viewBox={`0 0 ${VB_W} ${VB_H}`}
+            preserveAspectRatio="xMidYMid meet"
+            role="presentation"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerLeave={onPointerUp}
+          >
             <defs>
               <linearGradient id="land-demo-bar-purple" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="#6836f5" />
@@ -160,43 +245,75 @@ export function LandingMapDemo({ theme, t }: { theme: string; t: TFn }) {
                 <path d="M 24 0 L 0 0 0 24" fill="none" stroke={gridStroke} strokeWidth="0.5" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#land-demo-grid)" opacity={0.95} />
-            <g stroke={isDark ? "rgba(160,150,220,.42)" : "rgba(104,54,245,.32)"} fill="none" strokeWidth="1.6">
-              {EDGES.map(([from, to], i) => {
-                const a = nodeMap[from];
-                const b = nodeMap[to];
-                if (!a || !b) return null;
-                return <path key={`${from}-${to}-${i}`} d={edgePath(a, b)} />;
+            <g transform={gTransform}>
+              <rect width="100%" height="100%" fill="url(#land-demo-grid)" opacity={0.95} />
+              <g
+                stroke={isDark ? "rgba(160,150,220,.42)" : "rgba(104,54,245,.32)"}
+                fill="none"
+                strokeWidth="1.6"
+                pointerEvents="none"
+              >
+                {EDGES.map(([from, to], i) => {
+                  const a = nodeMap[from];
+                  const b = nodeMap[to];
+                  if (!a || !b) return null;
+                  return <path key={`${from}-${to}-${i}`} d={edgePath(a, b)} />;
+                })}
+              </g>
+              {nodes.map((n) => {
+                const pw = (n.w - 24) * (n.progress / 100);
+                const hi = hoverId === n.id;
+                return (
+                  <g
+                    key={n.id}
+                    transform={`translate(${n.x},${n.y})`}
+                    style={{ cursor: "default" }}
+                    onMouseEnter={() => setHoverId(n.id)}
+                    onMouseLeave={() => setHoverId(null)}
+                    pointerEvents="auto"
+                  >
+                    <title>{t(n.tk, n.tf)}</title>
+                    <rect
+                      width={n.w}
+                      height={n.h}
+                      rx="12"
+                      fill={isDark ? "rgba(22,18,40,.94)" : "rgba(255,255,255,.95)"}
+                      stroke={hi ? n.stroke : "var(--b1)"}
+                      strokeWidth={hi ? 2.25 : 0.75}
+                    />
+                    <rect x="0" y="0" width={n.w} height="3.5" rx="12" fill={n.stroke} />
+                    <text x="12" y="30" fill={t1} fontSize="12" fontWeight="700" fontFamily="Inter,system-ui,sans-serif" pointerEvents="none">
+                      {t(n.tk, n.tf)}
+                    </text>
+                    <text x="12" y="48" fill={t3} fontSize="9.5" fontFamily="Inter,system-ui,sans-serif" pointerEvents="none">
+                      {t("ref_demo_readonly", "Только просмотр · демо")}
+                    </text>
+                    <rect
+                      x="12"
+                      y={n.h - 16}
+                      width={n.w - 24}
+                      height="4"
+                      rx="2"
+                      fill={isDark ? "rgba(255,255,255,.08)" : "rgba(104,80,220,.1)"}
+                      pointerEvents="none"
+                    />
+                    <rect x="12" y={n.h - 16} width={pw} height="4" rx="2" fill={n.fillBar} pointerEvents="none" />
+                  </g>
+                );
               })}
             </g>
-            {nodes.map((n) => {
-              const pw = (n.w - 24) * (n.progress / 100);
-              return (
-                <g key={n.id} transform={`translate(${n.x},${n.y})`}>
-                  <rect
-                    width={n.w}
-                    height={n.h}
-                    rx="12"
-                    fill={isDark ? "rgba(22,18,40,.94)" : "rgba(255,255,255,.95)"}
-                    stroke="var(--b1)"
-                    strokeWidth="0.75"
-                  />
-                  <rect x="0" y="0" width={n.w} height="3.5" rx="12" fill={n.stroke} />
-                  <text x="12" y="30" fill={t1} fontSize="12" fontWeight="700" fontFamily="Inter,system-ui,sans-serif">
-                    {t(n.tk, n.tf)}
-                  </text>
-                  <text x="12" y="48" fill={t3} fontSize="9.5" fontFamily="Inter,system-ui,sans-serif">
-                    {t("ref_demo_readonly", "Только просмотр · демо")}
-                  </text>
-                  <rect x="12" y={n.h - 16} width={n.w - 24} height="4" rx="2" fill={isDark ? "rgba(255,255,255,.08)" : "rgba(104,80,220,.1)"} />
-                  <rect x="12" y={n.h - 16} width={pw} height="4" rx="2" fill={n.fillBar} />
-                </g>
-              );
-            })}
           </svg>
         </div>
       </div>
-      <p className="land-map-demo__hint">{t("ref_demo_hint", "Полная интерактивная карта — после регистрации в продукте.")}</p>
+      <div className="land-map-demo__hint">
+        <p className="land-map-demo__hint-text">{t("ref_demo_controls", "Перетащите карту · колёсико — масштаб")}</p>
+        <p className="land-map-demo__hint-sub">{t("ref_demo_hint", "Полная интерактивная карта — после регистрации в продукте.")}</p>
+        {onTry ? (
+          <button type="button" className="btn-p land-map-demo__try" onClick={onTry}>
+            {t("ref_demo_try", "Попробовать бесплатно")}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
