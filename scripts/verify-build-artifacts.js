@@ -14,6 +14,7 @@ for (const rel of need) {
 const clientNeed = [
   'client/landing-testimonials-columns.tsx',
   'client/landing-pricing-cards.tsx',
+  'client/landing-map-demo.tsx',
 ];
 for (const rel of clientNeed) {
   const p = path.join(root, rel);

@@ -8,6 +8,7 @@ import {
   LandingTestimonialsColumns,
   type LandingTestimonialColumnItem,
 } from "./client/landing-testimonials-columns";
+import { LandingMapDemo } from "./client/landing-map-demo";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -202,34 +203,7 @@ export function ReferenceLandingView({
 
         <div className="mockup-wrap sr sr-scale in" id="land-mockup">
           <div className="mockup-glow"/>
-          <div className="mockup-frame">
-            <div className="mockup-bar">
-              <div className="mkbar-dot" style={{ background: "#f04458" }}/>
-              <div className="mkbar-dot" style={{ background: "#f09428" }}/>
-              <div className="mkbar-dot" style={{ background: "#12c482" }}/>
-              <div style={{ flex: 1, height: 18, background: "var(--inp)", borderRadius: 4, margin: "0 8px", maxWidth: 240 }}/>
-              <div style={{ fontSize: 10, color: "var(--t3)", marginLeft: "auto" }}>Strategy AI</div>
-            </div>
-            <div className="mockup-body">
-              <div className="mkb-sb">
-                <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 8px", marginBottom: 6, borderBottom: ".5px solid var(--b0)", paddingBottom: 10 }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 6, background: "linear-gradient(135deg,#6836f5,#b060ff)" }}/>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--t1)" }}>Strategy AI</div>
-                </div>
-                <div className="mkb-ni on"><div className="mkb-dot" style={{ background: "#a278ff" }}/>{t("shell_strategy_map", "Карта")}</div>
-                <div className="mkb-ni"><div className="mkb-dot" style={{ background: "var(--t3)" }}/>{t("shell_scenarios", "Сценарии")}</div>
-                <div className="mkb-ni"><div className="mkb-dot" style={{ background: "var(--t3)" }}/>{t("shell_timeline", "Таймлайн")}</div>
-                <div className="mkb-ni"><div className="mkb-dot" style={{ background: "var(--green)" }}/>AI</div>
-                <div className="mkb-ni"><div className="mkb-dot" style={{ background: "var(--t3)" }}/>{t("shell_insights", "Инсайты")}</div>
-              </div>
-              <div className="mkb-main">
-                <div className="mkb-node" style={{ borderTop: "2.5px solid #8864ff" }}><div className="mkb-node-type" style={{ color: "#a278ff" }}>🎯 Goal</div><div className="mkb-node-title">$500K Q2</div><div className="mkb-node-bar"><div className="mkb-node-fill" style={{ width: "40%", background: "linear-gradient(90deg,#6836f5,#a050ff)" }}/></div></div>
-                <div className="mkb-node" style={{ borderTop: "2.5px solid #12c482" }}><div className="mkb-node-type" style={{ color: "rgba(18,196,130,.9)" }}>⚡</div><div className="mkb-node-title">Launch</div><div className="mkb-node-bar"><div className="mkb-node-fill" style={{ width: "85%", background: "#12c482" }}/></div></div>
-                <div className="mkb-node" style={{ borderTop: "2.5px solid #f09428" }}><div className="mkb-node-type" style={{ color: "rgba(240,148,40,.9)" }}>KPI</div><div className="mkb-node-title">MRR</div><div className="mkb-node-bar"><div className="mkb-node-fill" style={{ width: "68%", background: "#f09428" }}/></div></div>
-                <div className="mkb-node" style={{ borderTop: "2.5px solid #f04458" }}><div className="mkb-node-type" style={{ color: "rgba(240,68,88,.9)" }}>⚠️</div><div className="mkb-node-title">Runway</div><div className="mkb-node-bar"><div className="mkb-node-fill" style={{ width: "35%", background: "#f04458" }}/></div></div>
-              </div>
-            </div>
-          </div>
+          <LandingMapDemo theme={theme} t={t} />
         </div>
 
         <div id="land-features">
