@@ -44,7 +44,9 @@ export function TestimonialsColumn({ className = "", testimonials, duration = 14
       className={"testi-col " + className}
       style={{ ["--testi-marquee-dur"]: `${duration}s` } as React.CSSProperties}
     >
-      <div className="testi-col__track testi-col__track--marquee">{blocks}</div>
+      <div className="testi-col__viewport">
+        <div className="testi-col__track testi-col__track--marquee">{blocks}</div>
+      </div>
     </div>
   );
 }
