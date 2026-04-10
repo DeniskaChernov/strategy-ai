@@ -340,7 +340,7 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   }
 }
 /* Компактные карточки фич: без растягивания по высоте строки */
-.sa-ref-landing .features-grid > [data-glow].glow-card.feat-card{
+.sa-ref-landing .features-grid > .glow-card.feat-card{
   align-self:start !important;
   width:100% !important;
   min-height:0 !important;
@@ -561,56 +561,241 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   padding:16px 0 0;
   box-sizing:border-box;
 }
-.sa-ref-landing .sa-land-pricing .tier-wrap{width:100%;max-width:900px;margin:0 auto;position:relative;z-index:1}
+.sa-ref-landing .sa-land-pricing .tier-wrap{width:100%;max-width:1160px;margin:0 auto;position:relative;z-index:1}
 .sa-ref-landing .sa-land-pricing .tier-header{text-align:center;margin-bottom:28px}
 .sa-ref-landing .sa-land-pricing .tier-h{font-size:clamp(22px,3.2vw,28px);font-weight:800;color:var(--t1);letter-spacing:-.03em;margin-bottom:8px}
 .sa-ref-landing .sa-land-pricing .tier-s{font-size:14px;color:var(--t2);line-height:1.55;max-width:520px;margin:0 auto}
-.sa-ref-landing .sa-land-pricing .tier-grid{
+/* Карточки тарифов — LandingPricingCards */
+.sa-ref-landing .sa-lp-grid{
   display:grid;
-  grid-template-columns:repeat(5,1fr);
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:18px;
+  width:100%;
+}
+@media (min-width:1100px){
+  .sa-ref-landing .sa-lp-grid{grid-template-columns:repeat(5,1fr);}
+}
+.sa-ref-landing .sa-lp-card{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  border-radius:18px;
+  overflow:hidden;
+  transition:transform .28s ease,box-shadow .28s ease;
+  border:1px solid rgba(255,255,255,.08);
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-card{
+  border-color:rgba(104,80,220,.2);
+  box-shadow:0 16px 44px rgba(78,55,180,.1);
+}
+.sa-ref-landing .sa-lp-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 24px 56px rgba(0,0,0,.4);
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-card:hover{
+  box-shadow:0 22px 50px rgba(78,55,180,.16);
+}
+.sa-ref-landing .sa-lp-card--popular{
+  border-color:rgba(160,80,255,.45);
+  box-shadow:0 0 0 1px rgba(104,54,245,.25),0 20px 60px rgba(104,54,245,.2);
+}
+.sa-ref-landing .sa-lp-pop-badge{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translate(-50%,-50%);
+  z-index:4;
+  padding:5px 14px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.06em;
+  color:#fff;
+  background:linear-gradient(135deg,#6836f5,#a050ff);
+  box-shadow:0 4px 16px rgba(104,54,245,.45);
+  pointer-events:none;
+}
+.sa-ref-landing .sa-lp-card__mesh{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  border-radius:inherit;
+  background-color:hsl(252 22% 9%);
+  background-image:
+    radial-gradient(at 88% 32%, rgba(104,54,245,.22) 0%, transparent 52%),
+    radial-gradient(at 12% 78%, rgba(236,72,153,.1) 0%, transparent 48%),
+    radial-gradient(at 48% 100%, rgba(6,182,212,.08) 0%, transparent 42%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.sa-ref-landing .sa-lp-card__mesh--lt{
+  background-color:rgba(255,255,255,.94);
+  background-image:
+    radial-gradient(at 85% 28%, rgba(104,54,245,.14) 0%, transparent 50%),
+    radial-gradient(at 10% 80%, rgba(160,80,255,.1) 0%, transparent 48%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+.sa-ref-landing .sa-lp-spin{
+  position:absolute;
+  inset:-50%;
+  z-index:1;
+  pointer-events:none;
+  opacity:.5;
+}
+.sa-ref-landing .sa-lp-spin__beam{
+  position:absolute;
+  inset:0;
+  background:conic-gradient(from 200deg, transparent 0%, rgba(160,80,255,.55) 12%, rgba(104,54,245,.35) 28%, transparent 42%, transparent 100%);
+  animation:sa-lp-spin 12s linear infinite;
+}
+@keyframes sa-lp-spin{
+  to{transform:rotate(360deg);}
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-lp-spin__beam{animation:none;opacity:.25;}
+}
+.sa-ref-landing .sa-lp-card__inner{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  min-height:0;
+  padding:22px 18px 18px;
+  gap:0;
+}
+.sa-ref-landing .sa-lp-card--popular .sa-lp-card__inner{
+  padding-top:28px;
+}
+.sa-ref-landing .sa-lp-head{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:18px;
+}
+.sa-ref-landing .sa-lp-icon{
+  flex-shrink:0;
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-icon{
+  border-color:rgba(104,80,220,.2);
+  background:rgba(255,255,255,.65)!important;
+}
+.sa-ref-landing .sa-lp-head-text{min-width:0;flex:1;}
+.sa-ref-landing .sa-lp-name{
+  margin:0;
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:-.03em;
+  color:var(--t1);
+  line-height:1.2;
+}
+.sa-ref-landing .sa-lp-tag{
+  margin:4px 0 0;
+  font-size:11.5px;
+  color:var(--t3);
+  line-height:1.35;
+}
+.sa-ref-landing .sa-lp-price-block{margin-bottom:16px;}
+.sa-ref-landing .sa-lp-price-row{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:6px 8px;
+}
+.sa-ref-landing .sa-lp-price{
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:-.04em;
+  color:var(--t1);
+  line-height:1;
+}
+.sa-ref-landing .sa-lp-price-sub{
+  font-size:13px;
+  color:var(--t3);
+  font-weight:600;
+}
+.sa-ref-landing .sa-lp-fine{
+  margin:8px 0 0;
+  font-size:11px;
+  color:var(--t3);
+  opacity:.85;
+}
+.sa-ref-landing .sa-lp-feat{
+  list-style:none;
+  margin:0 0 18px;
+  padding:0;
+  flex:1;
+  display:flex;
+  flex-direction:column;
   gap:10px;
 }
-@media (max-width:900px){
-  .sa-ref-landing .sa-land-pricing .tier-grid{grid-template-columns:repeat(2,1fr)}
+.sa-ref-landing .sa-lp-feat li{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  font-size:12.5px;
+  line-height:1.45;
+  color:var(--t2);
 }
-@media (max-width:520px){
-  .sa-ref-landing .sa-land-pricing .tier-grid{grid-template-columns:1fr}
+.sa-ref-landing .sa-lp-check{
+  flex-shrink:0;
+  width:18px;
+  height:18px;
+  margin-top:1px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,rgba(104,54,245,.9),rgba(160,80,255,.85));
+  color:#0b0818;
 }
-.sa-ref-landing .sa-land-pricing .tier-card{
-  background:var(--card);backdrop-filter:blur(20px);border:.5px solid var(--b1);border-radius:16px;
-  padding:16px 12px 14px;cursor:default;transition:all .2s;position:relative;overflow:hidden;
-  display:flex;flex-direction:column;min-height:0;
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-check{
+  color:#fff;
 }
-.sa-ref-landing .sa-land-pricing .tier-card::after{
-  content:'';position:absolute;inset:0;border-radius:16px;
-  background:linear-gradient(145deg,rgba(255,255,255,.07),transparent 55%);pointer-events:none;
+.sa-ref-landing .sa-lp-btn{
+  width:100%;
+  height:44px;
+  margin-top:auto;
+  border-radius:12px;
+  border:none;
+  font-size:13px;
+  font-weight:800;
+  font-family:inherit;
+  cursor:pointer;
+  transition:transform .15s ease,box-shadow .2s ease,background .2s ease;
 }
-.sa-strategy-ui.lt .sa-ref-landing .sa-land-pricing .tier-card{
-  background:rgba(255,255,255,.76);border-color:rgba(104,80,220,.18);
+.sa-ref-landing .sa-lp-btn--accent{
+  background:linear-gradient(135deg,#6836f5,#a050ff);
+  color:#fff;
+  box-shadow:0 4px 18px rgba(104,54,245,.4);
 }
-.sa-strategy-ui.lt .sa-ref-landing .sa-land-pricing .tier-card::after{
-  background:linear-gradient(145deg,rgba(255,255,255,.8),rgba(255,255,255,.05) 42%,transparent 68%);
+.sa-ref-landing .sa-lp-btn--accent:hover{
+  box-shadow:0 8px 28px rgba(104,54,245,.5);
+  transform:translateY(-1px);
 }
-.sa-ref-landing .sa-land-pricing .tier-card:hover{border-color:var(--bh);transform:translateY(-2px);box-shadow:var(--shh)}
-.sa-ref-landing .sa-land-pricing .tier-card.popular{border-color:rgba(104,54,245,.5);box-shadow:0 0 0 2px rgba(104,54,245,.15);padding-top:22px}
-.sa-ref-landing .sa-land-pricing .tier-pop-badge{
-  position:absolute;top:0;left:50%;transform:translateX(-50%);
-  background:linear-gradient(135deg,#6836f5,#a050ff);color:#fff;font-size:9px;font-weight:700;
-  padding:3px 10px;border-radius:0 0 8px 8px;letter-spacing:.05em;
+.sa-ref-landing .sa-lp-btn--ghost{
+  background:rgba(255,255,255,.08);
+  color:var(--t1);
+  border:1px solid rgba(255,255,255,.14);
 }
-.sa-ref-landing .sa-land-pricing .tc-name{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:4px;margin-top:8px}
-.sa-ref-landing .sa-land-pricing .tc-price{font-size:20px;font-weight:800;color:var(--t1);letter-spacing:-.03em;margin-bottom:2px;line-height:1.15}
-.sa-ref-landing .sa-land-pricing .tc-sub{font-size:10px;color:var(--t3);margin-bottom:10px;min-height:14px}
-.sa-ref-landing .sa-land-pricing .tc-features{flex:1;display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
-.sa-ref-landing .sa-land-pricing .tc-feat{font-size:11px;color:var(--t2);line-height:1.45}
-.sa-ref-landing .sa-land-pricing .tier-btn{
-  width:100%;height:36px;border-radius:22px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:auto;
-  transition:all .2s;
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-btn--ghost{
+  background:rgba(255,255,255,.85);
+  border-color:rgba(104,80,220,.22);
+  color:var(--t1);
 }
-.sa-ref-landing .sa-land-pricing .tier-btn-free{background:var(--inp);color:var(--t2)}
-.sa-ref-landing .sa-land-pricing .tier-btn-free:hover{background:var(--card2);color:var(--t1)}
-.sa-ref-landing .sa-land-pricing .tier-btn-paid{background:linear-gradient(135deg,#6836f5,#a050ff);color:#fff;box-shadow:0 4px 14px rgba(104,54,245,.38)}
-.sa-ref-landing .sa-land-pricing .tier-btn-paid:hover{box-shadow:0 6px 22px rgba(104,54,245,.55);transform:translateY(-1px)}
+.sa-ref-landing .sa-lp-btn--ghost:hover{
+  background:rgba(255,255,255,.14);
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-btn--ghost:hover{
+  background:rgba(104,54,245,.1);
+}
 .sa-ref-landing .land-footer{
   width:100%;
   max-width:min(1080px,100%);
@@ -1079,39 +1264,22 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 [data-theme="light"] [data-glow].glow-card.glow-card--panel{
   box-shadow:0 28px 70px rgba(78,55,180,.22);
 }
+.glow-card.glow-card--plain > *{
+  position:relative;
+  z-index:2;
+}
 
-/* Карточки фич на лендинге: без clip — иначе ::before/::after и край spotlight обрезаются */
-/* !important — перебивают inline-токены GlowCard (--bg-spot-opacity и т.д.) */
-[data-glow].glow-card.feat-card{
-  overflow:visible !important;
-  --size:280 !important;
-  --bg-spot-opacity:0.52 !important;
-  --lightness:76 !important;
-  --border-spot-opacity:1 !important;
-  --border-light-opacity:0.78 !important;
+/* Карточки фич лендинга (GlowCard plain): без spotlight */
+.sa-ref-landing .glow-card--plain.feat-card{
+  transition:border-color .22s ease,transform .22s ease,box-shadow .22s ease;
 }
-.sa-strategy-ui.dk [data-glow].glow-card.feat-card .glow-card-spotlight{
-  filter:brightness(1.18) saturate(1.12);
+.sa-ref-landing .glow-card--plain.feat-card:hover{
+  border-color:var(--bh);
+  transform:translateY(-3px);
+  box-shadow:0 18px 44px rgba(0,0,0,.4),0 0 0 1px rgba(104,54,245,.2);
 }
-[data-glow].glow-card.feat-card:hover{
-  --bg-spot-opacity:0.6 !important;
-  --border-light-opacity:0.88 !important;
-  --size:300 !important;
-  box-shadow:
-    0 28px 70px rgba(0,0,0,.48),
-    0 0 0 1px rgba(104,54,245,.35),
-    0 0 52px rgba(104,54,245,.2);
-}
-.sa-strategy-ui.lt [data-glow].glow-card.feat-card{
-  --bg-spot-opacity:0.48 !important;
-  --lightness:52 !important;
-}
-.sa-strategy-ui.lt [data-glow].glow-card.feat-card:hover{
-  --bg-spot-opacity:0.56 !important;
-  box-shadow:
-    0 24px 56px rgba(78,55,180,.18),
-    0 0 0 1px rgba(104,80,220,.28),
-    0 0 40px rgba(104,54,245,.14);
+.sa-strategy-ui.lt .sa-ref-landing .glow-card--plain.feat-card:hover{
+  box-shadow:0 16px 40px rgba(78,55,180,.12),0 0 0 1px rgba(104,80,220,.2);
 }
 
 /* ── Floating AI assistant (лендинг, без Tailwind) ── */

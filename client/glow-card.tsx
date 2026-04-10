@@ -38,6 +38,8 @@ export interface GlowCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "cla
   height?: string | number;
   /** Если true — не задаём фиксированные sm/md/lg, размер из width/height/className */
   customSize?: boolean;
+  /** Без spotlight и data-glow (карточки фич на лендинге) */
+  plain?: boolean;
 }
 
 const glowColorMap = {
@@ -66,6 +68,7 @@ export function GlowCard({
   width,
   height,
   customSize = false,
+  plain = false,
   ...rest
 }: GlowCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -77,6 +80,7 @@ export function GlowCard({
   const sz = sizePx[size];
 
   useEffect(() => {
+    if (plain) return;
     const el = cardRef.current;
     if (!el) return;
     const syncCenter = () => {
@@ -94,9 +98,10 @@ export function GlowCard({
       window.removeEventListener("resize", syncCenter);
       window.removeEventListener("orientationchange", syncCenter);
     };
-  }, []);
+  }, [plain]);
 
   useEffect(() => {
+    if (plain) return () => {};
     return subscribeGlowPointer((p) => {
       const el = cardRef.current;
       if (!el) return;
@@ -106,9 +111,10 @@ export function GlowCard({
       el.style.setProperty("--yp", (p.y / Math.max(window.innerHeight, 1)).toFixed(4));
       applyGlowPointer(el, p);
     });
-  }, []);
+  }, [plain]);
 
   useEffect(() => {
+    if (plain) return;
     const el = cardRef.current;
     if (!el) return;
     const syncAfterLayout = () => applyGlowPointer(el, getLastGlowPointer());
@@ -116,7 +122,7 @@ export function GlowCard({
     ro.observe(el);
     syncAfterLayout();
     return () => ro.disconnect();
-  }, []);
+  }, [plain]);
 
   const getInlineStyles = (): CSSProperties => {
     /** Базовый режим: rounded-2xl ≈ 16px. Толщина «кольца» glow — --gc-border (не путать с токеном цвета --border). */
@@ -132,12 +138,12 @@ export function GlowCard({
       "--backdrop": "hsl(0 0% 60% / 0.12)",
       "--backup-border": panelVariant ? "var(--glass-border-accent, var(--border))" : "var(--backdrop)",
       "--size": panelVariant ? 240 : 200,
-      "--outer": 1,
+      "--outer": plain ? 0 : 1,
       "--saturation": 100,
       "--lightness": panelVariant ? 68 : 70,
-      "--bg-spot-opacity": panelVariant ? 0.34 : 0.1,
-      "--border-spot-opacity": panelVariant ? 0.95 : 1,
-      "--border-light-opacity": panelVariant ? 0.55 : 1,
+      "--bg-spot-opacity": plain ? 0 : panelVariant ? 0.34 : 0.1,
+      "--border-spot-opacity": plain ? 0 : panelVariant ? 0.95 : 1,
+      "--border-light-opacity": plain ? 0 : panelVariant ? 0.55 : 1,
       "--border-size": "calc(var(--gc-border, 3) * 1px)",
       "--spotlight-size": "calc(var(--size, 200) * 1px)",
       backgroundColor: panelVariant ? "var(--sb, var(--surface))" : "var(--backdrop, transparent)",
@@ -159,7 +165,13 @@ export function GlowCard({
           }),
       padding: panelVariant ? 28 : 16,
       borderRadius: panelVariant ? "var(--r-xl, 20px)" : radius,
-      boxShadow: panelVariant ? "0 28px 70px rgba(0,0,0,.42)" : "0 1rem 2rem -1rem #000",
+      boxShadow: plain
+        ? panelVariant
+          ? "0 10px 36px rgba(0,0,0,.28)"
+          : "0 8px 24px rgba(0,0,0,.2)"
+        : panelVariant
+          ? "0 28px 70px rgba(0,0,0,.42)"
+          : "0 1rem 2rem -1rem #000",
       backdropFilter: panelVariant ? "blur(44px) saturate(1.1)" : "blur(5px)",
       WebkitBackdropFilter: panelVariant ? "blur(44px) saturate(1.1)" : "blur(5px)",
       overflow: "hidden",
@@ -199,13 +211,17 @@ export function GlowCard({
   return (
     <div
       ref={cardRef}
-      data-glow
-      className={`glow-card${panelVariant ? " glow-card--panel" : ""} ${className}`.trim()}
+      {...(plain ? {} : { "data-glow": true })}
+      className={`glow-card${panelVariant ? " glow-card--panel" : ""}${plain ? " glow-card--plain" : ""} ${className}`.trim()}
       style={getInlineStyles()}
       {...domRest}
     >
-      <div data-glow aria-hidden className="glow-card-inner-glow" />
-      <div aria-hidden className="glow-card-spotlight" style={spotlightStyle} />
+      {!plain && (
+        <>
+          <div data-glow aria-hidden className="glow-card-inner-glow" />
+          <div aria-hidden className="glow-card-spotlight" style={spotlightStyle} />
+        </>
+      )}
       {children}
     </div>
   );

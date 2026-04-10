@@ -3,6 +3,7 @@ import { StrategyShellBg } from "./strategy-shell-sidebar";
 import { LandingStarsCanvas } from "./client/landing-stars-canvas";
 import { AnimatedLandingNav } from "./client/animated-landing-nav";
 import { GlowCard } from "./client/glow-card";
+import { LandingPricingCards } from "./client/landing-pricing-cards";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -233,6 +234,7 @@ export function ReferenceLandingView({
               <GlowCard
                 key={f.titleKey}
                 panelVariant
+                plain
                 glowColor="accent"
                 customSize
                 width="100%"
@@ -247,7 +249,6 @@ export function ReferenceLandingView({
                   justifyContent: "flex-start",
                 }}
               >
-                <div className="feat-card-glow"/>
                 <div className="feat-icon">{f.icon}</div>
                 <div className="feat-title">{t(f.titleKey, f.titleFb)}</div>
                 <div className="feat-desc">{t(f.descKey, f.descFb)}</div>
@@ -418,36 +419,7 @@ export function ReferenceLandingView({
               <div className="tier-h">{t("ref_tiers_line", "Линейка тарифов")}</div>
               <div className="tier-s">{t("ref_tiers_note", "Полные лимиты по проектам, картам и AI — в разделе «Учётная запись» после входа.")}</div>
             </div>
-            <div className="tier-grid">
-              {tierStrip.map((x)=>(
-                <div
-                  key={x.id}
-                  className={"tier-card" + (x.id === "pro" ? " popular" : "")}
-                  style={{ borderTop: `3px solid ${x.color}` }}
-                >
-                  {x.id === "pro" && (
-                    <div className="tier-pop-badge">{t("pricing_hot_badge", "★ TOP")}</div>
-                  )}
-                  <div className="tc-name">{x.name}</div>
-                  <div className="tc-price" style={{ color: x.id === "free" ? "var(--t2)" : "var(--t1)" }}>{t(`ref_tier_p_${x.id}`, "")}</div>
-                  <div className="tc-sub">{x.id === "free" ? String.fromCharCode(160) : t("per_month_short", "/мес")}</div>
-                  <div className="tc-features">
-                    <div className="tc-feat">{t(`ref_tier_d_${x.id}`, "")}</div>
-                  </div>
-                  <button
-                    type="button"
-                    className={"tier-btn " + (x.id === "free" ? "tier-btn-free" : "tier-btn-paid")}
-                    onClick={onGetStarted}
-                  >
-                    {x.id === "free"
-                      ? t("start_free_cta", "Начать бесплатно")
-                      : x.id === "enterprise"
-                        ? t("tier_enterprise_cta", "Связаться с нами")
-                        : t("ref_cta_btn", "Создать аккаунт →")}
-                  </button>
-                </div>
-              ))}
-            </div>
+            <LandingPricingCards t={t} theme={theme} tierStrip={tierStrip} onGetStarted={onGetStarted} />
           </div>
         </section>
 
