@@ -69,12 +69,22 @@ export function LandingPricingCards({ t, theme, tierStrip, onGetStarted }: Props
             ? t("tier_enterprise_cta", "Связаться с нами")
             : t("ref_cta_btn", "Создать аккаунт →");
 
+        const titleId = `sa-lp-title-${x.id}`;
+        const ctaAria = `${btnLabel} — ${x.name}`;
+
         return (
-          <div key={x.id} className={"sa-lp-card" + (isPro ? " sa-lp-card--popular" : "")}>
+          <article
+            key={x.id}
+            className={"sa-lp-card" + (isPro ? " sa-lp-card--popular" : "")}
+            aria-labelledby={titleId}
+          >
             {isPro && (
-              <div className="sa-lp-pop-badge" aria-hidden>
-                {t("pricing_hot_badge", "★ ТОП")}
-              </div>
+              <>
+                <span className="sa-lp-sr-only">{t("ref_pricing_popular_plan", "Популярный тариф.")}</span>
+                <div className="sa-lp-pop-badge" aria-hidden>
+                  {t("pricing_hot_badge", "★ ТОП")}
+                </div>
+              </>
             )}
 
             <div className={"sa-lp-card__mesh" + (lt ? " sa-lp-card__mesh--lt" : "")} aria-hidden />
@@ -97,7 +107,9 @@ export function LandingPricingCards({ t, theme, tierStrip, onGetStarted }: Props
                   <Icon size={22} strokeWidth={1.75} color={x.color} aria-hidden />
                 </div>
                 <div className="sa-lp-head-text">
-                  <h3 className="sa-lp-name">{x.name}</h3>
+                  <h3 id={titleId} className="sa-lp-name">
+                    {x.name}
+                  </h3>
                   <p className="sa-lp-tag">{t(`ref_tier_d_${x.id}`, "")}</p>
                 </div>
               </div>
@@ -125,11 +137,12 @@ export function LandingPricingCards({ t, theme, tierStrip, onGetStarted }: Props
                 type="button"
                 className={"sa-lp-btn" + (btnFree ? " sa-lp-btn--ghost" : " sa-lp-btn--accent")}
                 onClick={onGetStarted}
+                aria-label={ctaAria}
               >
                 {btnLabel}
               </button>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>

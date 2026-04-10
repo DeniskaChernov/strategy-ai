@@ -616,6 +616,17 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   box-shadow:0 4px 16px rgba(104,54,245,.45);
   pointer-events:none;
 }
+.sa-ref-landing .sa-lp-sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
 .sa-ref-landing .sa-lp-card__mesh{
   position:absolute;
   inset:0;

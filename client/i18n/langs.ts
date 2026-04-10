@@ -291,6 +291,7 @@ export const LANGS = {
     ref_pricing_price_free_sub:"навсегда",
     ref_pricing_price_ent_sub:"индивидуально",
     ref_pricing_no_card:"Без карты для старта",
+    ref_pricing_popular_plan:"Популярный тариф.",
     projects_briefing_cta:"Брифинг по последней карте",
     // Landing hero
     ref_horizon_side:"СТРАТЕГИЯ",ref_horizon_side_tag:"SPACE",ref_horizon_scroll:"SCROLL",
@@ -812,6 +813,7 @@ export const LANGS = {
     ref_pricing_price_free_sub:"forever",
     ref_pricing_price_ent_sub:"custom",
     ref_pricing_no_card:"No credit card required to start",
+    ref_pricing_popular_plan:"Most popular plan.",
     projects_briefing_cta:"Briefing for your last map",
     // Landing hero
     ref_horizon_side:"STRATEGY",ref_horizon_side_tag:"SPACE",ref_horizon_scroll:"SCROLL",
@@ -1331,6 +1333,7 @@ export const LANGS = {
     ref_pricing_price_free_sub:"doimiy",
     ref_pricing_price_ent_sub:"individual",
     ref_pricing_no_card:"Boshlash uchun karta shart emas",
+    ref_pricing_popular_plan:"Eng mashhur tarif.",
     projects_briefing_cta:"So'nggi xarita bo'yicha brifing",
     // Landing hero
     ref_horizon_side:"STRATEGY",ref_horizon_side_tag:"SPACE",ref_horizon_scroll:"SCROLL",
