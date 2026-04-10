@@ -1,9 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { StrategyShellBg } from "./strategy-shell-sidebar";
 import { LandingStarsCanvas } from "./client/landing-stars-canvas";
 import { AnimatedLandingNav } from "./client/animated-landing-nav";
 import { GlowCard } from "./client/glow-card";
 import { LandingPricingCards } from "./client/landing-pricing-cards";
+import {
+  LandingTestimonialsColumns,
+  type LandingTestimonialColumnItem,
+} from "./client/landing-testimonials-columns";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -36,49 +40,21 @@ export function ReferenceLandingView({
 }){
   const rootRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const testimonials = [TESTI1, TESTI2, TESTI3];
-  const testiTrackRef = useRef<HTMLDivElement>(null);
-  const [testiActive, setTestiActive] = useState(0);
 
-  const syncTestiActive = useCallback(() => {
-    const track = testiTrackRef.current;
-    if (!track) return;
-    const center = track.scrollLeft + track.clientWidth / 2;
-    let best = 0;
-    let bestDist = Infinity;
-    Array.from(track.children).forEach((child, i) => {
-      const el = child as HTMLElement;
-      const cx = el.offsetLeft + el.offsetWidth / 2;
-      const d = Math.abs(cx - center);
-      if (d < bestDist) {
-        bestDist = d;
-        best = i;
-      }
+  const testimonialColumns = useMemo(() => {
+    const m = (x: typeof TESTI1): LandingTestimonialColumnItem => ({
+      text: t(x.qk, x.qf),
+      name: t(x.nk, x.nf),
+      role: t(x.rk, x.rf),
+      initials: x.ini,
+      avatarStyle: x.avs,
     });
-    setTestiActive(best);
-  }, []);
-
-  const goTesti = useCallback((i: number) => {
-    const track = testiTrackRef.current;
-    const slide = track?.children[i] as HTMLElement | undefined;
-    if (!track || !slide) return;
-    const target = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
-    track.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    const track = testiTrackRef.current;
-    if (!track) return;
-    const onScroll = () => syncTestiActive();
-    track.addEventListener("scroll", onScroll, { passive: true });
-    syncTestiActive();
-    const onResize = () => syncTestiActive();
-    window.addEventListener("resize", onResize);
-    return () => {
-      track.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, [syncTestiActive]);
+    return [
+      [m(TESTI1), m(TESTI2), m(TESTI3)],
+      [m(TESTI2), m(TESTI3), m(TESTI1)],
+      [m(TESTI3), m(TESTI1), m(TESTI2)],
+    ];
+  }, [t]);
 
   const dk = theme === "dark" ? "dk" : "lt";
   const feats = [
@@ -243,9 +219,11 @@ export function ReferenceLandingView({
                   display: "flex",
                   flexDirection: "column",
                   gap: 0,
-                  padding: "14px 16px 16px",
+                  padding: "18px 18px 20px",
                   boxSizing: "border-box",
-                  alignSelf: "start",
+                  alignSelf: "stretch",
+                  height: "100%",
+                  minHeight: 0,
                   justifyContent: "flex-start",
                 }}
               >
@@ -301,78 +279,12 @@ export function ReferenceLandingView({
           <div className="land-section-title sr sr-up in">{t("ref_testi_title", "Нам доверяют команды")}</div>
           <div className="land-section-sub sr sr-up in" style={{ marginBottom: 40 }}>{t("ref_testi_sub", "Структура вместо разрозненных таблиц и чатов.")}</div>
           <div
-            className="testi-glass-wrap stagger sr sr-up in"
+            className="stagger sr sr-up in"
             role="region"
-            aria-roledescription={t("ref_testi_carousel_label", "Карусель отзывов")}
             aria-label={t("ref_testi_title", "Нам доверяют команды")}
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft") {
-                e.preventDefault();
-                goTesti((testiActive + testimonials.length - 1) % testimonials.length);
-              } else if (e.key === "ArrowRight") {
-                e.preventDefault();
-                goTesti((testiActive + 1) % testimonials.length);
-              }
-            }}
-            style={{ padding: "28px 20px 20px", boxSizing: "border-box", overflow: "visible" }}
+            style={{ padding: "8px 0 12px", boxSizing: "border-box" }}
           >
-            <div className="testi-glass-viewport">
-              <button
-                type="button"
-                className="testi-glass-nav testi-glass-nav--prev"
-                aria-label={t("ref_testi_prev", "Предыдущий отзыв")}
-                onClick={() => goTesti((testiActive + testimonials.length - 1) % testimonials.length)}
-              >
-                <span aria-hidden>‹</span>
-              </button>
-              <div ref={testiTrackRef} className="testi-glass-track">
-                {testimonials.map((x, i) => (
-                  <div key={i} className="testi-glass-slide" data-active={testiActive === i ? "true" : undefined}>
-                    <article className="testi-glass-card">
-                      <div className="testi-glass-head">
-                        <span className="testi-glass-quote" aria-hidden>
-                          “
-                        </span>
-                        <div className="testi-stars" aria-hidden>
-                          ★★★★★
-                        </div>
-                      </div>
-                      <p className="testi-text">{t(x.qk, x.qf)}</p>
-                      <div className="testi-author">
-                        <div className="testi-av" style={x.avs}>
-                          {x.ini}
-                        </div>
-                        <div>
-                          <div className="testi-name">{t(x.nk, x.nf)}</div>
-                          <div className="testi-role">{t(x.rk, x.rf)}</div>
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="testi-glass-nav testi-glass-nav--next"
-                aria-label={t("ref_testi_next", "Следующий отзыв")}
-                onClick={() => goTesti((testiActive + 1) % testimonials.length)}
-              >
-                <span aria-hidden>›</span>
-              </button>
-            </div>
-            <div className="testi-glass-dots" role="group" aria-label={t("ref_testi_choose", "Выбор отзыва")}>
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-current={testiActive === i ? "true" : undefined}
-                  className={"testi-glass-dot" + (testiActive === i ? " is-active" : "")}
-                  onClick={() => goTesti(i)}
-                  aria-label={t("ref_testi_goto", "Отзыв {n}").replace("{n}", String(i + 1))}
-                />
-              ))}
-            </div>
+            <LandingTestimonialsColumns columns={testimonialColumns} durations={[16, 22, 18]} />
           </div>
         </div>
 

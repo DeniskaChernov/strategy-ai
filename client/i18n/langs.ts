@@ -330,7 +330,7 @@ export const LANGS = {
     lt3_q:"Симуляция сценариев — это отдельный класс. Мы теперь входим в любые переговоры с тремя готовыми исходами вместо одного.",lt3_role:"Управляющий партнёр",
     // Landing pricing section
     tag_pricing_label:"Тарифы",pricing_start_word:"Начните",pricing_sub:"Первая карта и первый AI-анализ бесплатны. Платите только когда убедились в ценности инструмента.",
-    pricing_hot_badge:"★ ТОП",
+    pricing_hot_badge:"ТОП",
     lpr1_desc:"Для знакомства с инструментом",lpr1_f1:"1 проект и 1 стратегическая карта",lpr1_f2:"AI-интервью и генерация карты",lpr1_f3:"Gantt-таймлайн",lpr1_f4:"PNG / JSON экспорт",start_free_cta:"Начать бесплатно",
     lpr_starter_desc:"Мягкий вход в стратегическое планирование",lpr_starter_f1:"3 проекта, 3 карты каждый",lpr_starter_f2:"2 сценария + AI анализ рисков",lpr_starter_f3:"Полный Gantt + приоритеты",lpr_starter_f4:"1 500 AI-сообщений / мес",lpr_starter_cta:"Начать за $9 →",
     lpr2_desc:"Для профессионалов и команд",lpr2_f1:"10 проектов, 5 карт каждая",lpr2_f2:"SWOT, OKR, BCG, Porter AI-анализ",lpr2_f3:"5 сценариев + симуляция последствий",lpr2_f4:"Клонирование и версионирование карт",lpr2_f5:"Командная работа до 3 человек",lpr2_cta:"Перейти на Pro →",
@@ -848,7 +848,7 @@ export const LANGS = {
     lt3_q:"Scenario simulation is a class of its own. We now enter any negotiation with three prepared outcomes instead of one.",lt3_role:"Managing Partner",
     // Landing pricing section
     tag_pricing_label:"Pricing",pricing_start_word:"Start",pricing_sub:"Your first map and first AI analysis are free. Pay only when you're convinced of the tool's value.",
-    pricing_hot_badge:"★ TOP",
+    pricing_hot_badge:"TOP",
     lpr1_desc:"To get acquainted with the tool",lpr1_f1:"1 project and 1 strategy map",lpr1_f2:"AI interview and map generation",lpr1_f3:"Gantt timeline",lpr1_f4:"PNG / JSON export",start_free_cta:"Start free",
     lpr_starter_desc:"A gentle entry into strategic planning",lpr_starter_f1:"3 projects, 3 maps each",lpr_starter_f2:"2 scenarios + AI risk analysis",lpr_starter_f3:"Full Gantt + priorities",lpr_starter_f4:"1,500 AI messages / month",lpr_starter_cta:"Start for $9 →",
     lpr2_desc:"For professionals and teams",lpr2_f1:"10 projects, 5 maps each",lpr2_f2:"SWOT, OKR, BCG, Porter AI-analysis",lpr2_f3:"5 scenarios + consequence simulation",lpr2_f4:"Map cloning and versioning",lpr2_f5:"Team collaboration up to 3 people",lpr2_cta:"Go Pro →",
@@ -1372,7 +1372,7 @@ export const LANGS = {
     lt3_q:"Stsenariy simulyatsiyasi alohida sinf. Endi biz har qanday muzokaralarga bitta o'rniga uchta tayyor natija bilan kiramiz.",lt3_role:"Boshqaruvchi hamkor",
     // Landing pricing section
     tag_pricing_label:"Narxlar",pricing_start_word:"Boshlang",pricing_sub:"Birinchi xarita va birinchi AI tahlil bepul. Faqat vosita qiymatiga ishonch hosil qilganingizdan keyin to'lang.",
-    pricing_hot_badge:"★ TOP",
+    pricing_hot_badge:"TOP",
     lpr1_desc:"Vosita bilan tanishish uchun",lpr1_f1:"1 loyiha va 1 strategiya xaritasi",lpr1_f2:"AI suhbat va xarita generatsiyasi",lpr1_f3:"Gantt taymlayn",lpr1_f4:"PNG / JSON eksport",start_free_cta:"Bepul boshlash",
     lpr_starter_desc:"Strategik rejalashtishga yumshoq kirish",lpr_starter_f1:"3 loyiha, har birida 3 xarita",lpr_starter_f2:"2 stsenariy + AI xavf tahlili",lpr_starter_f3:"To'liq Gantt + ustuvorliklar",lpr_starter_f4:"1 500 AI xabarlari / oy",lpr_starter_cta:"$9 dan boshlash →",
     lpr2_desc:"Mutaxassislar va jamoalar uchun",lpr2_f1:"10 loyiha, har birida 5 xarita",lpr2_f2:"SWOT, OKR, BCG, Porter AI tahlili",lpr2_f3:"5 stsenariy + oqibatlar simulyatsiyasi",lpr2_f4:"Xaritani klonlash va versiyalash",lpr2_f5:"3 kishigacha jamoa hamkorligi",lpr2_cta:"Pro ga o'tish →",

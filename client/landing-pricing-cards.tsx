@@ -82,7 +82,8 @@ export function LandingPricingCards({ t, tierStrip, onGetStarted }: Props) {
                   <>
                     <span className="sa-lp-sr-only">{t("ref_pricing_popular_plan", "Популярный тариф.")}</span>
                     <div className="sa-lp-pop-badge" role="status">
-                      {t("pricing_hot_badge", "★ ТОП")}
+                      <span className="sa-lp-pop-badge__accent" aria-hidden />
+                      <span className="sa-lp-pop-badge__label">{t("pricing_hot_badge", "ТОП")}</span>
                     </div>
                   </>
                 )}
