@@ -636,9 +636,9 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   text-align:left;
 }
 .sa-strategy-ui.lt .sa-ref-landing .testi-col__card{
-  background:rgba(255,255,255,.92);
-  border-color:rgba(104,80,220,.12);
-  box-shadow:0 2px 14px rgba(78,55,180,.07);
+  background:rgba(255,255,255,.94);
+  border-color:rgba(15,23,42,.08);
+  box-shadow:0 1px 2px rgba(15,23,42,.05),0 4px 14px rgba(15,23,42,.06);
 }
 .sa-ref-landing .testi-col__stars{
   font-size:12px;
