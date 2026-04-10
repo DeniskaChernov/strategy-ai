@@ -65,11 +65,9 @@ export function ReferenceLandingView({
     { icon: "📊", titleKey: "ref_feat_gantt_t", titleFb: "Gantt-таймлайн", descKey: "ref_feat_gantt_d", descFb: "Временная шкала инициатив, пересечения и прогресс по дорожной карте." },
     { icon: "💡", titleKey: "ref_feat_insight_t", titleFb: "Инсайты", descKey: "ref_feat_insight_d", descFb: "Оценка здоровья стратегии, пробелы и приоритеты." },
     { icon: "👥", titleKey: "ref_feat_team_t", titleFb: "Командная работа", descKey: "ref_feat_team_d", descFb: "Роли, комментарии, совместное редактирование и автосохранение." },
-    { icon: "🔗", titleKey: "ref_feat_crm_t", titleFb: "CRM (в планах)", descKey: "ref_feat_crm_d", descFb: "Интеграция пайплайна со стратегическими целями — в развитии продукта." },
     { icon: "📤", titleKey: "ref_feat_export_t", titleFb: "Экспорт", descKey: "ref_feat_export_d", descFb: "PNG, JSON и др. Презентации — на тарифах Pro+." },
     { icon: "📸", titleKey: "ref_feat_ver_t", titleFb: "Версии карт", descKey: "ref_feat_ver_d", descFb: "Снимки состояний и история изменений." },
-    { icon: "🔐", titleKey: "ref_feat_sec_t", titleFb: "Данные и доступ", descKey: "ref_feat_sec_d", descFb: "Роли в проекте, контроль видимости карт и привычные практики безопасности для команд." },
-    { icon: "🧩", titleKey: "ref_feat_tpl_t", titleFb: "Шаблоны стартов", descKey: "ref_feat_tpl_d", descFb: "Быстрый старт с типовыми картами под рост, запуск продукта или квартальное планирование." },
+    { icon: "🔐", titleKey: "ref_feat_sec_t", titleFb: "Данные и доступ", descKey: "ref_feat_sec_d", descFb: "Роли в проекте и контроль доступа к картам для команды." },
   ];
   const trustPills = [
     { k: "ref_trust_p1", f: "B2B · SaaS" },
@@ -79,15 +77,15 @@ export function ReferenceLandingView({
     { k: "ref_trust_p5", f: "EdTech" },
   ];
   const audienceCards = [
-    { icon: "🚀", tk: "ref_aud_1_t", tf: "Фаундеры и CEO", dk: "ref_aud_1_d", df: "Сжать цели, риски и дорожную карту в одну живую картину для совета и инвесторов." },
-    { icon: "🎯", tk: "ref_aud_2_t", tf: "CPO и продакт-лиды", dk: "ref_aud_2_d", df: "Связать бэклог, сценарии и таймлайн — без разрозненных доски и таблиц." },
-    { icon: "🧭", tk: "ref_aud_3_t", tf: "Консультанты и фасилитаторы", dk: "ref_aud_3_d", df: "Вести сессии стратегии в одном месте: карта, сценарии и артефакты для клиента." },
+    { icon: "🚀", tk: "ref_aud_1_t", tf: "Стартапы и руководители", dk: "ref_aud_1_d", df: "Показать цели, риски и план в одном виде — для команды и инвесторов." },
+    { icon: "🎯", tk: "ref_aud_2_t", tf: "Продукт и стратегия", dk: "ref_aud_2_d", df: "Задачи, сценарии и сроки на одном экране — без прыжков между таблицами и досками." },
+    { icon: "🧭", tk: "ref_aud_3_t", tf: "Консультанты и тренеры", dk: "ref_aud_3_d", df: "Проводить стратегические сессии в одном окне: карта, сценарии и материалы для заказчика." },
   ];
-  const integrationChips = [
-    { k: "ref_int_1", f: "Экспорт PNG и JSON", emoji: "⬇️" },
-    { k: "ref_int_2", f: "Презентации на старших тарифах", emoji: "📽️" },
-    { k: "ref_int_3", f: "Командные роли и проекты", emoji: "👥" },
-    { k: "ref_int_4", f: "API и интеграции — в развитии", emoji: "🔌" },
+  const integrationItems: { k: string; f: string; mark: "exp" | "deck" | "team" | "api" }[] = [
+    { k: "ref_int_1", f: "Сохранить карту в PNG или JSON", mark: "exp" },
+    { k: "ref_int_2", f: "Презентации — на тарифах Pro и выше", mark: "deck" },
+    { k: "ref_int_3", f: "Команда: роли и проекты", mark: "team" },
+    { k: "ref_int_4", f: "API и внешние системы — в развитии продукта", mark: "api" },
   ];
   const steps = [
     { n: "1", tk: "ref_how1_t", tf: "Карта стратегии", dk: "ref_how1_d", df: "Цели, инициативы, KPI и риски как узлы и связи." },
@@ -258,7 +256,7 @@ export function ReferenceLandingView({
         <div id="land-audience">
           <div className="land-section-lbl sr sr-up in">{t("ref_aud_lbl", "Кому подходит")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_aud_title", "Один продукт — разные роли")}</div>
-          <div className="land-section-sub sr sr-up in">{t("ref_aud_sub", "От стартапа до консалтинга: карта, сценарии и AI в одном контексте.")}</div>
+          <div className="land-section-sub sr sr-up in">{t("ref_aud_sub", "Для тех, кто ведёт стратегию — от небольшой команды до консалта.")}</div>
           <div className="land-audience-grid stagger">
             {audienceCards.map((a) => (
               <GlowCard
@@ -316,12 +314,12 @@ export function ReferenceLandingView({
         <div id="land-integrations">
           <div className="land-section-lbl sr sr-up in">{t("ref_int_lbl", "Экосистема")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_int_title", "Экспорт, команда, развитие")}</div>
-          <div className="land-section-sub sr sr-up in">{t("ref_int_sub", "Что уже есть в продукте и что запланировано — без сюрпризов в тарифах.")}</div>
-          <div className="land-int-row sr sr-up in" role="list">
-            {integrationChips.map((c) => (
-              <div key={c.k} className="land-int-chip" role="listitem">
-                <span aria-hidden>{c.emoji}</span>
-                {t(c.k, c.f)}
+          <div className="land-section-sub sr sr-up in">{t("ref_int_sub", "Что можно сделать с картой сегодня и что появится дальше — прозрачно по тарифам.")}</div>
+          <div className="land-int-grid sr sr-up in" role="list">
+            {integrationItems.map((c) => (
+              <div key={c.k} className={"land-int-item land-int-item--" + c.mark} role="listitem">
+                <span className="land-int-item__mark" aria-hidden />
+                <span className="land-int-item__txt">{t(c.k, c.f)}</span>
               </div>
             ))}
           </div>

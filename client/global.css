@@ -424,34 +424,66 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   min-height:0;
   height:100%;
 }
-.sa-ref-landing .land-int-row{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:12px 16px;
-  max-width:min(900px,100%);
+.sa-ref-landing .land-int-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  max-width:min(880px,100%);
   margin:0 auto 88px;
-  padding:20px 22px;
-  border-radius:18px;
-  border:.5px solid var(--b1);
-  background:var(--card);
-  box-shadow:var(--shc);
+  padding:0;
   box-sizing:border-box;
 }
-.sa-strategy-ui.lt .sa-ref-landing .land-int-row{
-  background:rgba(255,255,255,.72);
+@media (min-width:900px){
+  .sa-ref-landing .land-int-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
 }
-.sa-ref-landing .land-int-chip{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
+@media (max-width:520px){
+  .sa-ref-landing .land-int-grid{
+    grid-template-columns:1fr;
+  }
+}
+.sa-ref-landing .land-int-item{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:14px 14px 14px 12px;
+  border-radius:14px;
+  border:.5px solid var(--b1);
+  background:rgba(255,255,255,.05);
+  box-shadow:none;
+  box-sizing:border-box;
+}
+.sa-strategy-ui.dk .sa-ref-landing .land-int-item{
+  background:rgba(255,255,255,.04);
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-int-item{
+  background:rgba(255,255,255,.38);
+  border-color:rgba(104,80,220,.14);
+}
+.sa-ref-landing .land-int-item__mark{
+  flex-shrink:0;
+  width:4px;
+  align-self:stretch;
+  min-height:40px;
+  border-radius:4px;
+  margin-top:2px;
+  background:linear-gradient(180deg,var(--acc),rgba(104,54,245,.35));
+}
+.sa-ref-landing .land-int-item--deck .land-int-item__mark{
+  background:linear-gradient(180deg,#12c482,rgba(18,196,130,.35));
+}
+.sa-ref-landing .land-int-item--team .land-int-item__mark{
+  background:linear-gradient(180deg,#f09428,rgba(240,148,40,.4));
+}
+.sa-ref-landing .land-int-item--api .land-int-item__mark{
+  background:linear-gradient(180deg,#06b6d4,rgba(6,182,212,.35));
+}
+.sa-ref-landing .land-int-item__txt{
   font-size:13px;
   font-weight:600;
   color:var(--t1);
-}
-.sa-ref-landing .land-int-chip span[aria-hidden]{
-  font-size:16px;
-  opacity:.9;
+  line-height:1.45;
 }
 /* Демо-карта лендинга — client/landing-map-demo.tsx (без линии под «хромом», как у старого mockup-bar) */
 .sa-ref-landing .land-map-demo{
@@ -466,7 +498,16 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   animation:mockup-float 6s ease-in-out infinite;
 }
 .sa-strategy-ui.lt .sa-ref-landing .land-map-demo{
-  box-shadow:0 24px 80px rgba(78,55,180,.2);
+  background:rgba(255,255,255,.44);
+  backdrop-filter:blur(20px) saturate(1.06);
+  -webkit-backdrop-filter:blur(20px) saturate(1.06);
+  box-shadow:0 24px 80px rgba(78,55,180,.16);
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-map-demo__sb{
+  background:rgba(255,255,255,.38);
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-map-demo__canvas{
+  background:transparent!important;
 }
 .sa-ref-landing .land-map-demo__badge{
   position:absolute;
@@ -603,6 +644,7 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   flex-direction:column;
   align-items:center;
   gap:8px;
+  background:transparent;
 }
 .sa-ref-landing .land-map-demo__hint-text{
   font-size:12px;
@@ -620,6 +662,11 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
 .sa-ref-landing .land-map-demo__try{
   margin-top:4px;
 }
+.sa-ref-landing #land-testimonials,
+.sa-ref-landing #land-testimonials .stagger{
+  background:transparent!important;
+  box-shadow:none!important;
+}
 /* Отзывы: три колонки + marquee — client/landing-testimonials-columns.tsx */
 .sa-ref-landing .testi-cols-grid{
   display:grid;
@@ -631,7 +678,11 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   padding:0 4px;
   box-sizing:border-box;
 }
-.sa-ref-landing .testi-cols-grid__cell{min-width:0;}
+.sa-ref-landing .testi-cols-grid__cell{
+  min-width:0;
+  background:transparent!important;
+  box-shadow:none!important;
+}
 .sa-ref-landing .testi-col{
   overflow:hidden;
   position:relative;

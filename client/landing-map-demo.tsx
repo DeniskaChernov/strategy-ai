@@ -107,8 +107,8 @@ export function LandingMapDemo({
 
   const nodeMap = useMemo(() => Object.fromEntries(nodes.map((n) => [n.id, n])), [nodes]);
   const isDark = theme === "dark";
-  const canvasBg = isDark ? "rgba(6,4,18,.55)" : "rgba(104,80,220,.06)";
-  const gridStroke = isDark ? "rgba(255,255,255,.06)" : "rgba(104,54,245,.12)";
+  const canvasBg = isDark ? "rgba(6,4,18,.55)" : "transparent";
+  const gridStroke = isDark ? "rgba(255,255,255,.06)" : "rgba(104,54,245,.05)";
   const t1 = isDark ? "#eaeaf8" : "#08061a";
   const t3 = isDark ? "rgba(148,144,196,.55)" : "rgba(70,58,130,.5)";
 
@@ -246,7 +246,7 @@ export function LandingMapDemo({
               </pattern>
             </defs>
             <g transform={gTransform}>
-              <rect width="100%" height="100%" fill="url(#land-demo-grid)" opacity={0.95} />
+              <rect width="100%" height="100%" fill="url(#land-demo-grid)" opacity={isDark ? 0.95 : 0.45} />
               <g
                 stroke={isDark ? "rgba(160,150,220,.42)" : "rgba(104,54,245,.32)"}
                 fill="none"
