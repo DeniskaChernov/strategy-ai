@@ -368,6 +368,91 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   flex:1;
   min-height:0;
 }
+.sa-ref-landing .land-trust-strip{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:10px 14px;
+  margin-bottom:88px;
+  padding:0 8px;
+}
+.sa-ref-landing .land-trust-strip__lbl{
+  width:100%;
+  text-align:center;
+  font-size:11px;
+  font-weight:600;
+  color:var(--t3);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  margin-bottom:4px;
+}
+.sa-ref-landing .land-trust-pill{
+  font-size:12px;
+  font-weight:600;
+  color:var(--t2);
+  padding:8px 14px;
+  border-radius:999px;
+  border:.5px solid var(--b1);
+  background:var(--card);
+  box-shadow:var(--shc);
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-trust-pill{
+  background:rgba(255,255,255,.62);
+}
+.sa-ref-landing .land-audience-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  margin-bottom:88px;
+  width:100%;
+  align-items:stretch;
+}
+@media (max-width:920px){
+  .sa-ref-landing .land-audience-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width:520px){
+  .sa-ref-landing .land-audience-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+.sa-ref-landing .land-audience-grid > .glow-card.feat-card{
+  align-self:stretch;
+  width:100%;
+  min-height:0;
+  height:100%;
+}
+.sa-ref-landing .land-int-row{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:12px 16px;
+  max-width:min(900px,100%);
+  margin:0 auto 88px;
+  padding:20px 22px;
+  border-radius:18px;
+  border:.5px solid var(--b1);
+  background:var(--card);
+  box-shadow:var(--shc);
+  box-sizing:border-box;
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-int-row{
+  background:rgba(255,255,255,.72);
+}
+.sa-ref-landing .land-int-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  font-weight:600;
+  color:var(--t1);
+}
+.sa-ref-landing .land-int-chip span[aria-hidden]{
+  font-size:16px;
+  opacity:.9;
+}
 /* Отзывы: три колонки + marquee — client/landing-testimonials-columns.tsx */
 .sa-ref-landing .testi-cols-grid{
   display:grid;

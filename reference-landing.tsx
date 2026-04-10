@@ -67,6 +67,26 @@ export function ReferenceLandingView({
     { icon: "🔗", titleKey: "ref_feat_crm_t", titleFb: "CRM (в планах)", descKey: "ref_feat_crm_d", descFb: "Интеграция пайплайна со стратегическими целями — в развитии продукта." },
     { icon: "📤", titleKey: "ref_feat_export_t", titleFb: "Экспорт", descKey: "ref_feat_export_d", descFb: "PNG, JSON и др. Презентации — на тарифах Pro+." },
     { icon: "📸", titleKey: "ref_feat_ver_t", titleFb: "Версии карт", descKey: "ref_feat_ver_d", descFb: "Снимки состояний и история изменений." },
+    { icon: "🔐", titleKey: "ref_feat_sec_t", titleFb: "Данные и доступ", descKey: "ref_feat_sec_d", descFb: "Роли в проекте, контроль видимости карт и привычные практики безопасности для команд." },
+    { icon: "🧩", titleKey: "ref_feat_tpl_t", titleFb: "Шаблоны стартов", descKey: "ref_feat_tpl_d", descFb: "Быстрый старт с типовыми картами под рост, запуск продукта или квартальное планирование." },
+  ];
+  const trustPills = [
+    { k: "ref_trust_p1", f: "B2B · SaaS" },
+    { k: "ref_trust_p2", f: "Продакты и стратегия" },
+    { k: "ref_trust_p3", f: "Консалтинг" },
+    { k: "ref_trust_p4", f: "Финтех" },
+    { k: "ref_trust_p5", f: "EdTech" },
+  ];
+  const audienceCards = [
+    { icon: "🚀", tk: "ref_aud_1_t", tf: "Фаундеры и CEO", dk: "ref_aud_1_d", df: "Сжать цели, риски и дорожную карту в одну живую картину для совета и инвесторов." },
+    { icon: "🎯", tk: "ref_aud_2_t", tf: "CPO и продакт-лиды", dk: "ref_aud_2_d", df: "Связать бэклог, сценарии и таймлайн — без разрозненных доски и таблиц." },
+    { icon: "🧭", tk: "ref_aud_3_t", tf: "Консультанты и фасилитаторы", dk: "ref_aud_3_d", df: "Вести сессии стратегии в одном месте: карта, сценарии и артефакты для клиента." },
+  ];
+  const integrationChips = [
+    { k: "ref_int_1", f: "Экспорт PNG и JSON", emoji: "⬇️" },
+    { k: "ref_int_2", f: "Презентации на старших тарифах", emoji: "📽️" },
+    { k: "ref_int_3", f: "Командные роли и проекты", emoji: "👥" },
+    { k: "ref_int_4", f: "API и интеграции — в развитии", emoji: "🔌" },
   ];
   const steps = [
     { n: "1", tk: "ref_how1_t", tf: "Карта стратегии", dk: "ref_how1_d", df: "Цели, инициативы, KPI и риски как узлы и связи." },
@@ -87,6 +107,8 @@ export function ReferenceLandingView({
     { q: "ref_faq3_q", qf: "Что в бесплатном тарифе?", a: "ref_faq3_a", af: "Ознакомление с продуктом: лимиты по проектам и картам — см. тарифы в приложении." },
     { q: "ref_faq4_q", qf: "Можно ли в команде?", a: "ref_faq4_a", af: "Да, на платных тарифах — участники проекта и роли." },
     { q: "ref_faq5_q", qf: "Экспорт?", a: "ref_faq5_a", af: "Доступен экспорт карты (в т.ч. PNG/JSON); PPTX — на старших тарифах." },
+    { q: "ref_faq6_q", qf: "Есть ли онбординг?", a: "ref_faq6_a", af: "Да: подсказки в интерфейсе, шаблоны карт и быстрый старт без обучения «с нуля»." },
+    { q: "ref_faq7_q", qf: "Можно ли работать офлайн?", a: "ref_faq7_a", af: "Основной режим — в браузере с сохранением в облаке; офлайн-режим может появиться позже." },
   ];
 
   return(
@@ -167,6 +189,15 @@ export function ReferenceLandingView({
             <div className="stat-val">4.9 ⭐</div>
             <div className="stat-lbl">Product Hunt</div>
           </div>
+        </div>
+
+        <div className="land-trust-strip sr sr-up in" aria-label={t("ref_trust_aria", "Отрасли и типы команд")}>
+          <div className="land-trust-strip__lbl">{t("ref_trust_lbl", "Команды и отрасли")}</div>
+          {trustPills.map((p) => (
+            <span key={p.k} className="land-trust-pill">
+              {t(p.k, p.f)}
+            </span>
+          ))}
         </div>
 
         <div className="mockup-wrap sr sr-scale in" id="land-mockup">
@@ -250,6 +281,40 @@ export function ReferenceLandingView({
           </div>
         </div>
 
+        <div id="land-audience">
+          <div className="land-section-lbl sr sr-up in">{t("ref_aud_lbl", "Кому подходит")}</div>
+          <div className="land-section-title sr sr-up in">{t("ref_aud_title", "Один продукт — разные роли")}</div>
+          <div className="land-section-sub sr sr-up in">{t("ref_aud_sub", "От стартапа до консалтинга: карта, сценарии и AI в одном контексте.")}</div>
+          <div className="land-audience-grid stagger">
+            {audienceCards.map((a) => (
+              <GlowCard
+                key={a.tk}
+                panelVariant
+                plain
+                glowColor="accent"
+                customSize
+                width="100%"
+                className="feat-card sr sr-up in"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0,
+                  padding: "18px 18px 20px",
+                  boxSizing: "border-box",
+                  alignSelf: "stretch",
+                  height: "100%",
+                  minHeight: 0,
+                  justifyContent: "flex-start",
+                }}
+              >
+                <div className="feat-icon">{a.icon}</div>
+                <div className="feat-title">{t(a.tk, a.tf)}</div>
+                <div className="feat-desc">{t(a.dk, a.df)}</div>
+              </GlowCard>
+            ))}
+          </div>
+        </div>
+
         <div id="land-compare">
           <div className="land-section-lbl sr sr-up in">{t("ref_sec_cmp_lbl", "Сравнение")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_sec_cmp_title", "Почему Strategy AI")}</div>
@@ -271,6 +336,20 @@ export function ReferenceLandingView({
                 <tr><td>{t("ref_cmp_row5", "Бесплатный старт")}</td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <div id="land-integrations">
+          <div className="land-section-lbl sr sr-up in">{t("ref_int_lbl", "Экосистема")}</div>
+          <div className="land-section-title sr sr-up in">{t("ref_int_title", "Экспорт, команда, развитие")}</div>
+          <div className="land-section-sub sr sr-up in">{t("ref_int_sub", "Что уже есть в продукте и что запланировано — без сюрпризов в тарифах.")}</div>
+          <div className="land-int-row sr sr-up in" role="list">
+            {integrationChips.map((c) => (
+              <div key={c.k} className="land-int-chip" role="listitem">
+                <span aria-hidden>{c.emoji}</span>
+                {t(c.k, c.f)}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -351,6 +430,7 @@ export function ReferenceLandingView({
           </div>
           <div className="footer-links">
             <button type="button" className="footer-link" onClick={()=>scrollToId("land-features")}>{t("nav_features", "Возможности")}</button>
+            <button type="button" className="footer-link" onClick={()=>scrollToId("land-audience")}>{t("nav_audience", "Для кого")}</button>
             <button type="button" className="footer-link" onClick={()=>scrollToId("land-compare")}>{t("ref_sec_cmp_lbl", "Сравнение")}</button>
             <button type="button" className="footer-link" onClick={()=>scrollToId("land-pricing")}>{t("nav_pricing", "Тарифы")}</button>
             <button type="button" className="footer-link" onClick={()=>scrollToId("land-faq")}>FAQ</button>
