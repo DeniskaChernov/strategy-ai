@@ -140,22 +140,18 @@ export function AnimatedLandingNav({
               </button>
             ))}
           </div>
-          <div
+          <button
+            type="button"
             className="tpill"
             onClick={(e) => {
               e.stopPropagation();
               onToggleTheme();
             }}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") onToggleTheme();
-            }}
             aria-label={t("toggle_theme", "Тема")}
           >
             <div className={"tpi" + (theme === "dark" ? " on" : "")}>☽</div>
             <div className={"tpi" + (theme === "light" ? " on" : "")}>☀</div>
-          </div>
+          </button>
           <button type="button" className="btn-g" onClick={(e) => { e.stopPropagation(); onSignIn(); }}>
             {t("sign_in", "Войти")}
           </button>

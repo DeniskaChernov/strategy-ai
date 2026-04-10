@@ -43,15 +43,17 @@ export function SplashLoaderVisual({ text, size = 180 }: SplashLoaderVisualProps
         } as React.CSSProperties
       }
     >
-      {letters.map((letter, index) => (
-        <span
-          key={index}
-          className="sa-splash-loader-letter"
-          style={{ animationDelay: `${index * 0.1}s` }}
-        >
-          {letter === " " ? "\u00a0" : letter}
-        </span>
-      ))}
+      <div className="sa-splash-loader-letters" aria-hidden>
+        {letters.map((letter, index) => (
+          <span
+            key={index}
+            className="sa-splash-loader-letter"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            {letter === " " ? "\u00a0" : letter}
+          </span>
+        ))}
+      </div>
       <div className="sa-splash-loader-ring" aria-hidden />
     </div>
   );

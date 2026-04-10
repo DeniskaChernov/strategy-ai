@@ -208,20 +208,45 @@ export function FloatingAiAssistant({
               <div className="sa-fai-controls-row">
                 <div className="sa-fai-toolbar">
                   <div className="sa-fai-attach" role="group" aria-label={t("fai_attach_group", "Вложения")}>
-                    <button type="button" className="sa-fai-tool" title={t("fai_tip_upload", "Загрузить файлы")}>
+                    <button
+                      type="button"
+                      className="sa-fai-tool"
+                      title={t("fai_tip_upload", "Загрузить файлы")}
+                      aria-label={t("fai_tip_upload", "Загрузить файлы")}
+                    >
                       {Ic.paperclip}
                     </button>
-                    <button type="button" className="sa-fai-tool" title={t("fai_tip_link", "Ссылка")}>
+                    <button
+                      type="button"
+                      className="sa-fai-tool"
+                      title={t("fai_tip_link", "Ссылка")}
+                      aria-label={t("fai_tip_link", "Ссылка")}
+                    >
                       {Ic.link}
                     </button>
-                    <button type="button" className="sa-fai-tool" title={t("fai_tip_code", "Код / репозиторий")}>
+                    <button
+                      type="button"
+                      className="sa-fai-tool"
+                      title={t("fai_tip_code", "Код / репозиторий")}
+                      aria-label={t("fai_tip_code", "Код / репозиторий")}
+                    >
                       {Ic.code}
                     </button>
-                    <button type="button" className="sa-fai-tool" title={t("fai_tip_design", "Макет")}>
+                    <button
+                      type="button"
+                      className="sa-fai-tool"
+                      title={t("fai_tip_design", "Макет")}
+                      aria-label={t("fai_tip_design", "Макет")}
+                    >
                       {Ic.figma}
                     </button>
                   </div>
-                  <button type="button" className="sa-fai-tool sa-fai-tool--solo" title={t("fai_tip_voice", "Голосовой ввод")}>
+                  <button
+                    type="button"
+                    className="sa-fai-tool sa-fai-tool--solo"
+                    title={t("fai_tip_voice", "Голосовой ввод")}
+                    aria-label={t("fai_tip_voice", "Голосовой ввод")}
+                  >
                     {Ic.mic}
                   </button>
                 </div>

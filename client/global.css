@@ -465,6 +465,13 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   width:100%;
   margin-top:8px;
 }
+.sa-ref-landing .land-footer button.footer-link{
+  background:none;
+  border:none;
+  padding:0;
+  font:inherit;
+  cursor:pointer;
+}
 
 /* MainWorkspaceNav вне shell (мобильная карта и т.п.): токены body[data-theme] */
 .workspace-nav-tabs.tabs{
@@ -535,7 +542,11 @@ select{appearance:none;-webkit-appearance:none;}
 ::-webkit-scrollbar-track{background:var(--scrollbar-track)}
 ::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--text4)}
-button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:2px solid var(--accent-1);outline-offset:2px}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible,
+[role="button"]:focus-visible, a:focus-visible{
+  outline:2px solid var(--accent-1);
+  outline-offset:2px;
+}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDownOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(18px)}}
@@ -1153,6 +1164,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   font-weight:700;user-select:none;
   max-width:min(calc(var(--sa-loader-size,180px)*1.02),92vw);
   font-size:var(--sa-loader-font-px,calc(var(--sa-loader-size,180px)*0.1));
+}
+.sa-splash-loader-letters{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:nowrap;
 }
 .sa-splash-loader-screen.dk .sa-splash-loader-letter{
   display:inline-block;color:rgba(255,255,255,.4);

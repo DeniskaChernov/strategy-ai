@@ -286,9 +286,9 @@ export function ReferenceLandingView({
               </tr></thead>
               <tbody>
                 <tr><td>{t("ref_cmp_row1", "Визуальная карта стратегии")}</td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
-                <tr><td>{t("ref_cmp_row2", "AI с контекстом бизнеса")}</td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center">Partial</td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
+                <tr><td>{t("ref_cmp_row2", "AI с контекстом бизнеса")}</td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center">{t("ref_cmp_partial", "Частично")}</td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
                 <tr><td>{t("ref_cmp_row3", "Сценарии")}</td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
-                <tr><td>{t("ref_cmp_row4", "Gantt / таймлайн")}</td><td className="center">Partial</td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
+                <tr><td>{t("ref_cmp_row4", "Gantt / таймлайн")}</td><td className="center">{t("ref_cmp_partial", "Частично")}</td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="center"><span className="compare-badge cb-no">–</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
                 <tr><td>{t("ref_cmp_row5", "Бесплатный старт")}</td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="center"><span className="compare-badge cb-yes">✓</span></td><td className="acc-col"><span className="compare-badge cb-yes">✓</span></td></tr>
               </tbody>
             </table>
@@ -356,13 +356,12 @@ export function ReferenceLandingView({
                 <span aria-hidden>›</span>
               </button>
             </div>
-            <div className="testi-glass-dots" role="tablist" aria-label={t("ref_testi_choose", "Выбор отзыва")}>
+            <div className="testi-glass-dots" role="group" aria-label={t("ref_testi_choose", "Выбор отзыва")}>
               {testimonials.map((_, i) => (
                 <button
                   key={i}
                   type="button"
-                  role="tab"
-                  aria-selected={testiActive === i}
+                  aria-current={testiActive === i ? "true" : undefined}
                   className={"testi-glass-dot" + (testiActive === i ? " is-active" : "")}
                   onClick={() => goTesti(i)}
                   aria-label={t("ref_testi_goto", "Отзыв {n}").replace("{n}", String(i + 1))}
@@ -391,9 +390,18 @@ export function ReferenceLandingView({
                   }
                 }}
                 aria-expanded={openFaq===i}
+                aria-controls={`land-faq-panel-${i}`}
               >
-                <div className="faq-q">{t(item.q, item.qf)}<span className="faq-icon">+</span></div>
-                <div className="faq-a">{t(item.a, item.af)}</div>
+                <div className="faq-q" id={`land-faq-q-${i}`}>{t(item.q, item.qf)}<span className="faq-icon" aria-hidden>+</span></div>
+                <div
+                  className="faq-a"
+                  id={`land-faq-panel-${i}`}
+                  role="region"
+                  aria-labelledby={`land-faq-q-${i}`}
+                  aria-hidden={openFaq !== i}
+                >
+                  {t(item.a, item.af)}
+                </div>
               </div>
             ))}
           </div>
@@ -454,10 +462,10 @@ export function ReferenceLandingView({
             <span style={{ fontSize: 13, fontWeight: 700, color: "var(--t1)" }}>Strategy AI</span>
           </div>
           <div className="footer-links">
-            <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-features")}>{t("nav_features", "Возможности")}</span>
-            <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-compare")}>{t("ref_sec_cmp_lbl", "Сравнение")}</span>
-            <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-pricing")}>{t("nav_pricing", "Тарифы")}</span>
-            <span className="footer-link" role="button" tabIndex={0} onClick={()=>scrollToId("land-faq")}>FAQ</span>
+            <button type="button" className="footer-link" onClick={()=>scrollToId("land-features")}>{t("nav_features", "Возможности")}</button>
+            <button type="button" className="footer-link" onClick={()=>scrollToId("land-compare")}>{t("ref_sec_cmp_lbl", "Сравнение")}</button>
+            <button type="button" className="footer-link" onClick={()=>scrollToId("land-pricing")}>{t("nav_pricing", "Тарифы")}</button>
+            <button type="button" className="footer-link" onClick={()=>scrollToId("land-faq")}>FAQ</button>
             <a className="footer-link" href="/privacy">{t("footer_privacy", "Конфиденциальность")}</a>
             <a className="footer-link" href="/terms">{t("footer_terms", "Условия")}</a>
           </div>
