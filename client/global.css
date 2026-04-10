@@ -463,7 +463,6 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   margin:0 auto;
   padding:0 4px;
   box-sizing:border-box;
-  background:var(--bg);
 }
 .sa-ref-landing .testi-cols-grid__cell{min-width:0;}
 .sa-ref-landing .testi-col{
@@ -472,9 +471,9 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   border-radius:16px;
   min-height:min(520px,62vh);
   max-height:640px;
-  background:var(--bg);
   display:flex;
   flex-direction:column;
+  background:transparent;
 }
 .sa-ref-landing .testi-col__viewport{
   flex:1;
@@ -514,9 +513,9 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   text-align:left;
 }
 .sa-strategy-ui.lt .sa-ref-landing .testi-col__card{
-  background:rgba(255,255,255,.88);
-  border-color:rgba(104,80,220,.14);
-  box-shadow:0 6px 28px rgba(78,55,180,.08);
+  background:rgba(255,255,255,.92);
+  border-color:rgba(104,80,220,.12);
+  box-shadow:0 2px 14px rgba(78,55,180,.07);
 }
 .sa-ref-landing .testi-col__stars{
   font-size:12px;
