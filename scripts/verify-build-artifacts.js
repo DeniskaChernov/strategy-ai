@@ -7,6 +7,7 @@ const need = [
   'public/global.css',
   'public/landing.css',
   'public/strategy-shell.css',
+  'public/tailwind.css',
   'public/env-config.js',
 ];
 for (const rel of need) {

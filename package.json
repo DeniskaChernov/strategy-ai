@@ -4,9 +4,10 @@
   "description": "Strategy AI — full-stack SaaS for strategic planning",
   "main": "server/index.js",
   "scripts": {
-    "build": "node build.js",
+    "build:tailwind": "tailwindcss -i ./client/tailwind-input.css -o ./public/tailwind.css --minify",
+    "build": "npm run build:tailwind && node build.js",
     "typecheck": "tsc --noEmit",
-    "ci": "node build.js && tsc --noEmit && node scripts/verify-build-artifacts.js",
+    "ci": "npm run build && tsc --noEmit && node scripts/verify-build-artifacts.js",
     "start": "node server/index.js",
     "dev": "node scripts/sync-css.js && nodemon server/index.js",
     "seed": "node server/seed.js",
@@ -48,7 +49,7 @@
     "husky": "^9.1.7",
     "nodemon": "^3.1.0",
     "postcss": "^8.5.9",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.4.5"
   },
