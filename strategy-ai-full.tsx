@@ -38,6 +38,10 @@ import { GlowCard } from "./client/glow-card";
 import { FloatingAiAssistant } from "./client/floating-ai-assistant";
 import { SplashLoaderScreen } from "./client/splash-loader";
 import { GlassCalendar, dateToYMD } from "./client/glass-calendar";
+import { parseMarketingPath } from "./client/spa-path";
+import { applySeoForAppScreen } from "./client/seo-head";
+import { LegalDocumentPage, NotFoundPage } from "./client/legal-pages";
+import { initAnalyticsAfterConsent, bootstrapAnalyticsIfConsented, trackSaEvent } from "./client/analytics";
 
 const TIERS={
   free:    {label:"Free",    price:"Бесплатно",  color:"#9088b0",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
@@ -1580,8 +1584,9 @@ function CookieConsent(){
   const[shown,setShown]=useState(()=>{
     try{return!localStorage.getItem("sa_cookie_ok");}catch{return true;}
   });
+  useEffect(()=>{bootstrapAnalyticsIfConsented();},[]);
   if(!shown)return null;
-  function accept(){try{localStorage.setItem("sa_cookie_ok","1");}catch{}setShown(false);}
+  function accept(){try{localStorage.setItem("sa_cookie_ok","1");}catch{}initAnalyticsAfterConsent();setShown(false);}
   return(
     <div style={{position:"fixed",bottom:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:"rgba(9,7,22,.92)",backdropFilter:"blur(20px) saturate(1.1)",WebkitBackdropFilter:"blur(20px)",border:"1px solid rgba(104,54,245,.28)",borderRadius:16,padding:"14px 20px",display:"flex",alignItems:"center",gap:16,maxWidth:560,width:"92vw",boxShadow:"0 8px 40px rgba(0,0,0,.45),0 0 0 .5px rgba(104,54,245,.12)"}}>
       <span style={{fontSize:12,color:"rgba(188,186,224,.62)",flex:1,lineHeight:1.5}}>{t("cookie_text","🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей")} <a href="/privacy" target="_blank" style={{color:"#b4a3ff",textDecoration:"underline"}}>{t("cookie_policy","Политикой конфиденциальности")}</a>.</span>
@@ -6717,18 +6722,15 @@ function SparklesCanvas({color="#ffffff",density=120,speed=1.2,minSz=0.4,maxSz=1
 function LandingPage({onGetStarted,onSignIn,onToggleTheme,theme,lang="ru",onChangeLang}){
   const{t}=useLang();
   return(
-    <>
-      <ReferenceLandingView
-        t={t}
-        lang={lang}
-        onChangeLang={onChangeLang}
-        theme={theme}
-        onToggleTheme={onToggleTheme}
-        onSignIn={onSignIn}
-        onGetStarted={onGetStarted}
-      />
-      <CookieConsent/>
-    </>
+    <ReferenceLandingView
+      t={t}
+      lang={lang}
+      onChangeLang={onChangeLang}
+      theme={theme}
+      onToggleTheme={onToggleTheme}
+      onSignIn={onSignIn}
+      onGetStarted={onGetStarted}
+    />
   );
 }
 // ── Welcome: ротация строк «что входит бесплатно» (одна строка, смена по таймеру) ──
@@ -6835,9 +6837,25 @@ function WelcomeScreen({onAuth,onBack,theme}){
   );
 }
 
+function initialMarketingScreen(): string {
+  if (typeof window === "undefined") return "splash";
+  const mp = parseMarketingPath(window.location.pathname);
+  if (mp.type === "privacy" || mp.type === "terms") return "legal";
+  if (mp.type === "notFound") return "notFound";
+  return "splash";
+}
+
+function initialLegalKind(): "privacy" | "terms" | null {
+  if (typeof window === "undefined") return null;
+  const mp = parseMarketingPath(window.location.pathname);
+  if (mp.type === "privacy") return "privacy";
+  if (mp.type === "terms") return "terms";
+  return null;
+}
+
 // ── App ──
 export default function App(){
-  const[screen,setScreen]=useState("splash");
+  const[screen,setScreen]=useState(initialMarketingScreen);
   const[user,setUser]=useState<any>(null);
   const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("sa_theme")||"dark";}catch{return"dark";}});
   const[palette,setPalette]=useState(()=>{try{return localStorage.getItem("sa_palette")||"indigo";}catch{return"indigo";}});
@@ -6858,6 +6876,7 @@ export default function App(){
   const[authChecked,setAuthChecked]=useState(false);
   const[loadError,setLoadError]=useState<string|null>(null);
   const[lang,setLang]=useState(()=>{try{return localStorage.getItem("sa_lang")||"ru";}catch{return"ru";}});
+  const[legalKind,setLegalKind]=useState<"privacy"|"terms"|null>(initialLegalKind);
   function changeLang(l:string){setLang(l);localStorage.setItem("sa_lang",l);}
 
   // ── Global AI chat (единый диалог на всё приложение) ──
@@ -6889,7 +6908,7 @@ export default function App(){
   },[user?.email,user?.theme,user?.palette]);
 
   // Синхронизация темы и палитры с body до отрисовки — смена темы/палитры сразу меняет цвета (body[data-theme][data-palette] в CSS)
-  const bodyPalette=screen==="landing"?"indigo":(palette||"indigo");
+  const bodyPalette=screen==="landing"||screen==="legal"||screen==="notFound"?"indigo":(palette||"indigo");
   useLayoutEffect(()=>{
     const b=document.body;
     b.setAttribute("data-theme",theme);
@@ -6903,7 +6922,7 @@ export default function App(){
   /* Лендинг: чёрный космос без орбов приложения — класс надёжнее CSS :has() */
   useLayoutEffect(()=>{
     const b=document.body;
-    if(screen==="landing")b.classList.add("sa-landing");
+    if(screen==="landing"||screen==="legal"||screen==="notFound")b.classList.add("sa-landing");
     else b.classList.remove("sa-landing");
     return()=>{b.classList.remove("sa-landing");};
   },[screen]);
@@ -6981,6 +7000,7 @@ export default function App(){
       const hash=typeof window!=="undefined"?window.location.hash:"";
       const shareFromHash=hash.startsWith("#share=")?hash.slice(7).replace(/\?.*/,"").trim():"";
       const shareId=shareFromQuery||shareFromHash;
+      const mp=parseMarketingPath(window.location.pathname);
 
       // Обработка успешной оплаты через Stripe (?payment=success&tier=pro)
       const paymentStatus=searchParams.get("payment");
@@ -7044,6 +7064,18 @@ export default function App(){
                   return;
                 }
               }
+              if(mp.type==="privacy"){
+                setLegalKind("privacy");setScreen("legal");setAuthChecked(true);return;
+              }
+              if(mp.type==="terms"){
+                setLegalKind("terms");setScreen("legal");setAuthChecked(true);return;
+              }
+              if(mp.type==="notFound"){
+                setScreen("notFound");setAuthChecked(true);return;
+              }
+              if(mp.type==="home"){
+                try{window.history.replaceState({},"","/app");}catch{}
+              }
               setScreen("projects");setAuthChecked(true);return;
             }
           }catch(e:any){
@@ -7058,12 +7090,39 @@ export default function App(){
             const u=(accs as any[]).find((a:any)=>a.email===sess.email);
             if(u){
               const merged={...u,theme:u.theme||(typeof localStorage!=="undefined"?localStorage.getItem("sa_theme"):null)||"dark",palette:u.palette||(typeof localStorage!=="undefined"?localStorage.getItem("sa_palette"):null)||"indigo"};
-              setUser(merged);setScreen("projects");setAuthChecked(true);return;
+              setUser(merged);
+              if(mp.type==="privacy"){
+                setLegalKind("privacy");setScreen("legal");setAuthChecked(true);return;
+              }
+              if(mp.type==="terms"){
+                setLegalKind("terms");setScreen("legal");setAuthChecked(true);return;
+              }
+              if(mp.type==="notFound"){
+                setScreen("notFound");setAuthChecked(true);return;
+              }
+              if(mp.type==="home"){
+                try{window.history.replaceState({},"","/app");}catch{}
+              }
+              setScreen("projects");setAuthChecked(true);return;
             }
           }
         }catch{}
       }
-      setScreen("landing");setAuthChecked(true);
+      if(mp.type==="privacy"){
+        setLegalKind("privacy");setScreen("legal");setAuthChecked(true);return;
+      }
+      if(mp.type==="terms"){
+        setLegalKind("terms");setScreen("legal");setAuthChecked(true);return;
+      }
+      if(mp.type==="notFound"){
+        setScreen("notFound");setAuthChecked(true);return;
+      }
+      if(mp.type==="app"){
+        setScreen("welcome");
+      }else{
+        setScreen("landing");
+      }
+      setAuthChecked(true);
     }catch(e:any){
       setLoadError(e?.message||"Не удалось загрузить данные");
       setAuthChecked(true);
@@ -7079,13 +7138,30 @@ export default function App(){
     const orig=window.fetch.bind(window);
     (window as any).__sa_onSessionExpired=()=>{
       setUser(null);setProject(null);setMapData(null);setCpProject(null);setCpMaps([]);
+      try{window.history.replaceState({},"","/");}catch{}
       setScreen("landing");setShowAuth(true);setAuthTab("login");
     };
     return()=>{};
   },[]);
 
+  function goMarketingHome(){
+    try{
+      if(user){
+        window.history.replaceState({},"","/app");
+        setScreen("projects");
+      }else{
+        window.history.pushState({},"","/");
+        setScreen("landing");
+      }
+    }catch{
+      setScreen(user?"projects":"landing");
+    }
+  }
+
   async function handleAuth(u:any,isNew:boolean){
+    trackSaEvent(isNew?"sign_up":"login",{method:"email"});
     setUser(u);setShowAuth(false);
+    try{window.history.replaceState({},"","/app");}catch{}
     if(isNew){setShowTiers(true);}
     else{setScreen("projects");}
   }
@@ -7102,6 +7178,7 @@ export default function App(){
     await clearSession();
     setUser(null);setProject(null);setMapData(null);setCpProject(null);setCpMaps([]);
     setAiChatMsgs([]);
+    try{window.history.replaceState({},"","/");}catch{}
     setScreen("landing");
   }
 
@@ -7136,19 +7213,27 @@ export default function App(){
   }
 
   useEffect(()=>{
-    const titles:Record<string,string>={
-      splash:"Strategy AI",
-      landing:"Strategy AI — Визуальное стратегическое планирование с AI",
-      welcome:"Strategy AI — Начать",
-      projects:"Strategy AI — Проекты",
-      project:"Strategy AI — Проект",
-      map:"Strategy AI — Карта",
-      sharedMap:"Strategy AI — Просмотр карты",
-      contentPlanHub:"Strategy AI — Контент-план",
-      contentPlanProject:"Strategy AI — Контент-план проекта",
+    applySeoForAppScreen(screen as "splash"|"landing"|"welcome"|"legal"|"notFound"|"projects"|"project"|"map"|"sharedMap"|"contentPlanHub"|"contentPlanProject",{legalKind});
+  },[screen,legalKind]);
+
+  useEffect(()=>{
+    if(!["landing","welcome","legal","notFound"].includes(screen))return;
+    const onPop=()=>{
+      const mp=parseMarketingPath(window.location.pathname);
+      if(mp.type==="privacy"){setLegalKind("privacy");setScreen("legal");return;}
+      if(mp.type==="terms"){setLegalKind("terms");setScreen("legal");return;}
+      if(mp.type==="notFound"){setScreen("notFound");return;}
+      if(!user){
+        if(mp.type==="app"){setScreen("welcome");return;}
+        if(mp.type==="home"){setScreen("landing");return;}
+      }else{
+        if(mp.type==="home"){try{window.history.replaceState({},"","/app");}catch{}setScreen("projects");return;}
+        if(mp.type==="app"){setScreen("projects");}
+      }
     };
-    document.title=titles[screen]||"Strategy AI";
-  },[screen]);
+    window.addEventListener("popstate",onPop);
+    return()=>window.removeEventListener("popstate",onPop);
+  },[user,screen]);
 
   // Кнопка «Назад» в браузере
   useEffect(()=>{
@@ -7169,7 +7254,7 @@ export default function App(){
     else if(screen==="contentPlanProject"&&cpProject&&history.state?.screen!=="contentPlanProject")history.pushState({screen:"contentPlanProject",projectId:cpProject.id},"","");
   },[screen,project?.id,mapData?.id,cpProject?.id]);
 
-  const appPalette=screen==="landing"?undefined:palette;
+  const appPalette=screen==="landing"||screen==="legal"||screen==="notFound"?undefined:palette;
 
   if(loadError)return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
@@ -7188,15 +7273,27 @@ export default function App(){
 
   return(
     <LangCtx.Provider value={{lang,setLang:changeLang,t}}>
-      <div data-theme={theme} data-palette={appPalette} className="screen-wrap" style={{minHeight:"100vh",background:screen==="landing"?"transparent":"var(--bg)",transition:"background .35s ease, color .35s ease"}}>
+      <div data-theme={theme} data-palette={appPalette} className="screen-wrap" style={{minHeight:"100vh",background:screen==="landing"||screen==="legal"||screen==="notFound"?"transparent":"var(--bg)",transition:"background .35s ease, color .35s ease"}}>
 <OfflineBanner/>
       <>
-        {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>prev==="projects"?prev:"landing")} theme={theme} authReady={authChecked}/>}
+        {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>{
+          if(prev==="projects")return prev;
+          if(prev!=="splash")return prev;
+          const mp=parseMarketingPath(window.location.pathname);
+          if(mp.type==="app")return"welcome";
+          return"landing";
+        })} theme={theme} authReady={authChecked}/>}
         {screen==="landing"&&(
           <div className="screen-enter" style={{height:"100%",minHeight:"100vh",overflow:"hidden",position:"relative"}}>
-            <LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onToggleTheme={toggleTheme} onSignIn={()=>{setAuthTab("login");setShowAuth(true);}} onGetStarted={()=>{setShowAuth(false);setScreen("welcome");}}/>
+            <LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onToggleTheme={toggleTheme} onSignIn={()=>{trackSaEvent("cta_sign_in_open");setAuthTab("login");setShowAuth(true);}} onGetStarted={()=>{trackSaEvent("cta_get_started");try{window.history.pushState({},"","/app");}catch{}setShowAuth(false);setScreen("welcome");}}/>
             {showAuth&&<AuthModal initialTab={authTab} theme={theme} onClose={()=>setShowAuth(false)} onAuth={handleAuth}/>}
           </div>
+        )}
+        {screen==="legal"&&legalKind&&(
+          <LegalDocumentPage kind={legalKind} theme={theme} t={t} onHome={goMarketingHome}/>
+        )}
+        {screen==="notFound"&&(
+          <NotFoundPage theme={theme} t={t} onHome={goMarketingHome}/>
         )}
         {screen==="sharedMap"&&sharedMapData&&(
           <MapEditor
@@ -7212,7 +7309,7 @@ export default function App(){
         )}
         {screen==="welcome"&&(
           <div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}>
-            <WelcomeScreen theme={theme} onBack={()=>setScreen("landing")} onAuth={handleAuth}/>
+            <WelcomeScreen theme={theme} onBack={()=>{try{window.history.pushState({},"","/");}catch{}setScreen("landing");}} onAuth={handleAuth}/>
           </div>
         )}
         {screen==="projects"&&user&&(
@@ -7338,6 +7435,7 @@ export default function App(){
           ✓ {t("payment_success","Оплата прошла успешно! Тариф обновлён.")}
         </div>
       )}
+      {(screen==="landing"||screen==="legal"||screen==="notFound")&&<CookieConsent/>}
       </>
       </div>
     </LangCtx.Provider>

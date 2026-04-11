@@ -179,11 +179,12 @@ app.use((req, res, next) => {
   // CSP: разрешаем inline для React/Vite, fonts, connect к API
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.clarity.ms",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: blob: https:",
-    "connect-src 'self' https: wss:",
+    "connect-src 'self' https: wss: https://www.google-analytics.com https://analytics.google.com https://*.clarity.ms",
+    "frame-src 'self' https://www.loom.com https://*.loom.com https://www.youtube.com https://www.youtube-nocookie.com",
     "frame-ancestors 'none'",
   ].join('; ');
   res.setHeader('Content-Security-Policy', csp);

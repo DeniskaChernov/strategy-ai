@@ -8,6 +8,40 @@ for (const f of ['global.css', 'landing.css', 'strategy-shell.css']) {
   fs.copyFileSync(path.join(__dirname, 'client', f), path.join(__dirname, 'public', f));
 }
 
+const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://strategy-ai.app').replace(/\/$/, '');
+const envConfig = {
+  ga4: process.env.GA4_MEASUREMENT_ID || '',
+  clarity: process.env.CLARITY_PROJECT_ID || '',
+  siteUrl,
+  demoVideo: process.env.DEMO_VIDEO_URL || '',
+  ogImage: process.env.PUBLIC_OG_IMAGE || '',
+};
+fs.writeFileSync(
+  path.join(__dirname, 'public', 'env-config.js'),
+  `window.__SA_CONFIG__=${JSON.stringify(envConfig)};\n`,
+  'utf8'
+);
+
+const today = new Date().toISOString().slice(0, 10);
+const sitemapPaths = ['', 'app', 'privacy', 'terms', '404'];
+const sitemapBody = sitemapPaths
+  .map((seg) => {
+    const loc = seg ? `${siteUrl}/${seg}` : `${siteUrl}/`;
+    const pr = seg === '' ? '1.0' : '0.64';
+    return `  <url><loc>${loc}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>${pr}</priority></url>`;
+  })
+  .join('\n');
+fs.writeFileSync(
+  path.join(__dirname, 'public', 'sitemap.xml'),
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapBody}\n</urlset>\n`,
+  'utf8'
+);
+fs.writeFileSync(
+  path.join(__dirname, 'public', 'robots.txt'),
+  `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`,
+  'utf8'
+);
+
 esbuild.build({
   entryPoints: ['strategy-ai-full.tsx'],
   bundle: true,
