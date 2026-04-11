@@ -24,6 +24,7 @@ public/app.js.map
 public/build-meta.json
 public/global.css
 public/landing.css
+public/tailwind.css
 
 # OS files
 .DS_Store
