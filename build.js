@@ -42,11 +42,25 @@ fs.writeFileSync(
   'utf8'
 );
 
+function resolveClientAlias(importPath) {
+  const rel = importPath.slice(2);
+  const base = path.join(__dirname, 'client', rel);
+  const candidates = [base, `${base}.tsx`, `${base}.ts`, `${base}.jsx`, `${base}.js`];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p) && fs.statSync(p).isFile()) return p;
+    } catch (_) {
+      /* ignore */
+    }
+  }
+  return `${base}.tsx`;
+}
+
 const atAliasPlugin = {
   name: 'at-alias',
   setup(build) {
     build.onResolve({ filter: /^@\// }, (args) => ({
-      path: path.join(__dirname, 'client', args.path.slice(2)),
+      path: resolveClientAlias(args.path),
     }));
   },
 };

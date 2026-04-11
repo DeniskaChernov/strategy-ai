@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
 import { StrategyShellBg } from "../strategy-shell-sidebar";
 
 type TFn = (key: string, fallback?: string) => string;
@@ -262,9 +263,9 @@ export function NotFoundPage({
         <p style={{ fontSize: 15, color: "var(--text3)", lineHeight: 1.55, marginBottom: 24 }}>
           {t("not_found_sub", "Такого адреса нет. Вернитесь на главную или откройте приложение.")}
         </p>
-        <button type="button" className="btn-p lg" onClick={onHome}>
+        <Button type="button" onClick={onHome}>
           {t("not_found_cta", "На главную")}
-        </button>
+        </Button>
       </div>
     </div>
   );
