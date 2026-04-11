@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://strategy-ai.app/sitemap.xml
+Sitemap: https://www.strategy-ai.uz/sitemap.xml
