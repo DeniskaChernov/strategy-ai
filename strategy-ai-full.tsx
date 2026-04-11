@@ -71,18 +71,6 @@ const LangCtx = createContext<LangValue>({
 });
 const useLang=()=>useContext(LangCtx);
 const useIsMobile=()=>{const[m,setM]=useState(()=>window.innerWidth<=640);useEffect(()=>{const h=()=>setM(window.innerWidth<=640);window.addEventListener("resize",h,{passive:true});return()=>window.removeEventListener("resize",h);},[]);return m;};
-const usePrefersReducedMotion=()=>{
-  const[reduced,setReduced]=useState(false);
-  useEffect(()=>{
-    if(typeof window==="undefined"||!window.matchMedia)return;
-    const mq=window.matchMedia("(prefers-reduced-motion: reduce)");
-    const fn=()=>setReduced(!!mq.matches);
-    fn();
-    mq.addEventListener("change",fn);
-    return()=>mq.removeEventListener("change",fn);
-  },[]);
-  return reduced;
-};
 
 // ── CustomSelect ──
 function CustomSelect({value,onChange,options,style={},disabled=false}){
@@ -696,7 +684,7 @@ function ConfirmDialog({title,message,confirmLabel="Удалить",onConfirm,on
   );
 }
 
-// ── Auth: общая форма (модалка или встроенная в welcome) ──
+// ── Auth: общая форма (модалка) ──
 function AuthFormContent({initialTab="login",onAuth,theme='dark',title="",subtitle="",variant="modal",titleId="auth-modal-title"}){
   const{lang,setLang,t}=useLang();
   const[tab,setTab]=useState(initialTab);
@@ -6719,124 +6707,6 @@ function SparklesCanvas({color="#ffffff",density=120,speed=1.2,minSz=0.4,maxSz=1
   return <canvas ref={cvs} style={{width:"100%",height:"100%",display:"block",pointerEvents:"none",...style}}/>;
 }
 
-function LandingPage({onGetStarted,onSignIn,onToggleTheme,theme,lang="ru",onChangeLang}){
-  const{t}=useLang();
-  return(
-    <ReferenceLandingView
-      t={t}
-      lang={lang}
-      onChangeLang={onChangeLang}
-      theme={theme}
-      onToggleTheme={onToggleTheme}
-      onSignIn={onSignIn}
-      onGetStarted={onGetStarted}
-    />
-  );
-}
-// ── Welcome: ротация строк «что входит бесплатно» (одна строка, смена по таймеру) ──
-function WelcomeFeatureRotator({items,reducedMotion}:{items:[string,string][];reducedMotion?:boolean}){
-  const[idx,setIdx]=useState(0);
-  useEffect(()=>{
-    if(reducedMotion||items.length<2)return;
-    const id=setInterval(()=>setIdx(i=>(i+1)%items.length),2600);
-    return()=>clearInterval(id);
-  },[items.length,reducedMotion]);
-  const row=items[idx]||items[0];
-  return(
-    <div className={"sa-ws-feat-rotator"+(reducedMotion?" sa-ws-feat-rotator--static":"")} aria-live={reducedMotion?"off":"polite"} aria-atomic="true">
-      <div key={reducedMotion?0:idx} className="sa-ws-feat-rotator-inner">
-        <span className="sa-ws-feat-rotator-ic" aria-hidden>{row[0]}</span>
-        <span className="sa-ws-feat-rotator-txt">{row[1]}</span>
-      </div>
-    </div>
-  );
-}
-
-// ── WelcomeScreen — тот же визуальный язык, что лендинг / strategy-reference ──
-function WelcomeScreen({onAuth,onBack,theme}){
-  const{t}=useLang();
-  const isMobile=useIsMobile();
-  const reducedMotion=usePrefersReducedMotion();
-  const cosmic=theme==="dark";
-  const[phase,setPhase]=useState<"cta"|"form">("cta");
-  const[authTab,setAuthTab]=useState<"login"|"register">("login");
-  const ctaRef=useRef<HTMLDivElement|null>(null);
-  const welcomeFirstPaint=useRef(true);
-  const featItems=useMemo(()=>[
-    ["🗺️",t("ws_feat1","Карты целей")],
-    ["✨",t("ws_feat2","AI советник")],
-    ["🗓️",t("ws_feat3","Gantt-план")],
-    ["⬇️",t("ws_feat4","PNG/JSON экспорт")],
-    ["✍️",t("ws_feat5","1 сценарий")],
-    ["📌",t("ws_feat6","До 5 шагов")],
-  ] as [string,string][],[t]);
-  useEffect(()=>{
-    if(phase!=="form")return;
-    const id=window.setTimeout(()=>{
-      const el=document.getElementById("welcome-auth-title");
-      (el as HTMLElement|undefined)?.focus?.({preventScroll:true});
-    },100);
-    return()=>clearTimeout(id);
-  },[phase]);
-  useEffect(()=>{
-    if(phase!=="form")return;
-    const h=(e:KeyboardEvent)=>{if(e.key==="Escape"){e.preventDefault();setPhase("cta");}};
-    window.addEventListener("keydown",h);
-    return()=>window.removeEventListener("keydown",h);
-  },[phase]);
-  useEffect(()=>{
-    if(phase!=="cta")return;
-    if(welcomeFirstPaint.current){welcomeFirstPaint.current=false;return;}
-    const id=window.setTimeout(()=>ctaRef.current?.querySelector<HTMLButtonElement>("button")?.focus({preventScroll:true}),60);
-    return()=>clearTimeout(id);
-  },[phase]);
-  return(
-    <div className={"sa-strategy-ui sa-welcome-screen "+(theme==="dark"?"dk":"lt")} data-theme={theme}>
-      <StrategyShellBg/>
-      {cosmic&&(
-        <div className="sa-welcome-sparkles" style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none"}} aria-hidden>
-          <SparklesCanvas density={180} speed={0.32} minSz={0.25} maxSz={1.1} color="#e8e4ff" style={{opacity:.38}}/>
-        </div>
-      )}
-      <button type="button" className="btn-g sa-welcome-topbar-back" onClick={onBack} style={{position:"fixed",top:"max(20px, env(safe-area-inset-top))",left:"max(20px, env(safe-area-inset-left))",zIndex:2}} aria-label={t("back_btn","← Назад")}>{t("back_btn","← Назад")}</button>
-      <div className="sa-welcome-body">
-      <main id="sa-welcome-main" className="sa-welcome-main" style={{width:"100%",maxWidth:440,padding:isMobile?16:24,boxSizing:"border-box",position:"relative",zIndex:1,animation:"scaleIn .3s cubic-bezier(.34,1.56,.64,1)"}}>
-        <div className="sa-welcome-header">
-          <img src="/logo.png" alt="" width={80} height={80} className="sa-welcome-logo" style={{objectFit:"contain",margin:"0 auto 16px",display:"block",animation:reducedMotion?"none":"float 3s ease infinite"}}/>
-          <h1 id="welcome-brand-title" className="modal-title sa-welcome-brand">{t("app_name","Strategy AI")}</h1>
-          <p className="modal-sub sa-welcome-tagline">{phase==="cta"?t("welcome_sub","От целей до результатов — с AI"):t("login_or_register","Войдите или создайте аккаунт бесплатно")}</p>
-        </div>
-        <div role="region" aria-labelledby="welcome-brand-title" className="sa-ws-card-region">
-          <GlowCard panelVariant glowColor="accent" customSize width="100%" className="sa-ref-panel sa-ws-panel sa-ref-panel--lift sa-page-reveal sa-pr-d1">
-            {phase==="cta"&&(
-              <div ref={ctaRef} className="sa-ws-cta-block" style={{display:"flex",flexDirection:"column",gap:14,marginBottom:16}}>
-                <button type="button" className="btn-p lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setAuthTab("register");setPhase("form");}}>{t("ws_start_btn","Начать бесплатно ✦")}</button>
-                <button type="button" className="btn-g lg" style={{width:"100%",justifyContent:"center"}} onClick={()=>{setAuthTab("login");setPhase("form");}}>{t("ws_login_btn","Уже есть аккаунт — Войти →")}</button>
-              </div>
-            )}
-            {phase==="form"&&(
-              <button type="button" className="sa-ws-auth-back" onClick={()=>{setPhase("cta");}}>{t("ws_back_choice","← К кнопкам")}</button>
-            )}
-            <div className="modal-divider sa-ws-welcome-divider"><span>{t("included_free","ВКЛЮЧЕНО БЕСПЛАТНО")}</span></div>
-            <WelcomeFeatureRotator items={featItems} reducedMotion={reducedMotion}/>
-            {phase==="form"&&(
-              <div className="sa-ws-auth-form-wrap sa-ws-phase-enter">
-                <AuthFormContent initialTab={authTab} onAuth={onAuth} theme={theme} variant="inline" titleId="welcome-auth-title"/>
-              </div>
-            )}
-          </GlowCard>
-        </div>
-        <p className="modal-sub sa-welcome-footer-terms">
-          {phase==="cta"
-            ?t("ws_terms","Нажимая «Начать», вы соглашаетесь с условиями использования")
-            :t("ws_terms_form","Продолжая вход или регистрацию, вы соглашаетесь с условиями использования")}
-        </p>
-      </main>
-      </div>
-    </div>
-  );
-}
-
 function initialMarketingScreen(): string {
   if (typeof window === "undefined") return "splash";
   const mp = parseMarketingPath(window.location.pathname);
@@ -7118,10 +6988,11 @@ export default function App(){
         setScreen("notFound");setAuthChecked(true);return;
       }
       if(mp.type==="app"){
-        setScreen("welcome");
-      }else{
-        setScreen("landing");
+        try{window.history.replaceState({},"","/");}catch{}
+        setAuthTab("register");
+        setShowAuth(true);
       }
+      setScreen("landing");
       setAuthChecked(true);
     }catch(e:any){
       setLoadError(e?.message||"Не удалось загрузить данные");
@@ -7213,18 +7084,24 @@ export default function App(){
   }
 
   useEffect(()=>{
-    applySeoForAppScreen(screen as "splash"|"landing"|"welcome"|"legal"|"notFound"|"projects"|"project"|"map"|"sharedMap"|"contentPlanHub"|"contentPlanProject",{legalKind});
+    applySeoForAppScreen(screen as "splash"|"landing"|"legal"|"notFound"|"projects"|"project"|"map"|"sharedMap"|"contentPlanHub"|"contentPlanProject",{legalKind});
   },[screen,legalKind]);
 
   useEffect(()=>{
-    if(!["landing","welcome","legal","notFound"].includes(screen))return;
+    if(!["landing","legal","notFound"].includes(screen))return;
     const onPop=()=>{
       const mp=parseMarketingPath(window.location.pathname);
       if(mp.type==="privacy"){setLegalKind("privacy");setScreen("legal");return;}
       if(mp.type==="terms"){setLegalKind("terms");setScreen("legal");return;}
       if(mp.type==="notFound"){setScreen("notFound");return;}
       if(!user){
-        if(mp.type==="app"){setScreen("welcome");return;}
+        if(mp.type==="app"){
+          try{window.history.replaceState({},"","/");}catch{}
+          setAuthTab("register");
+          setShowAuth(true);
+          setScreen("landing");
+          return;
+        }
         if(mp.type==="home"){setScreen("landing");return;}
       }else{
         if(mp.type==="home"){try{window.history.replaceState({},"","/app");}catch{}setScreen("projects");return;}
@@ -7237,7 +7114,7 @@ export default function App(){
 
   // Кнопка «Назад» в браузере
   useEffect(()=>{
-    if(screen==="splash"||screen==="landing"||screen==="welcome"||screen==="sharedMap")return;
+    if(screen==="splash"||screen==="landing"||screen==="sharedMap")return;
     const h=()=>{
       if(screen==="map"&&project){setMapData(null);setScreen("project");}
       else if(screen==="project"&&project){setProject(null);setScreen("projects");}
@@ -7276,16 +7153,35 @@ export default function App(){
       <div data-theme={theme} data-palette={appPalette} className="screen-wrap" style={{minHeight:"100vh",background:screen==="landing"||screen==="legal"||screen==="notFound"?"transparent":"var(--bg)",transition:"background .35s ease, color .35s ease"}}>
 <OfflineBanner/>
       <>
-        {screen==="splash"&&<SplashScreen onDone={()=>setScreen(prev=>{
-          if(prev==="projects")return prev;
-          if(prev!=="splash")return prev;
+        {screen==="splash"&&<SplashScreen onDone={()=>{
           const mp=parseMarketingPath(window.location.pathname);
-          if(mp.type==="app")return"welcome";
-          return"landing";
-        })} theme={theme} authReady={authChecked}/>}
+          if(mp.type==="app"){
+            setAuthTab("register");
+            setShowAuth(true);
+            try{window.history.replaceState({},"","/");}catch{}
+          }
+          setScreen(prev=>{
+            if(prev==="projects")return prev;
+            if(prev!=="splash")return prev;
+            return"landing";
+          });
+        }} theme={theme} authReady={authChecked}/>}
         {screen==="landing"&&(
           <div className="screen-enter" style={{height:"100%",minHeight:"100vh",overflow:"hidden",position:"relative"}}>
-            <LandingPage theme={theme} lang={lang} onChangeLang={changeLang} onToggleTheme={toggleTheme} onSignIn={()=>{trackSaEvent("cta_sign_in_open");setAuthTab("login");setShowAuth(true);}} onGetStarted={()=>{trackSaEvent("cta_get_started");try{window.history.pushState({},"","/app");}catch{}setShowAuth(false);setScreen("welcome");}}/>
+            <ReferenceLandingView
+              t={t}
+              lang={lang}
+              onChangeLang={changeLang}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              onSignIn={()=>{trackSaEvent("cta_sign_in_open");setAuthTab("login");setShowAuth(true);}}
+              onGetStarted={()=>{
+                trackSaEvent("cta_get_started");
+                setAuthTab("register");
+                setShowAuth(true);
+                try{window.history.replaceState({},"","/");}catch{}
+              }}
+            />
             {showAuth&&<AuthModal initialTab={authTab} theme={theme} onClose={()=>setShowAuth(false)} onAuth={handleAuth}/>}
           </div>
         )}
@@ -7306,11 +7202,6 @@ export default function App(){
             aiChatMsgs={aiChatMsgs}
             aiChatSetMsgs={setAiChatMsgs}
           />
-        )}
-        {screen==="welcome"&&(
-          <div className="screen-enter" style={{height:"100%",minHeight:"100vh"}}>
-            <WelcomeScreen theme={theme} onBack={()=>{try{window.history.pushState({},"","/");}catch{}setScreen("landing");}} onAuth={handleAuth}/>
-          </div>
         )}
         {screen==="projects"&&user&&(
           <div className="screen-enter" style={{height:"100%",display:"flex",flexDirection:"column",flex:1}}>

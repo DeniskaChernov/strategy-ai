@@ -4,7 +4,6 @@ import { marketingPathToUrl } from "./spa-path";
 export type AppSeoScreen =
   | "splash"
   | "landing"
-  | "welcome"
   | "legal"
   | "notFound"
   | "projects"
@@ -90,7 +89,6 @@ export function applySeoForAppScreen(
       title = defaultTitle;
       desc = defaultDesc;
       break;
-    case "welcome":
     case "projects":
     case "project":
     case "map":
@@ -98,17 +96,15 @@ export function applySeoForAppScreen(
     case "contentPlanProject":
       path = "/app";
       title =
-        screen === "welcome"
-          ? "Strategy AI — Начать"
-          : screen === "projects"
-            ? "Strategy AI — Проекты"
-            : screen === "map"
-              ? "Strategy AI — Карта"
-              : screen === "contentPlanHub"
-                ? "Strategy AI — Контент-план"
-                : screen === "contentPlanProject"
-                  ? "Strategy AI — Контент-план проекта"
-                  : "Strategy AI — Проект";
+        screen === "projects"
+          ? "Strategy AI — Проекты"
+          : screen === "map"
+            ? "Strategy AI — Карта"
+            : screen === "contentPlanHub"
+              ? "Strategy AI — Контент-план"
+              : screen === "contentPlanProject"
+                ? "Strategy AI — Контент-план проекта"
+                : "Strategy AI — Проект";
       desc = "Рабочее пространство Strategy AI: проекты, карты и сценарии.";
       break;
     case "legal":
