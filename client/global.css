@@ -662,10 +662,25 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
 .sa-ref-landing .land-map-demo__try{
   margin-top:4px;
 }
+/* Секция отзывов: без отдельного цветного блока у заголовков */
 .sa-ref-landing #land-testimonials,
 .sa-ref-landing #land-testimonials .stagger{
   background:transparent!important;
   box-shadow:none!important;
+}
+/* Светлая тема: подложка сетки — иначе в gap между колонками и в маске просвечивает градиент sa-bgl / body */
+.sa-strategy-ui.lt .sa-ref-landing #land-testimonials .testi-cols-grid{
+  background:#fff!important;
+  border-radius:20px;
+  padding:12px 10px;
+  box-sizing:border-box;
+  box-shadow:0 1px 0 rgba(15,23,42,.06);
+}
+.sa-strategy-ui.dk .sa-ref-landing #land-testimonials .testi-cols-grid{
+  background:var(--bg2);
+  border-radius:20px;
+  padding:12px 10px;
+  box-sizing:border-box;
 }
 /* Отзывы: три колонки + marquee — client/landing-testimonials-columns.tsx */
 .sa-ref-landing .testi-cols-grid{
@@ -693,13 +708,20 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   flex-direction:column;
   background:transparent;
 }
+/* Колонка + viewport: непрозрачный фон; mask на viewport убран — иначе «прорезы» показывают фиолетовый слой сцены */
+.sa-strategy-ui.lt .sa-ref-landing .testi-col,
+.sa-strategy-ui.lt .sa-ref-landing .testi-col__viewport{
+  background:#fff;
+}
+.sa-strategy-ui.dk .sa-ref-landing .testi-col,
+.sa-strategy-ui.dk .sa-ref-landing .testi-col__viewport{
+  background:var(--bg2);
+}
 .sa-ref-landing .testi-col__viewport{
   flex:1;
   min-height:0;
   position:relative;
   overflow:hidden;
-  mask-image:linear-gradient(180deg,transparent 0%,#000 10%,#000 90%,transparent 100%);
-  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 10%,#000 90%,transparent 100%);
 }
 .sa-ref-landing .testi-col__track{
   display:flex;
@@ -731,7 +753,7 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   text-align:left;
 }
 .sa-strategy-ui.lt .sa-ref-landing .testi-col__card{
-  background:rgba(255,255,255,.94);
+  background:#fff;
   border-color:rgba(15,23,42,.08);
   box-shadow:0 1px 2px rgba(15,23,42,.05),0 4px 14px rgba(15,23,42,.06);
 }
