@@ -695,7 +695,7 @@ function AuthFormContent({initialTab="login",onAuth,theme='dark',title="",subtit
   return(
     <div className={inline?"sa-ws-auth-form":undefined}>
       <div className={inline?"sa-ws-auth-toolbar":undefined} style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:inline?16:14}}>
-        <div className={"tabs"+(inline?" sa-ws-seg-tabs":"")} role="tablist" aria-label={t("auth_tabs_aria","Вход или регистрация")}>
+        <div className="tabs sa-ws-seg-tabs" role="tablist" aria-label={t("auth_tabs_aria","Вход или регистрация")}>
           <button type="button" role="tab" aria-selected={tab==="login"} className={"tab"+(tab==="login"?" on":"")} onClick={()=>{setTab("login");setErr("");}}>{t("login","Войти")}</button>
           <button type="button" role="tab" aria-selected={tab==="register"} className={"tab"+(tab==="register"?" on":"")} onClick={()=>{setTab("register");setErr("");}}>{t("register","Регистрация")}</button>
         </div>
@@ -3930,7 +3930,7 @@ ${ctx}
 // ── Главная навигация: Стратегия ↔ Контент-план (отдельная услуга) ──
 function MainWorkspaceNav({mode,onStrategy,onContentPlan,t,isMobile}:{mode:"strategy"|"contentPlan";onStrategy:()=>void;onContentPlan:()=>void;t:(k:string,fb?:string)=>string;isMobile:boolean}){
   return(
-    <div className={"workspace-nav-tabs tabs"+(isMobile?" workspace-nav-tabs--sm":"")} role="tablist" aria-label={t("workspace_nav_aria","Разделы приложения")}>
+    <div className={"workspace-nav-tabs tabs sa-ws-seg-tabs"+(isMobile?" workspace-nav-tabs--sm":"")} role="tablist" aria-label={t("workspace_nav_aria","Разделы приложения")}>
       <button type="button" role="tab" className={"tab"+(mode==="strategy"?" on":"")} aria-selected={mode==="strategy"} title={mode==="strategy"?undefined:t("nav_workspace_strategy_tip","Карты проектов, шаги, Gantt")} disabled={mode==="strategy"} onClick={onStrategy}>{t("nav_workspace_strategy","Стратегия")}</button>
       <button type="button" role="tab" className={"tab"+(mode==="contentPlan"?" on":"")} aria-selected={mode==="contentPlan"} title={mode==="contentPlan"?undefined:t("nav_workspace_content_tip","Публикации и календарь по проектам")} disabled={mode==="contentPlan"} onClick={onContentPlan}>{t("nav_workspace_content","Контент-план")}</button>
     </div>
@@ -4113,7 +4113,7 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
               <div style={{flex:1,minWidth:0}}>
                 <h1 style={{fontSize:isMobile?20:26,fontWeight:900,color:"var(--text)",letterSpacing:-.6,margin:0}}>{t("cp_hub_title","Контент-план")}</h1>
                 <div style={{fontSize:13.5,color:"var(--text4)",marginTop:4,maxWidth:"min(720px,100%)"}}>{t("cp_hub_subtitle","Отдельный рабочий режим: публикации и календарь по проектам из вашей стратегии. Шаги карт подтягиваются для привязки идей.")}</div>
-                <div style={{fontSize:12,color:"var(--text5)",marginTop:10,maxWidth:640,lineHeight:1.45}}>{t("cp_hub_nav_hint","Подсказка: переключатель «Стратегия» в шапке ведёт к списку проектов; оттуда же открываются карты и шаги.")}</div>
+                <div style={{fontSize:12,color:"var(--text4)",marginTop:10,maxWidth:640,lineHeight:1.45}}>{t("cp_hub_nav_hint","Подсказка: переключатель «Стратегия» в шапке ведёт к списку проектов; оттуда же открываются карты и шаги.")}</div>
               </div>
             </div>
             {!tier.contentPlan&&(

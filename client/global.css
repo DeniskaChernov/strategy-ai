@@ -1261,6 +1261,7 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   color:var(--t3);
   line-height:1.4;
 }
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-tag{color:rgba(72,62,110,.88)}
 .sa-ref-landing .sa-lp-price-block{margin-bottom:18px;}
 .sa-ref-landing .sa-lp-price-row{
   display:flex;
@@ -1280,12 +1281,14 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   color:var(--t3);
   font-weight:600;
 }
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-price-sub{color:rgba(72,62,110,.85)}
 .sa-ref-landing .sa-lp-fine{
   margin:10px 0 0;
   font-size:12px;
   color:var(--t3);
   opacity:.88;
 }
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-fine{color:rgba(72,62,110,.8);opacity:1}
 .sa-ref-landing .sa-lp-feat{
   list-style:none;
   margin:0 0 22px;
@@ -1303,6 +1306,7 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   line-height:1.5;
   color:var(--t2);
 }
+.sa-strategy-ui.lt .sa-ref-landing .sa-lp-feat li{color:rgba(42,36,72,.92)}
 .sa-ref-landing .sa-lp-check{
   flex-shrink:0;
   width:20px;

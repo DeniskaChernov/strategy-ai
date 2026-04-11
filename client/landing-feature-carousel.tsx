@@ -79,7 +79,7 @@ const STEP_DEFS: readonly StepDef[] = [
     titleKey: "ref_how2_t",
     titleFb: "Сценарии",
     descKey: "ref_how2_d",
-    descFb: "Сравните варианты развития до решения.",
+    descFb: "Ветки сценариев и последствия на одной карте — без лишнего шума.",
   },
   {
     id: "3",
@@ -368,8 +368,8 @@ export function defaultLandingCarouselImages(alt: string): LandingCarouselImageS
   return {
     step1img1: `https://placehold.co/520x300/1e1b2e/a89cff?text=${encodeURIComponent("Map")}`,
     step1img2: `https://placehold.co/520x300/151322/c4b5fd?text=${encodeURIComponent("Links")}`,
-    step2img1: `https://placehold.co/520x300/1a1528/86efac?text=${encodeURIComponent("A")}`,
-    step2img2: `https://placehold.co/520x300/1a1528/86efac?text=${encodeURIComponent("B")}`,
+    step2img1: `https://placehold.co/720x400/1e1630/c4b5fd?text=${encodeURIComponent("Сценарии")}`,
+    step2img2: `https://placehold.co/720x400/1e1630/c4b5fd?text=${encodeURIComponent("Сценарии")}`,
     step3img: `https://placehold.co/640x360/1e1630/fde68a?text=${encodeURIComponent("AI")}`,
     step4img: `https://placehold.co/640x360/14201e/7dd3fc?text=${encodeURIComponent("Gantt")}`,
     alt,
@@ -424,19 +424,12 @@ export function LandingFeatureCarousel({
         );
       case 1:
         return (
-          <div className="land-fc-viz-root">
+          <div className="land-fc-viz-root land-fc-viz-root--single">
             <AnimatedStepImage
               alt={image.alt}
               className={cn(defaultClasses.img, step2img1Class)}
               src={image.step2img1}
               preset="fadeInScale"
-            />
-            <AnimatedStepImage
-              alt={image.alt}
-              className={cn(defaultClasses.img, step2img2Class)}
-              src={image.step2img2}
-              preset="fadeInScale"
-              delay={0.1}
             />
           </div>
         );

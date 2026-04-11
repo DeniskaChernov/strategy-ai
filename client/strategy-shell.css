@@ -456,9 +456,10 @@ button.tpill{font:inherit;color:inherit;text-align:inherit}
 .tb-title{font-size:14px;font-weight:600;color:var(--t1);letter-spacing:-.02em;line-height:1.2}
 .tb-sub{font-size:10px;color:var(--t3);line-height:1}
 .tabs{display:flex;background:var(--inp);border:.5px solid var(--b0);border-radius:10px;padding:3px;gap:2px}
-.tab{font-size:11.5px;color:var(--t3);cursor:pointer;padding:5px 12px;border-radius:7px;transition:all .18s;font-weight:500;user-select:none}
+.tab{font-size:11.5px;color:var(--t3);cursor:pointer;padding:5px 12px;border-radius:7px;transition:all .18s;font-weight:500;user-select:none;border:none;background:transparent;font-family:inherit;line-height:1.2}
 .tab.on{background:var(--card);color:var(--t1);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .sa-strategy-ui.lt .tab.on{background:rgba(255,255,255,.92);color:var(--acc);box-shadow:0 2px 8px rgba(104,54,245,.14)}
+.sa-strategy-ui.lt .tabs:not(.sa-ws-seg-tabs) .tab:not(.on){color:rgba(72,62,110,.78)}
 .tb-r{display:flex;gap:8px;align-items:center}
 .srch{display:flex;align-items:center;gap:7px;background:var(--inp);border:.5px solid var(--b1);border-radius:22px;padding:6px 14px;transition:all .2s}
 .srch:focus-within{border-color:rgba(104,54,245,.38);background:var(--card)}
@@ -1300,6 +1301,19 @@ button.tpill{font:inherit;color:inherit;text-align:inherit}
   box-shadow:0 4px 16px rgba(104,54,245,.28)!important;
 }
 .sa-strategy-ui.lt .sa-ws-seg-tabs .tab:not(.on){color:var(--t2)!important}
+/* MainWorkspaceNav: перекрываем общие .workspace-nav-tabs, оставляем pill как в auth */
+.sa-strategy-ui .workspace-nav-tabs.tabs.sa-ws-seg-tabs .tab:not(.on){
+  background:transparent!important;
+  box-shadow:none!important;
+  color:var(--t3)!important;
+}
+.sa-strategy-ui.lt .workspace-nav-tabs.tabs.sa-ws-seg-tabs .tab:not(.on){
+  color:rgba(72,62,110,.82)!important;
+}
+.sa-strategy-ui .workspace-nav-tabs.tabs.sa-ws-seg-tabs .tab.on:disabled{
+  opacity:1;
+  cursor:default;
+}
 .sa-ws-auth-toolbar{align-items:flex-start}
 .sa-ws-auth-form .modal-inp{
   margin-bottom:12px;border-radius:14px;padding:13px 15px;font-size:14px;
@@ -1509,6 +1523,7 @@ button.tpill{font:inherit;color:inherit;text-align:inherit}
   font-size:clamp(22px,2.5vw,30px);font-weight:800;letter-spacing:-.03em;color:var(--t1);margin:0;line-height:1.15;
 }
 .land-fc-desc{font-size:15px;line-height:1.7;color:var(--t2);margin:0}
+.sa-strategy-ui.lt .land-fc-desc{color:rgba(52,44,88,.92)}
 .land-fc-viz-layer{
   position:relative;
   z-index:1;
