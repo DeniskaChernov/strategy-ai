@@ -9,6 +9,7 @@ import {
   type LandingTestimonialColumnItem,
 } from "./client/landing-testimonials-columns";
 import { LandingMapDemo } from "./client/landing-map-demo";
+import { LandingFeatureCarousel } from "./client/landing-feature-carousel";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -86,12 +87,6 @@ export function ReferenceLandingView({
     { k: "ref_int_2", f: "Презентации — на тарифах Pro и выше", mark: "deck" },
     { k: "ref_int_3", f: "Команда: роли и проекты", mark: "team" },
     { k: "ref_int_4", f: "API и внешние системы — в развитии продукта", mark: "api" },
-  ];
-  const steps = [
-    { n: "1", tk: "ref_how1_t", tf: "Карта стратегии", dk: "ref_how1_d", df: "Цели, инициативы, KPI и риски как узлы и связи." },
-    { n: "2", tk: "ref_how2_t", tf: "Сценарии", dk: "ref_how2_d", df: "Сравните варианты развития до решения." },
-    { n: "3", tk: "ref_how3_t", tf: "Спросите AI", dk: "ref_how3_d", df: "Вопросы по пробелам, рискам и приоритетам в контексте карты." },
-    { n: "4", tk: "ref_how4_t", tf: "Исполнение", dk: "ref_how4_d", df: "Таймлайн, прогресс и командная работа." },
   ];
   const tierStrip = [
     { id: "free" as const, badge: "⬡", color: "#9088b0", name: "Free" },
@@ -242,14 +237,8 @@ export function ReferenceLandingView({
           <div className="land-section-lbl sr sr-up in">{t("ref_sec_how_lbl", "Как это работает")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_sec_how_title", "От идеи к исполнению")}</div>
           <div className="land-section-sub sr sr-up in">{t("ref_sec_how_sub", "Четыре шага без перегруза классическими инструментами.")}</div>
-          <div className="how-steps stagger">
-            {steps.map(s=>(
-              <div key={s.n} className="how-step sr sr-up in">
-                <div className="how-num">{s.n}</div>
-                <div className="how-title">{t(s.tk, s.tf)}</div>
-                <div className="how-desc">{t(s.dk, s.df)}</div>
-              </div>
-            ))}
+          <div className="stagger sr sr-up in" style={{ marginBottom: 88 }}>
+            <LandingFeatureCarousel t={t} />
           </div>
         </div>
 
