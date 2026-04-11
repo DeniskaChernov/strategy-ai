@@ -8,7 +8,7 @@ for (const f of ['global.css', 'landing.css', 'strategy-shell.css']) {
   fs.copyFileSync(path.join(__dirname, 'client', f), path.join(__dirname, 'public', f));
 }
 
-const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://strategy-ai.app').replace(/\/$/, '');
+const siteUrl = (process.env.PUBLIC_SITE_URL || 'https://www.strategy-ai.uz').replace(/\/$/, '');
 const envConfig = {
   ga4: process.env.GA4_MEASUREMENT_ID || '',
   clarity: process.env.CLARITY_PROJECT_ID || '',
