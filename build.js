@@ -42,6 +42,15 @@ fs.writeFileSync(
   'utf8'
 );
 
+const atAliasPlugin = {
+  name: 'at-alias',
+  setup(build) {
+    build.onResolve({ filter: /^@\// }, (args) => ({
+      path: path.join(__dirname, 'client', args.path.slice(2)),
+    }));
+  },
+};
+
 esbuild.build({
   entryPoints: ['strategy-ai-full.tsx'],
   bundle: true,
@@ -49,6 +58,7 @@ esbuild.build({
   jsx: 'transform',
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
   minify: true,
+  plugins: [atAliasPlugin],
 }).then(() => {
   const app = fs.readFileSync('public/app.js');
   const hash = crypto.createHash('sha256').update(app).digest('hex').slice(0, 16);

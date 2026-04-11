@@ -4,10 +4,8 @@ import { LandingStarsCanvas } from "./client/landing-stars-canvas";
 import { AnimatedLandingNav } from "./client/animated-landing-nav";
 import { GlowCard } from "./client/glow-card";
 import { LandingPricingCards } from "./client/landing-pricing-cards";
-import {
-  LandingTestimonialsColumns,
-  type LandingTestimonialColumnItem,
-} from "./client/landing-testimonials-columns";
+import type { TestimonialCardItem } from "./client/components/ui/testimonials-columns-1";
+import { MotionTestimonialsMarquee } from "./client/components/ui/motion-testimonials-section";
 import { LandingMapDemo } from "./client/landing-map-demo";
 import { LandingFeatureCarousel } from "./client/landing-feature-carousel";
 
@@ -43,19 +41,33 @@ export function ReferenceLandingView({
   const rootRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const testimonialColumns = useMemo(() => {
-    const m = (x: typeof TESTI1): LandingTestimonialColumnItem => ({
-      text: t(x.qk, x.qf),
-      name: t(x.nk, x.nf),
-      role: t(x.rk, x.rf),
-      initials: x.ini,
-      avatarStyle: x.avs,
-    });
-    return [
-      [m(TESTI1), m(TESTI2), m(TESTI3)],
-      [m(TESTI2), m(TESTI3), m(TESTI1)],
-      [m(TESTI3), m(TESTI1), m(TESTI2)],
+  const motionTestimonialColumns = useMemo((): [
+    TestimonialCardItem[],
+    TestimonialCardItem[],
+    TestimonialCardItem[],
+  ] => {
+    const portraits = [
+      "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1519085367523-7373598650c7?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&h=128&fit=crop&crop=faces&auto=format&q=80",
     ];
+    const templates = [TESTI1, TESTI2, TESTI3];
+    const nine: TestimonialCardItem[] = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+      const x = templates[i % 3];
+      return {
+        text: t(x.qk, x.qf),
+        name: t(x.nk, x.nf),
+        role: t(x.rk, x.rf),
+        image: portraits[i],
+      };
+    });
+    return [nine.slice(0, 3), nine.slice(3, 6), nine.slice(6, 9)];
   }, [t]);
 
   const dk = theme === "dark" ? "dk" : "lt";
@@ -318,13 +330,12 @@ export function ReferenceLandingView({
           <div className="land-section-lbl sr sr-up in">{t("ref_testi_lbl", "Отзывы")}</div>
           <div className="land-section-title sr sr-up in">{t("ref_testi_title", "Нам доверяют команды")}</div>
           <div className="land-section-sub sr sr-up in" style={{ marginBottom: 40 }}>{t("ref_testi_sub", "Структура вместо разрозненных таблиц и чатов.")}</div>
-          <div
-            className="stagger sr sr-up in"
-            role="region"
-            aria-label={t("ref_testi_title", "Нам доверяют команды")}
-            style={{ padding: "8px 0 12px", boxSizing: "border-box" }}
-          >
-            <LandingTestimonialsColumns columns={testimonialColumns} durations={[16, 22, 18]} />
+          <div className="stagger sr sr-up in" style={{ padding: "8px 0 12px", boxSizing: "border-box" }}>
+            <MotionTestimonialsMarquee
+              columns={motionTestimonialColumns}
+              durations={[15, 19, 17]}
+              ariaLabel={t("ref_testi_title", "Нам доверяют команды")}
+            />
           </div>
         </div>
 

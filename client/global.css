@@ -809,6 +809,86 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
     max-height:520px;
   }
 }
+
+.sa-ref-landing .sa-tcol1-grid{
+  display:flex;
+  justify-content:center;
+  gap:24px;
+  margin-top:8px;
+  max-height:740px;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 88%,transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 88%,transparent 100%);
+}
+.sa-ref-landing .sa-tcol1-root{
+  position:relative;
+  overflow:hidden;
+  width:100%;
+  max-width:320px;
+  min-height:360px;
+  max-height:740px;
+}
+.sa-ref-landing .sa-tcol1-track{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+  padding-bottom:24px;
+  will-change:transform;
+}
+.sa-ref-landing .sa-tcol1-card{
+  padding:clamp(18px,3vw,26px);
+  border-radius:24px;
+  border:1px solid var(--b1);
+  background:var(--card);
+  box-shadow:var(--shc);
+  max-width:320px;
+  width:100%;
+  box-sizing:border-box;
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-tcol1-card{
+  background:rgba(255,255,255,.92);
+  border-color:rgba(104,80,220,.2);
+}
+.sa-ref-landing .sa-tcol1-text{
+  font-size:14px;
+  line-height:1.65;
+  color:var(--t2);
+}
+.sa-ref-landing .sa-tcol1-author{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:20px;
+}
+.sa-ref-landing .sa-tcol1-avatar{
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  object-fit:cover;
+  flex-shrink:0;
+}
+.sa-ref-landing .sa-tcol1-name{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:-.02em;
+  line-height:1.25;
+  color:var(--t1);
+}
+.sa-ref-landing .sa-tcol1-role{
+  font-size:13px;
+  line-height:1.35;
+  color:var(--t3);
+  opacity:.75;
+}
+.sa-ref-landing .sa-tcol1-col--md{display:none;}
+.sa-ref-landing .sa-tcol1-col--lg{display:none;}
+@media (min-width:768px){
+  .sa-ref-landing .sa-tcol1-col--md{display:block;}
+}
+@media (min-width:1024px){
+  .sa-ref-landing .sa-tcol1-col--lg{display:block;}
+}
+
 .sa-ref-landing .testi-glass-wrap{
   max-width:min(960px,100%);
   margin-left:auto;
