@@ -295,6 +295,12 @@ export const LANGS = {
     projects_briefing_cta:"Брифинг по последней карте",
     // Landing hero
     ref_horizon_side:"СТРАТЕГИЯ",ref_horizon_side_tag:"SPACE",ref_horizon_scroll:"SCROLL",
+    ref_hero_badge_tag:"NEW",
+    ref_hero_badge_line:"Карты, сценарии и AI — в одном продукте",
+    ref_hero_preview_alt:"Пример аналитики и дашборда",
+    ref_hero_secondary:"Смотреть интерфейс",
+    ref_hero_h1_html:'Стратегия,<br/><span class="grad-text">которая думает с вами</span>',
+    ref_hero_sub:"Визуальные карты целей и инициатив, сценарии «что если», таймлайн и AI-советник — в одном рабочем пространстве.",
     hero_sub:"AI анализирует ваш бизнес, строит стратегическую карту и даёт консультацию уровня McKinsey. Для тех, кто принимает решения с последствиями.",
     // Landing features section
     tag_features:"Возможности",feat_sub:"Каждый инструмент создан для людей, которые принимают решения с последствиями. Не для экспериментов — для результата.",
@@ -817,6 +823,12 @@ export const LANGS = {
     projects_briefing_cta:"Briefing for your last map",
     // Landing hero
     ref_horizon_side:"STRATEGY",ref_horizon_side_tag:"SPACE",ref_horizon_scroll:"SCROLL",
+    ref_hero_badge_tag:"NEW",
+    ref_hero_badge_line:"Maps, scenarios, and AI in one product",
+    ref_hero_preview_alt:"Analytics and dashboard preview",
+    ref_hero_secondary:"View the interface",
+    ref_hero_h1_html:'Strategy<br/><span class="grad-text">that thinks with you</span>',
+    ref_hero_sub:"Visual maps of goals and initiatives, what-if scenarios, timeline, and AI advisor — in one workspace.",
     hero_sub:"AI analyzes your business, builds a strategic map and delivers McKinsey-level consultation. For those who make decisions with consequences.",
     // Landing features section
     tag_features:"Features",feat_sub:"Every tool is built for people who make decisions with real consequences. Not for experimentation — for results.",
@@ -1337,6 +1349,12 @@ export const LANGS = {
     projects_briefing_cta:"So'nggi xarita bo'yicha brifing",
     // Landing hero
     ref_horizon_side:"STRATEGY",ref_horizon_side_tag:"SPACE",ref_horizon_scroll:"SCROLL",
+    ref_hero_badge_tag:"YANGI",
+    ref_hero_badge_line:"Xaritalar, stsenariylar va AI — bitta mahsulotda",
+    ref_hero_preview_alt:"Tahlil va dashboard namunasi",
+    ref_hero_secondary:"Interfeysni ko'rish",
+    ref_hero_h1_html:'Strategiya,<br/><span class="grad-text">siz bilan birga o‘ylaydigan</span>',
+    ref_hero_sub:"Maqsad va tashabbuslarning vizual xaritalari, «nima bo‘lsa» stsenariylari, taymlayn va AI maslahatchi — bitta ish maydonida.",
     hero_sub:"AI biznesingizni tahlil qiladi, strategik xarita tuzadi va McKinsey darajasida maslahat beradi. Oqibatli qarorlar qabul qiladiganlar uchun.",
     // Landing features section
     tag_features:"Imkoniyatlar",feat_sub:"Har bir vosita oqibatli qarorlar qabul qiladiganlar uchun yaratilgan. Tajriba uchun emas — natija uchun.",
