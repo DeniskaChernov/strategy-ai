@@ -1099,7 +1099,6 @@ body{background:var(--bg);transition:background var(--tr)}
     </div>
     <div style="display:flex;gap:18px;align-items:center">
       <span class="footer-link" onclick="scrollLand('land-features')" data-i="nav_features">Features</span>
-      <span class="footer-link" onclick="scrollLand('land-how')" data-i="nav_how">How it works</span>
       <span class="footer-link" onclick="scrollLand('land-pricing')" data-i="nav_pricing">Pricing</span>
       <span class="footer-link" onclick="scrollLand('land-faq')" data-i="nav_faq">FAQ</span>
     </div>
@@ -1191,19 +1190,6 @@ body{background:var(--bg);transition:background var(--tr)}
         <div class="feat-card sr sr-up"><div class="feat-card-glow"></div><div class="feat-icon">🔗</div><div class="feat-title">CRM Integration</div><div class="feat-desc">Two-way sync with Strategy CRM. Pipeline progress automatically updates your strategic goals in real time.</div></div>
         <div class="feat-card sr sr-up"><div class="feat-card-glow"></div><div class="feat-icon">📤</div><div class="feat-title">Export Everywhere</div><div class="feat-desc">Export your map as PNG, SVG, PDF, JSON or Markdown. PPTX slide generation for presentations on Pro+ plans.</div></div>
         <div class="feat-card sr sr-up"><div class="feat-card-glow"></div><div class="feat-icon">📸</div><div class="feat-title">Map Versions</div><div class="feat-desc">Save snapshots before major pivots. Full version history with one-click restore — your strategy's undo button.</div></div>
-      </div>
-    </div>
-
-    <!-- HOW IT WORKS -->
-    <div id="land-how">
-      <div class="land-section-lbl sr sr-up">How it works</div>
-      <div class="land-section-title sr sr-up">From vision to execution in 4 steps</div>
-      <div class="land-section-sub sr sr-up">Strategy AI guides you from the big picture to daily action — without the complexity of traditional tools.</div>
-      <div class="how-steps stagger">
-        <div class="how-step sr sr-up"><div class="how-num">1</div><div class="how-title">Map your strategy</div><div class="how-desc">Add goals, initiatives, KPIs and risks as visual nodes. Connect them to show dependencies and relationships.</div></div>
-        <div class="how-step sr sr-up"><div class="how-num">2</div><div class="how-title">Run scenarios</div><div class="how-desc">Create Aggressive, Balanced or Defensive scenarios. Switch and compare how each affects your goals.</div></div>
-        <div class="how-step sr sr-up"><div class="how-num">3</div><div class="how-title">Ask your AI advisor</div><div class="how-desc">Your AI advisor knows the full context. Ask about gaps, risks, priorities — get answers in seconds.</div></div>
-        <div class="how-step sr sr-up"><div class="how-num">4</div><div class="how-title">Execute and track</div><div class="how-desc">Monitor progress on the timeline, get weekly briefings, and sync with your CRM pipeline in real time.</div></div>
       </div>
     </div>
 
@@ -3470,7 +3456,7 @@ document.addEventListener('keydown',e=>{
 /* ─────────────── LANDING i18n ─────────────── */
 const LAND_LANG={
   en:{
-    nav_features:'Features',nav_how:'How it works',nav_pricing:'Pricing',nav_faq:'FAQ',
+    nav_features:'Features',nav_pricing:'Pricing',nav_faq:'FAQ',
     nav_signin:'Sign in',nav_getstarted:'Get started free',
     hero_badge:'✦ AI-Powered Strategic Planning · v2.0',
     hero_h1_pre:'Strategy that',hero_h1_grad:'thinks with you',
@@ -3480,8 +3466,6 @@ const LAND_LANG={
     stats_teams:'Teams using',stats_maps:'Strategy maps',stats_sat:'Satisfaction',stats_ph:'Product Hunt',
     feat_lbl:'Everything you need',feat_title:'Built for strategic thinkers',
     feat_sub:'From solo founders to enterprise teams — Strategy AI adapts to how you think and plan.',
-    how_lbl:'How it works',how_title:'From vision to execution in 4 steps',
-    how_sub:'Strategy AI guides you from the big picture to daily action — without the complexity of traditional tools.',
     compare_lbl:'Compare alternatives',compare_title:'Why teams choose Strategy AI',
     compare_sub:'Strategy AI combines the best of Notion, Miro and ChatGPT — purpose-built for strategic planning.',
     testi_lbl:'What teams say',testi_title:'Trusted by founders and strategists',
@@ -3494,7 +3478,7 @@ const LAND_LANG={
     footer_copy:'© 2025 Strategy AI · Built for strategic thinkers',
   },
   ru:{
-    nav_features:'Функции',nav_how:'Как это работает',nav_pricing:'Тарифы',nav_faq:'FAQ',
+    nav_features:'Функции',nav_pricing:'Тарифы',nav_faq:'FAQ',
     nav_signin:'Войти',nav_getstarted:'Начать бесплатно',
     hero_badge:'✦ Стратегическое планирование на базе ИИ · v2.0',
     hero_h1_pre:'Стратегия, которая',hero_h1_grad:'думает вместе с вами',
@@ -3504,8 +3488,6 @@ const LAND_LANG={
     stats_teams:'Команд использует',stats_maps:'Карт стратегий',stats_sat:'Удовлетворённость',stats_ph:'Product Hunt',
     feat_lbl:'Всё что нужно',feat_title:'Создан для стратегического мышления',
     feat_sub:'От соло-основателей до корпоративных команд — Strategy AI адаптируется к тому, как вы думаете и планируете.',
-    how_lbl:'Как это работает',how_title:'От идеи до исполнения за 4 шага',
-    how_sub:'Strategy AI ведёт вас от глобальной картины к ежедневным действиям — без сложности традиционных инструментов.',
     compare_lbl:'Сравнение с аналогами',compare_title:'Почему команды выбирают Strategy AI',
     compare_sub:'Strategy AI объединяет лучшее от Notion, Miro и ChatGPT — создан специально для стратегического планирования.',
     testi_lbl:'Что говорят команды',testi_title:'Доверяют основатели и стратеги',
@@ -3518,7 +3500,7 @@ const LAND_LANG={
     footer_copy:'© 2025 Strategy AI · Создан для стратегического мышления',
   },
   uz:{
-    nav_features:"Imkoniyatlar",nav_how:"Qanday ishlaydi",nav_pricing:"Narxlar",nav_faq:"FAQ",
+    nav_features:"Imkoniyatlar",nav_pricing:"Narxlar",nav_faq:"FAQ",
     nav_signin:"Kirish",nav_getstarted:"Bepul boshlash",
     hero_badge:"✦ Sun'iy intellekt asosida strategik rejalashtirish · v2.0",
     hero_h1_pre:"Siz bilan birga",hero_h1_grad:"o'ylaydigan strategiya",
@@ -3528,8 +3510,6 @@ const LAND_LANG={
     stats_teams:"Jamoalar foydalanmoqda",stats_maps:"Strategiya xaritalari",stats_sat:"Mamnunlik",stats_ph:"Product Hunt",
     feat_lbl:"Kerak bo'lgan hamma narsa",feat_title:"Strategik mutafakkirlar uchun yaratilgan",
     feat_sub:"Yolg'iz asoschilardан korporativ jamoalargacha — Strategy AI sizning fikrlash uslubingizga moslashadi.",
-    how_lbl:"Qanday ishlaydi",how_title:"G'oyadan bajarilishigacha 4 qadam",
-    how_sub:"Strategy AI sizni katta rasmdan kunlik harakatlarga olib boradi — an'anaviy vositalarning murakkabligisiz.",
     compare_lbl:"Muqobillari bilan solishtirish",compare_title:"Jamoalar nima uchun Strategy AI ni tanlaydi",
     compare_sub:"Strategy AI Notion, Miro va ChatGPT ning eng yaxshi tomonlarini birlashtiradi — strategik rejalashtirish uchun maxsus yaratilgan.",
     testi_lbl:"Jamoalar nima deydi",testi_title:"Asoschilар va strateglar ishonadi",

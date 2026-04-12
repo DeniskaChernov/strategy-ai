@@ -7,7 +7,6 @@ import { LandingPricingCards } from "./client/landing-pricing-cards";
 import type { TestimonialCardItem } from "./client/components/ui/testimonials-columns-1";
 import { MotionTestimonialsMarquee } from "./client/components/ui/motion-testimonials-section";
 import { LandingMapDemo } from "./client/landing-map-demo";
-import { LandingFeatureCarousel } from "./client/landing-feature-carousel";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -242,15 +241,6 @@ export function ReferenceLandingView({
                 <div className="feat-desc">{t(f.descKey, f.descFb)}</div>
               </GlowCard>
             ))}
-          </div>
-        </div>
-
-        <div id="land-how">
-          <div className="land-section-lbl sr sr-up in">{t("ref_sec_how_lbl", "Как это работает")}</div>
-          <div className="land-section-title sr sr-up in">{t("ref_sec_how_title", "От идеи к исполнению")}</div>
-          <div className="land-section-sub sr sr-up in">{t("ref_sec_how_sub", "Четыре шага без перегруза классическими инструментами.")}</div>
-          <div className="stagger sr sr-up in" style={{ marginBottom: 88 }}>
-            <LandingFeatureCarousel t={t} />
           </div>
         </div>
 

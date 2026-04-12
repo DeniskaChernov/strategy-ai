@@ -25,7 +25,6 @@ export function AnimatedLandingNav({
 }) {
   const navItems = [
     { id: "land-features", label: t("nav_features", "Возможности") },
-    { id: "land-how", label: t("nav_process", "Как это работает") },
     { id: "land-audience", label: t("nav_audience", "Для кого") },
     { id: "land-pricing", label: t("nav_pricing", "Тарифы") },
     { id: "land-faq", label: t("nav_faq", "FAQ") },
