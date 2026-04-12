@@ -8,6 +8,7 @@ import type { TestimonialCardItem } from "./client/components/ui/testimonials-co
 import { MotionTestimonialsMarquee } from "./client/components/ui/motion-testimonials-section";
 import { LandingMapDemo } from "./client/landing-map-demo";
 import { LandingFeatureCarousel } from "./client/landing-feature-carousel";
+import { HeroSection } from "./client/components/ui/hero-3";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -135,30 +136,13 @@ export function ReferenceLandingView({
       <div className="land-inner" style={{ position: "relative", zIndex: 5 }}>
         <div className="land-nav-spacer"/>
 
-        <div className="hero" id="hero-section">
-          <h1
-            className="hero-h1"
-            dangerouslySetInnerHTML={{
-              __html: t(
-                "ref_hero_h1_html",
-                'Стратегия,<br/><span class="grad-text">которая думает с вами</span>'
-              ),
-            }}
+        <div className="hero max-w-none text-left" id="hero-section">
+          <HeroSection
+            t={t}
+            theme={theme}
+            onGetStarted={onGetStarted}
+            onSecondaryCta={() => scrollToId("land-mockup")}
           />
-          <p className="hero-sub">
-            {t(
-              "ref_hero_sub",
-              "Визуальные карты целей и инициатив, сценарии «что если», таймлайн и AI-советник — в одном рабочем пространстве."
-            )}
-          </p>
-          <div className="hero-btns">
-            <button type="button" className="btn-p lg" onClick={onGetStarted}>
-              {t("hero_cta", "Начать бесплатно — без карты")}
-            </button>
-            <button type="button" className="btn-g lg" onClick={() => scrollToId("land-mockup")}>
-              {t("ref_demo", "Смотреть интерфейс ↗")}
-            </button>
-          </div>
           <div
             style={{
               marginTop: 28,
