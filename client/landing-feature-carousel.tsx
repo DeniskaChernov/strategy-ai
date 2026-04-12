@@ -4,17 +4,8 @@ import React, {
   useEffect,
   useState,
   type CSSProperties,
-  type MouseEvent,
 } from "react";
-import {
-  AnimatePresence,
-  motion,
-  useMotionTemplate,
-  useMotionValue,
-  type MotionStyle,
-  type MotionValue,
-  type Variants,
-} from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -26,13 +17,7 @@ const placeholderImage = (text = "Image") =>
 
 type StaticImageData = string;
 
-type WrapperStyle = MotionStyle & {
-  "--x": MotionValue<string>;
-  "--y": MotionValue<string>;
-};
-
 export interface LandingCarouselImageSet {
-  step1img1: StaticImageData;
   step1img2: StaticImageData;
   step2img1: StaticImageData;
   step2img2: StaticImageData;
@@ -150,19 +135,6 @@ function useNumberCycler(totalSteps: number = TOTAL_STEPS, interval: number = 50
   return { currentNumber, setStep };
 }
 
-function useCarouselIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const checkDevice = () => {
-      setIsMobile(window.matchMedia("(max-width: 768px)").matches);
-    };
-    checkDevice();
-    window.addEventListener("resize", checkDevice);
-    return () => window.removeEventListener("resize", checkDevice);
-  }, []);
-  return isMobile;
-}
-
 function IconCheck({ className, ...props }: React.ComponentProps<"svg">) {
   return (
     <svg
@@ -230,27 +202,9 @@ function FeatureCard({
   step: number;
   t: TFn;
 }) {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const isMobile = useCarouselIsMobile();
-  function handleMouseMove({ currentTarget, clientX, clientY }: MouseEvent<HTMLDivElement>) {
-    if (isMobile) return;
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
-  }
   const s = STEP_DEFS[step]!;
   return (
-    <motion.div
-      className="land-fc-spot-wrap"
-      onMouseMove={handleMouseMove}
-      style={
-        {
-          "--x": useMotionTemplate`${mouseX}px`,
-          "--y": useMotionTemplate`${mouseY}px`,
-        } as WrapperStyle
-      }
-    >
+    <div className="land-fc-spot-wrap">
       <div className="land-fc-card-inner">
         <div className="land-fc-body">
           <AnimatePresence mode="wait">
@@ -290,7 +244,7 @@ function FeatureCard({
           {children}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -356,7 +310,6 @@ function StepsNav({
 
 const defaultClasses = {
   img: "land-fc-img",
-  step1img1: "land-fc-img-pos land-fc-img-s1a",
   step1img2: "land-fc-img-pos land-fc-img-s1b",
   step2img1: "land-fc-img-pos land-fc-img-s2a",
   step2img2: "land-fc-img-pos land-fc-img-s2b",
@@ -366,8 +319,8 @@ const defaultClasses = {
 
 export function defaultLandingCarouselImages(alt: string): LandingCarouselImageSet {
   return {
-    step1img1: `https://placehold.co/520x300/1e1b2e/a89cff?text=${encodeURIComponent("Map")}`,
-    step1img2: `https://placehold.co/520x300/151322/c4b5fd?text=${encodeURIComponent("Links")}`,
+    step1img2:
+      "https://placehold.co/640x360/15121f/15121f",
     step2img1: `https://placehold.co/720x400/1e1630/c4b5fd?text=${encodeURIComponent("Сценарии")}`,
     step2img2: `https://placehold.co/720x400/1e1630/c4b5fd?text=${encodeURIComponent("Сценарии")}`,
     step3img: `https://placehold.co/640x360/1e1630/fde68a?text=${encodeURIComponent("AI")}`,
@@ -379,7 +332,6 @@ export function defaultLandingCarouselImages(alt: string): LandingCarouselImageS
 export interface LandingFeatureCarouselProps {
   t: TFn;
   image?: Partial<LandingCarouselImageSet>;
-  step1img1Class?: string;
   step1img2Class?: string;
   step2img1Class?: string;
   step2img2Class?: string;
@@ -390,7 +342,6 @@ export interface LandingFeatureCarouselProps {
 export function LandingFeatureCarousel({
   t,
   image: imagePartial,
-  step1img1Class = defaultClasses.step1img1,
   step1img2Class = defaultClasses.step1img2,
   step2img1Class = defaultClasses.step2img1,
   step2img2Class = defaultClasses.step2img2,
@@ -406,19 +357,12 @@ export function LandingFeatureCarousel({
     switch (step) {
       case 0:
         return (
-          <div className="land-fc-viz-root">
-            <AnimatedStepImage
-              alt={image.alt}
-              className={cn(defaultClasses.img, step1img1Class)}
-              src={image.step1img1}
-              preset="slideInLeft"
-            />
+          <div className="land-fc-viz-root land-fc-viz-root--single">
             <AnimatedStepImage
               alt={image.alt}
               className={cn(defaultClasses.img, step1img2Class)}
               src={image.step1img2}
-              preset="slideInRight"
-              delay={0.1}
+              preset="fadeInScale"
             />
           </div>
         );
