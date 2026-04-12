@@ -1,6 +1,6 @@
 // Strategy AI — Service Worker (PWA)
-// v4: + global/landing CSS; app.js и HTML — network-first; статика — cache-first
-const CACHE = 'strategy-ai-v4';
+// v6: shell/tailwind — network-first (как app.js), иначе после деплоя можно долго видеть старый CSS из cache-first
+const CACHE = 'strategy-ai-v6';
 
 function isApiOrSocket(u) {
   return u.href.includes('/api/') || u.pathname.includes('socket');
@@ -13,7 +13,9 @@ function isCriticalDocument(url) {
     p === '/' ||
     p === '/index.html' ||
     p === '/global.css' ||
-    p === '/landing.css'
+    p === '/landing.css' ||
+    p === '/strategy-shell.css' ||
+    p === '/tailwind.css'
   );
 }
 
@@ -22,7 +24,14 @@ self.addEventListener('install', (e) => {
     caches
       .open(CACHE)
       .then((cache) =>
-        cache.addAll(['/logo.png', '/manifest.json', '/global.css', '/landing.css'])
+        cache.addAll([
+          '/logo.png',
+          '/manifest.json',
+          '/global.css',
+          '/landing.css',
+          '/strategy-shell.css',
+          '/tailwind.css',
+        ])
       )
       .then(() => self.skipWaiting())
   );
