@@ -2,6 +2,7 @@ export const LANGS = {
   ru:{
     save:'Сохранить',cancel:'Отмена',delete:'Удалить',add:'Добавить',
     edit:'Редактировать',close:'Закрыть',confirm:'Подтвердить',back:'Назад',
+    skip_to_content:'Перейти к содержимому',
     all:'Все',yes:'Да',no:'Нет',loading:'Загрузка…',search:'Поиск',
     login:'Войти',register:'Регистрация',email:'Email',password:'Пароль',name:'Имя',
     fill_fields:'Заполните все поля',welcome:'Добро пожаловать',
@@ -524,6 +525,7 @@ export const LANGS = {
   en:{
     save:'Save',cancel:'Cancel',delete:'Delete',add:'Add',
     edit:'Edit',close:'Close',confirm:'Confirm',back:'Back',
+    skip_to_content:'Skip to main content',
     all:'All',yes:'Yes',no:'No',loading:'Loading…',search:'Search',
     login:'Log In',register:'Register',email:'Email',password:'Password',name:'Name',
     fill_fields:'Please fill all fields',welcome:'Welcome back',
@@ -1042,6 +1044,7 @@ export const LANGS = {
   uz:{
     save:"Saqlash",cancel:"Bekor",delete:"O'chirish",add:"Qo'shish",
     edit:"Tahrirlash",close:"Yopish",confirm:"Tasdiqlash",back:"Orqaga",
+    skip_to_content:"Asosiy mazmunga o'tish",
     all:"Barchasi",yes:"Ha",no:"Yo'q",loading:"Yuklanmoqda…",search:"Qidirish",
     login:"Kirish",register:"Ro'yxatdan o'tish",email:"Email",password:"Parol",name:"Ism",
     fill_fields:"Barcha maydonlarni to'ldiring",welcome:"Xush kelibsiz",

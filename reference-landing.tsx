@@ -131,7 +131,10 @@ export function ReferenceLandingView({
         scrollToId={scrollToId}
       />
 
-      <div className="land-inner" style={{ position: "relative", zIndex: 5 }}>
+      <a href="#land-main" className="sa-skip-link">
+        {t("skip_to_content", "Перейти к содержимому")}
+      </a>
+      <main className="land-inner" id="land-main" tabIndex={-1} style={{ position: "relative", zIndex: 5 }}>
         <div className="land-nav-spacer"/>
 
         <div className="hero" id="hero-section">
@@ -227,7 +230,7 @@ export function ReferenceLandingView({
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: 0,
+                  gap: 12,
                   padding: "18px 18px 20px",
                   boxSizing: "border-box",
                   alignSelf: "stretch",
@@ -261,7 +264,7 @@ export function ReferenceLandingView({
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: 0,
+                  gap: 12,
                   padding: "18px 18px 20px",
                   boxSizing: "border-box",
                   alignSelf: "stretch",
@@ -401,7 +404,7 @@ export function ReferenceLandingView({
           </div>
           <div className="footer-copy">© {new Date().getFullYear()} Strategy AI</div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
