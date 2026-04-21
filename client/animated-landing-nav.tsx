@@ -113,6 +113,8 @@ export function AnimatedLandingNav({
           }}
         >
           <div
+            role="group"
+            aria-label={t("select_language", "Язык")}
             style={{
               display: "flex",
               background: "var(--inp)",
@@ -127,6 +129,8 @@ export function AnimatedLandingNav({
                 key={code}
                 type="button"
                 className={"land-lang-btn" + (lang === code ? " on" : "")}
+                aria-pressed={lang === code}
+                aria-label={code.toUpperCase()}
                 onClick={(e) => {
                   e.stopPropagation();
                   onChangeLang(code);
