@@ -44,6 +44,17 @@ import { parseMarketingPath } from "./client/spa-path";
 import { applySeoForAppScreen } from "./client/seo-head";
 import { LegalDocumentPage, NotFoundPage } from "./client/legal-pages";
 import { initAnalyticsAfterConsent, bootstrapAnalyticsIfConsented, trackSaEvent } from "./client/analytics";
+import {
+  UUID_RE,
+  isUUID,
+  normalizeMap,
+  edgePt,
+  defaultNodes,
+  topSort,
+  simNode,
+  type SimNodeResult,
+} from "./client/lib/map-utils";
+import { getMaps, saveMap, deleteMap, getContentPlan, saveContentPlan } from "./client/lib/maps-api";
 
 const TIERS={
   free:    {label:"Free",    price:"Бесплатно",  color:"#9088b0",badge:"⬡", projects:1,  users:1,  maps:1,  scenarios:0,  templates:false,contentPlan:false,ai:"basic",   clone:false,wl:false,api:false,report:false,pptx:false,desc:"Для знакомства"},
@@ -123,64 +134,7 @@ function CustomSelect({value,onChange,options,style={},disabled=false}){
 }
 
 
-function normalizeMap(m:any){if(!m)return m;return{...m,isScenario:m.isScenario??m.is_scenario??false};}
-const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-function isUUID(s:any){return typeof s==="string"&&UUID_RE.test(s);}
-async function getMaps(pid:string){
-  if(API_BASE){
-    try{const d=await apiFetch(`/api/projects/${pid}/maps`);return (d.maps||[]).map(normalizeMap);}
-    catch{return[];}
-  }
-  return((await store.get(`sa_maps_${pid}`))||[]).map(normalizeMap);
-}
-async function saveMap(pid:string,map:any){
-  if(API_BASE){
-    try{
-      const treatAsNew=map._new||!isUUID(map.id);
-      if(treatAsNew){
-        const d=await apiFetch(`/api/projects/${pid}/maps`,{method:"POST",body:JSON.stringify({name:map.name,nodes:map.nodes,edges:map.edges,ctx:map.ctx,is_scenario:map.isScenario})});
-        return normalizeMap(d.map)||map;
-      } else {
-        const d=await apiFetch(`/api/projects/${pid}/maps/${map.id}`,{method:"PUT",body:JSON.stringify({name:map.name,nodes:map.nodes,edges:map.edges,ctx:map.ctx,is_scenario:map.isScenario})});
-        return normalizeMap(d.map)||map;
-      }
-    }catch(e:any){
-      if(e.message?.includes("MAP_LIMIT")||e.message?.includes("Лимит карт"))throw e;
-      return map;
-    }
-  }
-  const a=await getMaps(pid),i=a.findIndex((m:any)=>m.id===map.id);
-  await store.set(`sa_maps_${pid}`,i>=0?a.map((m:any)=>m.id===map.id?map:m):[...a,map]);
-  return map;
-}
-async function deleteMap(pid:string,mid:string){
-  if(API_BASE){
-    try{await apiFetch(`/api/projects/${pid}/maps/${mid}`,{method:"DELETE"});}
-    catch{}
-    return;
-  }
-  const a=await getMaps(pid);
-  await store.set(`sa_maps_${pid}`,a.filter((m:any)=>m.id!==mid));
-}
-
-// ── Content Plan (per project, Pro+) ──
-async function getContentPlan(projectId:string):Promise<any[]>{
-  if(API_BASE){
-    try{const d=await apiFetch(`/api/projects/${projectId}/content-plan`);return d.items||[];}
-    catch{return[];}
-  }
-  return (await store.get(`sa_content_${projectId}`))||[];
-}
-async function saveContentPlan(projectId:string,items:any[]){
-  if(API_BASE){
-    try{await apiFetch(`/api/projects/${projectId}/content-plan`,{method:"PUT",body:JSON.stringify({items})});return;}
-    catch{throw new Error("Ошибка сохранения");}
-  }
-  await store.set(`sa_content_${projectId}`,items);
-}
-
-// ── utils ──
-function edgePt(cx,cy,tx,ty){const dx=tx-cx,dy=ty-cy;if(!dx&&!dy)return{x:cx,y:cy};const hw=NW/2+8,hh=NH/2+8,t=Math.abs(dy)*hw<Math.abs(dx)*hh?hw/Math.abs(dx):hh/Math.abs(dy);return{x:cx+dx*t,y:cy+dy*t};}
+// utils карты и сетевой слой — см. client/lib/map-utils.ts и client/lib/maps-api.ts
 async function callAI(messages:any[],system:string,maxTokens=1200):Promise<string>{
   // Если бэкенд настроен — вызываем через него (там ключ, лимиты, модель)
   if(API_BASE){
@@ -220,38 +174,6 @@ async function callAI(messages:any[],system:string,maxTokens=1200):Promise<strin
     if(e.name==="AbortError")throw new Error("Превышено время ожидания — попробуйте ещё раз");
     throw e;
   }
-}
-function defaultNodes(){return[{id:"n1",x:200,y:270,title:"Анализ рынка",reason:"Понять ЦА",action:"Провести 15 интервью с целевой аудиторией",metric:"100 интервью",status:"completed",priority:"high",progress:100},{id:"n2",x:480,y:155,title:"MVP продукт",reason:"Проверить гипотезу",action:"Запустить бета-версию и собрать платящих пользователей",metric:"50 платящих",status:"active",priority:"critical",progress:60},{id:"n3",x:480,y:395,title:"Маркетинг",reason:"Первые клиенты",action:"Настроить каналы и запустить первую кампанию",metric:"CAC < $100",status:"active",priority:"high",progress:25},{id:"n4",x:760,y:270,title:"Рост",reason:"Масштаб",action:"Масштабировать успешные каналы до целевого MRR",metric:"$50k MRR",status:"planning",priority:"critical",progress:0}];}
-function topSort(nodes,edges){
-  const ind=Object.fromEntries(nodes.map(n=>[n.id,0])),adj=Object.fromEntries(nodes.map(n=>[n.id,[]]));
-  edges.forEach(e=>{const from=e.from||e.source,to=e.to||e.target;if(adj[from]!==undefined&&ind[to]!==undefined){adj[from].push(to);ind[to]++;}});
-  const q=nodes.filter(n=>ind[n.id]===0).map(n=>n.id),out=[];
-  while(q.length){const id=q.shift();const n=nodes.find(x=>x.id===id);if(n)out.push(n);(adj[id]||[]).forEach(nid=>{if(--ind[nid]===0)q.push(nid);});}
-  nodes.forEach(n=>{if(!out.find(x=>x.id===n.id))out.push(n);});return out;
-}
-
-type SimNodeResult={score:number;outcome:"success"|"partial"|"fail";depPenalty:number;autoFail?:boolean};
-function simNode(node,params,depResults,incomingEdges):SimNodeResult{
-  const progBase=node.progress||0;
-  const statusK={completed:1.0,active:0.82,planning:0.55,paused:0.45,blocked:0.15}[node.status]??0.5;
-  const prioBonus={low:8,medium:4,high:0,critical:-4}[node.priority]??0;
-  const budgetFactor=params.budget>=100000?1.0:params.budget>=50000?0.92:params.budget>=20000?0.82:params.budget>=5000?0.70:0.55;
-  const teamFactor=params.team>=10?1.0:params.team>=5?0.93:params.team>=3?0.84:params.team>=1?0.74:0.60;
-  const resourceFactor=(budgetFactor+teamFactor)/2;
-  let depPenalty=0,autoFail=false;
-  if(incomingEdges&&depResults){
-    for(const edge of incomingEdges){
-      const dep=depResults[edge.from];if(!dep)continue;
-      if(edge.type==="blocks"){if(dep.outcome==="fail"){autoFail=true;break;}if(dep.outcome==="partial")depPenalty+=22;}
-      else if(edge.type==="requires"){if(dep.outcome==="fail")depPenalty+=30;else if(dep.outcome==="partial")depPenalty+=14;}
-      else if(edge.type==="affects"){if(dep.outcome==="fail")depPenalty+=16;else if(dep.outcome==="partial")depPenalty+=7;}
-      else if(edge.type==="follows"){if(dep.outcome==="fail")depPenalty+=20;else if(dep.outcome==="partial")depPenalty+=9;}
-    }
-  }
-  if(autoFail)return{score:Math.floor(Math.random()*18)+2,outcome:"fail",autoFail:true,depPenalty:Math.round(depPenalty)};
-  const raw=(progBase*statusK)+prioBonus-depPenalty;
-  const sc=Math.max(2,Math.min(98,Math.round(raw*resourceFactor+(Math.random()-.5)*16)));
-  return{score:sc,outcome:sc>=70?"success":sc>=42?"partial":"fail",depPenalty:Math.round(depPenalty)};
 }
 
 
