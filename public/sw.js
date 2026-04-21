@@ -1,6 +1,6 @@
 // Strategy AI — Service Worker (PWA)
-// v6: shell/tailwind — network-first (как app.js), иначе после деплоя можно долго видеть старый CSS из cache-first
-const CACHE = 'strategy-ai-v6';
+// v7: PWA icons split (icon.svg / icon-maskable.svg), manifest updated, precache refreshed
+const CACHE = 'strategy-ai-v7';
 
 function isApiOrSocket(u) {
   return u.href.includes('/api/') || u.pathname.includes('socket');
@@ -26,6 +26,8 @@ self.addEventListener('install', (e) => {
       .then((cache) =>
         cache.addAll([
           '/logo.png',
+          '/icon.svg',
+          '/icon-maskable.svg',
           '/manifest.json',
           '/global.css',
           '/landing.css',
