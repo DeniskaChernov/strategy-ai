@@ -3,38 +3,53 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="description" content="Strategy AI — визуальное стратегическое планирование с AI-советником уровня McKinsey. Карты целей, Gantt, сценарии, экспорт."/>
+
+  <!-- SEO:BEGIN -->
   <title>Strategy AI — Визуальное стратегическое планирование с AI</title>
+  <meta name="description" content="Карты целей, Gantt-план, AI-советник уровня McKinsey и симуляция сценариев. Для предпринимателей и команд. Русский / English / O‘zbekcha."/>
+  <meta name="robots" content="index,follow"/>
+  <link rel="canonical" href="https://www.strategy-ai.uz/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="Strategy AI — Визуальное стратегическое планирование с AI"/>
+  <meta property="og:description" content="Карты целей, Gantt-план, AI-советник уровня McKinsey и симуляция сценариев."/>
+  <meta property="og:url" content="https://www.strategy-ai.uz/"/>
+  <meta property="og:image" content="https://www.strategy-ai.uz/logo.png"/>
+  <meta property="og:site_name" content="Strategy AI"/>
+  <meta property="og:locale" content="ru_RU"/>
+  <meta property="og:locale:alternate" content="en_US"/>
+  <meta property="og:locale:alternate" content="uz_UZ"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Strategy AI"/>
+  <meta name="twitter:description" content="Визуальное стратегическое планирование с AI-советником уровня McKinsey"/>
+  <meta name="twitter:image" content="https://www.strategy-ai.uz/logo.png"/>
+  <link rel="alternate" hreflang="ru" href="https://www.strategy-ai.uz/"/>
+  <link rel="alternate" hreflang="en" href="https://www.strategy-ai.uz/"/>
+  <link rel="alternate" hreflang="uz" href="https://www.strategy-ai.uz/"/>
+  <link rel="alternate" hreflang="x-default" href="https://www.strategy-ai.uz/"/>
+  <!-- SEO:END -->
+
+  <meta name="theme-color" content="#050410" media="(prefers-color-scheme: dark)"/>
+  <meta name="theme-color" content="#ece9ff" media="(prefers-color-scheme: light)"/>
+  <meta name="color-scheme" content="dark light"/>
+  <meta name="author" content="Strategy AI"/>
+
   <link rel="icon" type="image/svg+xml" href="/icon.svg"/>
   <link rel="icon" type="image/png" sizes="192x192" href="/logo.png"/>
   <link rel="apple-touch-icon" href="/logo.png"/>
   <link rel="mask-icon" href="/icon.svg" color="#8B5CF6"/>
   <link rel="manifest" href="/manifest.json"/>
-  <!-- Open Graph -->
-  <meta property="og:type" content="website"/>
-  <meta property="og:title" content="Strategy AI — Визуальное стратегическое планирование с AI"/>
-  <meta property="og:description" content="Карты целей, Gantt-план, AI-советник, симуляция сценариев. Для предпринимателей и команд."/>
-  <meta property="og:image" content="/logo.png"/>
-  <meta property="og:url" content="https://www.strategy-ai.uz"/>
-  <link rel="canonical" href="https://www.strategy-ai.uz/"/>
-  <meta property="og:locale" content="ru_RU"/>
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="Strategy AI"/>
-  <meta name="twitter:description" content="Визуальное стратегическое планирование с AI-советником уровня McKinsey"/>
-  <meta name="twitter:image" content="/logo.png"/>
-  <meta name="theme-color" content="#050410" media="(prefers-color-scheme: dark)"/>
-  <meta name="theme-color" content="#ece9ff" media="(prefers-color-scheme: light)"/>
-  <meta name="color-scheme" content="dark light"/>
+
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin/>
   <link rel="dns-prefetch" href="https://images.unsplash.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+
   <link rel="stylesheet" href="/global.css"/>
   <link rel="stylesheet" href="/landing.css"/>
   <link rel="stylesheet" href="/strategy-shell.css"/>
   <link rel="stylesheet" href="/tailwind.css"/>
+
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{width:100%;height:100%}
@@ -46,62 +61,85 @@
     #splash-logo{margin-bottom:20px}
     #splash-logo img{width:72px;height:72px;object-fit:contain}
     #splash p{font-size:14px;color:rgba(148,144,196,.62);margin-top:12px;letter-spacing:.06em}
-    @keyframes pulse{0%,100%{box-shadow:0 0 36px rgba(104,54,245,.35)}50%{box-shadow:0 0 72px rgba(104,54,245,.55)}}
     @keyframes spin{to{transform:rotate(360deg)}}
     .loader{width:28px;height:28px;border:2px solid rgba(104,54,245,.22);border-top-color:#6836f5;border-radius:50%;animation:spin .8s linear infinite;margin-top:16px}
+    .sa-seo-fallback{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
   </style>
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebApplication","name":"Strategy AI","url":"https://www.strategy-ai.uz/","description":"Визуальное стратегическое планирование с AI-советником уровня McKinsey","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":["ru","en","uz"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
-  </script>
 </head>
 <body>
   <script>
     (function(){
       try {
-        var t = localStorage.getItem('sa_theme'); var p = localStorage.getItem('sa_palette');
+        var t = localStorage.getItem('sa_theme');
+        var p = localStorage.getItem('sa_palette');
         document.body.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
         document.body.setAttribute('data-palette', (p && ['indigo','ocean','forest','orange','sunset','mono'].indexOf(p) >= 0) ? p : 'indigo');
+        var sp = document.getElementById('splash');
+        if (sp && t === 'light') {
+          sp.style.background = '#ece9ff';
+          var h = document.getElementById('splash-heading');
+          if (h) h.style.color = '#08061a';
+          var sub = sp.querySelector('p');
+          if (sub) sub.style.color = 'rgba(70,58,130,.52)';
+        }
       } catch (_) {}
     })();
-    (function(){
-      try{
-        var sp=document.getElementById('splash');
-        if(sp&&localStorage.getItem('sa_theme')==='light'){
-          sp.style.background='#ece9ff';
-          var h=document.getElementById('splash-heading');
-          if(h) h.style.color='#08061a';
-          var sub=sp.querySelector('p');
-          if(sub) sub.style.color='rgba(70,58,130,.52)';
-        }
-      }catch(_){}
-    })();
   </script>
-  <div id="splash">
-    <div id="splash-logo"><img src="/logo.png" alt="Strategy AI"/></div>
+
+  <div id="splash" aria-hidden="true">
+    <div id="splash-logo"><img src="/logo.png" alt="" width="72" height="72"/></div>
     <div id="splash-heading" style="font-size:22px;font-weight:800;color:#eaeaf8;letter-spacing:-0.5px">Strategy AI</div>
-    <p>Загрузка...</p>
-    <div class="loader"></div>
+    <p>Загрузка…</p>
+    <div class="loader" role="status" aria-label="Загрузка приложения"></div>
   </div>
-  <div id="root"></div>
+
+  <main id="root">
+    <article class="sa-seo-fallback" aria-hidden="true">
+      <h1>Strategy AI — визуальное стратегическое планирование с AI-советником</h1>
+      <p>Strategy AI помогает предпринимателям и командам превращать цели в понятные дорожные карты: визуальные карты стратегий, Gantt-план, AI-советник уровня McKinsey и симуляция сценариев «что если». Работает на русском, английском и узбекском.</p>
+      <h2>Ключевые возможности</h2>
+      <ul>
+        <li>Карты целей: визуальное дерево задач и связей между инициативами.</li>
+        <li>Gantt-план с дедлайнами, ответственными и зависимостями.</li>
+        <li>AI-советник: разбирает вашу стратегию, подсвечивает риски и предлагает сценарии.</li>
+        <li>Симуляция сценариев и сравнение результатов.</li>
+        <li>Контент-план и совместная работа команды в реальном времени.</li>
+        <li>Экспорт в PDF / PPTX и публичные ссылки для партнёров.</li>
+      </ul>
+      <h2>Для кого</h2>
+      <p>Предприниматели, продуктовые и маркетинговые команды, консультанты, фонды и студенты — все, кто хочет планировать визуально, а не в таблицах.</p>
+      <h2>Тарифы</h2>
+      <p>Бесплатный стартовый тариф, Pro для индивидуальных пользователей и Team для команд.</p>
+      <h2>Документы</h2>
+      <p>
+        <a href="/privacy">Политика конфиденциальности</a>
+        ·
+        <a href="/terms">Условия использования</a>
+      </p>
+    </article>
+  </main>
+
+  <noscript>
+    <div style="max-width:720px;margin:40px auto;padding:16px 20px;border-radius:12px;background:#1a1035;color:#eaeaf8;font-family:'Inter',system-ui,sans-serif;line-height:1.6">
+      <h1 style="margin:0 0 12px;font-size:22px">Strategy AI</h1>
+      <p>Для работы сервиса включите JavaScript. Это одностраничное приложение: без JavaScript мы не можем показать карты, Gantt и AI-советника.</p>
+      <p>Документы доступны без скриптов: <a href="/privacy" style="color:#b6a6ff">Политика конфиденциальности</a>, <a href="/terms" style="color:#b6a6ff">Условия использования</a>.</p>
+    </div>
+  </noscript>
 
   <script>
-    // URL бэкенда — устанавливается автоматически из текущего origin
-    // (фронтенд и бэкенд на одном Railway сервисе)
     window.__STRATEGY_AI_API_URL__ = window.location.origin;
   </script>
   <script src="/env-config.js"></script>
   <script type="module" src="/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(function() {});
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
     }
-  </script>
-  <script>
-    // Убираем splash когда React загрузился
-    window.addEventListener('load', function() {
-      setTimeout(function() {
+    window.addEventListener('load', function () {
+      setTimeout(function () {
         var s = document.getElementById('splash');
-        if (s) { s.style.opacity = '0'; setTimeout(function(){ s.remove(); }, 500); }
+        if (s) { s.style.opacity = '0'; setTimeout(function () { s.remove(); }, 500); }
       }, 300);
     });
   </script>

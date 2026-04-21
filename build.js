@@ -23,13 +23,13 @@ fs.writeFileSync(
 );
 
 const today = new Date().toISOString().slice(0, 10);
-const sitemapPaths = ['', 'app', 'privacy', 'terms', '404'];
-const sitemapBody = sitemapPaths
-  .map((seg) => {
-    const loc = seg ? `${siteUrl}/${seg}` : `${siteUrl}/`;
-    const pr = seg === '' ? '1.0' : '0.64';
-    return `  <url><loc>${loc}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>${pr}</priority></url>`;
-  })
+const sitemapUrls = [
+  { loc: `${siteUrl}/`, priority: '1.0', changefreq: 'weekly' },
+  { loc: `${siteUrl}/privacy`, priority: '0.4', changefreq: 'monthly' },
+  { loc: `${siteUrl}/terms`, priority: '0.4', changefreq: 'monthly' },
+];
+const sitemapBody = sitemapUrls
+  .map((u) => `  <url><loc>${u.loc}</loc><lastmod>${today}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`)
   .join('\n');
 fs.writeFileSync(
   path.join(__dirname, 'public', 'sitemap.xml'),
@@ -38,7 +38,17 @@ fs.writeFileSync(
 );
 fs.writeFileSync(
   path.join(__dirname, 'public', 'robots.txt'),
-  `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`,
+  [
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /api/',
+    'Disallow: /app',
+    'Disallow: /app/',
+    '',
+    `Sitemap: ${siteUrl}/sitemap.xml`,
+    'Host: ' + siteUrl.replace(/^https?:\/\//, ''),
+    '',
+  ].join('\n'),
   'utf8'
 );
 

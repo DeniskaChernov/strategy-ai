@@ -305,13 +305,23 @@ app.use((err, req, res, _next) => {
 // ── Фронтенд (статика из /public) — ПОСЛЕ error handler и API роутов ─────────
 const path = require('path');
 const publicDir = path.join(__dirname, '..', 'public');
-app.use(express.static(publicDir));
-// SPA fallback — все не-API роуты отдают index.html
+const { renderIndex, routeFor } = require('./seo');
+app.use(express.static(publicDir, { index: false }));
+// SPA fallback — все не-API роуты отдают index.html с per-route SEO
 app.get('*', (req, res) => {
-  const indexFile = path.join(publicDir, 'index.html');
-  res.sendFile(indexFile, err => {
-    if (err) res.status(404).send('App not built yet. Run: npm run build');
-  });
+  const html = renderIndex(req.path, req);
+  if (html == null) {
+    return res.status(503).send('App not built yet. Run: npm run build');
+  }
+  const route = routeFor(req.path);
+  const status = route === 'notFound' ? 404 : 200;
+  res
+    .status(status)
+    .set({
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-cache, must-revalidate',
+    })
+    .send(html);
 });
 
 // ── Deadline reminder cron (запускается раз в день в 08:00 UTC) ──────────────

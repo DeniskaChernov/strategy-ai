@@ -1,3 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /app
+Disallow: /app/
+
 Sitemap: https://www.strategy-ai.uz/sitemap.xml
+Host: www.strategy-ai.uz
