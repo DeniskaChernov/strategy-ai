@@ -33,7 +33,9 @@ import {
 } from "./client/api";
 import { makeTfn } from "./client/i18n/makeTfn";
 import { StrategyShellSidebar, StrategyShellBg, type StrategyShellNav } from "./strategy-shell-sidebar";
-import { ReferenceLandingView } from "./reference-landing";
+const ReferenceLandingView = React.lazy(() =>
+  import("./reference-landing").then((m) => ({ default: m.ReferenceLandingView }))
+);
 import { GlowCard } from "./client/glow-card";
 import { FloatingAiAssistant } from "./client/floating-ai-assistant";
 import { SplashLoaderScreen } from "./client/splash-loader";
@@ -7168,20 +7170,22 @@ export default function App(){
         }} theme={theme} authReady={authChecked}/>}
         {screen==="landing"&&(
           <div className="screen-enter" style={{height:"100%",minHeight:"100vh",overflow:"hidden",position:"relative"}}>
-            <ReferenceLandingView
-              t={t}
-              lang={lang}
-              onChangeLang={changeLang}
-              theme={theme}
-              onToggleTheme={toggleTheme}
-              onSignIn={()=>{trackSaEvent("cta_sign_in_open");setAuthTab("login");setShowAuth(true);}}
-              onGetStarted={()=>{
-                trackSaEvent("cta_get_started");
-                setAuthTab("register");
-                setShowAuth(true);
-                try{window.history.replaceState({},"","/");}catch{}
-              }}
-            />
+            <React.Suspense fallback={<SplashLoaderScreen theme={theme==="light"?"light":"dark"} text={t("loading","Загрузка…")}/>}>
+              <ReferenceLandingView
+                t={t}
+                lang={lang}
+                onChangeLang={changeLang}
+                theme={theme}
+                onToggleTheme={toggleTheme}
+                onSignIn={()=>{trackSaEvent("cta_sign_in_open");setAuthTab("login");setShowAuth(true);}}
+                onGetStarted={()=>{
+                  trackSaEvent("cta_get_started");
+                  setAuthTab("register");
+                  setShowAuth(true);
+                  try{window.history.replaceState({},"","/");}catch{}
+                }}
+              />
+            </React.Suspense>
             {showAuth&&<AuthModal initialTab={authTab} theme={theme} onClose={()=>setShowAuth(false)} onAuth={handleAuth}/>}
           </div>
         )}

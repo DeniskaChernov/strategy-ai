@@ -65,24 +65,40 @@ const atAliasPlugin = {
   },
 };
 
+for (const f of fs.readdirSync(path.join(__dirname, 'public'))) {
+  if (f.startsWith('chunk-') && f.endsWith('.js')) {
+    try { fs.unlinkSync(path.join(__dirname, 'public', f)); } catch (_) { /* ignore */ }
+  }
+}
+
 esbuild.build({
-  entryPoints: ['strategy-ai-full.tsx'],
+  entryPoints: { app: 'strategy-ai-full.tsx' },
   bundle: true,
-  outfile: 'public/app.js',
+  outdir: 'public',
+  format: 'esm',
+  splitting: true,
   jsx: 'transform',
+  target: ['es2020'],
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
   minify: true,
+  entryNames: '[name]',
+  chunkNames: 'chunk-[hash]',
   plugins: [atAliasPlugin],
 }).then(() => {
   const app = fs.readFileSync('public/app.js');
   const hash = crypto.createHash('sha256').update(app).digest('hex').slice(0, 16);
   const builtAt = new Date().toISOString();
+  const chunks = fs
+    .readdirSync(path.join(__dirname, 'public'))
+    .filter((f) => f.startsWith('chunk-') && f.endsWith('.js'))
+    .map((f) => ({ name: f, size: fs.statSync(path.join(__dirname, 'public', f)).size }));
   fs.writeFileSync(
     'public/build-meta.json',
-    JSON.stringify({ appHash: hash, builtAt }, null, 0) + '\n',
+    JSON.stringify({ appHash: hash, builtAt, chunks }, null, 0) + '\n',
     'utf8'
   );
-  console.log('Build done.', `app.js sha256:${hash}`);
+  const chunksStr = chunks.map((c) => `${c.name}:${c.size}B`).join(', ');
+  console.log('Build done.', `app.js sha256:${hash}`, chunks.length ? `chunks: ${chunksStr}` : 'no chunks');
 }).catch((e) => {
   console.error(e);
   process.exit(1);

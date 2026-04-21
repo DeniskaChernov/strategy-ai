@@ -90,7 +90,7 @@
     window.__STRATEGY_AI_API_URL__ = window.location.origin;
   </script>
   <script src="/env-config.js"></script>
-  <script src="/app.js"></script>
+  <script type="module" src="/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(function() {});

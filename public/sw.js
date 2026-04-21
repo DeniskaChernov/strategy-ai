@@ -1,6 +1,6 @@
 // Strategy AI — Service Worker (PWA)
-// v7: PWA icons split (icon.svg / icon-maskable.svg), manifest updated, precache refreshed
-const CACHE = 'strategy-ai-v7';
+// v8: app.js is ESM with code-splitting — landing lives in its own chunk
+const CACHE = 'strategy-ai-v8';
 
 function isApiOrSocket(u) {
   return u.href.includes('/api/') || u.pathname.includes('socket');
