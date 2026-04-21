@@ -63,7 +63,20 @@
     #splash p{font-size:14px;color:rgba(148,144,196,.62);margin-top:12px;letter-spacing:.06em}
     @keyframes spin{to{transform:rotate(360deg)}}
     .loader{width:28px;height:28px;border:2px solid rgba(104,54,245,.22);border-top-color:#6836f5;border-radius:50%;animation:spin .8s linear infinite;margin-top:16px}
-    .sa-seo-fallback{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+    /* SEO-фоллбэк для #root виден краулерам и пользователям без JS.
+       При активном сплэше он не мешает визуально. React при гидратации
+       заменит содержимое #root целиком. */
+    .sa-seo-fallback{max-width:820px;margin:0 auto;padding:40px 24px 80px;line-height:1.6;color:#eaeaf8;font-family:'Inter',system-ui,sans-serif}
+    .sa-seo-fallback h1{font-size:28px;line-height:1.2;margin:0 0 16px;letter-spacing:-0.02em}
+    .sa-seo-fallback h2{font-size:20px;line-height:1.25;margin:28px 0 10px;letter-spacing:-0.01em}
+    .sa-seo-fallback h3{font-size:16px;margin:16px 0 8px}
+    .sa-seo-fallback p{margin:0 0 12px;color:rgba(234,234,248,.86)}
+    .sa-seo-fallback ul{margin:0 0 12px 20px;padding:0}
+    .sa-seo-fallback li{margin:0 0 6px}
+    .sa-seo-fallback a{color:#b6a6ff;text-decoration:underline}
+    body[data-theme="light"] .sa-seo-fallback{color:#08061a}
+    body[data-theme="light"] .sa-seo-fallback p{color:rgba(8,6,26,.8)}
+    body[data-theme="light"] .sa-seo-fallback a{color:#6836f5}
   </style>
 </head>
 <body>
@@ -94,7 +107,8 @@
   </div>
 
   <main id="root">
-    <article class="sa-seo-fallback" aria-hidden="true">
+    <!-- SEO:MAIN:BEGIN -->
+    <article class="sa-seo-fallback">
       <h1>Strategy AI — визуальное стратегическое планирование с AI-советником</h1>
       <p>Strategy AI помогает предпринимателям и командам превращать цели в понятные дорожные карты: визуальные карты стратегий, Gantt-план, AI-советник уровня McKinsey и симуляция сценариев «что если». Работает на русском, английском и узбекском.</p>
       <h2>Ключевые возможности</h2>
@@ -117,6 +131,7 @@
         <a href="/terms">Условия использования</a>
       </p>
     </article>
+    <!-- SEO:MAIN:END -->
   </main>
 
   <noscript>

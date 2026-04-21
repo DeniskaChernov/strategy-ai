@@ -7,6 +7,7 @@
 // формируется на сервере — именно её в первую очередь смотрят краулеры.
 const fs = require('fs');
 const path = require('path');
+const { bodyFor } = require('./seo-body');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const INDEX_FILE = path.join(PUBLIC_DIR, 'index.html');
@@ -193,6 +194,12 @@ function renderIndex(pathname, req) {
   html = html.replace(
     /<!--\s*SEO:BEGIN\s*-->[\s\S]*?<!--\s*SEO:END\s*-->/,
     `<!-- SEO:BEGIN -->\n  ${injection}\n  <!-- SEO:END -->`
+  );
+
+  const body = bodyFor(route);
+  html = html.replace(
+    /<!--\s*SEO:MAIN:BEGIN\s*-->[\s\S]*?<!--\s*SEO:MAIN:END\s*-->/,
+    `<!-- SEO:MAIN:BEGIN -->\n    ${body}\n    <!-- SEO:MAIN:END -->`
   );
   return html;
 }
