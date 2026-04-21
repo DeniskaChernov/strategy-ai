@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 
 export type TestimonialCardItem = {
   text: string;
@@ -18,17 +17,11 @@ export function TestimonialsColumn({ className = "", testimonials, duration = 10
   if (testimonials.length === 0) return null;
 
   const loops = [0, 1];
+  const style = { ["--sa-tcol1-dur" as string]: `${duration || 10}s` } as React.CSSProperties;
+
   return (
     <div className={"sa-tcol1-root " + className}>
-      <motion.div
-        animate={{ y: ["0%", "-50%"] }}
-        transition={{
-          duration: duration || 10,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="sa-tcol1-track"
-      >
+      <div className="sa-tcol1-track sa-tcol1-track--marquee" style={style}>
         {loops.map((loopIdx) => (
           <React.Fragment key={loopIdx}>
             {testimonials.map((item, i) => (
@@ -53,7 +46,7 @@ export function TestimonialsColumn({ className = "", testimonials, duration = 10
             ))}
           </React.Fragment>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

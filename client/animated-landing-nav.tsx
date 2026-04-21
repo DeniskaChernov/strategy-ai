@@ -1,5 +1,4 @@
 import * as React from "react";
-import { motion } from "framer-motion";
 import { Compass } from "lucide-react";
 
 type TFn = (key: string, fallback?: string) => string;
@@ -44,11 +43,8 @@ export function AnimatedLandingNav({
         maxWidth: "min(96vw, 1100px)",
       }}
     >
-      <motion.nav
+      <nav
         aria-label={t("nav_main", "Основная навигация")}
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: "spring", damping: 18, stiffness: 250 }}
         className="sa-animated-nav-pill"
         style={{
           display: "flex",
@@ -159,7 +155,7 @@ export function AnimatedLandingNav({
             {t("nav_getstarted", "Начать бесплатно")}
           </button>
         </div>
-      </motion.nav>
+      </nav>
     </div>
   );
 }

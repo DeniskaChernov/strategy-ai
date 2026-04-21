@@ -883,6 +883,31 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   padding-bottom:24px;
   will-change:transform;
 }
+@keyframes sa-tcol1-marquee{
+  from{transform:translate3d(0,0,0);}
+  to{transform:translate3d(0,-50%,0);}
+}
+.sa-ref-landing .sa-tcol1-track--marquee{
+  animation:sa-tcol1-marquee var(--sa-tcol1-dur,20s) linear infinite;
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-tcol1-track--marquee{
+    animation:none;
+  }
+}
+@keyframes sa-nav-drop{
+  from{transform:translate3d(0,-80px,0);opacity:0;}
+  to{transform:translate3d(0,0,0);opacity:1;}
+}
+.sa-ref-landing .sa-animated-nav-pill{
+  animation:sa-nav-drop .55s cubic-bezier(.22,1.2,.36,1) both;
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-animated-nav-pill{
+    animation:none;
+    opacity:1;
+  }
+}
 .sa-ref-landing .sa-tcol1-card{
   padding:clamp(18px,3vw,26px);
   border-radius:20px;
