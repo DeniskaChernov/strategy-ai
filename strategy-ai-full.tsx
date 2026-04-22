@@ -4208,20 +4208,20 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           </div>
           {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f09428",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
           {lastProj&&!loading&&onOpenMap&&(
-            <div style={{display:"flex",flexDirection:isMobile?"column":"row",gap:12,marginBottom:16,alignItems:"stretch"}}>
-              <div className="glass-card" style={{flex:1,minWidth:0,padding:"16px 20px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--accent-soft)",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-                <span style={{fontSize:13,color:"var(--text3)"}}>{t("continue_last","Продолжить с")}</span>
-                <button onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"8px 16px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700}}>
+            <div className="card-stagger" style={{display:"flex",flexDirection:isMobile?"column":"row",gap:14,marginBottom:20,alignItems:"stretch",animationDelay:".05s"}}>
+              <div className="glass-card icard" style={{flex:1,minWidth:0,padding:"16px 20px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",background:"linear-gradient(135deg,var(--accent-soft),color-mix(in srgb,var(--accent-soft) 70%,transparent))",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",cursor:"default"}}>
+                <span style={{fontSize:12.5,color:"var(--text3)",fontWeight:600,letterSpacing:".02em",textTransform:"uppercase"}}>{t("continue_last","Продолжить с")}</span>
+                <button className="btn-smooth" onClick={()=>lastMapData?onOpenMap(lastMapData,lastProj,false,false):onSelectProject(lastProj)} style={{padding:"9px 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:700,boxShadow:"0 4px 16px var(--accent-glow)"}}>
                   {lastMapData?`${lastProj.name} → ${lastMapData.name}`:lastProj.name}
                 </button>
               </div>
               {lastMapData&&(
-                <div className="glass-card" style={{flex:1,minWidth:0,padding:"16px 20px",borderRadius:14,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:14,flexWrap:isMobile?"wrap":"nowrap"}}>
+                <div className="glass-card icard" style={{flex:1,minWidth:0,padding:"16px 20px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",background:"var(--surface)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:14,flexWrap:isMobile?"wrap":"nowrap",cursor:"default"}}>
                   <div style={{minWidth:0}}>
-                    <div style={{fontSize:12,color:"var(--text4)",marginBottom:4}}>{t("projects_briefing_cta","Брифинг по последней карте")}</div>
+                    <div style={{fontSize:12,color:"var(--text4)",marginBottom:4,fontWeight:600,letterSpacing:".02em",textTransform:"uppercase"}}>{t("projects_briefing_cta","Брифинг по последней карте")}</div>
                     <div style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lastMapData.name||"—"}</div>
                   </div>
-                  <button type="button" className="btn-interactive" onClick={()=>setShowBriefing(true)} style={{padding:"10px 16px",borderRadius:12,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",flexShrink:0}}>
+                  <button type="button" className="btn-smooth btn-interactive" onClick={()=>setShowBriefing(true)} style={{padding:"10px 16px",borderRadius:12,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:13,fontWeight:800,whiteSpace:"nowrap",flexShrink:0}}>
                     📋 {t("weekly_briefing","Еженедельный брифинг")}
                   </button>
                 </div>
@@ -4243,15 +4243,19 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           ):loading?(
             <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":`repeat(auto-fill,minmax(${shellUi?300:260}px,1fr))`,gap:isMobile?16:20}}>
               {[1,2,3,4].map(i=>(
-                <div key={i} className="glass-card" style={{padding:"22px 22px 18px",borderRadius:18,border:"1px solid var(--border)",display:"flex",flexDirection:"column",gap:14}}>
+                <div key={i} className="glass-card card-stagger" style={{padding:"22px 22px 18px",borderRadius:18,border:"1px solid var(--border)",display:"flex",flexDirection:"column",gap:14,animationDelay:`${i*0.05}s`}}>
                   <div style={{display:"flex",gap:14}}>
-                    <div style={{width:40,height:40,borderRadius:12,background:"var(--surface2)",animation:"pulse 1.5s ease infinite"}}/>
+                    <div className="sa-skel" style={{width:40,height:40,borderRadius:12}}/>
                     <div style={{flex:1}}>
-                      <div style={{height:16,borderRadius:8,background:"var(--surface2)",width:"70%",marginBottom:8,animation:"pulse 1.5s ease infinite"}}/>
-                      <div style={{height:12,borderRadius:6,background:"var(--surface2)",width:"40%",animation:"pulse 1.5s ease infinite"}}/>
+                      <div className="sa-skel" style={{height:14,borderRadius:7,width:"70%",marginBottom:8}}/>
+                      <div className="sa-skel" style={{height:10,borderRadius:5,width:"40%"}}/>
                     </div>
                   </div>
-                  <div style={{height:32,borderRadius:8,background:"var(--surface2)",animation:"pulse 1.5s ease infinite"}}/>
+                  <div className="sa-skel" style={{height:8,borderRadius:999}}/>
+                  <div style={{display:"flex",gap:6}}>
+                    <div className="sa-skel" style={{height:20,width:60,borderRadius:999}}/>
+                    <div className="sa-skel" style={{height:20,width:70,borderRadius:999}}/>
+                  </div>
                 </div>
               ))}
             </div>
@@ -4266,7 +4270,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                   <div key={p.id} onClick={()=>onSelectProject(p)} className="icard card-stagger card-interactive"
                     style={{padding:"22px 22px 18px",borderRadius:18,background:"var(--card)",border:"1px solid var(--border)",cursor:"pointer",position:"relative",display:"flex",flexDirection:"column",animationDelay:`${i*0.06}s`}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:14}}>
-                      <div style={{width:40,height:40,borderRadius:12,background:"var(--surface2)",border:"1px solid var(--glass-border-accent,var(--border))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,color:"var(--text2)",fontWeight:900,letterSpacing:.3}}>{icon}</div>
+                      <div className="sa-proj-card-icon" style={{width:40,height:40,borderRadius:12,background:"var(--surface2)",border:"1px solid var(--glass-border-accent,var(--border))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,color:"var(--text2)",fontWeight:900,letterSpacing:.3}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div className="icard-title" style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:2}}>{p.name}</div>
                         <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {(p.createdAt||p.created_at)?new Date(p.createdAt||p.created_at).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"}):"—"}</div>
@@ -4284,12 +4288,12 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                       if(totalN===0)return null;
                       return(
                         <div style={{marginBottom:10}}>
-                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                            <span style={{fontSize:13.5,color:"var(--text5)"}}>{t("progress","Прогресс")}</span>
-                            <span style={{fontSize:13.5,fontWeight:700,color:"#12c482"}}>{pct}%</span>
+                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                            <span style={{fontSize:13,color:"var(--text5)",letterSpacing:".01em"}}>{t("progress","Прогресс")}</span>
+                            <span style={{fontSize:13,fontWeight:800,color:"#12c482"}}>{pct}%</span>
                           </div>
-                          <div style={{height:4,borderRadius:2,background:"var(--surface2)",overflow:"hidden"}}>
-                            <div style={{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#12c482,#34d399)",borderRadius:2}}/>
+                          <div className="sa-proj-progress" style={{height:6}}>
+                            <div className="sa-proj-progress__fill" style={{width:"100%",["--pp" as any]:(pct/100).toFixed(3)}}/>
                           </div>
                         </div>
                       );
@@ -4304,10 +4308,16 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                 );
               })}
               {!filtered.length&&!loading&&(
-                <div style={{gridColumn:"1/-1",textAlign:"center",padding:"48px 0",color:"var(--text4)"}}>
-                  <div style={{fontSize:28,marginBottom:10,letterSpacing:6,opacity:.7}}>• • •</div>
-                  <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{t("no_projects","Нет проектов")}</div>
-                  <div style={{fontSize:13}}>{t("click_new_project","Нажмите «+ Проект» чтобы начать")}</div>
+                <div className="card-stagger" style={{gridColumn:"1/-1",textAlign:"center",padding:"64px 24px",color:"var(--text4)",display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
+                  <div aria-hidden style={{width:88,height:88,borderRadius:26,background:"linear-gradient(135deg,var(--accent-soft),transparent 80%)",border:"1px solid var(--glass-border-accent,var(--border))",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
+                    <span style={{position:"absolute",inset:"-30%",background:"radial-gradient(circle,var(--accent-glow),transparent 55%)",animation:"saEmptyPulse 3.6s ease-in-out infinite",pointerEvents:"none"}}/>
+                    <span style={{fontSize:36,lineHeight:1,zIndex:1,filter:"drop-shadow(0 2px 8px var(--accent-glow))"}}>✦</span>
+                  </div>
+                  <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginTop:4}}>{search.trim()?t("search_empty","Ничего не найдено"):t("no_projects","Нет проектов")}</div>
+                  <div style={{fontSize:13.5,maxWidth:340,lineHeight:1.5,color:"var(--text3)"}}>{search.trim()?t("search_try_other","Попробуйте другой запрос или очистите поиск."):t("click_new_project","Нажмите «+ Проект» чтобы начать")}</div>
+                  {!search.trim()&&!atLimit&&(
+                    <button onClick={()=>setCreating(true)} className="btn-smooth" style={{marginTop:8,padding:"11px 22px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,boxShadow:"0 6px 20px var(--accent-glow)"}}>+ {t("new_project","Новый проект")}</button>
+                  )}
                 </div>
               )}
             </div>
