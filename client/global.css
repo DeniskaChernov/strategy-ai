@@ -441,9 +441,20 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   border:.5px solid var(--b1);
   background:var(--card);
   box-shadow:var(--shc);
+  transition:border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease;
+  cursor:default;
+}
+.sa-ref-landing .land-trust-pill:hover{
+  border-color:rgba(104,54,245,.45);
+  color:var(--t1);
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(104,54,245,.16);
 }
 .sa-strategy-ui.lt .sa-ref-landing .land-trust-pill{
   background:rgba(255,255,255,.62);
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-trust-pill:hover{
+  box-shadow:0 6px 18px rgba(104,54,245,.2);
 }
 .sa-ref-landing .land-audience-grid{
   display:grid;
@@ -498,13 +509,29 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   background:rgba(255,255,255,.05);
   box-shadow:none;
   box-sizing:border-box;
+  transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease,background .2s ease;
+  cursor:default;
 }
+.sa-ref-landing .land-int-item:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 28px rgba(0,0,0,.22);
+}
+.sa-ref-landing .land-int-item--exp:hover{border-color:rgba(104,54,245,.55);box-shadow:0 10px 28px rgba(104,54,245,.22);}
+.sa-ref-landing .land-int-item--deck:hover{border-color:rgba(18,196,130,.55);box-shadow:0 10px 28px rgba(18,196,130,.18);}
+.sa-ref-landing .land-int-item--team:hover{border-color:rgba(240,148,40,.55);box-shadow:0 10px 28px rgba(240,148,40,.18);}
+.sa-ref-landing .land-int-item--api:hover{border-color:rgba(6,182,212,.55);box-shadow:0 10px 28px rgba(6,182,212,.18);}
 .sa-strategy-ui.dk .sa-ref-landing .land-int-item{
   background:rgba(255,255,255,.04);
+}
+.sa-strategy-ui.dk .sa-ref-landing .land-int-item:hover{
+  background:rgba(255,255,255,.06);
 }
 .sa-strategy-ui.lt .sa-ref-landing .land-int-item{
   background:rgba(255,255,255,.38);
   border-color:rgba(104,80,220,.14);
+}
+.sa-strategy-ui.lt .sa-ref-landing .land-int-item:hover{
+  background:rgba(255,255,255,.72);
 }
 .sa-ref-landing .land-int-item__mark{
   flex-shrink:0;
@@ -514,7 +541,15 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   border-radius:4px;
   margin-top:2px;
   background:linear-gradient(180deg,var(--acc),rgba(104,54,245,.35));
+  transition:width .2s ease,box-shadow .2s ease;
 }
+.sa-ref-landing .land-int-item:hover .land-int-item__mark{
+  width:5px;
+}
+.sa-ref-landing .land-int-item--exp:hover .land-int-item__mark{box-shadow:0 0 12px rgba(104,54,245,.5);}
+.sa-ref-landing .land-int-item--deck:hover .land-int-item__mark{box-shadow:0 0 12px rgba(18,196,130,.45);}
+.sa-ref-landing .land-int-item--team:hover .land-int-item__mark{box-shadow:0 0 12px rgba(240,148,40,.45);}
+.sa-ref-landing .land-int-item--api:hover .land-int-item__mark{box-shadow:0 0 12px rgba(6,182,212,.45);}
 .sa-ref-landing .land-int-item--deck .land-int-item__mark{
   background:linear-gradient(180deg,#12c482,rgba(18,196,130,.35));
 }
