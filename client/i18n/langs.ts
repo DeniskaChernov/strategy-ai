@@ -316,6 +316,11 @@ export const LANGS = {
     ref_testi_prev:"Предыдущий отзыв",ref_testi_next:"Следующий отзыв",
     ref_testi_choose:"Выбор отзыва",ref_testi_goto:"Отзыв {n}",ref_testi_carousel_label:"Карусель отзывов",
     splash_loader_text:"Загрузка…",splash_brand_name:"Strategy AI",
+    // ── Not found / 404 ──
+    not_found_title:"Страница не найдена",
+    not_found_sub:"Такого адреса нет. Вернитесь на главную или откройте приложение.",
+    not_found_cta:"На главную",
+    not_found_open_app:"Открыть приложение",
     // ── Reference landing: hero, features, audience, comparison, integrations, FAQ, CTA ──
     hero_cta:"Начать бесплатно — без карты",
     nav_audience:"Для кого",
@@ -889,6 +894,11 @@ export const LANGS = {
     ref_testi_prev:"Previous testimonial",ref_testi_next:"Next testimonial",
     ref_testi_choose:"Choose testimonial",ref_testi_goto:"Testimonial {n}",ref_testi_carousel_label:"Testimonial carousel",
     splash_loader_text:"Loading…",splash_brand_name:"Strategy AI",
+    // ── Not found / 404 ──
+    not_found_title:"Page not found",
+    not_found_sub:"This URL doesn't exist. Go back home or open the app.",
+    not_found_cta:"Go home",
+    not_found_open_app:"Open app",
     // ── Reference landing: hero, features, audience, comparison, integrations, FAQ, CTA ──
     hero_cta:"Start free — no card required",
     nav_audience:"Who it's for",
@@ -1460,6 +1470,11 @@ export const LANGS = {
     ref_testi_prev:"Oldingi sharh",ref_testi_next:"Keyingi sharh",
     ref_testi_choose:"Sharhni tanlash",ref_testi_goto:"{n}-sharh",ref_testi_carousel_label:"Sharhlar karuseli",
     splash_loader_text:"Yuklanmoqda…",splash_brand_name:"Strategy AI",
+    // ── Not found / 404 ──
+    not_found_title:"Sahifa topilmadi",
+    not_found_sub:"Bunday manzil mavjud emas. Bosh sahifaga qayting yoki ilovani oching.",
+    not_found_cta:"Bosh sahifa",
+    not_found_open_app:"Ilovani ochish",
     // ── Reference landing: hero, features, audience, comparison, integrations, FAQ, CTA ──
     hero_cta:"Bepul boshlash — kartasiz",
     nav_audience:"Kimlar uchun",

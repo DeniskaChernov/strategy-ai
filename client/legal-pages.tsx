@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { StrategyShellBg } from "../strategy-shell-sidebar";
 
 type TFn = (key: string, fallback?: string) => string;
@@ -10,7 +9,7 @@ const articleStyle: React.CSSProperties = {
   padding: "24px 20px 80px",
   lineHeight: 1.65,
   fontSize: 15,
-  color: "var(--text)",
+  color: "var(--t1)",
 };
 
 const h2: React.CSSProperties = {
@@ -19,10 +18,10 @@ const h2: React.CSSProperties = {
   marginTop: 32,
   marginBottom: 12,
   letterSpacing: "-0.02em",
-  color: "var(--text)",
+  color: "var(--t1)",
 };
 
-const p: React.CSSProperties = { marginBottom: 14, color: "var(--text2)" };
+const p: React.CSSProperties = { marginBottom: 14, color: "var(--t2)" };
 
 function P({ children }: { children: React.ReactNode }) {
   return <p style={p}>{children}</p>;
@@ -71,18 +70,19 @@ export function LegalDocumentPage({
           alignItems: "center",
           gap: 16,
           padding: "14px 20px",
-          borderBottom: "1px solid var(--border)",
+          borderBottom: "1px solid var(--b1)",
           background: "color-mix(in srgb, var(--bg) 88%, transparent)",
           backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
         }}
       >
         <button type="button" className="btn-g" onClick={onHome} style={{ fontSize: 13 }}>
           {t("legal_back_home", "← На главную")}
         </button>
-        <span style={{ fontWeight: 800, fontSize: 15, color: "var(--text)" }}>{title}</span>
+        <span style={{ fontWeight: 800, fontSize: 15, color: "var(--t1)" }}>{title}</span>
       </header>
       <article style={articleStyle}>
-        <p style={{ ...p, fontSize: 12, color: "var(--text5)" }}>{updated}</p>
+        <p style={{ ...p, fontSize: 12, color: "var(--t3)" }}>{updated}</p>
         <P>
           {t(
             "legal_disclaimer",
@@ -239,7 +239,7 @@ export function NotFoundPage({
   const dk = theme === "dark" ? "dk" : "lt";
   return (
     <div
-      className={`sa-strategy-ui ${dk}`}
+      className={`sa-strategy-ui sa-nf-page ${dk}`}
       data-theme={theme}
       style={{
         minHeight: "100vh",
@@ -250,22 +250,34 @@ export function NotFoundPage({
         padding: 32,
         fontFamily: "'Inter',system-ui,sans-serif",
         background: "var(--bg)",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
       <StrategyShellBg />
-      <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 420 }}>
-        <div style={{ fontSize: 56, marginBottom: 8 }} aria-hidden>
-          404
+      <div className="sa-nf-glow" aria-hidden />
+      <div className="sa-nf-card">
+        <div className="sa-nf-num" aria-hidden>
+          <span className="sa-nf-num-digit">4</span>
+          <span className="sa-nf-num-zero" aria-hidden>
+            <span className="sa-nf-num-zero-inner" />
+          </span>
+          <span className="sa-nf-num-digit">4</span>
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 12, color: "var(--text)" }}>
+        <h1 className="sa-nf-title">
           {t("not_found_title", "Страница не найдена")}
         </h1>
-        <p style={{ fontSize: 15, color: "var(--text3)", lineHeight: 1.55, marginBottom: 24 }}>
+        <p className="sa-nf-sub">
           {t("not_found_sub", "Такого адреса нет. Вернитесь на главную или откройте приложение.")}
         </p>
-        <Button type="button" onClick={onHome}>
-          {t("not_found_cta", "На главную")}
-        </Button>
+        <div className="sa-nf-btns">
+          <button type="button" className="btn-p lg" onClick={onHome}>
+            {t("not_found_cta", "На главную")}
+          </button>
+          <button type="button" className="btn-g lg" onClick={() => { window.location.href = "/app"; }}>
+            {t("not_found_open_app", "Открыть приложение")}
+          </button>
+        </div>
       </div>
     </div>
   );
