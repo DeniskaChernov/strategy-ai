@@ -2390,29 +2390,32 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   border:var(--border-size) solid transparent;
   border-radius:calc(var(--radius,16)*1px);
   background-repeat:no-repeat;
-  /* Локальный spot (не fixed): центр градиента берётся из --lx/--ly (% внутри padding-box).
-     JS clamp-ит координаты к ближайшей точке карточки, а видимость — через --glow-intensity. */
+  /* «Виртуальная лампа» в координатах viewport (--x/--y от JS). Благодаря
+     background-attachment:fixed каждая карточка видит только тот сегмент градиента,
+     который попадает в её border-полосу — спот корректно обрезается именно ближайшей
+     к курсору стороной, а далёкие карточки просто остаются чёрными. */
+  background-size:100vw 100vh;
+  background-position:0 0;
+  background-attachment:fixed;
   mask:linear-gradient(transparent,transparent),linear-gradient(#fff,#fff);
   mask-clip:padding-box,border-box;
   -webkit-mask:linear-gradient(transparent,transparent),linear-gradient(#fff,#fff);
   -webkit-mask-clip:padding-box,border-box;
   mask-composite:intersect;
   -webkit-mask-composite:source-in;
-  opacity:var(--glow-intensity,0);
-  transition:opacity .18s linear;
 }
 [data-glow].glow-card::before{
   background-image:radial-gradient(
-    calc(var(--spotlight-size)*0.75*var(--spot-scale,1)) calc(var(--spotlight-size)*0.75*var(--spot-scale,1)) at
-    var(--lx,50%) var(--ly,50%),
+    var(--spotlight-size) var(--spotlight-size) at
+    calc(var(--x,0) * 1px) calc(var(--y,0) * 1px),
     hsl(var(--hue) calc(var(--saturation,100)*1%) calc(var(--lightness,50)*1%) / var(--border-spot-opacity,1)),transparent 100%
   );
-  filter:brightness(1.9);
+  filter:brightness(1.7);
 }
 [data-glow].glow-card::after{
   background-image:radial-gradient(
-    calc(var(--spotlight-size)*0.5*var(--spot-scale,1)) calc(var(--spotlight-size)*0.5*var(--spot-scale,1)) at
-    var(--lx,50%) var(--ly,50%),
+    calc(var(--spotlight-size) * 0.65) calc(var(--spotlight-size) * 0.65) at
+    calc(var(--x,0) * 1px) calc(var(--y,0) * 1px),
     hsl(0 100% 100% / var(--border-light-opacity,1)),transparent 100%
   );
 }

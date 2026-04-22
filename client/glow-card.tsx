@@ -1,59 +1,5 @@
 import React, { useEffect, useRef, ReactNode, CSSProperties, HTMLAttributes } from "react";
-import { getLastGlowPointer, subscribeGlowPointer } from "./lib/glow-pointer";
-
-type Pos = { x: number; y: number };
-
-/**
- * Локальные координаты курсора относительно padding-box + «дистанционная» интенсивность.
- *
- * --lx / --ly — позиция для радиального градиента (в %). Когда курсор снаружи карточки,
- *   используется ближайшая точка на её ребре (clamp) — свечение привязано именно к той
- *   стороне/углу, к которому курсор ближе всего.
- * --glow-intensity — 0..1: 1 когда курсор внутри карточки, плавно падает до 0 за пределами
- *   THRESHOLD px от её ближайшей границы. Используется как opacity у ::before/::after,
- *   чтобы свечение было «привязано к курсору» (включается только там, где он рядом).
- */
-/** Зона реакции вокруг карточки: при приближении курсора ближе этого радиуса свечение начинает проявляться. */
-const GLOW_DISTANCE_THRESHOLD = 260;
-function applyGlowPointer(el: HTMLElement, p: Pos | null) {
-  const r = el.getBoundingClientRect();
-  if (r.width < 1 || r.height < 1) return;
-  const bl = el.clientLeft;
-  const bt = el.clientTop;
-  const iw = el.clientWidth;
-  const ih = el.clientHeight;
-
-  if (!p) {
-    el.style.setProperty("--lx", "50%");
-    el.style.setProperty("--ly", "50%");
-    el.style.setProperty("--glow-intensity", "0");
-    el.style.setProperty("--spot-scale", "1");
-    return;
-  }
-
-  const cx = Math.max(r.left, Math.min(p.x, r.right));
-  const cy = Math.max(r.top, Math.min(p.y, r.bottom));
-  const dx = p.x - cx;
-  const dy = p.y - cy;
-  const dist = Math.hypot(dx, dy);
-  const inside = dist === 0;
-  // Линейный коэффициент 0..1, затем выгибаем кривой «smoothstep»:
-  // близко к курсору свечение выходит на максимум быстрее, а на далёких расстояниях угасает плавно.
-  const t = inside ? 1 : Math.max(0, 1 - dist / GLOW_DISTANCE_THRESHOLD);
-  const intensity = t * t * (3 - 2 * t);
-  // Когда курсор снаружи — spot «разливается» вдоль ближайшего края, чтобы светился не точечный
-  // угол, а вся ближайшая к курсору сторона. Внутри карточки остаётся точечный spot.
-  const spotScale = inside ? 1 : 1 + Math.min(dist / 110, 2.6);
-
-  const px = cx - r.left - bl;
-  const py = cy - r.top - bt;
-  const lx = (px / Math.max(iw, 1)) * 100;
-  const ly = (py / Math.max(ih, 1)) * 100;
-  el.style.setProperty("--lx", `${lx.toFixed(2)}%`);
-  el.style.setProperty("--ly", `${ly.toFixed(2)}%`);
-  el.style.setProperty("--glow-intensity", intensity.toFixed(3));
-  el.style.setProperty("--spot-scale", spotScale.toFixed(3));
-}
+import { subscribeGlowPointer } from "./lib/glow-pointer";
 
 export interface GlowCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "className" | "style"> {
   children: ReactNode;
@@ -134,23 +80,14 @@ export function GlowCard({
     return subscribeGlowPointer((p) => {
       const el = cardRef.current;
       if (!el) return;
+      // Единая «лампа» в координатах viewport — каждый ::before/::after у GlowCard
+      // берёт её через background-attachment:fixed, поэтому spot корректно обрезается
+      // именно той стороной карточки, которая ближе всего к курсору.
       el.style.setProperty("--x", p.x.toFixed(2));
       el.style.setProperty("--xp", (p.x / Math.max(window.innerWidth, 1)).toFixed(4));
       el.style.setProperty("--y", p.y.toFixed(2));
       el.style.setProperty("--yp", (p.y / Math.max(window.innerHeight, 1)).toFixed(4));
-      applyGlowPointer(el, p);
     });
-  }, [plain]);
-
-  useEffect(() => {
-    if (plain) return;
-    const el = cardRef.current;
-    if (!el) return;
-    const syncAfterLayout = () => applyGlowPointer(el, getLastGlowPointer());
-    const ro = new ResizeObserver(syncAfterLayout);
-    ro.observe(el);
-    syncAfterLayout();
-    return () => ro.disconnect();
   }, [plain]);
 
   const getInlineStyles = (): CSSProperties => {
@@ -231,10 +168,12 @@ export function GlowCard({
     zIndex: 1,
     overflow: "hidden",
     backgroundImage: `radial-gradient(
-      var(--spotlight-size) var(--spotlight-size) at var(--lx, 50%) var(--ly, 50%),
+      var(--spotlight-size) var(--spotlight-size) at
+      calc(var(--x, 0) * 1px) calc(var(--y, 0) * 1px),
       hsl(var(--hue, 210) calc(var(--saturation, 100) * 1%) calc(var(--lightness, 70) * 1%) / var(--bg-spot-opacity, 0.1)),
       transparent
     )`,
+    backgroundAttachment: "fixed",
   };
 
   return (

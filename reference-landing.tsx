@@ -266,11 +266,11 @@ export function ReferenceLandingView({
                   ["--bg-spot-opacity" as any]: 0,
                   ["--outer" as any]: 0,
                   ["--gc-border" as any]: 2,
-                  ["--size" as any]: 260,
+                  ["--size" as any]: 520,
                   ["--saturation" as any]: 92,
                   ["--lightness" as any]: 62,
-                  ["--border-spot-opacity" as any]: 1,
-                  ["--border-light-opacity" as any]: 0.55,
+                  ["--border-spot-opacity" as any]: 0.85,
+                  ["--border-light-opacity" as any]: 0.4,
                 }}
               >
                 <div className="feat-icon">{f.icon}</div>
@@ -307,11 +307,11 @@ export function ReferenceLandingView({
                   ["--bg-spot-opacity" as any]: 0,
                   ["--outer" as any]: 0,
                   ["--gc-border" as any]: 2,
-                  ["--size" as any]: 260,
+                  ["--size" as any]: 520,
                   ["--saturation" as any]: 92,
                   ["--lightness" as any]: 62,
-                  ["--border-spot-opacity" as any]: 1,
-                  ["--border-light-opacity" as any]: 0.55,
+                  ["--border-spot-opacity" as any]: 0.85,
+                  ["--border-light-opacity" as any]: 0.4,
                   justifyContent: "flex-start",
                 }}
               >
