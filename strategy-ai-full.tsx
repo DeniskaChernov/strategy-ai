@@ -6272,7 +6272,7 @@ function SplashScreen({onDone,theme,authReady=false}){
   const letterText=t("splash_loader_text","Loading");
   const brandLabel=t("splash_brand_name","Strategy AI");
   return(
-    <SplashLoaderScreen theme={th} text={letterText} size={180} progressPct={pct} brandLabel={brandLabel} />
+    <SplashLoaderScreen theme={th} text={letterText} progressPct={pct} brandLabel={brandLabel} />
   );
 }
 // ── SparklesCanvas ──
