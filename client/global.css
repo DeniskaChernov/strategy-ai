@@ -15,6 +15,24 @@ input,textarea,select,button{font-family:'Inter',system-ui,sans-serif;}
   --fz-xs:11px;--fz-sm:12px;--fz-md:13px;--fz-lg:15px;--fz-xl:18px;
   /* ── Transitions ── */
   --tr-fast:all .1s ease;--tr:all .2s ease;--tr-slow:all .35s ease;
+  /* ── Motion system: единые тайминги и кривые для всего сайта ── */
+  --dur-xs:.12s;--dur-sm:.2s;--dur-md:.32s;--dur-lg:.55s;--dur-xl:.85s;
+  --ease-out-quart:cubic-bezier(.22,1,.36,1);
+  --ease-in-out-quart:cubic-bezier(.76,0,.24,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --ease-soft:cubic-bezier(.4,0,.2,1);
+  --ease-snap:cubic-bezier(.2,.9,.3,1);
+  /* shorthand-комбинации для общих случаев */
+  --tr-reveal:opacity var(--dur-lg) var(--ease-out-quart),transform var(--dur-lg) var(--ease-out-quart);
+  --tr-hover:transform var(--dur-sm) var(--ease-out-quart),box-shadow var(--dur-md) var(--ease-out-quart),border-color var(--dur-sm) var(--ease-soft),color var(--dur-sm) var(--ease-soft);
+  --tr-press:transform var(--dur-xs) var(--ease-snap);
+  --tr-theme:background-color var(--dur-lg) var(--ease-soft),color var(--dur-md) var(--ease-soft),border-color var(--dur-md) var(--ease-soft);
+}
+@media (prefers-reduced-motion:reduce){
+  :root{
+    --dur-xs:.01ms;--dur-sm:.01ms;--dur-md:.01ms;--dur-lg:.01ms;--dur-xl:.01ms;
+    --tr-reveal:none;--tr-hover:none;--tr-press:none;--tr-theme:none;
+  }
 }
 /* ── Accent variables (override by data-palette) ── */
 [data-theme="dark"]{
@@ -258,6 +276,33 @@ body:has(.sa-ref-landing) .screen-wrap{
   width:100% !important;
   max-width:100% !important;
   box-sizing:border-box !important;
+  /* Плавный программный скролл для якорей и focus() */
+  scroll-behavior:smooth;
+  /* Плавная смена темы/палитры самого scroll-контейнера */
+  transition:background-color var(--dur-lg) var(--ease-soft);
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing.sa-strategy-ui.view.on.sa-v-landing,
+  .sa-landing-shell.sa-strategy-ui{
+    scroll-behavior:auto;
+  }
+}
+/* Единое правило для scroll-reveal — точная transition-кривая из motion-токенов */
+.sa-ref-landing .sr,
+.sa-ref-landing .sr-init{
+  transition:var(--tr-reveal);
+}
+/* Мягкий кросс-fade при смене языка — key={lang} перемонтирует main,
+   CSS-анимация бесшумно «оживляет» новый контент. */
+@keyframes sa-lang-fade-in{
+  0%  { opacity:0; transform:translateY(6px); }
+  100%{ opacity:1; transform:none; }
+}
+.sa-ref-landing .sa-lang-fade{
+  animation:sa-lang-fade-in var(--dur-md) var(--ease-out-quart) both;
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-lang-fade{animation:none;}
 }
 .sa-ref-landing .land-inner{
   max-width:min(1080px,100%) !important;
@@ -321,17 +366,29 @@ body:has(.sa-ref-landing) .screen-wrap{
   font-size:clamp(11px,1.15vw,14px);
   font-weight:600;
   color:var(--t2);
-  padding:6px 8px;
+  padding:6px 10px 8px;
   border-radius:8px;
   white-space:nowrap;
   font-family:inherit;
+  position:relative;
+  transition:color var(--dur-sm) var(--ease-soft),background-color var(--dur-sm) var(--ease-soft),transform var(--dur-sm) var(--ease-out-quart);
 }
 .sa-ref-landing .sa-animated-nav-link:hover{
   color:var(--t1);
   background:rgba(104,54,245,.12);
 }
+.sa-ref-landing .sa-animated-nav-link:active{
+  transform:scale(.96);
+}
+.sa-ref-landing .sa-animated-nav-link.is-active{
+  color:var(--t1);
+  background:transparent;
+}
 .sa-strategy-ui.lt .sa-ref-landing .sa-animated-nav-link:hover{
   background:rgba(104,54,245,.08);
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-animated-nav-link:active{transform:none;}
 }
 /* Навбар на всю ширину вьюпорта (раньше max-width:960 + центр давали «поля» и сдвиг) */
 #land-nav-fixed{

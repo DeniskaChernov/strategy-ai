@@ -7,6 +7,8 @@ import { LandingPricingCards } from "./client/landing-pricing-cards";
 import type { TestimonialCardItem } from "./client/components/ui/testimonials-columns-1";
 import { MotionTestimonialsMarquee } from "./client/components/ui/motion-testimonials-section";
 import { LandingMapDemo } from "./client/landing-map-demo";
+import { useScrollReveal } from "./client/use-scroll-reveal";
+import { StatCounter } from "./client/stat-counter";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -39,6 +41,7 @@ export function ReferenceLandingView({
 }){
   const rootRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  useScrollReveal(rootRef, [lang, theme]);
 
   const motionTestimonialColumns = useMemo((): [
     TestimonialCardItem[],
@@ -134,7 +137,13 @@ export function ReferenceLandingView({
       <a href="#land-main" className="sa-skip-link">
         {t("skip_to_content", "Перейти к содержимому")}
       </a>
-      <main className="land-inner" id="land-main" tabIndex={-1} style={{ position: "relative", zIndex: 5 }}>
+      <main
+        key={lang}
+        className="land-inner sa-lang-fade"
+        id="land-main"
+        tabIndex={-1}
+        style={{ position: "relative", zIndex: 5 }}
+      >
         <div className="land-nav-spacer"/>
 
         <div className="hero" id="hero-section">
@@ -182,19 +191,27 @@ export function ReferenceLandingView({
 
         <div className="land-stats stagger" id="land-stats-section" style={{ marginBottom: 88 }}>
           <div className="stat-item sr sr-up in">
-            <div className="stat-val" style={{ color: "var(--acc)" }}>2,400+</div>
+            <div className="stat-val" style={{ color: "var(--acc)" }}>
+              <StatCounter to={2400} suffix="+" />
+            </div>
             <div className="stat-lbl">{t("ref_stat_teams", "Команд")}</div>
           </div>
           <div className="stat-item sr sr-up in">
-            <div className="stat-val" style={{ color: "var(--green)" }}>18K+</div>
+            <div className="stat-val" style={{ color: "var(--green)" }}>
+              <StatCounter to={18} suffix="K+" />
+            </div>
             <div className="stat-lbl">{t("ref_stat_maps", "Карт стратегии")}</div>
           </div>
           <div className="stat-item sr sr-up in">
-            <div className="stat-val" style={{ color: "var(--amber)" }}>94%</div>
+            <div className="stat-val" style={{ color: "var(--amber)" }}>
+              <StatCounter to={94} suffix="%" />
+            </div>
             <div className="stat-lbl">{t("ref_stat_sat", "Удовлетворённость")}</div>
           </div>
           <div className="stat-item sr sr-up in">
-            <div className="stat-val">4.9 ⭐</div>
+            <div className="stat-val">
+              <StatCounter to={4.9} decimals={1} thousandsSeparator="" /> ⭐
+            </div>
             <div className="stat-lbl">Product Hunt</div>
           </div>
         </div>
