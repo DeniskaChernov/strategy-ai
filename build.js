@@ -23,17 +23,36 @@ fs.writeFileSync(
 );
 
 const today = new Date().toISOString().slice(0, 10);
+// Список индексируемых маршрутов. Должен совпадать с routeFor/metaFor в server/seo.js
+// (страницы с robots: index,follow). Маршруты noindex (/app, /404) в sitemap не кладём.
+const sitemapLangs = ['ru', 'en', 'uz'];
 const sitemapUrls = [
   { loc: `${siteUrl}/`, priority: '1.0', changefreq: 'weekly' },
   { loc: `${siteUrl}/privacy`, priority: '0.4', changefreq: 'monthly' },
   { loc: `${siteUrl}/terms`, priority: '0.4', changefreq: 'monthly' },
 ];
 const sitemapBody = sitemapUrls
-  .map((u) => `  <url><loc>${u.loc}</loc><lastmod>${today}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`)
+  .map((u) => {
+    const alts = [
+      ...sitemapLangs.map(
+        (lng) => `    <xhtml:link rel="alternate" hreflang="${lng}" href="${u.loc}"/>`
+      ),
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${u.loc}"/>`,
+    ].join('\n');
+    return [
+      '  <url>',
+      `    <loc>${u.loc}</loc>`,
+      `    <lastmod>${today}</lastmod>`,
+      `    <changefreq>${u.changefreq}</changefreq>`,
+      `    <priority>${u.priority}</priority>`,
+      alts,
+      '  </url>',
+    ].join('\n');
+  })
   .join('\n');
 fs.writeFileSync(
   path.join(__dirname, 'public', 'sitemap.xml'),
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapBody}\n</urlset>\n`,
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${sitemapBody}\n</urlset>\n`,
   'utf8'
 );
 fs.writeFileSync(
