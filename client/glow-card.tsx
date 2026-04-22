@@ -13,7 +13,8 @@ type Pos = { x: number; y: number };
  *   THRESHOLD px от её ближайшей границы. Используется как opacity у ::before/::after,
  *   чтобы свечение было «привязано к курсору» (включается только там, где он рядом).
  */
-const GLOW_DISTANCE_THRESHOLD = 180;
+/** Зона реакции вокруг карточки: при приближении курсора ближе этого радиуса свечение начинает проявляться. */
+const GLOW_DISTANCE_THRESHOLD = 260;
 function applyGlowPointer(el: HTMLElement, p: Pos | null) {
   const r = el.getBoundingClientRect();
   if (r.width < 1 || r.height < 1) return;
@@ -35,9 +36,10 @@ function applyGlowPointer(el: HTMLElement, p: Pos | null) {
   const dy = p.y - cy;
   const dist = Math.hypot(dx, dy);
   const inside = dist === 0;
-  const intensity = inside
-    ? 1
-    : Math.max(0, 1 - dist / GLOW_DISTANCE_THRESHOLD);
+  // Линейный коэффициент 0..1, затем выгибаем кривой «smoothstep»:
+  // близко к курсору свечение выходит на максимум быстрее, а на далёких расстояниях угасает плавно.
+  const t = inside ? 1 : Math.max(0, 1 - dist / GLOW_DISTANCE_THRESHOLD);
+  const intensity = t * t * (3 - 2 * t);
 
   const px = cx - r.left - bl;
   const py = cy - r.top - bt;

@@ -128,6 +128,29 @@ esbuild.build({
   );
   const chunksStr = chunks.map((c) => `${c.name}:${c.size}B`).join(', ');
   console.log('Build done.', `app.js sha256:${hash}`, chunks.length ? `chunks: ${chunksStr}` : 'no chunks');
+
+  // ── Cache-busting: подставляем ?v=<hash> в index.html для всех основных ассетов ──
+  // Так браузер обязательно подтянет свежие CSS/JS после каждого билда, не полагаясь на TTL.
+  const ASSETS = ['app.js', 'global.css', 'landing.css', 'strategy-shell.css', 'tailwind.css'];
+  const assetVer = {};
+  for (const f of ASSETS) {
+    const p = path.join(__dirname, 'public', f);
+    if (!fs.existsSync(p)) continue;
+    assetVer[f] = crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex').slice(0, 10);
+  }
+  const indexPath = path.join(__dirname, 'public', 'index.html');
+  if (fs.existsSync(indexPath)) {
+    let html = fs.readFileSync(indexPath, 'utf8');
+    for (const [file, v] of Object.entries(assetVer)) {
+      // matches href="/global.css"  OR  src="/app.js"  (с уже существующим ?v=... или без)
+      const reLit = file.replace(/\./g, '\\.');
+      const re = new RegExp(`(href|src)="(/${reLit})(\\?v=[0-9a-f]+)?"`, 'g');
+      html = html.replace(re, `$1="$2?v=${v}"`);
+    }
+    fs.writeFileSync(indexPath, html, 'utf8');
+    const versStr = Object.entries(assetVer).map(([f, v]) => `${f}=${v}`).join(', ');
+    console.log('Cache-bust:', versStr);
+  }
 }).catch((e) => {
   console.error(e);
   process.exit(1);
