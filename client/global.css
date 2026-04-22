@@ -2403,7 +2403,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 [data-glow].glow-card::before{
   background-image:radial-gradient(
-    calc(var(--spotlight-size)*0.75) calc(var(--spotlight-size)*0.75) at
+    calc(var(--spotlight-size)*0.75*var(--spot-scale,1)) calc(var(--spotlight-size)*0.75*var(--spot-scale,1)) at
     var(--lx,50%) var(--ly,50%),
     hsl(var(--hue) calc(var(--saturation,100)*1%) calc(var(--lightness,50)*1%) / var(--border-spot-opacity,1)),transparent 100%
   );
@@ -2411,7 +2411,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 [data-glow].glow-card::after{
   background-image:radial-gradient(
-    calc(var(--spotlight-size)*0.5) calc(var(--spotlight-size)*0.5) at
+    calc(var(--spotlight-size)*0.5*var(--spot-scale,1)) calc(var(--spotlight-size)*0.5*var(--spot-scale,1)) at
     var(--lx,50%) var(--ly,50%),
     hsl(0 100% 100% / var(--border-light-opacity,1)),transparent 100%
   );

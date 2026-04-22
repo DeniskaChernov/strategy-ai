@@ -27,6 +27,7 @@ function applyGlowPointer(el: HTMLElement, p: Pos | null) {
     el.style.setProperty("--lx", "50%");
     el.style.setProperty("--ly", "50%");
     el.style.setProperty("--glow-intensity", "0");
+    el.style.setProperty("--spot-scale", "1");
     return;
   }
 
@@ -40,6 +41,9 @@ function applyGlowPointer(el: HTMLElement, p: Pos | null) {
   // близко к курсору свечение выходит на максимум быстрее, а на далёких расстояниях угасает плавно.
   const t = inside ? 1 : Math.max(0, 1 - dist / GLOW_DISTANCE_THRESHOLD);
   const intensity = t * t * (3 - 2 * t);
+  // Когда курсор снаружи — spot «разливается» вдоль ближайшего края, чтобы светился не точечный
+  // угол, а вся ближайшая к курсору сторона. Внутри карточки остаётся точечный spot.
+  const spotScale = inside ? 1 : 1 + Math.min(dist / 110, 2.6);
 
   const px = cx - r.left - bl;
   const py = cy - r.top - bt;
@@ -48,6 +52,7 @@ function applyGlowPointer(el: HTMLElement, p: Pos | null) {
   el.style.setProperty("--lx", `${lx.toFixed(2)}%`);
   el.style.setProperty("--ly", `${ly.toFixed(2)}%`);
   el.style.setProperty("--glow-intensity", intensity.toFixed(3));
+  el.style.setProperty("--spot-scale", spotScale.toFixed(3));
 }
 
 export interface GlowCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "className" | "style"> {
