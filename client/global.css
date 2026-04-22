@@ -2390,22 +2390,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   border:var(--border-size) solid transparent;
   border-radius:calc(var(--radius,16)*1px);
   background-repeat:no-repeat;
-  /* Fixed-attached spotlight: координаты курсора в вьюпорте → спот виден только где он пересекает карточку.
-     Так при уходе курсора свечение естественно исчезает, не прилипая к центру. */
-  background-size:calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)));
-  background-position:50% 50%;
-  background-attachment:fixed;
+  /* Локальный spot (не fixed): центр градиента берётся из --lx/--ly (% внутри padding-box).
+     JS clamp-ит координаты к ближайшей точке карточки, а видимость — через --glow-intensity. */
   mask:linear-gradient(transparent,transparent),linear-gradient(#fff,#fff);
   mask-clip:padding-box,border-box;
   -webkit-mask:linear-gradient(transparent,transparent),linear-gradient(#fff,#fff);
   -webkit-mask-clip:padding-box,border-box;
   mask-composite:intersect;
   -webkit-mask-composite:source-in;
+  opacity:var(--glow-intensity,0);
+  transition:opacity .18s linear;
 }
 [data-glow].glow-card::before{
   background-image:radial-gradient(
     calc(var(--spotlight-size)*0.75) calc(var(--spotlight-size)*0.75) at
-    calc(var(--x,0)*1px) calc(var(--y,0)*1px),
+    var(--lx,50%) var(--ly,50%),
     hsl(var(--hue) calc(var(--saturation,100)*1%) calc(var(--lightness,50)*1%) / var(--border-spot-opacity,1)),transparent 100%
   );
   filter:brightness(1.9);
@@ -2413,7 +2412,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 [data-glow].glow-card::after{
   background-image:radial-gradient(
     calc(var(--spotlight-size)*0.5) calc(var(--spotlight-size)*0.5) at
-    calc(var(--x,0)*1px) calc(var(--y,0)*1px),
+    var(--lx,50%) var(--ly,50%),
     hsl(0 100% 100% / var(--border-light-opacity,1)),transparent 100%
   );
 }
@@ -2452,37 +2451,23 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   z-index:2;
 }
 
-/* Карточки фич/аудиенции лендинга — spotlight border через GlowCard (::before/::after + mask-composite intersect) */
+/* Карточки фич/аудиенции лендинга — border-spotlight через GlowCard (::before/::after + mask-composite intersect).
+   Видимость ::before/::after управляется --glow-intensity (JS), которое зависит от дистанции курсора. */
 .sa-ref-landing .glow-card.feat-card{
   transition:transform .32s cubic-bezier(.22,1,.36,1),box-shadow .32s ease,border-color .32s ease;
-  /* переопределяем overflow inline — ::before/::after нужны за пределами карточки */
   overflow:visible !important;
-}
-.sa-ref-landing .glow-card.feat-card::before,
-.sa-ref-landing .glow-card.feat-card::after{
-  transition:opacity .28s ease;
-}
-/* Idle: лёгкая базовая подсветка границы (без hover).
-   ::before — цветной spot рамки; ::after — белый highlight.
-   Интенсивности управляются CSS-переменными, задаваемыми из JSX. */
-.sa-ref-landing .glow-card.feat-card{
-  --border-spot-opacity:.72;
-  --border-light-opacity:.35;
 }
 .sa-ref-landing .glow-card.feat-card:hover{
   transform:translateY(-3px);
-  --border-spot-opacity:1;
-  --border-light-opacity:.6;
   box-shadow:0 24px 60px rgba(104,54,245,.22),0 8px 20px rgba(0,0,0,.25);
 }
 .sa-strategy-ui.lt .sa-ref-landing .glow-card.feat-card:hover{
   box-shadow:0 20px 50px rgba(78,55,180,.18),0 6px 16px rgba(78,55,180,.08);
 }
-/* Убираем inner blur-glow для фич/аудиенции — он мешает и создаёт «туман» поверх текста. */
+/* Inner blur-glow и body-spotlight у фич отключены — иначе «туман» поверх текста. */
 .sa-ref-landing .glow-card.feat-card .glow-card-inner-glow{display:none;}
-/* body-spotlight также скрываем (у этих карточек --bg-spot-opacity:0, но на всякий случай). */
 .sa-ref-landing .glow-card.feat-card .glow-card-spotlight{display:none;}
-/* На touch-устройствах без курсора — показываем стабильный тонкий accent-border. */
+/* Touch-устройства: стабильный accent-border без hover-эффектов. */
 @media (hover:none),(pointer:coarse){
   .sa-ref-landing .glow-card.feat-card::before,
   .sa-ref-landing .glow-card.feat-card::after{display:none;}

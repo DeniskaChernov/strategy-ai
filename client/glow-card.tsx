@@ -3,7 +3,17 @@ import { getLastGlowPointer, subscribeGlowPointer } from "./lib/glow-pointer";
 
 type Pos = { x: number; y: number };
 
-/** Локальные % относительно padding-box (как у слоя spotlight с inset:0), не border-box. */
+/**
+ * Локальные координаты курсора относительно padding-box + «дистанционная» интенсивность.
+ *
+ * --lx / --ly — позиция для радиального градиента (в %). Когда курсор снаружи карточки,
+ *   используется ближайшая точка на её ребре (clamp) — свечение привязано именно к той
+ *   стороне/углу, к которому курсор ближе всего.
+ * --glow-intensity — 0..1: 1 когда курсор внутри карточки, плавно падает до 0 за пределами
+ *   THRESHOLD px от её ближайшей границы. Используется как opacity у ::before/::after,
+ *   чтобы свечение было «привязано к курсору» (включается только там, где он рядом).
+ */
+const GLOW_DISTANCE_THRESHOLD = 180;
 function applyGlowPointer(el: HTMLElement, p: Pos | null) {
   const r = el.getBoundingClientRect();
   if (r.width < 1 || r.height < 1) return;
@@ -11,19 +21,31 @@ function applyGlowPointer(el: HTMLElement, p: Pos | null) {
   const bt = el.clientTop;
   const iw = el.clientWidth;
   const ih = el.clientHeight;
-  const inside =
-    p != null && p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom;
-  if (inside && p) {
-    const px = p.x - r.left - bl;
-    const py = p.y - r.top - bt;
-    const lx = (px / Math.max(iw, 1)) * 100;
-    const ly = (py / Math.max(ih, 1)) * 100;
-    el.style.setProperty("--lx", `${lx.toFixed(2)}%`);
-    el.style.setProperty("--ly", `${ly.toFixed(2)}%`);
-  } else {
+
+  if (!p) {
     el.style.setProperty("--lx", "50%");
     el.style.setProperty("--ly", "50%");
+    el.style.setProperty("--glow-intensity", "0");
+    return;
   }
+
+  const cx = Math.max(r.left, Math.min(p.x, r.right));
+  const cy = Math.max(r.top, Math.min(p.y, r.bottom));
+  const dx = p.x - cx;
+  const dy = p.y - cy;
+  const dist = Math.hypot(dx, dy);
+  const inside = dist === 0;
+  const intensity = inside
+    ? 1
+    : Math.max(0, 1 - dist / GLOW_DISTANCE_THRESHOLD);
+
+  const px = cx - r.left - bl;
+  const py = cy - r.top - bt;
+  const lx = (px / Math.max(iw, 1)) * 100;
+  const ly = (py / Math.max(ih, 1)) * 100;
+  el.style.setProperty("--lx", `${lx.toFixed(2)}%`);
+  el.style.setProperty("--ly", `${ly.toFixed(2)}%`);
+  el.style.setProperty("--glow-intensity", intensity.toFixed(3));
 }
 
 export interface GlowCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "className" | "style"> {
