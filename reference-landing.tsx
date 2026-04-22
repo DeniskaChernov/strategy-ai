@@ -248,7 +248,7 @@ export function ReferenceLandingView({
               <GlowCard
                 key={f.titleKey}
                 panelVariant
-                glowColor="accent"
+                plain
                 customSize
                 width="100%"
                 className="feat-card sr sr-up in"
@@ -262,15 +262,6 @@ export function ReferenceLandingView({
                   height: "100%",
                   minHeight: 0,
                   justifyContent: "flex-start",
-                  overflow: "visible",
-                  ["--bg-spot-opacity" as any]: 0,
-                  ["--outer" as any]: 0,
-                  ["--gc-border" as any]: 2,
-                  ["--size" as any]: 300,
-                  ["--saturation" as any]: 92,
-                  ["--lightness" as any]: 62,
-                  ["--border-spot-opacity" as any]: 0.85,
-                  ["--border-light-opacity" as any]: 0.4,
                 }}
               >
                 <div className="feat-icon">{f.icon}</div>
@@ -290,7 +281,7 @@ export function ReferenceLandingView({
               <GlowCard
                 key={a.tk}
                 panelVariant
-                glowColor="accent"
+                plain
                 customSize
                 width="100%"
                 className="feat-card sr sr-up in"
@@ -303,15 +294,6 @@ export function ReferenceLandingView({
                   alignSelf: "stretch",
                   height: "100%",
                   minHeight: 0,
-                  overflow: "visible",
-                  ["--bg-spot-opacity" as any]: 0,
-                  ["--outer" as any]: 0,
-                  ["--gc-border" as any]: 2,
-                  ["--size" as any]: 300,
-                  ["--saturation" as any]: 92,
-                  ["--lightness" as any]: 62,
-                  ["--border-spot-opacity" as any]: 0.85,
-                  ["--border-light-opacity" as any]: 0.4,
                   justifyContent: "flex-start",
                 }}
               >
