@@ -389,6 +389,152 @@ body:has(.sa-ref-landing) .screen-wrap{
   .sa-ref-landing .hero-h1 .grad-text{animation:none;}
 }
 
+/* ── Ripple: короткоживущий волновой эффект при pointerdown ── */
+.sa-ref-landing .btn-p,
+.sa-ref-landing .btn-g,
+.sa-ref-landing .sa-ripple{position:relative;overflow:hidden;}
+.sa-ref-landing .sa-ripple-dot{
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+  transform:scale(0);
+  background:radial-gradient(circle,rgba(255,255,255,.6) 0%,rgba(255,255,255,.18) 40%,transparent 72%);
+  mix-blend-mode:screen;
+  animation:sa-ripple-out .7s var(--ease-out-quart) forwards;
+  z-index:2;
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-ripple-dot{
+  mix-blend-mode:multiply;
+  background:radial-gradient(circle,rgba(104,54,245,.28) 0%,rgba(104,54,245,.1) 42%,transparent 72%);
+}
+@keyframes sa-ripple-out{
+  0%  { transform:scale(0); opacity:.55; }
+  80% { opacity:.28; }
+  100%{ transform:scale(1); opacity:0; }
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-ripple-dot{display:none;}
+}
+
+/* ── Cursor spotlight: лёгкая подсветка за курсором на карточках ── */
+.sa-ref-landing .sa-spot{
+  --sp-x:50%;
+  --sp-y:50%;
+  --sp-o:0;
+  position:relative;
+}
+.sa-ref-landing .sa-spot::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:var(--sp-o,0);
+  transition:opacity var(--dur-md) var(--ease-soft);
+  background:radial-gradient(
+    360px 360px at var(--sp-x,50%) var(--sp-y,50%),
+    color-mix(in srgb,var(--acc,#6836f5) 22%,transparent) 0%,
+    color-mix(in srgb,var(--acc2,#a050ff) 10%,transparent) 35%,
+    transparent 70%);
+  z-index:0;
+  mix-blend-mode:screen;
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-spot::after{
+  mix-blend-mode:multiply;
+  background:radial-gradient(
+    320px 320px at var(--sp-x,50%) var(--sp-y,50%),
+    color-mix(in srgb,var(--acc,#6836f5) 14%,transparent) 0%,
+    transparent 65%);
+}
+.sa-ref-landing .sa-spot > *{position:relative;z-index:1;}
+@media (prefers-reduced-motion:reduce),(pointer:coarse){
+  .sa-ref-landing .sa-spot::after{display:none;}
+}
+
+/* ── Magnetic button: hover-притяжение через inline transform ── */
+.sa-ref-landing .sa-magnetic{
+  position:relative;
+  will-change:transform;
+  transition:transform var(--dur-md) var(--ease-spring),box-shadow var(--dur-md) var(--ease-out-quart),filter var(--dur-sm) var(--ease-soft);
+}
+.sa-ref-landing .sa-magnetic:active{transform:scale(.97) !important;transition:var(--tr-press);}
+.sa-ref-landing .sa-magnetic__inner{display:inline-flex;align-items:center;gap:inherit;pointer-events:none;}
+@media (prefers-reduced-motion:reduce),(pointer:coarse){
+  .sa-ref-landing .sa-magnetic{transform:none !important;}
+}
+
+/* ── Scroll progress bar: тонкая градиентная полоса сверху ── */
+.sa-scroll-progress{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  z-index:900;
+  pointer-events:none;
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--acc,#6836f5) 12%,transparent) 0%,
+    transparent 100%);
+  opacity:.55;
+}
+.sa-scroll-progress__bar{
+  transform-origin:left center;
+  transform:scaleX(0);
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg,var(--acc,#6836f5),var(--acc2,#a050ff) 48%,var(--green,#12c482));
+  box-shadow:0 0 10px rgba(104,54,245,.55),0 0 24px rgba(160,80,255,.32);
+  opacity:0;
+  transition:opacity var(--dur-sm) var(--ease-soft);
+  will-change:transform;
+}
+.sa-strategy-ui.lt .sa-scroll-progress{opacity:.38;}
+
+/* ── Scroll-to-top FAB ── */
+.sa-totop{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--acc,#6836f5) 45%,transparent);
+  background:
+    linear-gradient(160deg,color-mix(in srgb,var(--acc,#6836f5) 70%,transparent),color-mix(in srgb,var(--acc2,#a050ff) 70%,transparent));
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:850;
+  opacity:0;
+  transform:translateY(14px) scale(.9);
+  pointer-events:none;
+  transition:opacity var(--dur-md) var(--ease-out-quart),transform var(--dur-md) var(--ease-spring),box-shadow var(--dur-md) var(--ease-out-quart);
+  box-shadow:0 10px 28px rgba(104,54,245,.32),0 2px 6px rgba(0,0,0,.2);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.sa-totop.is-on{
+  opacity:.95;
+  transform:translateY(0) scale(1);
+  pointer-events:auto;
+}
+.sa-totop:hover{
+  opacity:1;
+  box-shadow:0 14px 38px rgba(104,54,245,.5),0 2px 8px rgba(0,0,0,.22);
+  transform:translateY(-2px) scale(1.04);
+}
+.sa-totop:active{transform:translateY(0) scale(.96);transition:var(--tr-press);}
+.sa-totop:focus-visible{outline:2px solid var(--acc,#6836f5);outline-offset:3px;}
+@media (max-width:640px){
+  .sa-totop{right:14px;bottom:14px;width:40px;height:40px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-totop{transition:opacity var(--dur-sm) linear;}
+  .sa-totop.is-on{transform:none;}
+}
+
 /* ── View Transitions: мягкий cross-fade при смене темы ── */
 @supports (view-transition-name: root){
   ::view-transition-old(root),

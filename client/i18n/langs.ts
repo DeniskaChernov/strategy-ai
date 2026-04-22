@@ -322,7 +322,7 @@ export const LANGS = {
     not_found_cta:"На главную",
     not_found_open_app:"Открыть приложение",
     // ── Landing nav & toggles ──
-    nav_faq:"FAQ",nav_getstarted:"Начать бесплатно",nav_main:"Основная навигация",toggle_theme:"Тема",
+    nav_faq:"FAQ",nav_getstarted:"Начать бесплатно",nav_main:"Основная навигация",scroll_to_top:"Наверх",toggle_theme:"Тема",
     // ── Landing demo map ──
     ref_demo_aria:"Демонстрация карты: перетащите холст, колёсико — масштаб",
     ref_demo_badge:"DEMO",
@@ -960,7 +960,7 @@ export const LANGS = {
     not_found_cta:"Go home",
     not_found_open_app:"Open app",
     // ── Landing nav & toggles ──
-    nav_faq:"FAQ",nav_getstarted:"Get started",nav_main:"Main navigation",toggle_theme:"Theme",
+    nav_faq:"FAQ",nav_getstarted:"Get started",nav_main:"Main navigation",scroll_to_top:"Back to top",toggle_theme:"Theme",
     // ── Landing demo map ──
     ref_demo_aria:"Map preview: drag the canvas, scroll to zoom",
     ref_demo_badge:"DEMO",
@@ -1600,7 +1600,7 @@ export const LANGS = {
     not_found_cta:"Bosh sahifa",
     not_found_open_app:"Ilovani ochish",
     // ── Landing nav & toggles ──
-    nav_faq:"FAQ",nav_getstarted:"Bepul boshlash",nav_main:"Asosiy navigatsiya",toggle_theme:"Mavzu",
+    nav_faq:"FAQ",nav_getstarted:"Bepul boshlash",nav_main:"Asosiy navigatsiya",scroll_to_top:"Tepaga",toggle_theme:"Mavzu",
     // ── Landing demo map ──
     ref_demo_aria:"Xarita demosi: kanvani suring, g‘ildirak — masshtab",
     ref_demo_badge:"DEMO",

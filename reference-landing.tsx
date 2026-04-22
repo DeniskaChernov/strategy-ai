@@ -10,6 +10,10 @@ import { LandingMapDemo } from "./client/landing-map-demo";
 import { useScrollReveal } from "./client/use-scroll-reveal";
 import { StatCounter } from "./client/stat-counter";
 import { HeroParallaxOrbs } from "./client/hero-parallax-orbs";
+import { ScrollProgress } from "./client/scroll-progress";
+import { MagneticButton } from "./client/magnetic-button";
+import { ScrollToTop } from "./client/scroll-to-top";
+import { useRipple } from "./client/use-ripple";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -20,6 +24,18 @@ const TESTI3 = { qk: "ref_t3_q", qf: "AI по шагам карты даёт к�
 function scrollToId(id: string){
   const el = typeof document !== "undefined" ? document.getElementById(id) : null;
   if(el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/** Лёгкий cursor-spotlight: обновляет CSS-переменные --sp-x / --sp-y на карточке. */
+function handleSpotlightMove(e: React.MouseEvent<HTMLElement>){
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty("--sp-x", `${((e.clientX - r.left) / Math.max(r.width, 1)) * 100}%`);
+  el.style.setProperty("--sp-y", `${((e.clientY - r.top) / Math.max(r.height, 1)) * 100}%`);
+  el.style.setProperty("--sp-o", "1");
+}
+function handleSpotlightLeave(e: React.MouseEvent<HTMLElement>){
+  e.currentTarget.style.setProperty("--sp-o", "0");
 }
 
 /** Лендинг в разметке и классах public/strategy-reference.html (токены .dk / .lt). */
@@ -43,6 +59,7 @@ export function ReferenceLandingView({
   const rootRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   useScrollReveal(rootRef, [lang, theme]);
+  useRipple(rootRef);
 
   const motionTestimonialColumns = useMemo((): [
     TestimonialCardItem[],
@@ -124,6 +141,8 @@ export function ReferenceLandingView({
     <div ref={rootRef} className={`sa-ref-landing sa-strategy-ui sa-landing-shell ${dk} view on sa-v-landing`} style={{ position: "fixed", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "stretch", overflowY: "auto", overflowX: "hidden", fontFamily: "'Inter',system-ui,sans-serif" }}>
       <StrategyShellBg/>
       <LandingStarsCanvas theme={theme} />
+      <ScrollProgress scrollRef={rootRef} />
+      <ScrollToTop scrollRef={rootRef} label={t("scroll_to_top", "Наверх")} />
       <AnimatedLandingNav
         t={t}
         lang={lang}
@@ -165,12 +184,12 @@ export function ReferenceLandingView({
             )}
           </p>
           <div className="hero-btns">
-            <button type="button" className="btn-p lg" onClick={onGetStarted}>
+            <MagneticButton type="button" className="btn-p lg" onClick={onGetStarted}>
               {t("hero_cta", "Начать бесплатно — без карты")}
-            </button>
-            <button type="button" className="btn-g lg" onClick={() => scrollToId("land-mockup")}>
+            </MagneticButton>
+            <MagneticButton type="button" className="btn-g lg" strength={6} radius={110} onClick={() => scrollToId("land-mockup")}>
               {t("ref_demo", "Смотреть интерфейс ↗")}
-            </button>
+            </MagneticButton>
           </div>
           <div
             style={{
@@ -245,7 +264,9 @@ export function ReferenceLandingView({
                 glowColor="accent"
                 customSize
                 width="100%"
-                className="feat-card sr sr-up in"
+                className="feat-card sa-spot sr sr-up in"
+                onMouseMove={handleSpotlightMove}
+                onMouseLeave={handleSpotlightLeave}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -279,7 +300,9 @@ export function ReferenceLandingView({
                 glowColor="accent"
                 customSize
                 width="100%"
-                className="feat-card sr sr-up in"
+                className="feat-card sa-spot sr sr-up in"
+                onMouseMove={handleSpotlightMove}
+                onMouseLeave={handleSpotlightLeave}
                 style={{
                   display: "flex",
                   flexDirection: "column",
