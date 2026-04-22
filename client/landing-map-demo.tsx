@@ -11,33 +11,36 @@ type DemoNode = {
   tk: string;
   tf: string;
   progress: number;
-  stroke: string;
-  fillBar: string;
+  /** Базовый цвет (акцент) узла. */
+  color: string;
+  /** id градиента для прогресс-бара/акцента внутри <defs>. */
+  gradId: string;
 };
 
-const EDGES: [string, string][] = [
-  ["n1", "n2"],
-  ["n1", "n3"],
-  ["n2", "n4"],
-  ["n3", "n4"],
+const EDGES: Array<{ from: string; to: string; gradId: string }> = [
+  { from: "n1", to: "n2", gradId: "lmd-e-pg" },
+  { from: "n1", to: "n3", gradId: "lmd-e-po" },
+  { from: "n2", to: "n4", gradId: "lmd-e-gc" },
+  { from: "n3", to: "n4", gradId: "lmd-e-oc" },
 ];
 
-const VB_W = 900;
-const VB_H = 420;
+const VB_W = 960;
+const VB_H = 460;
 
 function center(n: DemoNode): { x: number; y: number } {
   return { x: n.x + n.w / 2, y: n.y + n.h / 2 };
 }
 
+/** Гладкий S-кейв между двумя точками; контрольные точки сдвинуты горизонтально,
+ *  чтобы линии приходили в узлы ближе к «середине» стороны — смотрится аккуратнее. */
 function edgePath(a: DemoNode, b: DemoNode): string {
   const p1 = center(a);
   const p2 = center(b);
   const dx = p2.x - p1.x;
-  const dy = p2.y - p1.y;
-  const c1x = p1.x + dx * 0.35;
-  const c1y = p1.y + dy * 0.15;
-  const c2x = p2.x - dx * 0.35;
-  const c2y = p2.y - dy * 0.15;
+  const c1x = p1.x + dx * 0.55;
+  const c1y = p1.y;
+  const c2x = p2.x - dx * 0.55;
+  const c2y = p2.y;
   return `M ${p1.x} ${p1.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
 }
 
@@ -55,51 +58,51 @@ export function LandingMapDemo({
     () => [
       {
         id: "n1",
-        x: 72,
-        y: 168,
-        w: 176,
-        h: 92,
+        x: 64,
+        y: 182,
+        w: 196,
+        h: 96,
         tk: "ref_demo_n1",
         tf: "Цель: рост MRR",
         progress: 44,
-        stroke: "#8864ff",
-        fillBar: "url(#land-demo-bar-purple)",
+        color: "#a278ff",
+        gradId: "lmd-n-purple",
       },
       {
         id: "n2",
-        x: 360,
-        y: 36,
-        w: 176,
-        h: 92,
+        x: 382,
+        y: 40,
+        w: 196,
+        h: 96,
         tk: "ref_demo_n2",
         tf: "Запуск фичи",
         progress: 78,
-        stroke: "#12c482",
-        fillBar: "#12c482",
+        color: "#22d08a",
+        gradId: "lmd-n-green",
       },
       {
         id: "n3",
-        x: 360,
-        y: 300,
-        w: 176,
-        h: 92,
+        x: 382,
+        y: 324,
+        w: 196,
+        h: 96,
         tk: "ref_demo_n3",
         tf: "Найм и процессы",
         progress: 32,
-        stroke: "#f09428",
-        fillBar: "#f09428",
+        color: "#ffa54a",
+        gradId: "lmd-n-orange",
       },
       {
         id: "n4",
-        x: 648,
-        y: 168,
-        w: 176,
-        h: 92,
+        x: 700,
+        y: 182,
+        w: 196,
+        h: 96,
         tk: "ref_demo_n4",
         tf: "Масштабирование",
         progress: 58,
-        stroke: "#06b6d4",
-        fillBar: "url(#land-demo-bar-cyan)",
+        color: "#38cff0",
+        gradId: "lmd-n-cyan",
       },
     ],
     []
@@ -107,10 +110,10 @@ export function LandingMapDemo({
 
   const nodeMap = useMemo(() => Object.fromEntries(nodes.map((n) => [n.id, n])), [nodes]);
   const isDark = theme === "dark";
-  const canvasBg = isDark ? "rgba(6,4,18,.55)" : "transparent";
-  const gridStroke = isDark ? "rgba(255,255,255,.06)" : "rgba(104,54,245,.05)";
+  const gridStroke = isDark ? "rgba(255,255,255,.055)" : "rgba(104,54,245,.07)";
   const t1 = isDark ? "#eaeaf8" : "#08061a";
-  const t3 = isDark ? "rgba(148,144,196,.55)" : "rgba(70,58,130,.5)";
+  const t3 = isDark ? "rgba(148,144,196,.62)" : "rgba(70,58,130,.58)";
+  const trackBg = isDark ? "rgba(255,255,255,.07)" : "rgba(104,80,220,.1)";
 
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -184,8 +187,11 @@ export function LandingMapDemo({
           <span className="land-map-demo__dot land-map-demo__dot--y" />
           <span className="land-map-demo__dot land-map-demo__dot--g" />
         </div>
-        <div className="land-map-demo__url">{t("ref_demo_url", "app.strategy-ai — карта проекта")}</div>
-        <div className="land-map-demo__brand">Strategy AI</div>
+        <div className="land-map-demo__url" title={t("ref_demo_url", "app.strategy-ai — карта проекта")}>
+          <span className="land-map-demo__url-lock" aria-hidden>🔒</span>
+          <span className="land-map-demo__url-text">{t("ref_demo_url", "app.strategy-ai — карта проекта")}</span>
+        </div>
+        <div className="land-map-demo__brand" aria-hidden>Strategy AI</div>
       </div>
       <div className="land-map-demo__body">
         <aside className="land-map-demo__sb">
@@ -198,27 +204,33 @@ export function LandingMapDemo({
             {t("shell_strategy_map", "Карта")}
           </div>
           <div className="land-map-demo__sb-item">
-            <span className="land-map-demo__sb-dot" style={{ background: "var(--t3)" }} />
+            <span className="land-map-demo__sb-dot" />
             {t("shell_scenarios", "Сценарии")}
           </div>
           <div className="land-map-demo__sb-item">
-            <span className="land-map-demo__sb-dot" style={{ background: "var(--t3)" }} />
+            <span className="land-map-demo__sb-dot" />
             {t("shell_timeline", "Таймлайн")}
           </div>
           <div className="land-map-demo__sb-item">
-            <span className="land-map-demo__sb-dot" style={{ background: "var(--green)" }} />
+            <span className="land-map-demo__sb-dot" style={{ background: "#22d08a" }} />
             AI
           </div>
           <div className="land-map-demo__sb-item">
-            <span className="land-map-demo__sb-dot" style={{ background: "var(--t3)" }} />
+            <span className="land-map-demo__sb-dot" />
             {t("shell_insights", "Инсайты")}
           </div>
         </aside>
         <div
           className={"land-map-demo__canvas" + (dragging ? " land-map-demo__canvas--drag" : "")}
-          style={{ background: canvasBg, touchAction: "none" }}
+          style={{ touchAction: "none" }}
         >
-          <button type="button" className="land-map-demo__reset" onClick={resetView} title={t("ref_demo_reset", "Сбросить вид")}>
+          <div className="land-map-demo__vignette" aria-hidden />
+          <button
+            type="button"
+            className="land-map-demo__reset"
+            onClick={resetView}
+            title={t("ref_demo_reset", "Сбросить вид")}
+          >
             {t("ref_demo_reset_short", "1:1")}
           </button>
           <svg
@@ -233,71 +245,202 @@ export function LandingMapDemo({
             onPointerLeave={onPointerUp}
           >
             <defs>
-              <linearGradient id="land-demo-bar-purple" x1="0" y1="0" x2="1" y2="0">
+              {/* Акцентные градиенты прогресс-баров / левых акцентов узлов */}
+              <linearGradient id="lmd-n-purple" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="#6836f5" />
-                <stop offset="100%" stopColor="#a050ff" />
+                <stop offset="100%" stopColor="#b078ff" />
               </linearGradient>
-              <linearGradient id="land-demo-bar-cyan" x1="0" y1="0" x2="1" y2="0">
+              <linearGradient id="lmd-n-green" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#12c482" />
+                <stop offset="100%" stopColor="#22d08a" />
+              </linearGradient>
+              <linearGradient id="lmd-n-orange" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#f09428" />
+                <stop offset="100%" stopColor="#ffb964" />
+              </linearGradient>
+              <linearGradient id="lmd-n-cyan" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="#06b6d4" />
-                <stop offset="100%" stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#38cff0" />
               </linearGradient>
-              <pattern id="land-demo-grid" width="24" height="24" patternUnits="userSpaceOnUse">
-                <path d="M 24 0 L 0 0 0 24" fill="none" stroke={gridStroke} strokeWidth="0.5" />
+              {/* Градиенты связей: от цвета источника к цвету цели */}
+              <linearGradient id="lmd-e-pg" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#a278ff" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#22d08a" stopOpacity="0.85" />
+              </linearGradient>
+              <linearGradient id="lmd-e-po" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#a278ff" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#ffa54a" stopOpacity="0.85" />
+              </linearGradient>
+              <linearGradient id="lmd-e-gc" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#22d08a" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#38cff0" stopOpacity="0.85" />
+              </linearGradient>
+              <linearGradient id="lmd-e-oc" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#ffa54a" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#38cff0" stopOpacity="0.85" />
+              </linearGradient>
+              {/* Вертикальная подсветка фона узла */}
+              <linearGradient id="lmd-node-bg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={isDark ? "rgba(40,32,72,.96)" : "rgba(255,255,255,.98)"} />
+                <stop offset="100%" stopColor={isDark ? "rgba(20,16,40,.96)" : "rgba(250,248,255,.96)"} />
+              </linearGradient>
+              <pattern id="lmd-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                <path d="M 28 0 L 0 0 0 28" fill="none" stroke={gridStroke} strokeWidth="0.5" />
               </pattern>
+              {/* Мягкая тень под узлом */}
+              <filter id="lmd-node-shadow" x="-15%" y="-20%" width="130%" height="150%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="6" />
+                <feOffset dy="4" result="off" />
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="0.35" />
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              {/* Soft glow для связей */}
+              <filter id="lmd-edge-glow" x="-20%" y="-50%" width="140%" height="200%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
             <g transform={gTransform}>
-              <rect width="100%" height="100%" fill="url(#land-demo-grid)" opacity={isDark ? 0.95 : 0.45} />
-              <g
-                stroke={isDark ? "rgba(160,150,220,.42)" : "rgba(104,54,245,.32)"}
-                fill="none"
-                strokeWidth="1.6"
-                pointerEvents="none"
-              >
-                {EDGES.map(([from, to], i) => {
-                  const a = nodeMap[from];
-                  const b = nodeMap[to];
+              <rect width="100%" height="100%" fill="url(#lmd-grid)" opacity={isDark ? 0.85 : 0.6} />
+
+              {/* Связи: сначала мягкий glow-слой, затем чёткая градиентная линия поверх */}
+              <g fill="none" pointerEvents="none">
+                {EDGES.map((e) => {
+                  const a = nodeMap[e.from];
+                  const b = nodeMap[e.to];
                   if (!a || !b) return null;
-                  return <path key={`${from}-${to}-${i}`} d={edgePath(a, b)} />;
+                  const d = edgePath(a, b);
+                  return (
+                    <g key={`${e.from}-${e.to}`}>
+                      <path
+                        d={d}
+                        stroke={`url(#${e.gradId})`}
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        opacity={isDark ? 0.22 : 0.16}
+                        filter="url(#lmd-edge-glow)"
+                      />
+                      <path
+                        d={d}
+                        stroke={`url(#${e.gradId})`}
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        opacity={isDark ? 0.95 : 0.85}
+                      />
+                      {/* dot-маркеры на концах */}
+                      <circle cx={center(a).x} cy={center(a).y} r="2.6" fill={a.color} opacity="0.85" />
+                      <circle cx={center(b).x} cy={center(b).y} r="2.6" fill={b.color} opacity="0.85" />
+                    </g>
+                  );
                 })}
               </g>
+
+              {/* Узлы */}
               {nodes.map((n) => {
                 const pw = (n.w - 24) * (n.progress / 100);
                 const hi = hoverId === n.id;
+                const nodeBorder = hi
+                  ? n.color
+                  : isDark
+                    ? "rgba(255,255,255,.1)"
+                    : "rgba(104,80,220,.18)";
                 return (
                   <g
                     key={n.id}
                     transform={`translate(${n.x},${n.y})`}
-                    style={{ cursor: "default" }}
+                    style={{ cursor: "default", transition: "transform .2s" }}
                     onMouseEnter={() => setHoverId(n.id)}
                     onMouseLeave={() => setHoverId(null)}
                     pointerEvents="auto"
+                    filter="url(#lmd-node-shadow)"
                   >
                     <title>{t(n.tk, n.tf)}</title>
+                    {/* Подложка узла */}
                     <rect
                       width={n.w}
                       height={n.h}
-                      rx="12"
-                      fill={isDark ? "rgba(22,18,40,.94)" : "rgba(255,255,255,.95)"}
-                      stroke={hi ? n.stroke : "var(--b1)"}
-                      strokeWidth={hi ? 2.25 : 0.75}
+                      rx="14"
+                      fill="url(#lmd-node-bg)"
+                      stroke={nodeBorder}
+                      strokeWidth={hi ? 1.6 : 0.9}
                     />
-                    <rect x="0" y="0" width={n.w} height="3.5" rx="12" fill={n.stroke} />
-                    <text x="12" y="30" fill={t1} fontSize="12" fontWeight="700" fontFamily="Inter,system-ui,sans-serif" pointerEvents="none">
+                    {/* Лёгкий акцентный цвет в фоне при hover */}
+                    {hi && (
+                      <rect
+                        width={n.w}
+                        height={n.h}
+                        rx="14"
+                        fill={n.color}
+                        opacity={isDark ? 0.09 : 0.07}
+                        pointerEvents="none"
+                      />
+                    )}
+                    {/* Левый акцентный бар */}
+                    <rect x="0" y="0" width="4" height={n.h} rx="2" fill={`url(#${n.gradId})`} />
+                    {/* Заголовок */}
+                    <text
+                      x="18"
+                      y="34"
+                      fill={t1}
+                      fontSize="13.5"
+                      fontWeight="700"
+                      fontFamily="Inter,system-ui,sans-serif"
+                      pointerEvents="none"
+                    >
                       {t(n.tk, n.tf)}
                     </text>
-                    <text x="12" y="48" fill={t3} fontSize="9.5" fontFamily="Inter,system-ui,sans-serif" pointerEvents="none">
+                    {/* Подпись */}
+                    <text
+                      x="18"
+                      y="52"
+                      fill={t3}
+                      fontSize="10.5"
+                      fontFamily="Inter,system-ui,sans-serif"
+                      pointerEvents="none"
+                    >
                       {t("ref_demo_readonly", "Только просмотр · демо")}
                     </text>
+                    {/* Progress-трек */}
                     <rect
-                      x="12"
-                      y={n.h - 16}
-                      width={n.w - 24}
-                      height="4"
-                      rx="2"
-                      fill={isDark ? "rgba(255,255,255,.08)" : "rgba(104,80,220,.1)"}
+                      x="18"
+                      y={n.h - 20}
+                      width={n.w - 36}
+                      height="5"
+                      rx="2.5"
+                      fill={trackBg}
                       pointerEvents="none"
                     />
-                    <rect x="12" y={n.h - 16} width={pw} height="4" rx="2" fill={n.fillBar} pointerEvents="none" />
+                    {/* Progress-заливка */}
+                    <rect
+                      x="18"
+                      y={n.h - 20}
+                      width={Math.max(4, pw - 12)}
+                      height="5"
+                      rx="2.5"
+                      fill={`url(#${n.gradId})`}
+                      pointerEvents="none"
+                    />
+                    {/* % справа */}
+                    <text
+                      x={n.w - 12}
+                      y={n.h - 14}
+                      fill={t3}
+                      fontSize="9.5"
+                      fontWeight="700"
+                      fontFamily="Inter,system-ui,sans-serif"
+                      textAnchor="end"
+                      pointerEvents="none"
+                    >
+                      {n.progress}%
+                    </text>
                   </g>
                 );
               })}
