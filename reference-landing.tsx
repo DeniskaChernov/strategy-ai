@@ -26,18 +26,6 @@ function scrollToId(id: string){
   if(el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** Лёгкий cursor-spotlight: обновляет CSS-переменные --sp-x / --sp-y на карточке. */
-function handleSpotlightMove(e: React.MouseEvent<HTMLElement>){
-  const el = e.currentTarget;
-  const r = el.getBoundingClientRect();
-  el.style.setProperty("--sp-x", `${((e.clientX - r.left) / Math.max(r.width, 1)) * 100}%`);
-  el.style.setProperty("--sp-y", `${((e.clientY - r.top) / Math.max(r.height, 1)) * 100}%`);
-  el.style.setProperty("--sp-o", "1");
-}
-function handleSpotlightLeave(e: React.MouseEvent<HTMLElement>){
-  e.currentTarget.style.setProperty("--sp-o", "0");
-}
-
 /** Лендинг в разметке и классах public/strategy-reference.html (токены .dk / .lt). */
 export function ReferenceLandingView({
   t,
@@ -260,13 +248,10 @@ export function ReferenceLandingView({
               <GlowCard
                 key={f.titleKey}
                 panelVariant
-                plain
                 glowColor="accent"
                 customSize
                 width="100%"
-                className="feat-card sa-spot sr sr-up in"
-                onMouseMove={handleSpotlightMove}
-                onMouseLeave={handleSpotlightLeave}
+                className="feat-card sr sr-up in"
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -277,6 +262,15 @@ export function ReferenceLandingView({
                   height: "100%",
                   minHeight: 0,
                   justifyContent: "flex-start",
+                  overflow: "visible",
+                  ["--bg-spot-opacity" as any]: 0,
+                  ["--outer" as any]: 0,
+                  ["--gc-border" as any]: 2,
+                  ["--size" as any]: 260,
+                  ["--saturation" as any]: 92,
+                  ["--lightness" as any]: 62,
+                  ["--border-spot-opacity" as any]: 1,
+                  ["--border-light-opacity" as any]: 0.55,
                 }}
               >
                 <div className="feat-icon">{f.icon}</div>
@@ -296,13 +290,10 @@ export function ReferenceLandingView({
               <GlowCard
                 key={a.tk}
                 panelVariant
-                plain
                 glowColor="accent"
                 customSize
                 width="100%"
-                className="feat-card sa-spot sr sr-up in"
-                onMouseMove={handleSpotlightMove}
-                onMouseLeave={handleSpotlightLeave}
+                className="feat-card sr sr-up in"
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -312,6 +303,15 @@ export function ReferenceLandingView({
                   alignSelf: "stretch",
                   height: "100%",
                   minHeight: 0,
+                  overflow: "visible",
+                  ["--bg-spot-opacity" as any]: 0,
+                  ["--outer" as any]: 0,
+                  ["--gc-border" as any]: 2,
+                  ["--size" as any]: 260,
+                  ["--saturation" as any]: 92,
+                  ["--lightness" as any]: 62,
+                  ["--border-spot-opacity" as any]: 1,
+                  ["--border-light-opacity" as any]: 0.55,
                   justifyContent: "flex-start",
                 }}
               >
