@@ -416,38 +416,81 @@ body:has(.sa-ref-landing) .screen-wrap{
   .sa-ref-landing .sa-ripple-dot{display:none;}
 }
 
-/* ── Cursor spotlight: лёгкая подсветка за курсором на карточках ── */
+/* ── Cursor border-glow: светящийся контур под курсором (не заливка) ── */
 .sa-ref-landing .sa-spot{
   --sp-x:50%;
   --sp-y:50%;
   --sp-o:0;
+  --sp-radius:260px;
+  --sp-thickness:1.4px;
   position:relative;
 }
-.sa-ref-landing .sa-spot::after{
+/* ::before — светящаяся рамка через mask-composite: exclude.
+   padding = толщина бордера, gradient радиуса sp-radius. */
+.sa-ref-landing .sa-spot::before{
   content:"";
   position:absolute;
   inset:0;
   border-radius:inherit;
+  padding:var(--sp-thickness,1.4px);
   pointer-events:none;
   opacity:var(--sp-o,0);
   transition:opacity var(--dur-md) var(--ease-soft);
+  background:
+    radial-gradient(
+      var(--sp-radius,260px) var(--sp-radius,260px) at var(--sp-x,50%) var(--sp-y,50%),
+      color-mix(in srgb,var(--acc,#6836f5) 95%,transparent) 0%,
+      color-mix(in srgb,var(--acc2,#a050ff) 70%,transparent) 35%,
+      transparent 75%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  z-index:3;
+  filter:drop-shadow(0 0 8px color-mix(in srgb,var(--acc,#6836f5) 45%,transparent));
+}
+/* ::after — мягкий halo сразу за рамкой (размытое пятно,
+   видно снаружи карточки), тоже только вокруг курсора. */
+.sa-ref-landing .sa-spot::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:calc(var(--sp-o,0) * .6);
+  transition:opacity var(--dur-md) var(--ease-soft);
   background:radial-gradient(
-    360px 360px at var(--sp-x,50%) var(--sp-y,50%),
-    color-mix(in srgb,var(--acc,#6836f5) 22%,transparent) 0%,
-    color-mix(in srgb,var(--acc2,#a050ff) 10%,transparent) 35%,
-    transparent 70%);
-  z-index:0;
-  mix-blend-mode:screen;
+    calc(var(--sp-radius,260px) * 1.15) calc(var(--sp-radius,260px) * 1.15)
+      at var(--sp-x,50%) var(--sp-y,50%),
+    color-mix(in srgb,var(--acc,#6836f5) 32%,transparent) 0%,
+    transparent 72%);
+  filter:blur(12px);
+  z-index:2;
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-spot::before{
+  filter:drop-shadow(0 0 6px color-mix(in srgb,var(--acc,#6836f5) 30%,transparent));
+  background:
+    radial-gradient(
+      var(--sp-radius,260px) var(--sp-radius,260px) at var(--sp-x,50%) var(--sp-y,50%),
+      color-mix(in srgb,var(--acc,#6836f5) 85%,transparent) 0%,
+      color-mix(in srgb,var(--acc2,#a050ff) 55%,transparent) 40%,
+      transparent 78%);
 }
 .sa-strategy-ui.lt .sa-ref-landing .sa-spot::after{
-  mix-blend-mode:multiply;
+  opacity:calc(var(--sp-o,0) * .35);
   background:radial-gradient(
-    320px 320px at var(--sp-x,50%) var(--sp-y,50%),
-    color-mix(in srgb,var(--acc,#6836f5) 14%,transparent) 0%,
-    transparent 65%);
+    calc(var(--sp-radius,260px) * 1.1) calc(var(--sp-radius,260px) * 1.1)
+      at var(--sp-x,50%) var(--sp-y,50%),
+    color-mix(in srgb,var(--acc,#6836f5) 18%,transparent) 0%,
+    transparent 70%);
 }
 .sa-ref-landing .sa-spot > *{position:relative;z-index:1;}
 @media (prefers-reduced-motion:reduce),(pointer:coarse){
+  .sa-ref-landing .sa-spot::before,
   .sa-ref-landing .sa-spot::after{display:none;}
 }
 
