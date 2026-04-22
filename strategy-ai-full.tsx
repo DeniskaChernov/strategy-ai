@@ -6333,7 +6333,17 @@ function initialLegalKind(): "privacy" | "terms" | null {
 export default function App(){
   const[screen,setScreen]=useState(initialMarketingScreen);
   const[user,setUser]=useState<any>(null);
-  const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("sa_theme")||"dark";}catch{return"dark";}});
+  const[theme,setTheme]=useState(()=>{
+    try{
+      const saved=localStorage.getItem("sa_theme");
+      if(saved==="dark"||saved==="light")return saved;
+      // Первый визит — уважаем системную тему пользователя
+      if(typeof window!=="undefined"&&typeof window.matchMedia==="function"){
+        return window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+      }
+      return"dark";
+    }catch{return"dark";}
+  });
   const[palette,setPalette]=useState(()=>{try{return localStorage.getItem("sa_palette")||"indigo";}catch{return"indigo";}});
   const[project,setProject]=useState(null);
   const[cpProject,setCpProject]=useState<any>(null);
@@ -6672,7 +6682,23 @@ export default function App(){
     try{localStorage.setItem("sa_last_project",JSON.stringify({id:proj.id,name:proj.name}));localStorage.setItem("sa_last_map",JSON.stringify({id:m.id,name:m.name}));}catch{}
   }
 
-  function toggleTheme(){const next=t=>t==="dark"?"light":"dark";setTheme(t=>{const n=next(t);try{localStorage.setItem("sa_theme",n);document.body.setAttribute("data-theme",n);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{theme:n}).then(u=>u&&setUser(u)).catch(()=>{});return n;});}
+  function toggleTheme(){
+    const next=t=>t==="dark"?"light":"dark";
+    const apply=()=>setTheme(t=>{
+      const n=next(t);
+      try{localStorage.setItem("sa_theme",n);document.body.setAttribute("data-theme",n);}catch{}
+      if(API_BASE&&user?.email)patchUser(user.email,{theme:n}).then(u=>u&&setUser(u)).catch(()=>{});
+      return n;
+    });
+    // View Transitions API: красивый cross-fade темы в браузерах Chromium/Edge/Safari 18+
+    const doc:any=typeof document!=="undefined"?document:null;
+    const reduced=typeof window!=="undefined"&&window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(doc&&typeof doc.startViewTransition==="function"&&!reduced){
+      doc.startViewTransition(()=>apply());
+    }else{
+      apply();
+    }
+  }
   function changePalette(p:string){setPalette(p);try{localStorage.setItem("sa_palette",p);}catch{};try{document.body.setAttribute("data-palette",p);}catch{};if(API_BASE&&user?.email)patchUser(user.email,{palette:p}).then(u=>u&&setUser(u)).catch(()=>{});}
 
   if(showTiers){

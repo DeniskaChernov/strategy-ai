@@ -9,6 +9,7 @@ import { MotionTestimonialsMarquee } from "./client/components/ui/motion-testimo
 import { LandingMapDemo } from "./client/landing-map-demo";
 import { useScrollReveal } from "./client/use-scroll-reveal";
 import { StatCounter } from "./client/stat-counter";
+import { HeroParallaxOrbs } from "./client/hero-parallax-orbs";
 
 type TFn = (key: string, fallback?: string) => string;
 
@@ -147,6 +148,7 @@ export function ReferenceLandingView({
         <div className="land-nav-spacer"/>
 
         <div className="hero" id="hero-section">
+          <HeroParallaxOrbs />
           <h1
             className="hero-h1"
             dangerouslySetInnerHTML={{

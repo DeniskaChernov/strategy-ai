@@ -304,6 +304,114 @@ body:has(.sa-ref-landing) .screen-wrap{
 @media (prefers-reduced-motion:reduce){
   .sa-ref-landing .sa-lang-fade{animation:none;}
 }
+
+/* ── Hero parallax orbs: декоративные светящиеся пятна за hero ── */
+.sa-ref-landing .hero > :not(.sa-hero-orbs){position:relative;z-index:1;}
+.sa-ref-landing .sa-hero-orbs{
+  position:absolute;
+  inset:-60px -40px -40px -40px;
+  pointer-events:none;
+  z-index:0;
+  overflow:visible;
+  --mx:0;
+  --my:0;
+}
+.sa-ref-landing .sa-hero-orb{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  filter:blur(60px);
+  opacity:.55;
+  will-change:transform;
+  transition:opacity var(--dur-lg) var(--ease-soft);
+  animation:sa-orb-float 14s ease-in-out infinite alternate;
+}
+.sa-ref-landing .sa-hero-orb--a{
+  top:-40px;
+  left:8%;
+  width:340px;
+  height:340px;
+  background:radial-gradient(circle at 30% 30%,rgba(124,92,255,.45),transparent 65%);
+  transform:translate3d(calc(var(--mx)*14px),calc(var(--my)*10px),0);
+  animation-delay:-2s;
+}
+.sa-ref-landing .sa-hero-orb--b{
+  top:20px;
+  right:6%;
+  width:300px;
+  height:300px;
+  background:radial-gradient(circle at 60% 40%,rgba(88,165,255,.4),transparent 62%);
+  transform:translate3d(calc(var(--mx)*-18px),calc(var(--my)*12px),0);
+  animation-delay:-6s;
+}
+.sa-ref-landing .sa-hero-orb--c{
+  bottom:-40px;
+  left:42%;
+  width:260px;
+  height:260px;
+  background:radial-gradient(circle at 50% 50%,rgba(255,168,94,.32),transparent 60%);
+  transform:translate3d(calc(var(--mx)*10px),calc(var(--my)*-14px),0);
+  animation-delay:-10s;
+}
+.sa-strategy-ui.lt .sa-ref-landing .sa-hero-orb{opacity:.28;filter:blur(52px);}
+@keyframes sa-orb-float{
+  0%  { filter:blur(60px); }
+  50% { filter:blur(72px); }
+  100%{ filter:blur(60px); }
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-hero-orb{animation:none;transition:none;}
+}
+@media (max-width:640px){
+  .sa-ref-landing .sa-hero-orb{filter:blur(42px);opacity:.35;}
+  .sa-ref-landing .sa-hero-orb--a{width:220px;height:220px;}
+  .sa-ref-landing .sa-hero-orb--b{width:200px;height:200px;}
+  .sa-ref-landing .sa-hero-orb--c{width:180px;height:180px;}
+}
+
+/* ── Живой shimmer на hero: замедленный ease-in-out + мягкая пульсация яркости ── */
+.sa-ref-landing .hero-h1 .grad-text{
+  animation:
+    sa-shimmer-flow 9s cubic-bezier(.45,.05,.55,.95) infinite,
+    sa-shimmer-breathe 6.5s ease-in-out infinite;
+  will-change:background-position,filter;
+}
+@keyframes sa-shimmer-flow{
+  0%  { background-position:120% 0; }
+  50% { background-position:-20% 0; }
+  100%{ background-position:-220% 0; }
+}
+@keyframes sa-shimmer-breathe{
+  0%,100%{ filter:brightness(1) saturate(1); }
+  50%    { filter:brightness(1.12) saturate(1.15); }
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .hero-h1 .grad-text{animation:none;}
+}
+
+/* ── View Transitions: мягкий cross-fade при смене темы ── */
+@supports (view-transition-name: root){
+  ::view-transition-old(root),
+  ::view-transition-new(root){
+    animation-duration:var(--dur-lg);
+    animation-timing-function:var(--ease-soft);
+  }
+  ::view-transition-old(root){
+    animation-name:sa-vt-fade-out;
+  }
+  ::view-transition-new(root){
+    animation-name:sa-vt-fade-in;
+  }
+  @keyframes sa-vt-fade-out{
+    0%  { opacity:1; }
+    100%{ opacity:0; }
+  }
+  @keyframes sa-vt-fade-in{
+    0%  { opacity:0; }
+    100%{ opacity:1; }
+  }
+}
+
 .sa-ref-landing .land-inner{
   max-width:min(1080px,100%) !important;
   width:100% !important;
@@ -1359,10 +1467,31 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   min-height:0;
   border-radius:18px;
   overflow:hidden;
-  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+  transition:transform var(--dur-md) var(--ease-out-quart),box-shadow var(--dur-md) var(--ease-out-quart),border-color var(--dur-sm) var(--ease-soft);
   background:var(--card);
   border:1px solid var(--b1);
   box-shadow:0 1px 2px rgba(0,0,0,.12),0 6px 20px rgba(0,0,0,.1);
+}
+/* 3D-tilt контейнер: живой отклик на mousemove, плавный сброс на leave */
+.sa-ref-landing .sa-lp-card--tilt{
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.sa-ref-landing .sa-lp-card--tilt .sa-lp-card__inner{
+  transform:translateZ(0);
+  transition:transform var(--dur-md) var(--ease-out-quart);
+}
+.sa-ref-landing .sa-lp-card--tilt:hover .sa-lp-card__inner{
+  transform:translateZ(22px);
+}
+@media (prefers-reduced-motion:reduce){
+  .sa-ref-landing .sa-lp-card--tilt,
+  .sa-ref-landing .sa-lp-card--tilt .sa-lp-card__inner{
+    transform:none !important;
+  }
+}
+@media (pointer:coarse){
+  .sa-ref-landing .sa-lp-card--tilt .sa-lp-card__inner{transform:none;}
 }
 .sa-strategy-ui.lt .sa-ref-landing .sa-lp-card{
   background:rgba(255,255,255,.96);
@@ -1374,6 +1503,8 @@ body[data-theme="light"]:has(.sa-ref-landing) #land-nav-fixed{
   box-shadow:0 6px 28px rgba(0,0,0,.22);
   border-color:rgba(255,255,255,.14);
 }
+/* tilt-карточки управляют transform через JS — отменяем hover-смещение */
+.sa-ref-landing .sa-lp-card--tilt:hover{transform:none;}
 .sa-strategy-ui.lt .sa-ref-landing .sa-lp-card:hover{
   box-shadow:0 10px 32px rgba(0,0,0,.08);
   border-color:rgba(104,80,220,.24);
