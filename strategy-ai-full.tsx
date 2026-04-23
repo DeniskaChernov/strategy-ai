@@ -1871,16 +1871,22 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
     }
   },[externalMsgs]);
 
-  useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"});},[msgs]);
+  const scrollRef=useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    const el=scrollRef.current;
+    if(!el){endRef.current?.scrollIntoView({behavior:"smooth"});return;}
+    const nearBottom=el.scrollHeight-el.scrollTop-el.clientHeight<160;
+    if(nearBottom||msgs.length<=1)endRef.current?.scrollIntoView({behavior:"smooth",block:"end"});
+  },[msgs]);
   useEffect(()=>{if(!load)inpRef.current?.focus();},[load]);
 
-  const quickByTier={
-    free:["Что добавить?","Главные риски?","Pre-mortem: что убьёт план?","Один эксперимент на неделю","Следующий шаг?","Застрял — что делать?","Что не так?"],
-    starter:["Проанализируй карту","Second-order эффекты","Найди риски","Предложи шаги","Маркетинг / продажи","С чего начать?","Что упускаю?","Что не так?"],
-    pro:["Полный анализ","Second-order effects","Узкие места","Риски и контрмеры","Приоритизируй","CAC/LTV и runway","Sales pipeline","Что я упускаю?","Pre-mortem"],
-    team:["Стратегический аудит","Unit economics","GTM рекомендации","Конкурентный анализ","Точки масштабирования","Blue Ocean","Non-obvious риск","Strategic blind spots","Капитальная эффективность"],
-    enterprise:["Executive audit","BCG / сценарии","OKR для карты","Due diligence угол","CMO/CRO угол","Reg / data риск","Strategic blind spots","Non-obvious move","Pre-mortem сценарий"],
-  };
+  const quickByTier=useMemo(()=>({
+    free:[t("qf_add","Что добавить?"),t("qf_risks","Главные риски?"),t("qf_premortem","Pre-mortem: что убьёт план?"),t("qf_exp","Один эксперимент на неделю"),t("qf_next","Следующий шаг?"),t("qf_stuck","Застрял — что делать?"),t("qf_wrong","Что не так?")],
+    starter:[t("qs_analyze","Проанализируй карту"),t("qs_second","Second-order эффекты"),t("qs_find_risks","Найди риски"),t("qs_propose","Предложи шаги"),t("qs_msales","Маркетинг / продажи"),t("qs_start","С чего начать?"),t("qs_miss","Что упускаю?"),t("qs_wrong","Что не так?")],
+    pro:[t("qp_full","Полный анализ"),t("qp_second","Second-order effects"),t("qp_bottleneck","Узкие места"),t("qp_risks","Риски и контрмеры"),t("qp_prio","Приоритизируй"),t("qp_unit","CAC/LTV и runway"),t("qp_sales","Sales pipeline"),t("qp_miss","Что я упускаю?"),t("qp_pre","Pre-mortem")],
+    team:[t("qt_audit","Стратегический аудит"),t("qt_unit","Unit economics"),t("qt_gtm","GTM рекомендации"),t("qt_comp","Конкурентный анализ"),t("qt_scale","Точки масштабирования"),t("qt_blue","Blue Ocean"),t("qt_non","Non-obvious риск"),t("qt_blind","Strategic blind spots"),t("qt_cap","Капитальная эффективность")],
+    enterprise:[t("qe_exec","Executive audit"),t("qe_bcg","BCG / сценарии"),t("qe_okr","OKR для карты"),t("qe_dd","Due diligence угол"),t("qe_cmo","CMO/CRO угол"),t("qe_reg","Reg / data риск"),t("qe_blind","Strategic blind spots"),t("qe_non","Non-obvious move"),t("qe_pre","Pre-mortem сценарий")],
+  }),[t]);
   const allQuick=quickByTier[tier]||quickByTier.free;
   const QUICK_SHOW=4;
   const[showMoreQuick,setShowMoreQuick]=useState(false);
@@ -1921,13 +1927,13 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
           const raw=addMatch[1].replace(/[\r\n]/g," ").trim();
           const fallback=raw.match(/\{[\s\S]*\}/);
           const nodeData=JSON.parse(fallback?fallback[0]:raw);
-          const n={title:nodeData.title||"Новый шаг",reason:nodeData.reason||"",action:nodeData.action||"",metric:nodeData.metric||"",status:nodeData.status||"planning",priority:nodeData.priority||"medium",progress:nodeData.progress??0,tags:Array.isArray(nodeData.tags)?nodeData.tags:[],color:nodeData.color||""};
+          const n={title:nodeData.title||t("new_step","Новый шаг"),reason:nodeData.reason||"",action:nodeData.action||"",metric:nodeData.metric||"",status:nodeData.status||"planning",priority:nodeData.priority||"medium",progress:nodeData.progress??0,tags:Array.isArray(nodeData.tags)?nodeData.tags:[],color:nodeData.color||""};
           onAddNode(n);
-          setMsgs(m=>[...m,{role:"sys",text:"✅ Шаг добавлен на карту: "+n.title}]);
-        }catch{setMsgs(m=>[...m,{role:"sys",text:"⚠️ AI предложил шаг, но формат не распознан. Добавьте вручную."}]);}
+          setMsgs(m=>[...m,{role:"sys",text:"✅ "+t("step_added_to_map","Шаг добавлен на карту")+": "+n.title}]);
+        }catch{setMsgs(m=>[...m,{role:"sys",text:"⚠️ "+t("ai_step_format_err","AI предложил шаг, но формат не распознан. Добавьте вручную.")}]);}
       }
     }catch(e:any){
-      const msg=e?.message||"Ошибка подключения. Проверьте сеть.";
+      const msg=e?.message||t("connection_error","Ошибка подключения. Проверьте сеть.");
       setMsgs(m=>[...m,{role:"ai",text:msg}]);
       onError?.(msg);
     }
@@ -1978,18 +1984,16 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         <div style={{fontSize:10,fontWeight:700,color:"var(--text5)",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>{t("ai_quick_questions","Быстрые вопросы")}</div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {quick.map(q=>(
-            <button key={q} className="btn-interactive sa-ai-chip" onClick={()=>send(q)} style={{padding:"8px 12px",borderRadius:999,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",color:"var(--text2)",cursor:"pointer",fontSize:11,fontWeight:600,transition:"all .2s"}}
-              onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.borderColor="var(--accent-1)";e.currentTarget.style.color="var(--accent-2)";e.currentTarget.style.transform="translateY(-1px)";}}
-              onMouseOut={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="var(--glass-border-accent,var(--border))";e.currentTarget.style.color="var(--text2)";e.currentTarget.style.transform="";}}>{q}</button>
+            <button key={q} className="btn-interactive sa-ai-chip" onClick={()=>send(q)} style={{padding:"8px 12px",borderRadius:999,border:"1px solid var(--glass-border-accent,var(--border))",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",color:"var(--text2)",cursor:"pointer",fontSize:11,fontWeight:600}}>{q}</button>
           ))}
           {allQuick.length>QUICK_SHOW&&(
             <button onClick={()=>setShowMoreQuick(s=>!s)} className="btn-interactive sa-ai-chip" style={{padding:"8px 12px",borderRadius:999,border:"1px dashed var(--border)",background:"transparent",color:"var(--text4)",fontSize:11,fontWeight:600,cursor:"pointer"}}>
-              {showMoreQuick?"▲ Свернуть":"+ Ещё…"}
+              {showMoreQuick?"▲ "+t("collapse","Свернуть"):"+ "+t("more_dots","Ещё…")}
             </button>
           )}
         </div>
       </div>
-      <div className="sa-ai-msg-scroll" style={{flex:1,overflowY:"auto",padding:"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
+      <div ref={scrollRef} className="sa-ai-msg-scroll" style={{flex:1,overflowY:"auto",padding:"14px 18px",display:"flex",flexDirection:"column",gap:14,scrollBehavior:"smooth"}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":m.role==="sys"?"center":"flex-start",gap:10,alignItems:"flex-start",animation:"fadeInUp .4s cubic-bezier(0.22,1,0.36,1) forwards"}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,marginTop:2,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div>}
@@ -2000,7 +2004,10 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
         <div ref={endRef}/>
       </div>
       <div style={{padding:"16px 18px",borderTop:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(8px)",flexDirection:"column",display:"flex",gap:10}}>
-        {aiFreeTier&&<div className="glass-card" style={{padding:"10px 14px",borderRadius:10,border:"1px solid var(--glass-border-accent,var(--border))",color:"var(--text3)",fontSize:12}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</div>}
+        {aiFreeTier&&<div role="status" className="glass-card" style={{padding:"12px 14px",borderRadius:12,border:"1px solid rgba(104,54,245,.32)",background:"linear-gradient(135deg,rgba(104,54,245,.10),rgba(160,80,255,.06))",color:"var(--text2)",fontSize:12.5,display:"flex",alignItems:"center",gap:10}}>
+          <span style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:14,flexShrink:0,boxShadow:"0 4px 14px var(--accent-glow)"}}>✦</span>
+          <span style={{lineHeight:1.45}}>{t("ai_free_upgrade","AI-чат доступен с тарифа Starter. Улучшите тариф в профиле.")}</span>
+        </div>}
         <div className="sa-ai-input-wrap" style={{opacity:aiFreeTier?.65:1,width:"100%"}}>
           <input ref={inpRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={aiFreeTier?t("ai_free_placeholder","Доступно с тарифа Starter"):t("ask_placeholder","Спросите о стратегии…")} disabled={aiFreeTier} style={{flex:1,minWidth:0,padding:"10px 4px 10px 0",fontSize:13,color:"var(--text)",outline:"none",fontFamily:"'Inter',system-ui,sans-serif",transition:"opacity .2s",opacity:aiFreeTier?.7:1}}/>
           <button className="btn-interactive" onClick={()=>send()} disabled={aiFreeTier||!inp.trim()||load} style={{width:44,height:44,borderRadius:12,border:"none",flexShrink:0,background:!aiFreeTier&&inp.trim()&&!load?"var(--gradient-accent)":"rgba(255,255,255,.06)",color:!aiFreeTier&&inp.trim()&&!load?"#fff":"var(--text4)",cursor:!aiFreeTier&&inp.trim()&&!load?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:!aiFreeTier&&inp.trim()&&!load?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>

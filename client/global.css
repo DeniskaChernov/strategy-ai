@@ -2383,6 +2383,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 .sa-ai-chip{
   border-radius:999px !important;
+  transition:background .22s ease,border-color .22s ease,color .22s ease,transform .22s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.sa-ai-chip:hover{
+  background:var(--accent-soft) !important;
+  border-color:var(--accent-1) !important;
+  color:var(--accent-2) !important;
+  transform:translateY(-1px);
+}
+.sa-ai-chip:focus-visible{
+  outline:2px solid rgba(104,54,245,.55);outline-offset:2px;
+}
+.sa-ai-chip:active{transform:translateY(0) scale(.97)}
+@media (prefers-reduced-motion: reduce){
+  .sa-ai-chip,.sa-ai-chip:hover,.sa-ai-chip:active{transition:none !important;transform:none !important}
 }
 .sa-ai-input-wrap{
   display:flex;
