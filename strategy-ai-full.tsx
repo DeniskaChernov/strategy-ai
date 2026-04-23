@@ -1265,6 +1265,7 @@ function Onboarding({onDone,onBack,theme="dark"}){
   const[mapGenFailed,setMapGenFailed]=useState(false);
   const[history,setHistory]=useState([]);
   const[qCount,setQCount]=useState(0);
+  const[lastAiQuestion,setLastAiQuestion]=useState("");
   const endRef=useRef(null);
   const inputRef=useRef(null);
   useEffect(()=>{askNext([]);},[]);
@@ -1276,7 +1277,7 @@ function Onboarding({onDone,onBack,theme="dark"}){
     try{
       const reply=await callAI(hist.length===0?[{role:"user",content:"Начни интервью — задай первый вопрос."}]:hist,OB_SYS,300);
       if(reply.trim()==="READY"||hist.length>=MAX_Q*2){await buildMap(hist);}
-      else{setMsgs(m=>[...m,{role:"ai",text:reply.trim()}]);setQCount(q=>q+1);setLoading(false);}
+      else{const txt=reply.trim();setLastAiQuestion(txt);setMsgs(m=>[...m,{role:"ai",text:txt}]);setQCount(q=>q+1);setLoading(false);}
     }catch{
       setMsgs(m=>[...m,{role:"ai",text:t("ai_network_err","Не удалось получить ответ AI. Проверьте сеть и ключ API. Попробуйте ещё раз.")}]);
       setLoading(false);
@@ -1286,15 +1287,14 @@ function Onboarding({onDone,onBack,theme="dark"}){
     if(!inp.trim()||loading||generating)return;
     const text=inp.trim();setInp("");
     const newMsgs=[...msgs,{role:"user",text}];setMsgs(newMsgs);
-    const aiMsg=msgs[msgs.length-1]?.text||"";
-    const newHist=[...history,{role:"assistant",content:aiMsg},{role:"user",content:text}].filter(h=>h.content);
+    const newHist=[...history,{role:"assistant",content:lastAiQuestion},{role:"user",content:text}].filter(h=>h.content);
     setHistory(newHist);
     if(qCount>=MAX_Q){await buildMap(newHist);}else{await askNext(newHist);}
   }
   const defaultEdges=[{id:"e1",source:"n1",target:"n2",type:"requires",label:""},{id:"e2",source:"n2",target:"n4",type:"requires",label:""},{id:"e3",source:"n3",target:"n4",type:"affects",label:""}];
   async function buildMap(hist){
     setGenerating(true);setMapGenFailed(false);
-    setMsgs(m=>[...m,{role:"ai",text:"Анализирую ваши ответы и строю персональную карту…"}]);
+    setMsgs(m=>[...m,{role:"ai",text:t("analyzing_answers","Анализирую ваши ответы и строю персональную карту…")}]);
     const ctx=hist.filter(h=>h.content).map(h=>(h.role==="user"?"Пользователь: ":"AI: ")+h.content).join("\n");
     try{
       const raw=await callAI([{role:"user",content:"Интервью:\n"+ctx+"\n\nСоздай стратегическую карту."}],MAP_GEN_SYS,1500);
@@ -6199,6 +6199,7 @@ function InMapOnboarding({project,tier,theme="dark",onDone,onSkip}){
   const[qCount,setQCount]=useState(0);
   const[showSkipConfirm,setShowSkipConfirm]=useState(false);
   const[mapGenFailed,setMapGenFailed]=useState(false);
+  const[lastAiQuestion,setLastAiQuestion]=useState("");
   const endRef=useRef(null);
   const inputRef=useRef(null);
   const tKey=tier||"free";
@@ -6222,7 +6223,7 @@ ${mapHint} X:150–900, Y:80–520.`;
     try{
       const reply=await callAI(hist.length===0?[{role:"user",content:"Начни интервью."}]:hist,sysPrompt,300);
       if(reply.trim()==="READY"||hist.length>=MAX_Q*2){await buildMap(hist);}
-      else{setMsgs(m=>[...m,{role:"ai",text:reply.trim()}]);setQCount(q=>q+1);setLoading(false);}
+      else{const txt=reply.trim();setLastAiQuestion(txt);setMsgs(m=>[...m,{role:"ai",text:txt}]);setQCount(q=>q+1);setLoading(false);}
     }catch{
       setMsgs(m=>[...m,{role:"ai",text:t("ai_network_err","Не удалось получить ответ AI. Проверьте сеть и ключ API. Попробуйте ещё раз.")}]);
       setLoading(false);
@@ -6232,14 +6233,13 @@ ${mapHint} X:150–900, Y:80–520.`;
     if(!inp.trim()||loading||generating)return;
     const text=inp.trim();setInp("");
     const newMsgs=[...msgs,{role:"user",text}];setMsgs(newMsgs);
-    const aiMsg=msgs[msgs.length-1]?.text||"";
-    const newHist=[...history,{role:"assistant",content:aiMsg},{role:"user",content:text}].filter(h=>h.content);
+    const newHist=[...history,{role:"assistant",content:lastAiQuestion},{role:"user",content:text}].filter(h=>h.content);
     setHistory(newHist);
     if(qCount>=MAX_Q){await buildMap(newHist);}else{await askNext(newHist);}
   }
   async function buildMap(hist){
     setGenerating(true);setMapGenFailed(false);
-    setMsgs(m=>[...m,{role:"ai",text:"Строю персональную карту…"}]);
+    setMsgs(m=>[...m,{role:"ai",text:t("building_map","Строю персональную карту…")}]);
     const ctx=hist.filter(h=>h.content).map(h=>(h.role==="user"?"Пользователь: ":"AI: ")+h.content).join("\n");
     try{
       const raw=await callAI([{role:"user",content:"Интервью:\n"+ctx+"\n\nСоздай карту."}],mapSys,1500);
