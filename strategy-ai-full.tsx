@@ -1633,27 +1633,50 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
     setAutoConnLoading(false);
   }
 
-  const iS={width:"100%",padding:"10px 12px",fontSize:13,background:"rgba(255,255,255,.04)",border:"1px solid var(--glass-border-accent,var(--input-border))",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"'Inter',system-ui,sans-serif",transition:"border-color .2s",backdropFilter:"blur(8px)"};
-  const iSTextarea={...iS,resize:"vertical" as const,minHeight:40,maxHeight:160,overflowY:"auto" as const,wordBreak:"break-word" as const};
+  const iS=useMemo<React.CSSProperties>(()=>({width:"100%",padding:"10px 12px",fontSize:13,background:"rgba(255,255,255,.04)",border:"1px solid var(--glass-border-accent,var(--input-border))",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"'Inter',system-ui,sans-serif",transition:"border-color .2s",backdropFilter:"blur(8px)"}),[]);
+  const iSTextarea=useMemo<React.CSSProperties>(()=>({...iS,resize:"vertical",minHeight:40,maxHeight:160,overflowY:"auto",wordBreak:"break-word"}),[iS]);
   const connCount=allEdges.filter(e=>(e.source||e.from)===node.id||(e.target||e.to)===node.id).length;
-  const tabs=[["info","◆ Инфо"],["comments",`💬${comments.length?" "+comments.length:""}`],["connections",`⇄${connCount?" "+connCount:""}`],["history",`⏱${history.length?" "+history.length:""}`]];
+  const tabs=useMemo(()=>[
+    ["info","◆ "+t("tab_info","Инфо")] as const,
+    ["comments",`💬${comments.length?" "+comments.length:""}`] as const,
+    ["connections",`⇄${connCount?" "+connCount:""}`] as const,
+    ["history",`⏱${history.length?" "+history.length:""}`] as const,
+  ],[t,comments.length,connCount,history.length]);
+
+  // focus trap внутри шторки
+  const panelRef=useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    function onKey(e:KeyboardEvent){
+      if(e.key==="Escape"){e.preventDefault();handleClose();return;}
+      if(e.key!=="Tab"||!panelRef.current)return;
+      const focusable=panelRef.current.querySelectorAll<HTMLElement>('button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+      if(focusable.length===0)return;
+      const first=focusable[0],last=focusable[focusable.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
+    document.addEventListener("keydown",onKey);
+    return()=>document.removeEventListener("keydown",onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
 
   const panelRight=isMobile?0:aiPanelOpen?360:0;
   const panelWidth=isMobile?"100%":aiPanelOpen?320:340;
   const panelStyle: React.CSSProperties=isMobile?{position:"fixed",left:0,right:0,top:0,bottom:0,width:"100%",maxWidth:480,marginLeft:"auto",borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:50,boxShadow:"-16px 0 48px rgba(0,0,0,.3)",borderRadius:0}:{position:"absolute",right:panelRight,top:0,bottom:0,width:panelWidth,borderLeft:"1px solid var(--border)",display:"flex",flexDirection:"column",zIndex:40,boxShadow:"-16px 0 48px rgba(0,0,0,.2)",borderRadius:"16px 0 0 0"};
   return(
-    <div className={`glass-panel panel-slide ${exiting?"panel-slide-out":""}`.trim()} style={panelStyle}>
+    <div ref={panelRef} role="dialog" aria-modal="false" aria-label={t("editor_panel","Редактор шага")}
+         className={`glass-panel panel-slide ${exiting?"panel-slide-out":""}`.trim()} style={panelStyle}>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 16px",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(12px)"}}>
         <div style={{width:10,height:10,borderRadius:3,background:STATUS[node.status]?.c||"var(--accent-1)",flexShrink:0}}/>
-        <div style={{flex:1,fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>{node.title||"Без названия"}</div>
-        {onScrollTo&&<button onClick={()=>onScrollTo(node)} title="Найти на карте" style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="var(--accent-soft)";e.currentTarget.style.color="var(--accent-2)";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>↗</button>}
-        <button onClick={handleClose} style={{width:36,height:36,borderRadius:10,border:"none",background:"var(--surface2)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,transition:"all .15s"}} onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.15)";e.currentTarget.style.color="#f04458";}} onMouseOut={e=>{e.currentTarget.style.background="var(--surface2)";e.currentTarget.style.color="var(--text4)";}}>×</button>
+        <div style={{flex:1,fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>{node.title||t("untitled","Без названия")}</div>
+        {onScrollTo&&<IconButton size={36} onClick={()=>onScrollTo(node)} title={t("find_on_map","Найти на карте")} aria-label={t("find_on_map","Найти на карте")} style={{borderRadius:10}}>↗</IconButton>}
+        <IconButton size={36} danger onClick={handleClose} title={t("close","Закрыть")} aria-label={t("close","Закрыть")} style={{borderRadius:10,fontSize:16}}>×</IconButton>
       </div>
-      <div style={{display:"flex",borderBottom:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,overflowX:"auto",padding:"0 10px"}}>
+      <div className="tabs" role="tablist" style={{margin:"10px 14px 6px",overflowX:"auto",flexShrink:0}}>
         {tabs.map(item=>{
           const k=item[0],lbl=item[1];
           const isActive=tab===k;
-          return <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:"10px 12px",border:"none",background:isActive?"rgba(255,255,255,.04)":"transparent",color:isActive?"var(--text)":"var(--text4)",fontSize:12,fontWeight:isActive?700:500,cursor:"pointer",borderBottom:isActive?"2px solid var(--accent-1)":"2px solid transparent",marginBottom:-1,whiteSpace:"nowrap",minWidth:0,transition:"all .15s"}}>{lbl}</button>;
+          return <button key={k} role="tab" aria-selected={isActive} className={"tab"+(isActive?" on":"")} onClick={()=>setTab(k)} style={{flex:1,whiteSpace:"nowrap",fontSize:12}}>{lbl}</button>;
         })}
       </div>
       <div style={{flex:1,overflowY:"auto",padding:"14px 16px"}}>
@@ -1686,7 +1709,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
                 <CustomSelect value={node.priority||"medium"} onChange={v=>!readOnly&&onUpdate({priority:v})} disabled={readOnly} style={{width:"100%"}} options={Object.entries(PRIORITY).map(([k,p]:[string,{label:string;c:string}])=>({value:k,label:p.label,dot:p.c}))}/>
               </div>
             </div>
-            <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>Прогресс <span style={{color:"var(--accent-1)",fontWeight:700}}>{node.progress||0}%</span></div>
+            <div><div style={{fontSize:11,fontWeight:600,color:"var(--text5)",marginBottom:4}}>{t("progress","Прогресс")} <span style={{color:"var(--accent-1)",fontWeight:700}}>{node.progress||0}%</span></div>
               <input type="range" min={0} max={100} value={node.progress||0} onChange={e=>!readOnly&&onUpdate({progress:+e.target.value})} style={{width:"100%",accentColor:"var(--accent-1)"}} disabled={readOnly}/>
             </div>
             {showMore&&(
@@ -1707,7 +1730,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
               </div>
             )}
             <button onClick={()=>setShowMore(s=>!s)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid var(--border)",background:"transparent",color:"var(--text4)",fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .2s"}}>
-              {showMore?"▲ Свернуть":"▼ Детали"}
+              {showMore?"▲ "+t("collapse","Свернуть"):"▼ "+t("details","Детали")}
             </button>
             {!readOnly&&(
               <div style={{display:"flex",gap:6,paddingTop:4}}>
@@ -1735,8 +1758,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             ))}
             {!readOnly&&(
               <div style={{marginTop:4,borderTop:"1px solid var(--border)",paddingTop:8,display:"flex",flexDirection:"column",gap:6}}>
-                <textarea value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder="Комментарий… или @AI вопрос (Ctrl+Enter)" rows={2} onKeyDown={e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();addComment();}}} style={{...iSTextarea,lineHeight:1.5}}/>
-                <button onClick={addComment} disabled={!newComment.trim()||aiCommentLoading} style={{padding:"7px",borderRadius:8,border:"none",background:newComment.trim()&&!aiCommentLoading?"var(--gradient-accent)":"var(--surface2)",color:newComment.trim()&&!aiCommentLoading?"var(--accent-on-bg)":"var(--text4)",fontSize:13,cursor:newComment.trim()&&!aiCommentLoading?"pointer":"not-allowed",fontWeight:600}}>{aiCommentLoading?"AI отвечает…":"Отправить"}</button>
+                <textarea value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder={t("comment_placeholder","Комментарий… или @AI вопрос (Ctrl+Enter)")} rows={2} onKeyDown={e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();addComment();}}} style={{...iSTextarea,lineHeight:1.5}}/>
+                <button onClick={addComment} disabled={!newComment.trim()||aiCommentLoading} style={{padding:"7px",borderRadius:8,border:"none",background:newComment.trim()&&!aiCommentLoading?"var(--gradient-accent)":"var(--surface2)",color:newComment.trim()&&!aiCommentLoading?"var(--accent-on-bg)":"var(--text4)",fontSize:13,cursor:newComment.trim()&&!aiCommentLoading?"pointer":"not-allowed",fontWeight:600}}>{aiCommentLoading?t("ai_replying","AI отвечает…"):t("send","Отправить")}</button>
               </div>
             )}
           </div>
@@ -1761,7 +1784,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
                         <div key={e.id} style={{display:"flex",alignItems:"center",gap:7,padding:"7px 9px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",marginBottom:5,cursor:"pointer"}}
                           onClick={()=>onScrollTo&&onScrollTo(other)}>
                           <div style={{width:7,height:7,borderRadius:2,background:et.c,flexShrink:0}}/>
-                          <div style={{flex:1,fontSize:13,color:"var(--text2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{other?.title||"Удалён"}</div>
+                          <div style={{flex:1,fontSize:13,color:"var(--text2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{other?.title||t("deleted","Удалён")}</div>
                           <div style={{fontSize:12,color:et.c,fontWeight:600,fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>{et.label}</div>
                         </div>
                       );
@@ -1771,8 +1794,8 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
               }
               return(
                 <React.Fragment>
-                  <ConnSection title={`→ Исходящие (${outgoing.length})`} edges={outgoing}/>
-                  <ConnSection title={`← Входящие (${incoming.length})`} edges={incoming}/>
+                  <ConnSection title={`→ ${t("outgoing","Исходящие")} (${outgoing.length})`} edges={outgoing}/>
+                  <ConnSection title={`← ${t("incoming","Входящие")} (${incoming.length})`} edges={incoming}/>
                 </React.Fragment>
               );
             })()}
@@ -1784,12 +1807,12 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
             {[...history].reverse().map(h=>(
               <div key={h.id} style={{padding:"9px 11px",borderRadius:9,background:"var(--surface)",border:"1px solid var(--border)"}}>
                 <div style={{display:"flex",gap:6,alignItems:"center",marginBottom:4}}>
-                  <span style={{fontSize:13.5,fontWeight:700,color:h.type==="ai_rephrase"?"var(--accent-2)":"var(--text3)"}}>{h.type==="ai_rephrase"?"✦ AI переформулировал":"✏️ Изменено"}</span>
+                  <span style={{fontSize:13.5,fontWeight:700,color:h.type==="ai_rephrase"?"var(--accent-2)":"var(--text3)"}}>{h.type==="ai_rephrase"?"✦ "+t("ai_rephrased","AI переформулировал"):"✏️ "+t("changed","Изменено")}</span>
                   <span style={{fontSize:12,color:"var(--text5)",marginLeft:"auto"}}>{new Date(h.at).toLocaleString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span>
                 </div>
-                <div style={{fontSize:13,color:"var(--text4)",marginBottom:3}}>Автор: {h.by}</div>
-                {h.before?.title&&<div style={{fontSize:13,color:"var(--text5)",padding:"3px 7px",background:"rgba(239,68,68,.04)",borderRadius:5,borderLeft:"2px solid rgba(239,68,68,.3)",marginBottom:2}}>До: {h.before.title}</div>}
-                {h.after?.title&&<div style={{fontSize:13,color:"var(--text3)",padding:"3px 7px",background:"rgba(16,185,129,.04)",borderRadius:5,borderLeft:"2px solid rgba(16,185,129,.3)"}}>После: {h.after.title}</div>}
+                <div style={{fontSize:13,color:"var(--text4)",marginBottom:3}}>{t("author","Автор")}: {h.by}</div>
+                {h.before?.title&&<div style={{fontSize:13,color:"var(--text5)",padding:"3px 7px",background:"rgba(239,68,68,.04)",borderRadius:5,borderLeft:"2px solid rgba(239,68,68,.3)",marginBottom:2}}>{t("before","До")}: {h.before.title}</div>}
+                {h.after?.title&&<div style={{fontSize:13,color:"var(--text3)",padding:"3px 7px",background:"rgba(16,185,129,.04)",borderRadius:5,borderLeft:"2px solid rgba(16,185,129,.3)"}}>{t("after","После")}: {h.after.title}</div>}
               </div>
             ))}
           </div>
