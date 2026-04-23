@@ -4979,17 +4979,17 @@ function ContentPlanItemModal({formKey,item,allNodes,t,theme,onSave,onClose}:{fo
 function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTheme,onChangeTier,onUpgrade,onOpenContentPlanHub,onOpenContentPlanProject,aiChatMsgs,aiChatSetMsgs}){
   const{t,lang}=useLang();
   const isMobile=useIsMobile();
-  const[maps,setMaps]=useState([]);
+  const[maps,setMaps]=useState<MapLite[]>([]);
   const[loading,setLoading]=useState(true);
-  const[tab,setTab]=useState("maps");
-  const[proj,setProj]=useState(project);
+  const[tab,setTab]=useState<"maps"|"scenarios"|"content"|"ai"|"team"|"settings">("maps");
+  const[proj,setProj]=useState<ProjectLite>(project);
   const[newMember,setNewMember]=useState("");
   const[nmRole,setNmRole]=useState("editor");
   const[showTmpls,setShowTmpls]=useState(false);
   const[showScChoice,setShowScChoice]=useState(false);
   const[showScTmpls,setShowScTmpls]=useState(false);
   const[projCtx,setProjCtx]=useState("");
-  const[toast,setToast]=useState(null);
+  const[toast,setToast]=useState<{msg:string;type:string}|null>(null);
   const[delMapId,setDelMapId]=useState<string|null>(null);
   const[delProjConfirm,setDelProjConfirm]=useState(false);
   const[showNotifs,setShowNotifs]=useState(false);
@@ -5019,9 +5019,9 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       const cur=await getMaps(proj.id);
       const reg=cur.filter(m=>!m.isScenario);
       if(reg.length>=tier.maps){setToast({msg:t("map_limit_tier","Лимит карт для {tier}: {n}").replace("{tier}",tier.label).replace("{n}",String(fmt(tier.maps))),type:"warn"});return;}
-      const map={id:uid(),name:tmpl?tmpl.name:`Карта ${reg.length+1}`,nodes:tmpl?.nodes||[],edges:tmpl?.edges||[],ctx:"",isScenario:false,createdAt:Date.now()};
+      const map={id:uid(),name:tmpl?tmpl.name:t("map_default_n","Карта {n}").replace("{n}",String(reg.length+1)),nodes:tmpl?.nodes||[],edges:tmpl?.edges||[],ctx:"",isScenario:false,createdAt:Date.now()};
       const saved=await saveMap(proj.id,map);
-      if(tmpl){await load();setToast({msg:`Шаблон "${tmpl.name}" применён!`,type:"success"});}
+      if(tmpl){await load();setToast({msg:t("template_applied","Шаблон «{name}» применён!").replace("{name}",tmpl.name),type:"success"});}
       else onOpenMap(saved,proj,true,myRole==="viewer");
     }finally{creatingRef.current=false;}
   }
@@ -5029,7 +5029,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   async function createBlankScenario(){
     setShowScChoice(false);
     const sc=(await getMaps(proj.id)).filter(m=>m.isScenario);
-    const map={id:uid(),name:`Сценарий ${sc.length+1}`,nodes:[],edges:[],ctx:"",isScenario:true,createdAt:Date.now()};
+    const map={id:uid(),name:t("scenario_default_n","Сценарий {n}").replace("{n}",String(sc.length+1)),nodes:[],edges:[],ctx:"",isScenario:true,createdAt:Date.now()};
     const saved=await saveMap(proj.id,map);
     onOpenMap(saved,proj,true,myRole==="viewer");
   }
@@ -5037,11 +5037,11 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   async function createScenarioFromTemplate(parsed){
     setShowScTmpls(false);setShowScChoice(false);
     const sc=(await getMaps(proj.id)).filter(m=>m.isScenario);
-    const name=parsed.scenarioName?`${parsed.scenarioIcon} ${parsed.scenarioName}`:`Сценарий ${sc.length+1}`;
+    const name=parsed.scenarioName?`${parsed.scenarioIcon} ${parsed.scenarioName}`:t("scenario_default_n","Сценарий {n}").replace("{n}",String(sc.length+1));
     const map={id:uid(),name,nodes:parsed.nodes||[],edges:parsed.edges||[],ctx:"",isScenario:true,createdAt:Date.now()};
     const saved=await saveMap(proj.id,map);
     await load();
-    setToast({msg:`Сценарий "${name}" создан!`,type:"success"});
+    setToast({msg:t("scenario_created","Сценарий «{name}» создан!").replace("{name}",name),type:"success"});
     onOpenMap(saved,proj,false,myRole==="viewer");
   }
 
@@ -5109,11 +5109,10 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
             {isSc?"⎇":"🗺️"}
           </div>
           <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name||"Без названия"}</div>
-            <div style={{fontSize:13.5,color:"var(--text5)"}}>{ns.length} {t("steps_label","шагов")} • {t("updated_label","обновлено")} {m.updatedAt?new Date(m.updatedAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short"}):"—"}</div>
+            <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name||t("untitled","Без названия")}</div>
+            <div style={{fontSize:13.5,color:"var(--text5)"}}>{ns.length} {t("steps_label","шагов")} • {t("updated_label","обновлено")} {(m as any).updatedAt?new Date((m as any).updatedAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short"}):"—"}</div>
           </div>
-          {canEdit&&<button onClick={e=>{e.stopPropagation();delMap(m.id);}} aria-label={t("confirm_delete_map","Удалить карту?")} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .2s"}}
-            onMouseOver={e=>{e.currentTarget.style.opacity="1";}} onMouseOut={e=>{e.currentTarget.style.opacity="0";}}>🗑</button>}
+          {canEdit&&<button className="sa-map-card__del" onClick={e=>{e.stopPropagation();delMap(m.id);}} aria-label={t("confirm_delete_map","Удалить карту?")} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .22s ease"}}>🗑</button>}
         </div>
         {ns.length>0&&(
           <div>
@@ -5141,8 +5140,8 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
         <div className="atb-cluster" style={{minWidth:0,flex:isMobile?"1 1 100%":"1 1 auto",maxWidth:isMobile?"100%":"46%"}}>
           <button type="button" className="sa-back-ic" onClick={onBack} aria-label={t("back_btn","Назад")}>←</button>
           <div style={{minWidth:0}}>
-            <div className="tb-title" style={{fontSize:isMobile?14:15,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{proj.name||"Проект"}</div>
-            <div className="tb-sub">{regularMaps.length} карт • {scenarios.length} сцен. • {(proj.members||[]).length} уч.</div>
+            <div className="tb-title" style={{fontSize:isMobile?14:15,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{proj.name||t("project_short","Проект")}</div>
+            <div className="tb-sub">{t("pd_sub_maps","{n} карт").replace("{n}",String(regularMaps.length))} • {t("pd_sub_sc","{n} сцен.").replace("{n}",String(scenarios.length))} • {t("pd_sub_m","{n} уч.").replace("{n}",String((proj.members||[]).length))}</div>
           </div>
         </div>
         {!isMobile&&onOpenContentPlanHub&&(
@@ -5182,8 +5181,15 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
       )}
 
       <div className="sa-proj-tabs sa-page-reveal sa-pr-d2" role="tablist">
-        {[["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 Карты (${regularMaps.length})`],["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ Сценарии (${scenarios.length})`],["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],["ai",isMobile?"✦":"✦ "+t("project_ai_tab","AI")],["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 Команда (${(proj.members||[]).length})`],["settings","⚙ "+t("settings_title","Настройки")]].map(([k,lbl])=>(
-          <button key={k} type="button" role="tab" aria-selected={tab===k} className={tab===k?"on":""} onClick={()=>setTab(k)}>{lbl}</button>
+        {([
+          ["maps",isMobile?`🗺 (${regularMaps.length})`:`🗺 ${t("pd_tab_maps","Карты")} (${regularMaps.length})`],
+          ["scenarios",isMobile?`⎇ (${scenarios.length})`:`⎇ ${t("pd_tab_scenarios","Сценарии")} (${scenarios.length})`],
+          ["content",isMobile?"✍️":"✍️ "+t("content_plan_tab","Контент-план")],
+          ["ai",isMobile?"✦":"✦ "+t("project_ai_tab","AI")],
+          ["team",isMobile?`👥 (${(proj.members||[]).length})`:`👥 ${t("pd_tab_team","Команда")} (${(proj.members||[]).length})`],
+          ["settings","⚙ "+t("settings_title","Настройки")],
+        ] as const).map(([k,lbl])=>(
+          <button key={k} type="button" role="tab" aria-selected={tab===k} className={tab===k?"on":""} onClick={()=>setTab(k as any)}>{lbl}</button>
         ))}
       </div>
 

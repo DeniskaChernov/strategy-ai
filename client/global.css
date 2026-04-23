@@ -2043,6 +2043,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (prefers-reduced-motion: reduce){
   .sa-notif-pulse span,.sa-ic-btn,.sa-ic-btn:active{animation:none!important}
 }
+.sa-map-card:hover .sa-map-card__del,.sa-map-card:focus-within .sa-map-card__del{opacity:1!important}
+.sa-map-card__del:hover{background:rgba(239,68,68,.14)!important;border-color:rgba(239,68,68,.42)!important}
+.sa-map-card__del:focus-visible{outline:2px solid rgba(240,68,88,.55);outline-offset:2px;opacity:1!important}
 .node-card{transition:filter .2s ease,transform .25s cubic-bezier(.25,.46,.45,.94);}
 .zoom-ctrl-btn{transition:background .2s ease,color .2s ease,transform .15s ease;}
 .zoom-ctrl-btn:hover{background:var(--surface2) !important;color:var(--text) !important;}
