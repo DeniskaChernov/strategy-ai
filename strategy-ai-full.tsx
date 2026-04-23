@@ -2012,10 +2012,11 @@ function EdgeLine({edge,nodes,selected,onClick,etypeMap}){
   const tay=2*(1-tang_t)*(cpy-sp.y)+2*tang_t*(ep.y-cpy);
   const ang=Math.atan2(tay,tax)*180/Math.PI;
   return(
-    <g onClick={e=>{e.stopPropagation();onClick(edge);}}>
-      <path d={d} fill="none" stroke="transparent" strokeWidth={12} style={{cursor:"pointer"}}/>
-      <path d={d} fill="none" stroke={selected?"var(--accent-1)":et.c} strokeWidth={selected?2.5:1.5} strokeDasharray={et.d==="none"?"none":et.d} opacity={selected?1:.65} style={{transition:"stroke .15s,opacity .15s"}}/>
-      <polygon points="-5,-3 5,0 -5,3" fill={selected?"var(--accent-1)":et.c} transform={`translate(${ep.x},${ep.y}) rotate(${ang})`} opacity={selected?1:.7}/>
+    <g onClick={e=>{e.stopPropagation();onClick(edge);}} role="button" tabIndex={0} aria-label={edge.label||et.label||t("edge","связь")}
+       onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onClick(edge);}}}>
+      <path className="sa-edge-hit" d={d} fill="none" stroke="transparent" strokeWidth={14}/>
+      <path className="sa-edge-line" d={d} fill="none" stroke={selected?"url(#sa-edge-grad)":et.c} strokeWidth={selected?2.6:1.6} strokeDasharray={et.d==="none"?"none":et.d} opacity={selected?1:.68}/>
+      <polygon points="-5,-3 5,0 -5,3" fill={selected?"var(--accent-1)":et.c} transform={`translate(${ep.x},${ep.y}) rotate(${ang})`} opacity={selected?1:.75} style={{transition:"opacity .2s ease"}}/>
       {edge.label&&<text x={bmx} y={bmy-6} textAnchor="middle" fontSize={9.5} fill="var(--text3)" style={{pointerEvents:"none",userSelect:"none"}}>{edge.label}</text>}
     </g>
   );
@@ -2031,20 +2032,20 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
   const isLight=theme==="light";
   const glassBg=isLight?"rgba(255,255,255,.78)":"rgba(9,7,22,.78)";
   const bg=node.color?node.color+(isLight?"28":"22"):glassBg;
-  const titleColor=selected?"var(--accent-1)":(isLight?"#08061a":"#eaeaf8");
-  const reasonColor=isLight?"rgba(70,58,130,.48)":"rgba(188,186,224,.56)";
-  const statusColor=isLight?"rgba(35,28,80,.65)":"rgba(188,186,224,.56)";
+  const titleColor=selected?"var(--accent-1)":"var(--t1)";
+  const reasonColor="var(--t3)";
+  const statusColor="var(--t3)";
   const metricColor="var(--accent-1)";
   const progressTrack=isLight?"rgba(0,0,0,.08)":"rgba(255,255,255,.08)";
   const tagBg="var(--accent-soft)";
   const tagColor="var(--accent-2)";
-  const dateColor=isLight?"rgba(70,58,130,.48)":"rgba(148,144,196,.52)";
+  const dateColor="var(--t4)";
   const isOverdue=node.deadline&&new Date(node.deadline)<new Date()&&node.status!=="completed";
   const isConnSrc=connecting&&connectSource?.id===node.id;
   const commentCount=(node.comments||[]).length;
   const progress=node.progress||0;
   const progressW=Math.max(0,progress/100*204);
-  const titleFull=node.title||"Новый шаг";
+  const titleFull=node.title||t("new_step","Новый шаг");
   const titleLen=28;
   const title=titleFull.length>titleLen?titleFull.slice(0,titleLen-1)+"…":titleFull;
   const hasMeta=node.reason||node.action||node.metric;
@@ -2059,7 +2060,13 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
   const statusY=progressY+progressBarH+10;
   const tagsY=statusY+14;
   return(
-    <g className="node-card" transform={`translate(${node.x},${node.y})`} onClick={e=>{e.stopPropagation();onClick(node,{shiftKey:e.shiftKey});}} onPointerDown={e=>onMouseDown(e,node)} onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContextMenu?.(e.clientX,e.clientY,node);}} style={{cursor:connecting?"crosshair":"grab"}}>
+    <g className="node-card sa-node-card sa-node-appear" transform={`translate(${node.x},${node.y})`}
+       role="button" tabIndex={0} aria-label={`${titleFull} — ${st.label}`}
+       onClick={e=>{e.stopPropagation();onClick(node,{shiftKey:e.shiftKey});}}
+       onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onClick(node,{shiftKey:e.shiftKey});}}}
+       onPointerDown={e=>onMouseDown(e,node)}
+       onContextMenu={e=>{e.preventDefault();e.stopPropagation();onContextMenu?.(e.clientX,e.clientY,node);}}
+       style={{cursor:connecting?"crosshair":"grab"}}>
       {selected&&<rect x={-1} y={1} width={242} height={130} rx={13} fill="var(--accent-soft)" style={{filter:"blur(8px)"}}/>}
       {focused&&<rect x={-2} y={0} width={244} height={132} rx={14} fill="transparent" stroke="var(--accent-1)" strokeWidth={2} style={{filter:"drop-shadow(0 0 12px var(--accent-glow))"}}/>}
       <rect width={240} height={128} rx={12} fill={bg}
@@ -3340,6 +3347,10 @@ ${ctx}
           <defs>
             <clipPath id="nodeTitleClip"><rect x={14} y={2} width={178} height={16} rx={2}/></clipPath>
             <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="sa-edge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="var(--accent-1)"/>
+              <stop offset="100%" stopColor="var(--accent-2)"/>
+            </linearGradient>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform={`translate(${view.x%40},${view.y%40})`}>
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--grid)" strokeWidth="1"/>
             </pattern>

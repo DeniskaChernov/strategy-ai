@@ -2061,7 +2061,19 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sa-mini-map-wrap{opacity:.88}
 .sa-mini-map-wrap:hover{opacity:1;box-shadow:0 12px 32px rgba(0,0,0,.32)!important}
 .sa-mini-map-vp{transition:x .12s linear,y .12s linear,width .12s linear,height .12s linear}
+@keyframes sa-node-in{0%{opacity:0;transform:scale(.85)}60%{opacity:1;transform:scale(1.03)}100%{opacity:1;transform:scale(1)}}
+.sa-node-appear{animation:sa-node-in .32s cubic-bezier(.34,1.56,.64,1) both;transform-origin:center;transform-box:fill-box}
+.sa-node-card{transition:filter .22s ease}
+.sa-node-card:hover{filter:brightness(1.06) drop-shadow(0 6px 18px var(--accent-glow))}
+.sa-node-card:focus-visible{outline:none}
+.sa-node-card:focus-visible>rect:first-of-type{stroke:var(--acc);stroke-width:2}
+.sa-edge-line{transition:stroke-width .18s ease,opacity .18s ease,stroke .2s ease}
+.sa-edge-hit:hover + .sa-edge-line{stroke-width:3!important;opacity:1!important}
+.sa-edge-hit{cursor:pointer}
 .node-card{transition:filter .2s ease,transform .25s cubic-bezier(.25,.46,.45,.94);}
+@media (prefers-reduced-motion: reduce){
+  .sa-node-appear,.sa-node-card{animation:none!important;transition:none!important}
+}
 .zoom-ctrl-btn{transition:background .2s ease,color .2s ease,transform .15s ease;}
 .zoom-ctrl-btn:hover{background:var(--surface2) !important;color:var(--text) !important;}
 
