@@ -674,7 +674,7 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
   const curIdx=TIER_ORDER.indexOf(user.tier||"free");
   const isCurrentTier=selected===user.tier;
   const isUpgrade=TIER_ORDER.indexOf(selected)>curIdx;
-  const fi={width:"100%",padding:"10px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:9,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Inter',system-ui,sans-serif"};
+  const fi=useMemo(()=>({width:"100%",padding:"10px 13px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:9,color:"var(--text)",outline:"none",marginBottom:10,fontFamily:"'Inter',system-ui,sans-serif",transition:"border-color .18s ease,box-shadow .18s ease"} as React.CSSProperties),[]);
   function formatCardNum(v){return v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();}
   function formatExp(v){const d=v.replace(/\D/g,"").slice(0,4);return d.length>2?d.slice(0,2)+"/"+d.slice(2):d;}
   async function saveName(){
@@ -949,8 +949,8 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                           {id:"sunset",label:"◇ Sunset",c1:"#b88a6a",c2:"#c9a088"},
                           {id:"mono",label:"◇ Mono",c1:"#6b7a8a",c2:"#8a9baa"},
                         ].map(({id,label,c1,c2})=>(
-                          <button key={id} onClick={()=>onPaletteChange(id)} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${palette===id?"var(--accent-1)":"var(--glass-border-accent,var(--border))"}`,background:palette===id?"var(--accent-soft)":"rgba(255,255,255,.02)",color:"var(--text)",cursor:"pointer",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:5}}>
-                            <span style={{width:12,height:12,borderRadius:4,background:`linear-gradient(135deg,${c1},${c2})`}}/>
+                          <button key={id} type="button" aria-pressed={palette===id} aria-label={t("palette_choose","Выбрать палитру: {name}").replace("{name}",label)} onClick={()=>onPaletteChange(id)} className="sa-palette-btn" data-on={palette===id?"1":"0"} style={{padding:"6px 10px",borderRadius:8,border:`1px solid ${palette===id?"var(--accent-1)":"var(--glass-border-accent,var(--border))"}`,background:palette===id?"var(--accent-soft)":"rgba(255,255,255,.02)",color:"var(--text)",cursor:"pointer",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:5,transition:"all .28s cubic-bezier(.34,1.56,.64,1)"}}>
+                            <span style={{width:12,height:12,borderRadius:4,background:`linear-gradient(135deg,${c1},${c2})`,transition:"transform .3s ease"}}/>
                             {label}
                           </button>
                         ))}
