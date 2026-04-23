@@ -3576,10 +3576,27 @@ ${ctx}
 
 // ── Главная навигация: Стратегия ↔ Контент-план (отдельная услуга) ──
 function MainWorkspaceNav({mode,onStrategy,onContentPlan,t,isMobile}:{mode:"strategy"|"contentPlan";onStrategy:()=>void;onContentPlan:()=>void;t:(k:string,fb?:string)=>string;isMobile:boolean}){
+  // gradient-pill слайдер — как в AuthFormContent
+  const isStrategy=mode==="strategy";
+  const fz=isMobile?12:12.5;
+  const pad=isMobile?"6px 14px":"7px 18px";
+  const tabs:Array<{key:"strategy"|"contentPlan";label:string;tip:string;onClick:()=>void}>=[
+    {key:"strategy",label:t("nav_workspace_strategy","Стратегия"),tip:t("nav_workspace_strategy_tip","Карты проектов, шаги, Gantt"),onClick:onStrategy},
+    {key:"contentPlan",label:t("nav_workspace_content","Контент-план"),tip:t("nav_workspace_content_tip","Публикации и календарь по проектам"),onClick:onContentPlan},
+  ];
   return(
-    <div className={"workspace-nav-tabs tabs sa-ws-seg-tabs"+(isMobile?" workspace-nav-tabs--sm":"")} role="tablist" aria-label={t("workspace_nav_aria","Разделы приложения")}>
-      <button type="button" role="tab" className={"tab"+(mode==="strategy"?" on":"")} aria-selected={mode==="strategy"} title={mode==="strategy"?undefined:t("nav_workspace_strategy_tip","Карты проектов, шаги, Gantt")} disabled={mode==="strategy"} onClick={onStrategy}>{t("nav_workspace_strategy","Стратегия")}</button>
-      <button type="button" role="tab" className={"tab"+(mode==="contentPlan"?" on":"")} aria-selected={mode==="contentPlan"} title={mode==="contentPlan"?undefined:t("nav_workspace_content_tip","Публикации и календарь по проектам")} disabled={mode==="contentPlan"} onClick={onContentPlan}>{t("nav_workspace_content","Контент-план")}</button>
+    <div role="tablist" aria-label={t("workspace_nav_aria","Разделы приложения")}
+      style={{position:"relative",display:"inline-grid",gridTemplateColumns:"1fr 1fr",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:12,padding:3,gap:0}}>
+      <span aria-hidden="true" style={{position:"absolute",top:3,bottom:3,left:isStrategy?3:"calc(50% + 0px)",width:"calc(50% - 3px)",borderRadius:9,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",boxShadow:"0 6px 18px rgba(104,54,245,.3),inset 0 1px 0 rgba(255,255,255,.18)",transition:"left .28s cubic-bezier(.34,1.56,.64,1)"}}/>
+      {tabs.map(tb=>{
+        const on=mode===tb.key;
+        return(
+          <button key={tb.key} type="button" role="tab" aria-selected={on} aria-disabled={on} title={on?undefined:tb.tip} onClick={on?undefined:tb.onClick}
+            style={{position:"relative",zIndex:1,border:"none",background:"transparent",padding:pad,borderRadius:9,cursor:on?"default":"pointer",fontFamily:"inherit",fontSize:fz,fontWeight:on?700:600,letterSpacing:"-0.01em",color:on?"#fff":"var(--t2)",transition:"color .22s ease",textShadow:on?"0 1px 0 rgba(0,0,0,.18)":"none",whiteSpace:"nowrap"}}>
+            {tb.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -4425,16 +4442,23 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
 
 function NotifBell({unread,onClick,className,showLabel}:{unread:number;onClick:()=>void;className?:string;showLabel?:boolean}){
   const{t}=useLang();
+  const prevUnread=useRef(unread);
+  const[bump,setBump]=useState(false);
+  useEffect(()=>{
+    if(unread>prevUnread.current){setBump(true);const id=setTimeout(()=>setBump(false),500);return()=>clearTimeout(id);}
+    prevUnread.current=unread;
+  },[unread]);
   if(!API_BASE)return null;
   const isIc=className?.includes("btn-ic");
   const lbl=t("notifications_short","Уведомления");
+  const has=unread>0;
   return(
-    <button type="button" className={className||"btn-interactive"} onClick={onClick} title={t("notifications_title","Уведомления")} aria-label={t("notifications_title","Уведомления")}
-      style={isIc?{position:"relative"}:{position:"relative",padding:showLabel?"6px 12px":"6px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:14,fontWeight:800,display:"inline-flex",alignItems:"center",gap:6}}>
-      <span aria-hidden style={{fontSize:isIc?15:16,lineHeight:1}}>🔔</span>
+    <button type="button" className={(className||"btn-interactive")+(has?" sa-notif-pulse":"")} onClick={onClick} title={t("notifications_title","Уведомления")} aria-label={t("notifications_title","Уведомления")}
+      style={isIc?{position:"relative",transition:"all .22s cubic-bezier(.34,1.56,.64,1)"}:{position:"relative",padding:showLabel?"6px 12px":"6px 10px",borderRadius:10,border:".5px solid var(--b1)",background:"var(--inp)",color:"var(--t2)",cursor:"pointer",fontSize:14,fontWeight:800,display:"inline-flex",alignItems:"center",gap:6,transition:"all .22s cubic-bezier(.34,1.56,.64,1)"}}>
+      <span aria-hidden style={{fontSize:isIc?15:16,lineHeight:1,display:"inline-block",transformOrigin:"50% 10%",animation:has?"sa-bell-swing 2.4s ease-in-out infinite":"none"}}>🔔</span>
       {showLabel&&!isIc&&<span style={{fontSize:11,fontWeight:700,maxWidth:80,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lbl}</span>}
-      {unread>0&&(
-        <span style={{position:"absolute",top:isIc?4: -6,right:isIc?4: -6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"var(--accent-1)",color:"var(--accent-on-bg)",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px var(--accent-glow)",border:"2px solid var(--bg2)"}}>
+      {has&&(
+        <span key={unread} style={{position:"absolute",top:isIc?4: -6,right:isIc?4: -6,minWidth:18,height:18,padding:"0 6px",borderRadius:999,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:11,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 18px rgba(104,54,245,.45)",border:"2px solid var(--bg2)",animation:bump?"sa-badge-pop .5s cubic-bezier(.34,1.56,.64,1)":"none"}}>
           {unread>99?"99+":unread}
         </span>
       )}
