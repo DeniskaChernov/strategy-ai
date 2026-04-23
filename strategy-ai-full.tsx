@@ -5677,7 +5677,7 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
   async function build(){
     if(!selected)return;
     const missing=selected.fields.filter(fld=>!fields[fld.key]?.trim());
-    if(missing.length){setError(`Заполните: ${missing.map(f=>f.label).join(", ")}`);return;}
+    if(missing.length){setError(`${t("fill_fields","Заполните")}: ${missing.map(f=>f.label).join(", ")}`);return;}
     setError("");setGenerating(true);
     try{
       const prompt=selected.buildPrompt(fields,mapCtx);
@@ -5706,18 +5706,17 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
           <div style={{width:32,height:32,borderRadius:9,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>⎇</div>
           <div style={{flex:1}}>
             <div style={{fontSize:14.5,fontWeight:900,color:"var(--text)"}}>{t("scenario_templates","Шаблоны сценариев")}</div>
-            <div style={{fontSize:13.5,color:"var(--text4)"}}>AI сгенерирует стратегическую карту под ваш контекст</div>
+            <div style={{fontSize:13.5,color:"var(--text4)"}}>{t("scen_subtitle","AI сгенерирует стратегическую карту под ваш контекст")}</div>
           </div>
-          <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          <button className="modal-close" onClick={onClose} aria-label={t("close","Закрыть")}>×</button>
         </div>
-        <div style={{display:"flex",flex:1,overflow:"hidden"}}>
+        <div style={{display:"flex",flex:1,overflow:"hidden",flexDirection:isMobile?"column":"row"}}>
           {/* Template list */}
-          <div style={{width:240,borderRight:"1px solid var(--border)",overflowY:"auto",padding:"10px 8px",display:"flex",flexDirection:"column",gap:4,flexShrink:0}}>
+          <div style={{width:isMobile?"100%":240,maxHeight:isMobile?180:"none",borderRight:isMobile?"none":"1px solid var(--border)",borderBottom:isMobile?"1px solid var(--border)":"none",overflowY:"auto",padding:"10px 8px",display:"flex",flexDirection:isMobile?"row":"column",gap:4,flexShrink:0}}>
             {SC_TEMPLATES.map(tmpl=>(
               <div key={tmpl.id} onClick={()=>{setSelected(tmpl);setFields({});setError("");}}
-                style={{padding:"10px 12px",borderRadius:10,cursor:"pointer",background:selected?.id===tmpl.id?"rgba(104,54,245,.1)":"transparent",border:`1px solid ${selected?.id===tmpl.id?"rgba(104,54,245,.35)":"transparent"}`,transition:"all .15s"}}
-                onMouseOver={e=>{if(selected?.id!==tmpl.id){e.currentTarget.style.background="var(--surface)";e.currentTarget.style.borderColor="var(--border)";}}}
-                onMouseOut={e=>{if(selected?.id!==tmpl.id){e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="transparent";}}}>
+                className="sa-tmpl-row"
+                style={{padding:"10px 12px",borderRadius:10,cursor:"pointer",background:selected?.id===tmpl.id?"rgba(104,54,245,.1)":"transparent",border:`1px solid ${selected?.id===tmpl.id?"rgba(104,54,245,.35)":"transparent"}`,transition:"all .18s ease",flexShrink:0,minWidth:isMobile?180:undefined}}>
                 <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:3}}>
                   <span style={{fontSize:16}}>{tmpl.icon}</span>
                   <span style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{tmpl.name}</span>
@@ -5732,7 +5731,7 @@ function ScenarioTemplatesModal({onSelect,onClose,mapCtx="",theme="dark"}){
               <div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,color:"var(--text5)",textAlign:"center"}}>
                 <div style={{fontSize:36}}>⎇</div>
                 <div style={{fontSize:14,fontWeight:700,color:"var(--text3)"}}>{t("choose_template_left","Выберите шаблон слева")}</div>
-                <div style={{fontSize:13,color:"var(--text5)",maxWidth:260}}>AI сгенерирует персональную стратегическую карту на основе ваших данных</div>
+                <div style={{fontSize:13,color:"var(--text5)",maxWidth:260}}>{t("scen_subtitle_long","AI сгенерирует персональную стратегическую карту на основе ваших данных")}</div>
               </div>
             )}
             {selected&&(
@@ -5784,16 +5783,18 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
             <div style={{fontSize:13,color:"var(--text4)",marginTop:2}}>{t("choose_template","Выберите готовую стратегическую карту или начните с нуля")}</div>
           </div>
           {!canUse&&<div style={{padding:"4px 10px",borderRadius:8,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.2)",color:"#f09428",fontSize:13,fontWeight:700}}>{t("templates_team_tier_badge","Team+ тариф")}</div>}
-          <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          <button className="modal-close" onClick={onClose} aria-label={t("close","Закрыть")}>×</button>
         </div>
-        <div style={{flex:1,overflowY:"auto",padding:"18px 22px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12,alignContent:"start"}}>
+        <div style={{flex:1,overflowY:"auto",padding:"18px 22px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14,alignContent:"start"}}>
           {TEMPLATES.map(tmpl=>{
             const locked=!canUse;
+            const sel=selected===tmpl.id;
             return(
-              <div key={tmpl.id} onClick={()=>!locked&&setSelected(tmpl.id===selected?null:tmpl.id)}
-                style={{padding:"16px",borderRadius:14,border:`2px solid ${selected===tmpl.id?"var(--accent-1)":locked?"var(--border)":"var(--border)"}`,background:selected===tmpl.id?"var(--accent-soft)":locked?"var(--surface)":"var(--card)",cursor:locked?"not-allowed":"pointer",transition:"all .2s",opacity:locked?.5:1}}
-                onMouseOver={e=>{if(!locked)e.currentTarget.style.borderColor="var(--accent-1)";}}
-                onMouseOut={e=>{if(selected!==tmpl.id)e.currentTarget.style.borderColor="var(--border)";}}>
+              <div key={tmpl.id} role="button" tabIndex={locked?-1:0} aria-disabled={locked} aria-pressed={sel}
+                onClick={()=>!locked&&setSelected(sel?null:tmpl.id)}
+                onKeyDown={e=>{if(!locked&&(e.key==="Enter"||e.key===" ")){e.preventDefault();setSelected(sel?null:tmpl.id);}}}
+                className={"sa-tmpl-card"+(locked?" locked":"")}
+                style={{padding:"16px",borderRadius:14,border:`2px solid ${sel?"var(--accent-1)":"var(--border)"}`,background:sel?"var(--accent-soft)":locked?"var(--surface)":"var(--card)",cursor:locked?"not-allowed":"pointer",opacity:locked?.5:1,outline:"none"}}>
                 <div style={{fontSize:22,marginBottom:8}}>{tmpl.name.split(" ")[0]}</div>
                 <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",marginBottom:4}}>{tmpl.name.split(" ").slice(1).join(" ")}</div>
                 <div style={{fontSize:13,color:"var(--text4)",marginBottom:8}}>{tmpl.desc}</div>
@@ -5877,7 +5878,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
   const[results,setResults]=useState({});
   const[secResults,setSecResults]=useState({});
   const[activeId,setActiveId]=useState(null);
-  const[log,setLog]=useState([{role:"sys",text:"Опишите желаемый результат, установите параметры и нажмите ▶ Запустить"}]);
+  const[log,setLog]=useState<{role:string;text:string}[]>([{role:"sys",text:t("sim_intro_log","Опишите желаемый результат, установите параметры и нажмите ▶ Запустить")}]);
   const[aiInp,setAiInp]=useState("");
   const[aiLoad,setAiLoad]=useState(false);
   const[final,setFinal]=useState(null);
@@ -5912,9 +5913,9 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
     const inEdges=buildInEdges(mapData.edges||[]);
     const inEdgesSec=secMap?buildInEdges(secMap.edges||[]):{};
     setLog([
-      {role:"start",text:`▶ Запуск · ${ordered.length} шагов`},
-      ...(p.plannedResult?[{role:"plan",text:`🎯 Цель: "${p.plannedResult}"${p.plannedMetric?" · "+p.plannedMetric:""}`}]:[]),
-      {role:"sys",text:`💰 $${(+p.budget).toLocaleString()} · 👥 ${p.team} чел. · ⏱ ${p.timeline||"не указан"}`}
+      {role:"start",text:`▶ ${t("start_short","Запуск")} · ${ordered.length} ${t("steps_label","шагов")}`},
+      ...(p.plannedResult?[{role:"plan",text:`🎯 ${t("goal","Цель")}: "${p.plannedResult}"${p.plannedMetric?" · "+p.plannedMetric:""}`}]:[]),
+      {role:"sys",text:`💰 $${(+p.budget).toLocaleString()} · 👥 ${p.team} ${t("people_short","чел.")} · ⏱ ${p.timeline||t("not_set","не указан")}`}
     ]);
     for(let i=0;i<ordered.length;i++){
       if(!runRef.current)break;
@@ -5928,7 +5929,7 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
         sacc[ordSec[i].id]=sr;setSecResults({...sacc});
       }
       const icon=r.outcome==="success"?"✅":r.outcome==="partial"?"⚠️":"❌";
-      const dep=r.autoFail?" (заблокирован)":r.depPenalty>15?` (−${r.depPenalty}%)`:"";
+      const dep=r.autoFail?` (${t("blocked","заблокирован")})`:r.depPenalty>15?` (−${r.depPenalty}%)`:"";
       addLog(`${icon} "${node.title}" — ${r.score}%${dep}`,"step");
       await sleep(800);
     }
@@ -5941,11 +5942,11 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
       const budgetUsed=Math.round(pr.budget*(0.5+avg/200));
       const failNodes=ordered.filter(n=>acc[n.id]?.outcome==="fail");
       const secAvg=ordSec.length?Math.round(Object.values(sacc).reduce((s,r2)=>s+r2.score,0)/Math.max(1,ordSec.length)):null;
-      const planAchievement=avg>=80?"перевыполнен":avg>=60?"выполнен":avg>=40?"частично выполнен":"не выполнен";
+      const planAchievement=avg>=80?t("plan_overdone","перевыполнен"):avg>=60?t("plan_done","выполнен"):avg>=40?t("plan_partial","частично выполнен"):t("plan_failed","не выполнен");
       const f={avg,revenueAchieved,budgetUsed,failNodes,planAchievement,secAvg};
       setFinal(f);
-      addLog(`📊 Средний score: ${avg}% · Выручка: $${revenueAchieved.toLocaleString()} · ${planAchievement.toUpperCase()}`,"result");
-      if(secAvg!==null)addLog(`📊 Сценарий Б: ${secAvg}% ${secAvg>avg?"(лучше на "+(secAvg-avg)+"%)":`(хуже на ${avg-secAvg}%)`}`,"result");
+      addLog(`📊 ${t("avg_score","Средний score")}: ${avg}% · ${t("revenue","Выручка")}: $${revenueAchieved.toLocaleString()} · ${planAchievement.toUpperCase()}`,"result");
+      if(secAvg!==null)addLog(`📊 ${t("scenario_b","Сценарий Б")}: ${secAvg}% ${secAvg>avg?"("+t("better_by","лучше на")+" "+(secAvg-avg)+"%)":`(${t("worse_by","хуже на")} ${avg-secAvg}%)`}`,"result");
       // AI analysis
       setAiLoad(true);
       const nodeDetails=ordered.map(n=>{
@@ -5969,13 +5970,13 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
     }
   }
 
-  function pauseSim(){pauseRef.current=true;setSimState("paused");addLog("⏸ Пауза","sys");}
-  function resumeSim(){pauseRef.current=false;setSimState("running");addLog("▶ Продолжаем…","sys");}
-  function stopSim(){runRef.current=false;pauseRef.current=false;setSimState("idle");setActiveId(null);setResults({});setSecResults({});setFinal(null);setLog([{role:"sys",text:"Установите параметры и нажмите ▶ Запустить"}]);}
+  function pauseSim(){pauseRef.current=true;setSimState("paused");addLog("⏸ "+t("pause","Пауза"),"sys");}
+  function resumeSim(){pauseRef.current=false;setSimState("running");addLog("▶ "+t("resuming","Продолжаем…"),"sys");}
+  function stopSim(){runRef.current=false;pauseRef.current=false;setSimState("idle");setActiveId(null);setResults({});setSecResults({});setFinal(null);setLog([{role:"sys",text:t("sim_set_params","Установите параметры и нажмите ▶ Запустить")}]);}
   async function askAI(){
     if(!aiInp.trim()||aiLoad)return;
     const q=aiInp;setAiInp("");addLog(`👤 ${q}`,"user");setAiLoad(true);
-    const ctx=final?`Симуляция: итог ${final.avg}%, план ${final.planAchievement}.`:"";
+    const ctx=final?`${t("sim_short","Симуляция")}: ${t("result","итог")} ${final.avg}%, ${t("plan","план")} ${final.planAchievement}.`:"";
     try{const r=await callAI([{role:"user",content:`${ctx} Вопрос: ${q}`}],"Ты AI-советник по симуляции стратегии. Отвечай конкретно: что сделать, зачем, как измерить. Учитывай зависимости между шагами и «погоду».",350);addLog(`✦ ${r}`,"ai");}
     catch{addLog(`✦ ${t("ai_sim_error","Ошибка AI-консультанта")}`,"ai");}
     setAiLoad(false);
@@ -5987,25 +5988,30 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
   const fi={width:"100%",padding:"8px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"};
 
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.9))",display:"flex",flexDirection:"column",zIndex:300,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}}>
-<div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
-        <div style={{fontSize:15,fontWeight:900,color:"var(--text)",flex:1}}>⎇ Симуляция · {mapData.name||"Карта"}</div>
-        {isRunning&&<div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--text3)"}}><div style={{width:10,height:10,borderRadius:"50%",background:"#12c482",animation:"pulse 1s infinite"}}/>{progress}% завершено</div>}
+    <div data-theme={theme} role="dialog" aria-label={t("simulation","Симуляция")} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.9))",display:"flex",flexDirection:"column",zIndex:300,backdropFilter:"blur(16px)",animation:"fadeIn .2s ease"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0,position:"relative"}}>
+        <div style={{fontSize:15,fontWeight:900,color:"var(--text)",flex:1}}>⎇ {t("simulation","Симуляция")} · {mapData.name||t("map","Карта")}</div>
+        {isRunning&&<div style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"var(--text3)"}}><div style={{width:10,height:10,borderRadius:"50%",background:"#12c482",animation:"pulse 1s infinite"}}/>{progress}% {t("completed_short","завершено")}</div>}
         {isFinished&&final&&<div style={{fontSize:13,color:final.avg>=60?"#12c482":"#f09428",fontWeight:700}}>{final.planAchievement.toUpperCase()} · {final.avg}%</div>}
-        <button onClick={onClose} style={{width:32,height:32,borderRadius:"50%",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>×</button>
+        <button className="modal-close" onClick={onClose} aria-label={t("close","Закрыть")}>×</button>
+        {(isRunning||isFinished)&&(
+          <div aria-hidden style={{position:"absolute",left:0,right:0,bottom:-1,height:2,background:"rgba(255,255,255,.06)"}}>
+            <div className={isFinished?"":"sa-sim-bar"} style={{height:"100%",width:`${progress}%`,background:isFinished?"linear-gradient(90deg,var(--accent-1),var(--accent-2))":undefined}}/>
+          </div>
+        )}
       </div>
       <div style={{flex:1,display:"flex",overflow:"hidden"}}>
         {/* Left: params */}
         <div style={{width:240,flexShrink:0,borderRight:"1px solid var(--border)",overflowY:"auto",padding:"16px 14px",display:"flex",flexDirection:"column",gap:12}}>
           <div>
-            <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>🎯 Желаемый результат</div>
-            <textarea value={params.plannedResult} onChange={e=>setParams(p=>({...p,plannedResult:e.target.value}))} rows={2} placeholder="Например: Выйти на $100k MRR" style={{...fi,resize:"none"}} disabled={isRunning||isPaused}/>
+            <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>🎯 {t("sim_goal","Желаемый результат")}</div>
+            <textarea value={params.plannedResult} onChange={e=>setParams(p=>({...p,plannedResult:e.target.value}))} rows={2} placeholder={t("sim_goal_ph","Например: Выйти на $100k MRR")} style={{...fi,resize:"none"}} disabled={isRunning||isPaused}/>
           </div>
           <div>
-            <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>📊 Целевая метрика</div>
-            <input value={params.plannedMetric} onChange={e=>setParams(p=>({...p,plannedMetric:e.target.value}))} placeholder="100k MRR / 1000 клиентов" style={fi} disabled={isRunning||isPaused}/>
+            <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>📊 {t("sim_target_metric","Целевая метрика")}</div>
+            <input value={params.plannedMetric} onChange={e=>setParams(p=>({...p,plannedMetric:e.target.value}))} placeholder={t("sim_metric_ph","100k MRR / 1000 клиентов")} style={fi} disabled={isRunning||isPaused}/>
           </div>
-          {[["💰 Бюджет ($)","budget","number"],["👥 Команда (чел)","team","number"],["💵 Целевая выручка ($)","revenue","number"],["⏱ Срок","timeline","text"]].map(row=>{
+          {[[`💰 ${t("sim_budget","Бюджет ($)")}`,"budget","number"],[`👥 ${t("sim_team","Команда (чел)")}`,"team","number"],[`💵 ${t("sim_revenue","Целевая выручка ($)")}`,"revenue","number"],[`⏱ ${t("sim_term","Срок")}`,"timeline","text"]].map(row=>{
             const label=row[0],key=row[1],type=row[2];
             return(
               <div key={key}>
@@ -6016,25 +6022,25 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
           })}
           {otherMaps.length>0&&(
             <div>
-              <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>⎇ Сравнить с картой</div>
+              <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>⎇ {t("sim_compare","Сравнить с картой")}</div>
               <select value={secMapId} onChange={e=>setSecMapId(e.target.value)} style={{...fi,cursor:"pointer"}} disabled={isRunning||isPaused}>
-                <option value="">Без сравнения</option>
+                <option value="">{t("sim_no_compare","Без сравнения")}</option>
                 {otherMaps.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </div>
           )}
           <div style={{display:"flex",flexDirection:"column",gap:6,marginTop:4}}>
-            {!isRunning&&!isPaused&&<button onClick={startSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,var(--info),var(--accent-1))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Запустить</button>}
-            {isRunning&&<button onClick={pauseSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.08)",color:"#f09428",fontSize:13,fontWeight:700,cursor:"pointer"}}>⏸ Пауза</button>}
-            {isPaused&&<button onClick={resumeSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#12c482,#06b6d4)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ Продолжить</button>}
-            {(isRunning||isPaused)&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#f04458",fontSize:13,fontWeight:700,cursor:"pointer"}}>■ Стоп</button>}
-            {isFinished&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:700,cursor:"pointer"}}>↺ Заново</button>}
+            {!isRunning&&!isPaused&&<button onClick={startSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,var(--info),var(--accent-1))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ {t("run","Запустить")}</button>}
+            {isRunning&&<button onClick={pauseSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(245,158,11,.3)",background:"rgba(245,158,11,.08)",color:"#f09428",fontSize:13,fontWeight:700,cursor:"pointer"}}>⏸ {t("pause","Пауза")}</button>}
+            {isPaused&&<button onClick={resumeSim} style={{padding:"9px",borderRadius:9,border:"none",background:"linear-gradient(135deg,#12c482,#06b6d4)",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>▶ {t("resume","Продолжить")}</button>}
+            {(isRunning||isPaused)&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#f04458",fontSize:13,fontWeight:700,cursor:"pointer"}}>■ {t("stop","Стоп")}</button>}
+            {isFinished&&<button onClick={stopSim} style={{padding:"9px",borderRadius:9,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:700,cursor:"pointer"}}>↺ {t("again","Заново")}</button>}
           </div>
         </div>
         {/* Center: map + gantt tabs */}
         <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
           <div style={{display:"flex",gap:2,padding:"8px 12px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
-            {[["map","🗺 Карта"],["gantt","📅 Ганнт"]].map(item=>{
+            {[["map","🗺 "+t("map","Карта")],["gantt","📅 "+t("gantt_short","Ганнт")]].map(item=>{
               const k=item[0],lbl=item[1];
               return <button key={k} onClick={()=>setCenterTab(k)} style={{padding:"5px 14px",borderRadius:8,border:`1px solid ${centerTab===k?"rgba(104,54,245,.4)":"transparent"}`,background:centerTab===k?"rgba(104,54,245,.1)":"transparent",color:centerTab===k?"#b4a3ff":"var(--text4)",cursor:"pointer",fontSize:13,fontWeight:centerTab===k?700:500}}>{lbl}</button>;
             })}
@@ -6130,9 +6136,9 @@ function SimulationModal({mapData,allProjectMaps,onClose,theme="dark",statusMap}
             <div ref={logRef}/>
           </div>
           <div style={{padding:"10px 12px",borderTop:"1px solid var(--border)",flexShrink:0}}>
-            <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",marginBottom:6}}>✦ Спросить AI</div>
+            <div style={{fontSize:13.5,fontWeight:700,color:"var(--text4)",marginBottom:6}}>✦ {t("ask_ai","Спросить AI")}</div>
             <div style={{display:"flex",gap:6}}>
-              <input value={aiInp} onChange={e=>setAiInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")askAI();}} placeholder="Вопрос о симуляции…" style={{flex:1,padding:"7px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
+              <input value={aiInp} onChange={e=>setAiInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")askAI();}} placeholder={t("sim_ask_ph","Вопрос о симуляции…")} style={{flex:1,padding:"7px 10px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
               <button onClick={askAI} disabled={!aiInp.trim()||aiLoad} className="btn-interactive" style={{width:30,height:30,borderRadius:8,border:"none",background:aiInp.trim()&&!aiLoad?"var(--gradient-accent)":"var(--surface)",color:aiInp.trim()&&!aiLoad?"var(--accent-on-bg)":"var(--text4)",cursor:aiInp.trim()&&!aiLoad?"pointer":"not-allowed",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:aiInp.trim()&&!aiLoad?"0 2px 12px var(--accent-glow)":"none"}}>↑</button>
             </div>
           </div>

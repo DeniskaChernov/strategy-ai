@@ -2062,6 +2062,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sa-mini-map-wrap:hover{opacity:1;box-shadow:0 12px 32px rgba(0,0,0,.32)!important}
 .sa-mini-map-vp{transition:x .12s linear,y .12s linear,width .12s linear,height .12s linear}
 .sa-gantt-row:hover{background:var(--rowh,rgba(255,255,255,.04))}
+.sa-tmpl-row:hover{background:var(--surface)!important;border-color:var(--border)!important}
+.sa-tmpl-card{transition:all .22s cubic-bezier(.34,1.56,.64,1)}
+.sa-tmpl-card:not(.locked):hover{border-color:var(--accent-1)!important;transform:translateY(-3px);box-shadow:0 12px 28px var(--accent-glow)}
+.sa-tmpl-card:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px}
+@keyframes sa-sim-progress{from{background-position:0 0}to{background-position:48px 0}}
+.sa-sim-bar{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));background-size:48px 100%;animation:sa-sim-progress 1.6s linear infinite;transition:width .35s ease}
+@media (prefers-reduced-motion: reduce){.sa-sim-bar{animation:none}}
 .sa-gantt-row:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px;background:var(--rowh,rgba(255,255,255,.04))}
 @keyframes sa-gantt-pulse{0%,100%{opacity:.95}50%{opacity:.55}}
 .sa-gantt-today{animation:sa-gantt-pulse 2.4s ease-in-out infinite}
