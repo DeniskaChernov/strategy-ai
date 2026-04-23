@@ -1383,7 +1383,8 @@ function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme,stat
     onJump(-(wx-canvasW/zoom/2)*zoom,-(wy-canvasH/zoom/2)*zoom);
   }
   return(
-    <div onClick={handleClick} style={{position:"absolute",bottom:28,right:28,width:W,height:H,borderRadius:14,overflow:"hidden",background:"var(--bg2)",border:"1px solid var(--border2)",boxShadow:"0 8px 24px rgba(0,0,0,.25)",cursor:"crosshair",zIndex:50}}>
+    <div onClick={handleClick} className="sa-mini-map-wrap" aria-label={t("minimap_hint","Миникарта")} title={t("minimap_hint","Миникарта")}
+      style={{position:"absolute",bottom:28,right:28,width:W,height:H,borderRadius:14,overflow:"hidden",background:"var(--bg2)",border:".5px solid var(--b1)",boxShadow:"0 8px 24px rgba(0,0,0,.25)",cursor:"crosshair",zIndex:50}}>
       <svg width={W} height={H}>
         {edges.map(e=>{
           const s2=nodes.find(n=>n.id===e.source),t2=nodes.find(n=>n.id===e.target);
@@ -1394,7 +1395,7 @@ function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme,stat
           const st=STATUS[n.status];
           return <rect key={n.id} x={tx(n)} y={ty(n)} width={24} height={14} rx={3} fill={st?st.c+"33":"var(--accent-soft)"} stroke={st?st.c:"var(--accent-1)"} strokeWidth={.8}/>;
         })}
-        <rect x={Math.max(0,vpX)} y={Math.max(0,vpY)} width={Math.min(vpW,W)} height={Math.min(vpH,H)} fill="var(--accent-grid)" stroke="var(--accent-1)" strokeWidth={1} strokeDasharray="3,2"/>
+        <rect className="sa-mini-map-vp" x={Math.max(0,vpX)} y={Math.max(0,vpY)} width={Math.min(vpW,W)} height={Math.min(vpH,H)} fill="rgba(104,54,245,.18)" stroke="var(--accent-1)" strokeWidth={1.2} strokeDasharray="4,3" pointerEvents="none"/>
       </svg>
     </div>
   );
@@ -3113,9 +3114,8 @@ ${ctx}
               </span>
             )}
             {!readOnly&&<>{sep}
-            <button className="btn-interactive" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)"}}
-              onMouseOver={e=>{e.currentTarget.style.boxShadow="0 6px 24px var(--accent-glow)";}} onMouseOut={e=>{e.currentTarget.style.boxShadow="0 2px 12px var(--accent-glow)";}}>
-              <span style={{fontSize:17,lineHeight:1}}>+</span> Шаг
+            <button className="btn-interactive sa-tbar-btn--add" onClick={addNode} title={t("add_step_hint","Добавить шаг (клик на пустое место)")} style={{height:40,padding:isMobile?"0 14px":"0 18px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,flexShrink:0,display:"flex",alignItems:"center",gap:8,boxShadow:"0 2px 12px var(--accent-glow)"}}>
+              <span style={{fontSize:17,lineHeight:1}}>+</span> {t("step_short","Шаг")}
             </button>
             <button onClick={()=>{setConnecting(c=>!c);setConnectSrc(null);}} title={connecting?t("cancel","Отмена"):t("link_mode_hint","Режим связи: клик на источник, затем на цель")}
               style={{height:40,padding:isMobile?"0 12px":"0 16px",borderRadius:12,border:"none",background:connecting?"var(--accent-soft)":"var(--surface)",color:connecting?"var(--accent-2)":"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,display:"flex",alignItems:"center",gap:6,transition:"all .2s"}}>
@@ -3249,35 +3249,29 @@ ${ctx}
           {/* Export/Import */}
           <div style={{display:"flex",alignItems:"center",gap:shellUi?8:8,flexShrink:shellUi?undefined:0,flexWrap:"wrap",minWidth:0,maxWidth:"100%",...(shellUi?{flexBasis:"100%",width:"100%",paddingTop:8,marginTop:4,borderTop:"1px solid var(--b1)"}:{})}}>
             <span style={{fontSize:shellUi?13:12,color:"var(--text4)",letterSpacing:1,textTransform:"uppercase",fontWeight:600,marginRight:4,flexShrink:0}}>{t("export_label","Экспорт")}</span>
-            <button onClick={exportPNG} disabled={exporting} title="Скачать PNG"
-              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-              onMouseOver={e=>{if(!exporting)e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
+            <button className="sa-tbar-btn" onClick={exportPNG} disabled={exporting} title={t("export_png_title","Скачать PNG")}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0}}>
               {exporting?"…":"⬇ PNG"}
             </button>
-            <button onClick={exportJSON} title="Скачать JSON"
-              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-              onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
+            <button className="sa-tbar-btn" onClick={exportJSON} title={t("export_json_title","Скачать JSON")}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0}}>
               ⬇ JSON
             </button>
-            <button onClick={exportPDF} title={t("export_pdf_hint","PDF через печать браузера (Ctrl+P → Сохранить как PDF)")}
-              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-              onMouseOver={e=>{e.currentTarget.style.background="var(--surface)";}} onMouseOut={e=>{e.currentTarget.style.background="transparent";}}>
+            <button className="sa-tbar-btn" onClick={exportPDF} title={t("export_pdf_hint","PDF через печать браузера (Ctrl+P → Сохранить как PDF)")}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid var(--border)",background:"transparent",color:"var(--text3)",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0}}>
               ⬇ PDF
             </button>
-            <button onClick={exportPPTX} title={t("export_pptx","Скачать PPTX")}
-              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#f87171",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-              onMouseOver={e=>{e.currentTarget.style.background="rgba(239,68,68,.12)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(239,68,68,.06)";}}>
+            <button className="sa-tbar-btn--danger" onClick={exportPPTX} title={t("export_pptx","Скачать PPTX")}
+              style={{height:shellUi?36:32,padding:shellUi?"0 14px":"0 12px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.06)",color:"#f87171",cursor:"pointer",fontSize:shellUi?14:13,fontWeight:600,flexShrink:0}}>
               ⬇ PPTX
             </button>
             {/* Версии */}
             {API_BASE&&mapData?.id&&(
               <>
-                {!readOnly&&<button onClick={saveVersion} title={t("save_version_btn","Сохранить версию")}
-                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(104,54,245,.3)",background:"rgba(104,54,245,.08)",color:"#b4a3ff",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-                  onMouseOver={e=>{e.currentTarget.style.background="rgba(104,54,245,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(104,54,245,.08)";}}>📸 {t("save_version_short","Версия")}</button>}
-                <button onClick={()=>setShowVersions(true)} title={t("version_history","История версий")}
-                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(104,54,245,.3)",background:"rgba(104,54,245,.08)",color:"#b4a3ff",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0,transition:"all .15s"}}
-                  onMouseOver={e=>{e.currentTarget.style.background="rgba(104,54,245,.14)";}} onMouseOut={e=>{e.currentTarget.style.background="rgba(104,54,245,.08)";}}>
+                {!readOnly&&<button className="sa-tbar-btn--accent" onClick={saveVersion} title={t("save_version_btn","Сохранить версию")}
+                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(104,54,245,.3)",background:"rgba(104,54,245,.08)",color:"#b4a3ff",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>📸 {t("save_version_short","Версия")}</button>}
+                <button className="sa-tbar-btn--accent" onClick={()=>setShowVersions(true)} title={t("version_history","История версий")}
+                  style={{height:32,padding:"0 12px",borderRadius:10,border:"1px solid rgba(104,54,245,.3)",background:"rgba(104,54,245,.08)",color:"#b4a3ff",cursor:"pointer",fontSize:13,fontWeight:600,flexShrink:0}}>
                   📜 {!isMobile&&t("version_history_short","История")}
                 </button>
               </>

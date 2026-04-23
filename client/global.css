@@ -2046,6 +2046,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sa-map-card:hover .sa-map-card__del,.sa-map-card:focus-within .sa-map-card__del{opacity:1!important}
 .sa-map-card__del:hover{background:rgba(239,68,68,.14)!important;border-color:rgba(239,68,68,.42)!important}
 .sa-map-card__del:focus-visible{outline:2px solid rgba(240,68,88,.55);outline-offset:2px;opacity:1!important}
+/* ── Map toolbar export/version buttons: CSS-hover (вместо JS onMouseOver/Out) ── */
+.sa-tbar-btn{transition:background .18s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease}
+.sa-tbar-btn:hover{background:var(--card2)!important}
+.sa-tbar-btn--accent{transition:background .18s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease}
+.sa-tbar-btn--accent:hover{background:rgba(104,54,245,.14)!important}
+.sa-tbar-btn--danger{transition:background .18s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease}
+.sa-tbar-btn--danger:hover{background:rgba(239,68,68,.12)!important;border-color:rgba(239,68,68,.42)!important}
+.sa-tbar-btn--add{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease}
+.sa-tbar-btn--add:hover{transform:translateY(-1px);box-shadow:0 8px 24px var(--accent-glow)!important}
+.sa-tbar-btn:focus-visible,.sa-tbar-btn--accent:focus-visible,.sa-tbar-btn--danger:focus-visible,.sa-tbar-btn--add:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px}
+/* MiniMap viewport rect — плавный fade границы */
+.sa-mini-map-wrap{transition:opacity .25s ease,box-shadow .25s ease}
+.sa-mini-map-wrap{opacity:.88}
+.sa-mini-map-wrap:hover{opacity:1;box-shadow:0 12px 32px rgba(0,0,0,.32)!important}
+.sa-mini-map-vp{transition:x .12s linear,y .12s linear,width .12s linear,height .12s linear}
 .node-card{transition:filter .2s ease,transform .25s cubic-bezier(.25,.46,.45,.94);}
 .zoom-ctrl-btn{transition:background .2s ease,color .2s ease,transform .15s ease;}
 .zoom-ctrl-btn:hover{background:var(--surface2) !important;color:var(--text) !important;}
