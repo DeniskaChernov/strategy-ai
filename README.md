@@ -91,6 +91,13 @@ npm start
 
 ---
 
+## Для разработчиков фронта
+
+- [`docs/STRATEGY_AI_DESIGN_SYSTEM.md`](./docs/STRATEGY_AI_DESIGN_SYSTEM.md) — токены, типографика, компоненты DS
+- [`docs/UI_PATTERNS.md`](./docs/UI_PATTERNS.md) — shared primitives, классы, a11y/i18n/motion чек-лист
+
+---
+
 ## Тарифы
 
 | Тариф | Цена | AI сообщений |
