@@ -2293,19 +2293,21 @@ function DeadlineReminders({nodes,onGoToNode,onDismiss}:{nodes:any[],onGoToNode:
   const all=[...overdue,...soon];
   if(all.length===0)return null;
   return(
-    <div style={{position:"fixed",bottom:80,right:20,zIndex:350,width:280,background:"var(--surface)",border:`1px solid ${overdue.length?"rgba(239,68,68,.4)":"rgba(245,158,11,.35)"}`,borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,.3)",overflow:"hidden"}}>
+    <div role="status" aria-live="polite" className="sa-deadline-rem" style={{position:"fixed",bottom:80,right:20,zIndex:350,width:280,background:"var(--surface)",border:`1px solid ${overdue.length?"rgba(239,68,68,.4)":"rgba(245,158,11,.35)"}`,borderRadius:14,boxShadow:"0 8px 32px rgba(0,0,0,.3)",overflow:"hidden"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid var(--border)",background:overdue.length?"rgba(239,68,68,.08)":"rgba(245,158,11,.08)"}}>
         <span style={{fontSize:13,fontWeight:700,color:overdue.length?"#f04458":"#f09428"}}>⏰ {t("deadline_reminder","Напоминания")}{all.length>1?` · ${all.length}`:""}</span>
-        <button onClick={()=>onDismiss?.()} title={t("dismiss","Скрыть")} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:16}}>✕</button>
+        <button onClick={()=>onDismiss?.()} title={t("dismiss","Скрыть")} aria-label={t("dismiss","Скрыть")} className="sa-dr-close" style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:16,lineHeight:1,padding:2,borderRadius:6}}>✕</button>
       </div>
       {all.slice(0,4).map(n=>{
         const d=new Date(n.deadline);
         const diff=Math.round((d.getTime()-now.getTime())/(1000*60*60*24));
         const isOverdue=d<now;
         return(
-          <div key={n.id} onClick={()=>onGoToNode(n.id)} style={{padding:"10px 16px",borderBottom:"1px solid var(--border)",cursor:"pointer",transition:"background .15s"}}
-            onMouseOver={e=>(e.currentTarget as HTMLElement).style.background="var(--hover)"}
-            onMouseOut={e=>(e.currentTarget as HTMLElement).style.background="transparent"}>
+          <div key={n.id} onClick={()=>onGoToNode(n.id)} role="button" tabIndex={0}
+            onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onGoToNode(n.id);}}}
+            className="sa-dr-row"
+            aria-label={`${n.title} · ${isOverdue?t("days_overdue","просрочено {n}д.").replace("{n}",String(Math.abs(diff))):t("days_left","{n}д.").replace("{n}",String(diff))}`}
+            style={{padding:"10px 16px",borderBottom:"1px solid var(--border)",cursor:"pointer",transition:"background .15s",outline:"none"}}>
             <div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:2}}>{n.title}</div>
             <div style={{fontSize:11,color:isOverdue?"#f04458":"#f09428",fontWeight:600}}>
               {isOverdue?t("days_overdue","просрочено {n}д.").replace("{n}",String(Math.abs(diff))):t("days_left","{n}д.").replace("{n}",String(diff))+" · "+n.deadline}
@@ -2398,7 +2400,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
     }
     setLoading(false);
   }
-  useEffect(()=>{fetchBriefing();},[]);
+  useEffect(()=>{fetchBriefing();},[nodes]);
 
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.65))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
@@ -2412,12 +2414,12 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
         </div>
         <div style={{padding:"22px 26px"}}>
           {/* Метрики */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:20}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10,marginBottom:20}}>
             {[
               {label:t("total_steps","Всего"),value:nodes.length,color:"var(--accent-1)"},
               {label:t("done","Выполнено"),value:done.length,color:"#12c482"},
               {label:t("blocked","Заблокировано"),value:blocked.length,color:"#f04458"},
-              {label:"Health",value:`${health}%`,color:health>=70?"#12c482":health>=40?"#f09428":"#f04458"},
+              {label:t("health","Здоровье"),value:`${health}%`,color:health>=70?"#12c482":health>=40?"#f09428":"#f04458"},
             ].map(m=>(
               <div key={m.label} style={{textAlign:"center",padding:"12px 8px",borderRadius:12,background:"var(--bg2)",border:"1px solid var(--border)"}}>
                 <div style={{fontSize:22,fontWeight:800,color:m.color}}>{m.value}</div>
@@ -2429,9 +2431,9 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
           <div style={{padding:"16px 18px",borderRadius:12,background:"var(--accent-soft)",border:"1px solid var(--accent-1)",minHeight:80}}>
             <div style={{fontSize:12,fontWeight:700,color:"var(--accent-2)",marginBottom:8}}>✦ AI-анализ</div>
             {loading?(
-              <div style={{display:"flex",alignItems:"center",gap:8,color:"var(--text3)",fontSize:13}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,color:"var(--text3)",fontSize:13}} role="status" aria-live="polite">
                 <div style={{width:16,height:16,border:"2px solid var(--accent-1)",borderTopColor:"transparent",borderRadius:"50%",animation:"spin 0.7s linear infinite"}}/>
-                Анализирую карту…
+                {t("analyzing_map","Анализирую карту…")}
               </div>
             ):(
               <div>
@@ -2443,7 +2445,7 @@ function WeeklyBriefingModal({nodes,mapName,user,onClose,theme="dark",onError}:{
           {/* Критичные шаги */}
           {critical.length>0&&(
             <div style={{marginTop:16}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#f87171",marginBottom:8}}>⚠️ Критичные незавершённые шаги</div>
+              <div style={{fontSize:12,fontWeight:700,color:"#f87171",marginBottom:8}}>⚠️ {t("critical_unfinished","Критичные незавершённые шаги")}</div>
               {critical.slice(0,3).map((n:any)=>(
                 <div key={n.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:9,background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.15)",marginBottom:6}}>
                   <div style={{width:6,height:6,borderRadius:"50%",background:"#f04458",flexShrink:0}}/>
@@ -3674,16 +3676,20 @@ function NotificationsCenterModal({open,onClose,isMobile,zIndex=220,notifs,setNo
             <div style={{fontSize:14,fontWeight:900,color:"var(--text)"}}>{t("notif_center","Уведомления")}</div>
             <div style={{fontSize:12.5,color:"var(--text5)"}}>{notifUnread>0?t("notif_unread_n","Непрочитанных: {n}").replace("{n}",String(notifUnread)):t("notif_all_read","Все прочитано")}</div>
           </div>
-          <button type="button" className="btn-interactive" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 10px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:800}}>
+          <button type="button" className="btn-g" onClick={async()=>{await readAllNotifications();await loadNotifications();}} style={{padding:"7px 12px",borderRadius:10,fontSize:12,fontWeight:800,height:32}}>
             {t("notif_read_all","Прочитать все")}
           </button>
-          <button type="button" onClick={onClose} aria-label={t("close","Закрыть")} style={{width:30,height:30,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          <button type="button" className="modal-close" onClick={onClose} aria-label={t("close","Закрыть")}>×</button>
         </div>
         <div style={{padding:"10px 12px",overflow:"auto"}}>
           {notifLoading&&notifs.length===0?(
-            <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}}>{t("loading_short","Загрузка…")}</div>
+            <div style={{padding:"18px 10px",color:"var(--text5)",fontSize:13}} role="status" aria-live="polite">{t("loading_short","Загрузка…")}</div>
           ):notifs.length===0?(
-            <div style={{padding:"22px 10px",color:"var(--text5)",fontSize:13,textAlign:"center"}}>{t("notif_empty","Пока нет уведомлений")}</div>
+            <div style={{padding:"32px 16px",color:"var(--text5)",fontSize:13,textAlign:"center",display:"flex",flexDirection:"column",gap:10,alignItems:"center"}}>
+              <div style={{fontSize:28,opacity:.7}} aria-hidden>🔕</div>
+              <div style={{fontSize:14,fontWeight:700,color:"var(--text3)"}}>{t("notif_empty","Пока нет уведомлений")}</div>
+              <div style={{fontSize:12,color:"var(--text5)",maxWidth:320,lineHeight:1.5}}>{t("notif_empty_hint","Здесь появятся обновления по картам, шагам и дедлайнам команды.")}</div>
+            </div>
           ):(
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               {notifs.map((n:any)=>(

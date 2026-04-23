@@ -2071,6 +2071,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (prefers-reduced-motion: reduce){.sa-sim-bar{animation:none}}
 .sa-gantt-row:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px;background:var(--rowh,rgba(255,255,255,.04))}
 .sa-cp-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--accent-glow)}
+@keyframes sa-dr-in{from{opacity:0;transform:translate(16px,16px)}to{opacity:1;transform:translate(0,0)}}
+.sa-deadline-rem{animation:sa-dr-in .32s cubic-bezier(.34,1.56,.64,1) both}
+.sa-dr-row{outline:none}
+.sa-dr-row:hover{background:var(--rowh,rgba(104,54,245,.08))!important}
+.sa-dr-row:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:-2px}
+.sa-dr-close:hover{background:rgba(239,68,68,.10)!important;color:#f04458!important}
+.sa-dr-close:focus-visible{outline:2px solid rgba(239,68,68,.45);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.sa-deadline-rem{animation:none}}
 .sa-cp-card:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px;box-shadow:0 0 0 2px var(--accent-1)}
 .sa-pill{transition:all .18s cubic-bezier(.34,1.56,.64,1)!important}
 .sa-pill:hover{border-color:var(--accent-1)!important;transform:translateY(-1px)}
