@@ -2084,6 +2084,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sa-palette-btn[data-on="1"]{box-shadow:0 2px 10px var(--accent-glow)}
 .sa-palette-btn[data-on="1"] span:first-of-type{transform:scale(1.18) rotate(-3deg)}
 body,.sa-strategy-ui{transition:background-color .4s ease,color .35s ease}
+@keyframes sa-trial-pulse{0%,100%{box-shadow:0 0 0 0 rgba(104,54,245,.35)}50%{box-shadow:0 0 0 6px rgba(104,54,245,0)}}
+@keyframes sa-trial-flash{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.75;transform:scale(1.18)}}
+.sa-trial-flash{display:inline-block;animation:sa-trial-flash 1.6s ease-in-out infinite}
+.sa-mc-row:hover{border-color:rgba(239,68,68,.35)!important;transform:translateY(-1px)}
+.sa-mc-row:focus-visible{outline:2px solid rgba(239,68,68,.55);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.sa-mc-row{transition:none!important}.sa-mc-row:hover{transform:none!important}}
+@media (prefers-reduced-motion: reduce){.sa-trial-flash,.sa-trial-banner span[style*="sa-trial-pulse"]{animation:none!important}}
 @media (prefers-reduced-motion: reduce){.sa-palette-btn{transition:none!important}.sa-palette-btn:hover{transform:none!important}.sa-palette-btn[data-on="1"] span:first-of-type{transform:none!important}}
 .sa-cp-card:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px;box-shadow:0 0 0 2px var(--accent-1)}
 .sa-pill{transition:all .18s cubic-bezier(.34,1.56,.64,1)!important}

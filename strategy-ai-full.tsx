@@ -500,8 +500,8 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",on
       <div style={{position:"relative",zIndex:1,maxWidth:1300,width:"100%",margin:"0 auto",padding:isMobile?"0 16px 56px":"0 24px 80px",flex:1}}>
         <div style={{textAlign:"center",padding:isMobile?"28px 0 24px":"40px 0 44px"}}>
           <h1 style={{fontSize:isMobile?"clamp(26px,7vw,36px)":52,fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.05,marginBottom:10,animation:"slideUp .4s .1s both"}}>
-            Выберите<br/>
-            <span style={{background:`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}99,var(--accent-1))`,backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite"}}>свой тариф</span>
+            {t("tier_hero_line_1","Выберите")}<br/>
+            <span style={{background:`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}99,var(--accent-1))`,backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite"}}>{t("tier_hero_line_2","свой тариф")}</span>
           </h1>
         </div>
         <div style={{display:"grid",gridTemplateColumns:isMobile?"minmax(0,1fr)":"repeat(auto-fill,minmax(200px,1fr))",gap:14,marginBottom:36,alignItems:"stretch",maxWidth:isMobile?420:"none",marginLeft:isMobile?"auto":"",marginRight:isMobile?"auto":""}}>
@@ -532,7 +532,7 @@ function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",on
         <div style={{textAlign:"center",marginBottom:48}}>
           <button onClick={proceed} disabled={loading} style={{padding:"18px 72px",fontSize:17,fontWeight:800,borderRadius:18,border:"none",background:selected==="free"?"rgba(148,163,184,.12)":`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}bb)`,color:selected==="free"?"var(--text4)":"#fff",cursor:loading?"wait":"pointer",boxShadow:selected!=="free"?`0 16px 52px ${selMkt.glow}44`:"none",display:"inline-flex",alignItems:"center",gap:14,letterSpacing:-.3}}>
             {loading&&<div style={{width:18,height:18,border:"2px solid rgba(255,255,255,.3)",borderTop:"2px solid #fff",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>}
-            {loading?t("saving","Сохраняю…"):selected===curTier?`Остаться на ${sel.label}`:selected==="free"?"Начать бесплатно →":`Перейти на ${sel.label} — ${TIER_PRICES[selected]} →`}
+            {loading?t("saving","Сохраняю…"):selected===curTier?t("tier_stay_on","Остаться на {tier}").replace("{tier}",sel.label):selected==="free"?t("tier_start_free","Начать бесплатно →"):t("tier_go_to","Перейти на {tier} — {price} →").replace("{tier}",sel.label).replace("{price}",TIER_PRICES[selected])}
           </button>
         </div>
       </div>
@@ -548,22 +548,26 @@ function MapConflictModal({existingMaps,newNodeCount,tierLabel,tierMapsCount,onR
   async function doReplace(){if(!replaceId)return;setLoading(true);await onReplace(replaceId);}
   const mapsAllowed=tierMapsCount!=null?tierMapsCount:1;
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(16px)",padding:16}}>
-      <div className="glass-panel" style={{width:"min(95vw,480px)",maxHeight:"90vh",overflowY:"auto",background:"var(--glass-panel-bg,var(--bg2))",border:"1px solid rgba(239,68,68,.35)",borderRadius:"var(--r-xl)",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.55)"}}>
-        <div style={{padding:"22px 24px",borderBottom:"1px solid var(--border)"}}>
-          <div style={{fontSize:16,fontWeight:700,color:"var(--text)"}}>{t("map_limit","Лимит карт исчерпан")}</div>
-          <div style={{fontSize:13,color:"var(--text3)",marginTop:4}}>На тарифе {tierLabel} разрешено карт: {mapsAllowed}</div>
+    <div data-theme={theme} role="dialog" aria-modal="true" aria-label={t("map_limit","Лимит карт исчерпан")} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,backdropFilter:"blur(16px)",padding:16}}>
+      <div className="glass-panel" style={{width:"min(95vw,480px)",maxHeight:"90vh",overflowY:"auto",background:"var(--glass-panel-bg,var(--bg2))",border:"1px solid rgba(239,68,68,.35)",borderRadius:"var(--r-xl)",boxShadow:"var(--glass-shadow-accent,none),0 40px 80px rgba(0,0,0,.55)",animation:"scaleIn .22s cubic-bezier(.34,1.56,.64,1)"}}>
+        <div style={{padding:"22px 24px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"flex-start",gap:14}}>
+          <div aria-hidden style={{width:44,height:44,borderRadius:14,background:"linear-gradient(135deg,rgba(239,68,68,.18),rgba(104,54,245,.14))",border:"1px solid rgba(239,68,68,.28)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>⚠️</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>{t("map_limit","Лимит карт исчерпан")}</div>
+            <div style={{fontSize:13,color:"var(--text3)",marginTop:4}}>{t("tier_maps_allowed","На тарифе {tier} разрешено карт: {n}").replace("{tier}",tierLabel).replace("{n}",String(mapsAllowed))}</div>
+          </div>
         </div>
         <div style={{padding:"20px 24px"}}>
+          <div style={{fontSize:12,fontWeight:700,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.5,marginBottom:10}}>{t("map_conflict_pick","Выберите карту для замены")}</div>
           {existingMaps.map(m=>(
-            <div key={m.id} onClick={()=>setReplaceId(m.id)} style={{padding:"11px 14px",borderRadius:11,border:`2px solid ${replaceId===m.id?"rgba(239,68,68,.5)":"var(--border)"}`,background:replaceId===m.id?"rgba(239,68,68,.06)":"var(--surface)",cursor:"pointer",marginBottom:8}}>
-              <div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>{m.name}</div>
-              <div style={{fontSize:13.5,color:"var(--text5)"}}>{m.nodes?.length||0} шагов</div>
+            <div key={m.id} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setReplaceId(m.id);}}} onClick={()=>setReplaceId(m.id)} className="sa-mc-row" aria-pressed={replaceId===m.id} style={{padding:"11px 14px",borderRadius:11,border:`2px solid ${replaceId===m.id?"rgba(239,68,68,.5)":"var(--border)"}`,background:replaceId===m.id?"rgba(239,68,68,.06)":"var(--surface)",cursor:"pointer",marginBottom:8,transition:"all .2s ease",outline:"none"}}>
+              <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{m.name}</div>
+              <div style={{fontSize:12.5,color:"var(--text5)"}}>{m.nodes?.length||0} {t("steps_label","шагов")}</div>
             </div>
           ))}
           <div style={{display:"flex",gap:10,marginTop:16}}>
-            <button onClick={doReplace} disabled={!replaceId||loading} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:replaceId&&!loading?"linear-gradient(135deg,#dc2626,#f04458)":"var(--surface2)",color:replaceId&&!loading?"#fff":"var(--text4)",fontSize:13,fontWeight:700,cursor:replaceId&&!loading?"pointer":"not-allowed"}}>{loading?t("replacing",t("replacing","Заменяю…")):t("replace_btn","🗑 Заменить")}</button>
-            <button onClick={onUpgrade} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("upgrade_tier","✦ Расширить тариф")}</button>
+            <button type="button" onClick={doReplace} disabled={!replaceId||loading} aria-label={t("replace_btn","🗑 Заменить")} style={{flex:1,padding:"13px",borderRadius:12,border:"none",background:replaceId&&!loading?"linear-gradient(135deg,#dc2626,#f04458)":"var(--surface2)",color:replaceId&&!loading?"#fff":"var(--text4)",fontSize:13,fontWeight:800,cursor:replaceId&&!loading?"pointer":"not-allowed",transition:"transform .18s ease"}}>{loading?t("replacing","Заменяю…"):t("replace_btn","🗑 Заменить")}</button>
+            <button type="button" className="btn-p" onClick={onUpgrade} style={{flex:1,padding:"13px",borderRadius:12,fontSize:13,fontWeight:800}}>{t("upgrade_tier","✦ Расширить тариф")}</button>
           </div>
         </div>
       </div>
@@ -2239,9 +2243,13 @@ function TrialBanner({user,onUpgrade}:{user:any,onUpgrade:()=>void}){
   if(trialEnd<=now)return null;
   const daysLeft=Math.ceil((trialEnd.getTime()-now.getTime())/(1000*60*60*24));
   return(
-    <div style={{background:"var(--accent-soft)",borderBottom:"1px solid var(--accent-1)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13}}>
-      <span style={{color:"var(--accent-2)",fontWeight:600}}>⚡ {t("trial_active","Пробный период активен")} — {daysLeft} {t("trial_days_left","дней осталось")}</span>
-      <button onClick={onUpgrade} style={{padding:"4px 14px",borderRadius:7,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:12,fontWeight:700,cursor:"pointer"}}>{t("upgrade","Улучшить →")}</button>
+    <div role="status" className="sa-trial-banner" style={{position:"sticky",top:0,zIndex:5,background:"linear-gradient(90deg,var(--accent-soft),var(--accent-soft) 40%,rgba(104,54,245,.12))",borderBottom:"1px solid var(--accent-1)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13,flexWrap:"wrap"}}>
+      <span style={{color:"var(--accent-2)",fontWeight:700,display:"inline-flex",alignItems:"center",gap:6}}>
+        <span className="sa-trial-flash" aria-hidden>⚡</span>
+        {t("trial_active","Пробный период активен")}
+        <span style={{padding:"2px 8px",borderRadius:999,background:"var(--accent-1)",color:"#fff",fontSize:11,fontWeight:800,animation:"sa-trial-pulse 2.6s ease-in-out infinite"}}>{daysLeft} {t("trial_days_left","дней осталось")}</span>
+      </span>
+      <button type="button" className="btn-p" onClick={onUpgrade} style={{padding:"6px 14px",borderRadius:8,fontSize:12,fontWeight:800}}>{t("upgrade","Улучшить →")}</button>
     </div>
   );
 }
@@ -2263,12 +2271,15 @@ function EmailVerifyBanner({user,onVerified}:{user:any,onVerified?:()=>void}){
     setLoading(false);
   }
   return(
-    <div style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08))",borderBottom:"1px solid rgba(245,158,11,.3)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13}}>
-      <span style={{color:"#f09428",fontWeight:600}}>✉️ {t("verify_email_banner","Подтвердите ваш email для полного доступа.")}</span>
+    <div role="status" style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08))",borderBottom:"1px solid rgba(245,158,11,.35)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13,flexWrap:"wrap"}}>
+      <span style={{color:"#f09428",fontWeight:700,display:"inline-flex",alignItems:"center",gap:6}}>
+        <span aria-hidden>✉️</span>
+        {t("verify_email_banner","Подтвердите ваш email для полного доступа.")}
+      </span>
       {sent?(
-        <span style={{color:"#12c482",fontWeight:600,fontSize:12}}>{t("verify_email_sent","Письмо отправлено! Проверьте почту.")}</span>
+        <span style={{color:"#12c482",fontWeight:700,fontSize:12}}>{t("verify_email_sent","Письмо отправлено! Проверьте почту.")}</span>
       ):(
-        <button onClick={resend} disabled={loading} style={{padding:"4px 14px",borderRadius:7,border:"1px solid rgba(245,158,11,.4)",background:"rgba(245,158,11,.1)",color:"#fbbf24",fontSize:12,fontWeight:700,cursor:loading?"wait":"pointer"}}>
+        <button type="button" className="btn-p" onClick={resend} disabled={loading} style={{padding:"5px 14px",borderRadius:8,fontSize:12,fontWeight:800}}>
           {loading?"…":t("verify_email_resend","Отправить письмо")}
         </button>
       )}
