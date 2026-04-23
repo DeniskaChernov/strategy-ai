@@ -2070,6 +2070,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .sa-sim-bar{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));background-size:48px 100%;animation:sa-sim-progress 1.6s linear infinite;transition:width .35s ease}
 @media (prefers-reduced-motion: reduce){.sa-sim-bar{animation:none}}
 .sa-gantt-row:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px;background:var(--rowh,rgba(255,255,255,.04))}
+.sa-cp-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--accent-glow)}
+.sa-cp-card:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px;box-shadow:0 0 0 2px var(--accent-1)}
+.sa-pill{transition:all .18s cubic-bezier(.34,1.56,.64,1)!important}
+.sa-pill:hover{border-color:var(--accent-1)!important;transform:translateY(-1px)}
+.sa-pill:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px}
+.sa-pill[data-on="1"]{box-shadow:0 2px 10px var(--accent-glow)}
+@media (prefers-reduced-motion: reduce){.sa-cp-card,.sa-pill{transition:none!important;animation:none!important}.sa-cp-card:hover,.sa-pill:hover{transform:none!important}}
 @keyframes sa-gantt-pulse{0%,100%{opacity:.95}50%{opacity:.55}}
 .sa-gantt-today{animation:sa-gantt-pulse 2.4s ease-in-out infinite}
 @media (prefers-reduced-motion: reduce){.sa-gantt-today{animation:none}}

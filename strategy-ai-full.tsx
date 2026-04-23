@@ -4519,9 +4519,34 @@ function NotifBell({unread,onClick,className,showLabel}:{unread:number;onClick:(
 }
 
 // ── ContentPlanTab (Pro+): ведение контент-плана по проекту, связь с шагами стратегии ──
-const CONTENT_TYPES=[{id:"post",labelKey:"content_type_post"},{id:"story",labelKey:"content_type_story"},{id:"email",labelKey:"content_type_email"},{id:"video",labelKey:"content_type_video"}];
-const CONTENT_CHANNELS=[{id:"blog",labelKey:"content_channel_blog"},{id:"instagram",labelKey:"content_channel_instagram"},{id:"telegram",labelKey:"content_channel_telegram"},{id:"vk",labelKey:"content_channel_vk"},{id:"youtube",labelKey:"content_channel_youtube"},{id:"email",labelKey:"content_channel_email"}];
-const CONTENT_STATUSES=[{id:"draft",labelKey:"content_status_draft"},{id:"scheduled",labelKey:"content_status_scheduled"},{id:"published",labelKey:"content_status_published"}];
+const CONTENT_TYPES=[{id:"post",labelKey:"content_type_post",fb:"Пост"},{id:"story",labelKey:"content_type_story",fb:"История"},{id:"email",labelKey:"content_type_email",fb:"Рассылка"},{id:"video",labelKey:"content_type_video",fb:"Видео"}];
+const CONTENT_CHANNELS=[{id:"blog",labelKey:"content_channel_blog",fb:"Блог"},{id:"instagram",labelKey:"content_channel_instagram",fb:"Instagram"},{id:"telegram",labelKey:"content_channel_telegram",fb:"Telegram"},{id:"vk",labelKey:"content_channel_vk",fb:"ВКонтакте"},{id:"youtube",labelKey:"content_channel_youtube",fb:"YouTube"},{id:"email",labelKey:"content_channel_email",fb:"Email"}];
+const CONTENT_STATUSES=[{id:"draft",labelKey:"content_status_draft",fb:"Черновик"},{id:"scheduled",labelKey:"content_status_scheduled",fb:"Запланировано"},{id:"published",labelKey:"content_status_published",fb:"Опубликовано"}];
+
+function contentLabel(arr:{id:string,labelKey:string,fb?:string}[],id:string,t:(k:string,fb?:string)=>string,defaultFb=""){
+  const x=arr.find(a=>a.id===id);
+  if(!x)return defaultFb;
+  return t(x.labelKey,x.fb||defaultFb||x.id);
+}
+
+function PillGroup({items,value,onChange,ariaLabel}:{items:{id:string,labelKey:string,fb?:string}[],value:string,onChange:(id:string)=>void,ariaLabel?:string}){
+  const{t}=useLang();
+  return(
+    <div style={{display:"flex",gap:6,flexWrap:"wrap"}} role="group" aria-label={ariaLabel}>
+      {items.map(x=>{
+        const on=value===x.id;
+        return(
+          <button key={x.id} type="button" aria-pressed={on} onClick={()=>onChange(x.id)}
+            className="sa-pill"
+            data-on={on?"1":"0"}
+            style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${on?"var(--accent-1)":"var(--border)"}`,background:on?"var(--accent-soft)":"var(--surface)",color:on?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:on?700:600,transition:"all .18s cubic-bezier(.34,1.56,.64,1)"}}>
+            {t(x.labelKey,x.fb||x.id)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTier}:{projectId:string;projectName:string;maps:any[];user:any;theme:string;lang:string;t:(k:string,fb?:string)=>string;onChangeTier:(tier:string)=>void}){
   const [items,setItems]=useState<any[]>([]);
@@ -4615,24 +4640,20 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
     return(
       <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(280px,1fr))",gap:20,padding:"4px 0"}} role="region" aria-label={t("content_map_aria","Карточки публикаций")}>
         {filtered.map((it:any)=>(
-          <div key={it.id} className="glass-card btn-interactive" role="button" tabIndex={0}
+          <div key={it.id} className="glass-card btn-interactive sa-cp-card" role="button" tabIndex={0}
             aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
             onClick={()=>setEditId(it.id)}
             onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
-            style={{padding:"20px 18px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",cursor:"pointer",display:"flex",flexDirection:"column",gap:10,minHeight:120,transition:"all .2s",position:"relative",outline:"none"}}
-            onMouseOver={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow="0 12px 32px var(--accent-glow)";}}
-            onMouseOut={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}
-            onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
-            onBlur={e=>{e.currentTarget.style.boxShadow="";}}>
+            style={{padding:"20px 18px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",cursor:"pointer",display:"flex",flexDirection:"column",gap:10,minHeight:120,transition:"transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease",position:"relative",outline:"none"}}>
             <div style={{fontSize:14,fontWeight:800,color:"var(--text)",lineHeight:1.4,overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}} title={it.title}>{it.title||t("untitled","Без названия")}</div>
             <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap",marginTop:"auto"}}>
-              <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+              <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post",CONTENT_TYPES.find((x:any)=>x.id===it.type)?.fb||"Пост")}</span>
               <span>·</span>
               <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
             </div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4,gap:8}}>
               <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:11.5,fontWeight:700}}>
-                {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
+                {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft",CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.fb||"Черновик")}
               </div>
               <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
             </div>
@@ -4664,14 +4685,14 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)",marginBottom:2}}>{it.title||t("untitled","Без названия")}</div>
             <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
-              <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+              <span>{t(CONTENT_TYPES.find((x:any)=>x.id===it.type)?.labelKey||"content_type_post",CONTENT_TYPES.find((x:any)=>x.id===it.type)?.fb||"Пост")}</span>
               <span>·</span>
               <span>{CHANNEL_LABEL[it.channel]||it.channel}</span>
               {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
             </div>
           </div>
           <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
-            {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft")}
+            {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft",CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.fb||"Черновик")}
           </div>
           <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
         </div>
@@ -4863,7 +4884,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
         <div role="group" aria-label={t("content_filter_status_aria","Статус публикации")} style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {["all",...CONTENT_STATUSES.map(s=>s.id)].map(s=>(
             <button key={s} type="button" aria-pressed={filterStatus===s} onClick={()=>setFilterStatus(s)} style={{padding:"7px 14px",borderRadius:10,border:`1px solid ${filterStatus===s?"var(--accent-1)":"var(--border)"}`,background:filterStatus===s?"var(--accent-soft)":"var(--surface)",color:filterStatus===s?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12.5,fontWeight:filterStatus===s?800:600,transition:"border-color .15s, background .15s"}}>
-              {s==="all"?t("all_statuses","Все"):t(CONTENT_STATUSES.find(x=>x.id===s)?.labelKey||"")}
+              {s==="all"?t("all_statuses","Все"):t(CONTENT_STATUSES.find(x=>x.id===s)?.labelKey||"",CONTENT_STATUSES.find(x=>x.id===s)?.fb||s)}
             </button>
           ))}
         </div>
@@ -4900,15 +4921,15 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:14,fontWeight:700,color:"var(--text)",marginBottom:4}}>{it.title||t("untitled","Без названия")}</div>
                     <div style={{fontSize:12,color:"var(--text4)",display:"flex",gap:8,flexWrap:"wrap"}}>
-                      <span>{t(CONTENT_TYPES.find(x=>x.id===it.type)?.labelKey||"content_type_post")}</span>
+                      <span>{t(CONTENT_TYPES.find(x=>x.id===it.type)?.labelKey||"content_type_post",CONTENT_TYPES.find(x=>x.id===it.type)?.fb||"Пост")}</span>
                       <span>·</span>
-                      <span>{t(CONTENT_CHANNELS.find(x=>x.id===it.channel)?.labelKey||"content_channel_blog")}</span>
+                      <span>{t(CONTENT_CHANNELS.find(x=>x.id===it.channel)?.labelKey||"content_channel_blog",CONTENT_CHANNELS.find(x=>x.id===it.channel)?.fb||"Блог")}</span>
                       {it.scheduledDate&&<><span>·</span><span>{it.scheduledDate}</span></>}
                       {it.strategyStepTitle&&<><span>·</span><span style={{color:"var(--accent-1)"}}>↗ {it.strategyStepTitle}</span></>}
                     </div>
                   </div>
                   <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",border:`1px solid ${it.status==="published"?"rgba(16,185,129,.3)":it.status==="scheduled"?"var(--glass-border-accent,var(--border))":"var(--border)"}`,color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
-                    {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft")}
+                    {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft",CONTENT_STATUSES.find(x=>x.id===it.status)?.fb||"Черновик")}
                   </div>
                   <button type="button" onClick={()=>setEditId(it.id)} className="btn-interactive" title={t("edit","Редактировать")} aria-label={t("content_edit_item_aria","Редактировать: {title}").replace("{title}",(it.title||t("untitled","Без названия")).slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:700}}>✏️</button>
                   <button type="button" onClick={()=>removeItem(it.id)} className="btn-interactive" title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",(it.title||"").slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,fontWeight:800}}>🗑</button>
@@ -4980,16 +5001,16 @@ function ContentPlanItemModal({formKey,item,allNodes,t,theme,onSave,onClose}:{fo
         <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:18}}>✍️ {item.id?t("edit","Редактировать"):t("add_content_item","Публикация")}</div>
         <input placeholder={t("title","Название")} value={title} onChange={e=>{setTitle(e.target.value);setDirty(true);}} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:10,outline:"none",fontFamily:"inherit"}}/>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_type","Тип контента")}</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}} role="group" aria-label={t("content_label_type","Тип контента")}>
-          {CONTENT_TYPES.map(x=>(<button key={x.id} type="button" aria-pressed={type===x.id} onClick={()=>{setType(x.id);setDirty(true);}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${type===x.id?"var(--accent-1)":"var(--border)"}`,background:type===x.id?"var(--accent-soft)":"var(--surface)",color:type===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:type===x.id?700:600}}>{t(x.labelKey)}</button>))}
+        <div style={{marginBottom:12}}>
+          <PillGroup items={CONTENT_TYPES} value={type} onChange={(v)=>{setType(v);setDirty(true);}} ariaLabel={t("content_label_type","Тип контента")}/>
         </div>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_channel","Канал публикации")}</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}} role="group" aria-label={t("content_label_channel","Канал публикации")}>
-          {CONTENT_CHANNELS.map(x=>(<button key={x.id} type="button" aria-pressed={channel===x.id} onClick={()=>{setChannel(x.id);setDirty(true);}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${channel===x.id?"var(--accent-1)":"var(--border)"}`,background:channel===x.id?"var(--accent-soft)":"var(--surface)",color:channel===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:channel===x.id?700:600}}>{t(x.labelKey)}</button>))}
+        <div style={{marginBottom:12}}>
+          <PillGroup items={CONTENT_CHANNELS} value={channel} onChange={(v)=>{setChannel(v);setDirty(true);}} ariaLabel={t("content_label_channel","Канал публикации")}/>
         </div>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_label_status","Статус")}</div>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}} role="group" aria-label={t("content_label_status","Статус")}>
-          {CONTENT_STATUSES.map(x=>(<button key={x.id} type="button" aria-pressed={status===x.id} onClick={()=>{setStatus(x.id);setDirty(true);}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${status===x.id?"var(--accent-1)":"var(--border)"}`,background:status===x.id?"var(--accent-soft)":"var(--surface)",color:status===x.id?"var(--accent-1)":"var(--text3)",cursor:"pointer",fontSize:12,fontWeight:status===x.id?700:600}}>{t(x.labelKey)}</button>))}
+        <div style={{marginBottom:12}}>
+          <PillGroup items={CONTENT_STATUSES} value={status} onChange={(v)=>{setStatus(v);setDirty(true);}} ariaLabel={t("content_label_status","Статус")}/>
         </div>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("scheduled_date_short","Дата публикации")}</div>
         <input type="date" value={scheduledDate} onChange={e=>{setScheduledDate(e.target.value);setDirty(true);}} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}/>
