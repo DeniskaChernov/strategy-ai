@@ -87,6 +87,46 @@ const LangCtx = createContext<LangValue>({
 const useLang=()=>useContext(LangCtx);
 const useIsMobile=()=>{const[m,setM]=useState(()=>window.innerWidth<=640);useEffect(()=>{const h=()=>setM(window.innerWidth<=640);window.addEventListener("resize",h,{passive:true});return()=>window.removeEventListener("resize",h);},[]);return m;};
 
+// ── useNotifications: единый хук загрузки уведомлений ──
+// Вызов: const {notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications}=useNotifications(showNotifs);
+// Полит/опрос каждые 30с, пока открыта шторка уведомлений; один начальный fetch при монтировании.
+function useNotifications(pollWhenOpen:boolean, userEmail?:string){
+  const[notifs,setNotifs]=useState<any[]>([]);
+  const[notifUnread,setNotifUnread]=useState(0);
+  const[notifLoading,setNotifLoading]=useState(false);
+  const loadNotifications=React.useCallback(async()=>{
+    if(!API_BASE)return;
+    if(userEmail!==undefined && !userEmail)return;
+    setNotifLoading(true);
+    try{
+      const d=await getNotifications();
+      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
+      setNotifUnread(Number(d?.unread||0));
+    }catch{}
+    setNotifLoading(false);
+  },[userEmail]);
+  useEffect(()=>{loadNotifications();},[loadNotifications]);
+  useEffect(()=>{
+    if(!pollWhenOpen)return;
+    loadNotifications();
+    const id=setInterval(()=>loadNotifications(),30000);
+    return()=>clearInterval(id);
+  },[pollWhenOpen,loadNotifications]);
+  return{notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications};
+}
+
+// ── IconButton: круглая 32×32 кнопка в стиле .btn-g для тулбаров и иконочных действий ──
+type IconButtonProps=React.ButtonHTMLAttributes<HTMLButtonElement>&{active?:boolean;danger?:boolean;size?:number};
+const IconButton=React.forwardRef<HTMLButtonElement,IconButtonProps>(function IconButton({active=false,danger=false,size=32,className="",style,children,...rest},ref){
+  const cls="sa-ic-btn btn-interactive"+(active?" on":"")+(danger?" danger":"")+(className?" "+className:"");
+  return(
+    <button ref={ref} type="button" className={cls} {...rest}
+      style={{width:size,height:size,borderRadius:10,display:"inline-flex",alignItems:"center",justifyContent:"center",border:".5px solid var(--b1)",background:active?"var(--card2)":"var(--inp)",color:danger?"var(--red)":active?"var(--t1)":"var(--t2)",cursor:"pointer",fontFamily:"inherit",fontSize:14,lineHeight:1,padding:0,transition:"all .22s cubic-bezier(.34,1.56,.64,1)",...style}}>
+      {children}
+    </button>
+  );
+});
+
 // ── CustomSelect ──
 function CustomSelect({value,onChange,options,style={},disabled=false}){
   const{t}=useLang();
@@ -2421,9 +2461,7 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   const[showDeadlines,setShowDeadlines]=useState(true);
   const[showBriefing,setShowBriefing]=useState(false);
   const[showNotifs,setShowNotifs]=useState(false);
-  const[notifs,setNotifs]=useState<any[]>([]);
-  const[notifUnread,setNotifUnread]=useState(0);
-  const[notifLoading,setNotifLoading]=useState(false);
+  const{notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications}=useNotifications(showNotifs,user?.email);
   // WebSocket presence
   const[onlineUsers,setOnlineUsers]=useState<any[]>([]);
   const[remoteCursors,setRemoteCursors]=useState<Record<string,{x:number,y:number,name:string,email:string}>>({});
@@ -2446,24 +2484,6 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
     setTimeout(()=>setToasts((t:any[])=>t.filter((x:any)=>x.id!==id)),4300);
   }
   function pushUndo(n:any,e:any){setUndoStack((s:any[])=>[...s.slice(-29),{nodes:n,edges:e}]);setRedoStack([]);}
-
-  async function loadNotifications(){
-    if(!API_BASE||!user?.email)return;
-    setNotifLoading(true);
-    try{
-      const d=await getNotifications();
-      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
-      setNotifUnread(Number(d?.unread||0));
-    }catch{}
-    setNotifLoading(false);
-  }
-  useEffect(()=>{loadNotifications();},[]);
-  useEffect(()=>{
-    if(!showNotifs)return;
-    loadNotifications();
-    const id=setInterval(()=>loadNotifications(),30000);
-    return()=>clearInterval(id);
-  },[showNotifs]);
 
   useEffect(()=>{
     if(!focusNodeId)return;
@@ -3664,31 +3684,11 @@ function ContentPlanHubPage({user,theme,onBackToStrategy,onOpenProject,onLogout,
   const[loading,setLoading]=useState(true);
   const[showAIHub,setShowAIHub]=useState(false);
   const[showNotifs,setShowNotifs]=useState(false);
-  const[notifs,setNotifs]=useState<any[]>([]);
-  const[notifUnread,setNotifUnread]=useState(0);
-  const[notifLoading,setNotifLoading]=useState(false);
+  const{notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications}=useNotifications(showNotifs,user?.email);
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
 
   useEffect(()=>{(async()=>{setLoading(true);try{const ps=await getProjects(user.email);setProjects(ps);const mm:Record<string,any[]>={};for(const p of ps){mm[p.id]=await getMaps(p.id);}setMapsByProj(mm);}catch{setProjects([]);setMapsByProj({});}finally{setLoading(false);}})();},[user?.email]);
   useEffect(()=>{document.title=t("cp_doc_hub_title","Strategy AI — Контент-план");},[t]);
-
-  async function loadNotifications(){
-    if(!API_BASE)return;
-    setNotifLoading(true);
-    try{
-      const d=await getNotifications();
-      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
-      setNotifUnread(Number(d?.unread||0));
-    }catch{}
-    setNotifLoading(false);
-  }
-  useEffect(()=>{loadNotifications();},[]);
-  useEffect(()=>{
-    if(!showNotifs)return;
-    loadNotifications();
-    const id=setInterval(()=>loadNotifications(),30000);
-    return()=>clearInterval(id);
-  },[showNotifs]);
 
   const allMapsForAI=Object.values(mapsByProj).flatMap((arr:any)=>Array.isArray(arr)?arr:[]);
   const aiNodes=allMapsForAI.flatMap((m:any)=>m.nodes||[]).slice(0,220);
@@ -3852,31 +3852,11 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
   const[showAIHub,setShowAIHub]=useState(false);
   const[showNotifs,setShowNotifs]=useState(false);
-  const[notifs,setNotifs]=useState<any[]>([]);
-  const[notifUnread,setNotifUnread]=useState(0);
-  const[notifLoading,setNotifLoading]=useState(false);
+  const{notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications}=useNotifications(showNotifs,user?.email);
   const[allProjects,setAllProjects]=useState<any[]>([]);
 
   useEffect(()=>{document.title=`${project?.name||"Проект"} — ${t("cp_doc_suffix","Контент-план")}`;},[project?.name,t]);
   useEffect(()=>{(async()=>{try{setAllProjects(await getProjects(user.email));}catch{setAllProjects([]);}})();},[user?.email]);
-
-  async function loadNotifications(){
-    if(!API_BASE)return;
-    setNotifLoading(true);
-    try{
-      const d=await getNotifications();
-      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
-      setNotifUnread(Number(d?.unread||0));
-    }catch{}
-    setNotifLoading(false);
-  }
-  useEffect(()=>{loadNotifications();},[]);
-  useEffect(()=>{
-    if(!showNotifs)return;
-    loadNotifications();
-    const id=setInterval(()=>loadNotifications(),30000);
-    return()=>clearInterval(id);
-  },[showNotifs]);
 
   const aiNodes=(maps||[]).flatMap((m:any)=>m.nodes||[]).slice(0,220);
   const aiEdges=(maps||[]).flatMap((m:any)=>m.edges||[]).slice(0,260);
@@ -4011,9 +3991,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const[newName,setNewName]=useState("");
   const[delId,setDelId]=useState(null);
   const[showNotifs,setShowNotifs]=useState(false);
-  const[notifs,setNotifs]=useState<any[]>([]);
-  const[notifUnread,setNotifUnread]=useState(0);
-  const[notifLoading,setNotifLoading]=useState(false);
+  const{notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications}=useNotifications(showNotifs,user?.email);
   const[showAIHub,setShowAIHub]=useState(false);
   const[showBriefing,setShowBriefing]=useState(false);
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
@@ -4030,24 +4008,6 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
     finally{setLoading(false);}
   }
   useEffect(()=>{loadProjects();},[]);
-
-  async function loadNotifications(){
-    if(!API_BASE)return;
-    setNotifLoading(true);
-    try{
-      const d=await getNotifications();
-      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
-      setNotifUnread(Number(d?.unread||0));
-    }catch{}
-    setNotifLoading(false);
-  }
-  useEffect(()=>{loadNotifications();},[]);
-  useEffect(()=>{
-    if(!showNotifs)return;
-    loadNotifications();
-    const id=setInterval(()=>loadNotifications(),30000);
-    return()=>clearInterval(id);
-  },[showNotifs]);
 
   useEffect(()=>{document.title=loading?"Strategy AI — Загрузка…":"Strategy AI — Проекты";},[loading]);
 
@@ -5006,9 +4966,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   const[delMapId,setDelMapId]=useState<string|null>(null);
   const[delProjConfirm,setDelProjConfirm]=useState(false);
   const[showNotifs,setShowNotifs]=useState(false);
-  const[notifs,setNotifs]=useState<any[]>([]);
-  const[notifUnread,setNotifUnread]=useState(0);
-  const[notifLoading,setNotifLoading]=useState(false);
+  const{notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications}=useNotifications(showNotifs,user?.email);
   const creatingRef=useRef(false);
 
   const tier=TIERS[user.tier]||TIERS.free;
@@ -5017,24 +4975,6 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
   const canEdit=myRole==="owner"||myRole==="editor";
 
   useEffect(()=>{load();},[]);
-
-  async function loadNotifications(){
-    if(!API_BASE)return;
-    setNotifLoading(true);
-    try{
-      const d=await getNotifications();
-      setNotifs(Array.isArray(d?.notifications)?d.notifications:[]);
-      setNotifUnread(Number(d?.unread||0));
-    }catch{}
-    setNotifLoading(false);
-  }
-  useEffect(()=>{loadNotifications();},[]);
-  useEffect(()=>{
-    if(!showNotifs)return;
-    loadNotifications();
-    const id=setInterval(()=>loadNotifications(),30000);
-    return()=>clearInterval(id);
-  },[showNotifs]);
 
   async function load(){
     setLoading(true);
@@ -5797,28 +5737,27 @@ function TemplateModal({tier,onSelect,onClose,theme="dark"}){
 
 
 // ── MapTour ──
-const TOUR_STEPS=[
-  {title:"Это ваша стратегическая карта",body:"Каждый узел — шаг к цели. Перетаскивайте их, соединяйте и отслеживайте прогресс. Перетащите фон для перемещения, колесо мыши — зум.",icon:"🗺️"},
-  {title:"Добавляйте шаги",body:'Нажмите + Шаг или кликните на пустое место. У каждого шага — статус, приоритет, метрика, дедлайн. Ctrl+Z / Ctrl+Y — отмена и повтор.',icon:"⊕"},
-  {title:"Связывайте шаги",body:'Кнопка "⇒ Связать" или "🔗 AI-связи" — AI предложит логичные зависимости. Режим связи: клик на источник, затем на цель.',icon:"→"},
-  {title:"AI-советник",body:'Кнопка "✦ AI" или Ctrl+Shift+A. AI знает карту, связи, дедлайны. Быстрые подсказки: "С чего начать?", "Риски?", "Следующий шаг?".',icon:"✦"},
-  {title:"Редактируйте детали",body:"Клик на шаг — панель с описанием, комментариями (@AI для вопросов), дедлайном, историей. ✨ Перефразировать — AI улучшит формулировку.",icon:"✏️"},
-  {title:"Готовы к работе",body:"? — горячие клавиши. 📊 — аналитика. ⎇ — симуляция. Шаблоны и экспорт — в тулбаре. Удачи!",icon:"✓"},
-];
-
 function MapTour({onDone}){
   const{t}=useLang();
+  const TOUR_STEPS=useMemo(()=>[
+    {title:t("tour_s1_title","Это ваша стратегическая карта"),body:t("tour_s1_body","Каждый узел — шаг к цели. Перетаскивайте их, соединяйте и отслеживайте прогресс. Перетащите фон для перемещения, колесо мыши — зум."),icon:"🗺️"},
+    {title:t("tour_s2_title","Добавляйте шаги"),body:t("tour_s2_body","Нажмите + Шаг или кликните на пустое место. У каждого шага — статус, приоритет, метрика, дедлайн. Ctrl+Z / Ctrl+Y — отмена и повтор."),icon:"⊕"},
+    {title:t("tour_s3_title","Связывайте шаги"),body:t("tour_s3_body","Кнопка «⇒ Связать» или «🔗 AI-связи» — AI предложит логичные зависимости. Режим связи: клик на источник, затем на цель."),icon:"→"},
+    {title:t("tour_s4_title","AI-советник"),body:t("tour_s4_body","Кнопка «✦ AI» или Ctrl+Shift+A. AI знает карту, связи, дедлайны. Быстрые подсказки: «С чего начать?», «Риски?», «Следующий шаг?»."),icon:"✦"},
+    {title:t("tour_s5_title","Редактируйте детали"),body:t("tour_s5_body","Клик на шаг — панель с описанием, комментариями (@AI для вопросов), дедлайном, историей. ✨ Перефразировать — AI улучшит формулировку."),icon:"✏️"},
+    {title:t("tour_s6_title","Готовы к работе"),body:t("tour_s6_body","? — горячие клавиши. 📊 — аналитика. ⎇ — симуляция. Шаблоны и экспорт — в тулбаре. Удачи!"),icon:"✓"},
+  ],[t]);
   const[step,setStep]=useState(0);
   const s=TOUR_STEPS[step];
   const isLast=step===TOUR_STEPS.length-1;
   useEffect(()=>{
-    const h=e=>{
+    const h=(e:KeyboardEvent)=>{
       if(e.key==="Escape")onDone();
       if(e.key==="ArrowRight"||e.key===" ")isLast?onDone():setStep(st=>st+1);
       if(e.key==="ArrowLeft"&&step>0)setStep(st=>st-1);
     };
     window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);
-  },[isLast,step]);
+  },[isLast,step,onDone]);
   return(
     <div style={{position:"fixed",inset:0,zIndex:9999,pointerEvents:"none"}}>
       <div style={{position:"absolute",inset:0,background:"var(--tour-overlay-bg,rgba(0,0,0,.45))",backdropFilter:"blur(3px)",pointerEvents:"all"}} onClick={()=>isLast?onDone():setStep(st=>st+1)}/>
