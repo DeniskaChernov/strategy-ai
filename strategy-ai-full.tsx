@@ -3993,12 +3993,15 @@ function ContentPlanProjectPage({user,project,maps,theme,onBackToHub,onOpenStrat
 }
 
 // ── ProjectsPage ──
+type ProjectLite={id:string;name:string;owner:string;members?:Array<{email:string;role:string}>;createdAt?:number;created_at?:number};
+type MapLite={id:string;name?:string;isScenario?:boolean;nodes?:any[];edges?:any[]};
+
 function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onProfile,theme,onToggleTheme,aiChatMsgs,aiChatSetMsgs,onOpenContentPlanHub,onOpenContentPlanProject}){
   const{t,lang,setLang}=useLang();
   const isMobile=useIsMobile();
   const ROLES=getROLES(t);
-  const[projects,setProjects]=useState([]);
-  const[maps,setMaps]=useState({});
+  const[projects,setProjects]=useState<ProjectLite[]>([]);
+  const[maps,setMaps]=useState<Record<string,MapLite[]>>({});
   const[toast,setToast]=useState<{msg:string;type:string}|null>(null);
   const[loading,setLoading]=useState(true);
   const[search,setSearch]=useState("");
@@ -4006,7 +4009,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const[searchResults,setSearchResults]=useState<any[]>([]);
   const[creating,setCreating]=useState(false);
   const[newName,setNewName]=useState("");
-  const[delId,setDelId]=useState(null);
+  const[delId,setDelId]=useState<string|null>(null);
   const[showNotifs,setShowNotifs]=useState(false);
   const{notifs,setNotifs,notifUnread,setNotifUnread,notifLoading,loadNotifications}=useNotifications(showNotifs,user?.email);
   const[showAIHub,setShowAIHub]=useState(false);
@@ -4018,7 +4021,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
     setLoadErr(null);setLoading(true);
     try{
       const ps=await getProjects(user.email);setProjects(ps);
-      const mm={};
+      const mm:Record<string,MapLite[]>={};
       for(const p of ps){mm[p.id]=await getMaps(p.id);}
       setMaps(mm);
     }catch(e:any){setLoadErr(e?.message||t("load_error","Ошибка загрузки"));setProjects([]);setMaps({});}
@@ -4026,7 +4029,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   }
   useEffect(()=>{loadProjects();},[]);
 
-  useEffect(()=>{document.title=loading?"Strategy AI — Загрузка…":"Strategy AI — Проекты";},[loading]);
+  useEffect(()=>{document.title=loading?t("doc_title_loading","Strategy AI — Загрузка…"):t("doc_title_projects","Strategy AI — Проекты");},[loading,t]);
 
   useEffect(()=>{
     if(!API_BASE){setSearchResults([]);return;}
@@ -4063,11 +4066,11 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
     }catch(e:any){setDelId(null);setToast({msg:e?.message||t("delete_project_err","Ошибка при удалении проекта"),type:"error"});setTimeout(()=>setToast(null),4000);}
   }
 
-  const filtered=projects.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
-  const myCount=projects.filter(p=>p.owner===user.email).length;
+  const filtered=projects.filter((p:ProjectLite)=>p.name.toLowerCase().includes(search.toLowerCase()));
+  const myCount=projects.filter((p:ProjectLite)=>p.owner===user.email).length;
   const atLimit=myCount>=tier.projects;
-  const lastProj=(()=>{try{const s=localStorage.getItem("sa_last_project");if(!s)return null;const j=JSON.parse(s);return projects.find(p=>p.id===j.id||p.name===j.name)||null;}catch{return null;}})();
-  const lastMapData=(()=>{if(!lastProj)return null;try{const s=localStorage.getItem("sa_last_map");if(!s)return null;const j=JSON.parse(s);const ms=maps[lastProj.id]||[];return ms.find((m:any)=>m.id===j.id||m.name===j.name)||null;}catch{return null;}})();
+  const lastProj=useMemo<ProjectLite|null>(()=>{try{const s=localStorage.getItem("sa_last_project");if(!s)return null;const j=JSON.parse(s);return projects.find((p:ProjectLite)=>p.id===j.id||p.name===j.name)||null;}catch{return null;}},[projects]);
+  const lastMapData=useMemo<MapLite|null>(()=>{if(!lastProj)return null;try{const s=localStorage.getItem("sa_last_map");if(!s)return null;const j=JSON.parse(s);const ms=maps[lastProj.id]||[];return ms.find((m:MapLite)=>m.id===j.id||m.name===j.name)||null;}catch{return null;}},[lastProj,maps]);
   const allMapsForAI=Object.values(maps||{}).flatMap((arr:any)=>Array.isArray(arr)?arr:[]);
   const aiNodes=allMapsForAI.flatMap((m:any)=>m.nodes||[]).slice(0,220);
   const aiEdges=allMapsForAI.flatMap((m:any)=>m.edges||[]).slice(0,260);
@@ -4151,10 +4154,10 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
               <MainWorkspaceNav mode="strategy" onStrategy={()=>{}} onContentPlan={onOpenContentPlanHub} t={t} isMobile={true}/>
             </div>
           )}
-          <div style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:20,marginBottom:32}}>
+          <div className="sa-projects-sticky-head" style={{display:"flex",flexDirection:isMobile?"column":"row",alignItems:isMobile?"stretch":"center",gap:20,marginBottom:24,position:"sticky",top:0,zIndex:20,padding:"14px 4px",margin:"0 -4px 24px",background:"color-mix(in srgb,var(--bg) 72%,transparent)",backdropFilter:"blur(18px)",borderBottom:".5px solid var(--b1)"}}>
             <div>
               <h1 style={{fontSize:isMobile?18:22,fontWeight:900,color:"var(--text)",letterSpacing:-.5,marginBottom:2}}>{t("your_projects","Мои проекты")}</h1>
-              <div style={{fontSize:13.5,color:"var(--text3)"}}>{myCount} из {tier.projects==="∞"?"∞":tier.projects} проектов</div>
+              <div style={{fontSize:13.5,color:"var(--text3)"}}>{t("projects_of_limit","{cur} из {max} проектов").replace("{cur}",String(myCount)).replace("{max}",tier.projects==="∞"?"∞":String(tier.projects))}</div>
             </div>
             {!isMobile&&<div style={{flex:1}}/>}
             <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
@@ -4201,10 +4204,10 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                   </div>
                 )}
               </div>
-              <button onClick={()=>{if(atLimit){return;}setCreating(true);}} className="btn-smooth" style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,flexShrink:0,boxShadow:atLimit?"none":"0 2px 12px var(--accent-glow)"}} title={atLimit?`Лимит ${tier.projects} проектов для ${tier.label}`:t("new_project","+ Новый проект")}>+ Проект</button>
+              <button onClick={()=>{if(atLimit){return;}setCreating(true);}} className="btn-smooth" style={{padding:"8px 18px",borderRadius:10,border:"none",background:atLimit?"var(--surface)":"var(--gradient-accent)",color:atLimit?"var(--text4)":"var(--accent-on-bg)",cursor:atLimit?"not-allowed":"pointer",fontSize:13,fontWeight:700,flexShrink:0,boxShadow:atLimit?"none":"0 2px 12px var(--accent-glow)"}} title={atLimit?t("projects_limit_tip","Лимит {n} проектов для {tier}").replace("{n}",String(tier.projects)).replace("{tier}",tier.label):t("new_project","+ Новый проект")}>+ {t("project_short","Проект")}</button>
             </div>
           </div>
-          {atLimit&&<div style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f09428",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ Лимит проектов для тарифа {tier.label}. <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
+          {atLimit&&<div role="status" style={{padding:"10px 16px",borderRadius:10,background:"rgba(245,158,11,.06)",border:"1px solid rgba(245,158,11,.2)",color:"#f09428",fontSize:13.5,marginBottom:16,display:"flex",alignItems:"center",gap:8}}>⚠️ {t("projects_limit_banner","Лимит проектов для тарифа {tier}.").replace("{tier}",tier.label)} <button onClick={onProfile} style={{border:"none",background:"none",color:"var(--accent-1)",cursor:"pointer",fontWeight:700,fontSize:13.5}}>{t("upgrade_tier_arrow","Улучшить тариф →")}</button></div>}
           {lastProj&&!loading&&onOpenMap&&(
             <div className="card-stagger" style={{display:"flex",flexDirection:isMobile?"column":"row",gap:14,marginBottom:20,alignItems:"stretch",animationDelay:".05s"}}>
               <div className="glass-card icard" style={{flex:1,minWidth:0,padding:"16px 20px",borderRadius:16,border:"1px solid var(--glass-border-accent,var(--border))",background:"linear-gradient(135deg,var(--accent-soft),color-mix(in srgb,var(--accent-soft) 70%,transparent))",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",cursor:"default"}}>
@@ -4274,7 +4277,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                         <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {(p.createdAt||p.created_at)?new Date(p.createdAt||p.created_at).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"}):"—"}</div>
                       </div>
                       {p.owner===user.email&&(
-                        <button onClick={e=>{e.stopPropagation();setDelId(p.id);}} style={{width:24,height:24,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:14,opacity:.7,display:"flex",alignItems:"center",justifyContent:"center"}} onMouseOver={e=>{e.stopPropagation();e.currentTarget.style.opacity="1";e.currentTarget.style.borderColor="rgba(239,68,68,.25)";e.currentTarget.style.background="rgba(239,68,68,.06)";e.currentTarget.style.color="#f04458";}} onMouseOut={e=>{e.currentTarget.style.opacity=".7";e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.background="var(--surface)";e.currentTarget.style.color="var(--text4)";}}>×</button>
+                        <IconButton size={26} danger aria-label={t("delete_project","Удалить проект?")} onClick={(e)=>{e.stopPropagation();setDelId(p.id);}} style={{fontSize:14,opacity:.78}}>×</IconButton>
                       )}
                     </div>
                     {/* Progress bar based on completed nodes */}
@@ -4322,7 +4325,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
           )}
         </div>
       </div>
-      {delId&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message="Все карты и данные проекта будут удалены без возможности восстановления." confirmLabel="Удалить" onConfirm={()=>deleteProj(delId)} onCancel={()=>setDelId(null)} danger={true}/>}
+      {delId&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message={t("delete_project_desc","Все карты и данные проекта будут удалены без возможности восстановления.")} confirmLabel={t("delete","Удалить")} onConfirm={()=>deleteProj(delId)} onCancel={()=>setDelId(null)} danger={true}/>}
       {showBriefing&&lastMapData&&(
         <WeeklyBriefingModal
           nodes={lastMapData.nodes||[]}
