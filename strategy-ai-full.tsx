@@ -1178,6 +1178,18 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                         <div style={{fontSize:12,opacity:.8}}>{t("downgrade_excess","Данные сверх лимита станут доступны только для чтения.")}</div>
                       </div>
                     )}
+                    {isCurrentTier&&user?.tier&&user.tier!=="free"&&(
+                      <button type="button" onClick={async()=>{
+                        try{
+                          const r=await apiFetch("/api/billing/portal",{method:"POST"});
+                          if(r?.url){window.location.href=r.url;return;}
+                        }catch{}
+                        // Fallback: openая ссылка на портал, если сервер недоступен
+                        try{const url=(typeof window!=="undefined"&&(window as any).STRIPE_PORTAL_URL)||"https://billing.stripe.com/p/login";window.open(url,"_blank","noopener,noreferrer");}catch{}
+                      }} style={{width:"100%",padding:"11px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",fontSize:13,fontWeight:700,cursor:"pointer",marginBottom:8}}>
+                        💳 {t("manage_billing","Управлять подпиской (Stripe)")}
+                      </button>
+                    )}
                     {isCurrentTier?(
                       <div style={{padding:"13px",borderRadius:12,background:"var(--surface)",border:"1px solid var(--border)",textAlign:"center",fontSize:13,color:"var(--text3)",fontWeight:600}}>{t("current_tier_badge","✓ Текущий тариф")}</div>
                     ):(
@@ -1737,9 +1749,15 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
               {showMore?"▲ "+t("collapse","Свернуть"):"▼ "+t("details","Детали")}
             </button>
             {!readOnly&&(
-              <div style={{display:"flex",gap:6,paddingTop:4}}>
-                {onConnect&&<button onClick={()=>onConnect({startNode:node})} style={{flex:1,padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>⇒ {t("link_btn","Связать")}</button>}
-                <button onClick={doAutoConnect} disabled={autoConnLoading} style={{flex:1,padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:autoConnLoading?"var(--text4)":"var(--accent-2)",cursor:autoConnLoading?"wait":"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>{autoConnLoading?"…":"✦ AI"}</button>
+              <div style={{display:"flex",gap:6,paddingTop:4,flexWrap:"wrap"}}>
+                {onConnect&&<button onClick={()=>onConnect({startNode:node})} style={{flex:"1 1 80px",padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>⇒ {t("link_btn","Связать")}</button>}
+                <button onClick={doAutoConnect} disabled={autoConnLoading} style={{flex:"1 1 80px",padding:"8px 12px",borderRadius:8,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:autoConnLoading?"var(--text4)":"var(--accent-2)",cursor:autoConnLoading?"wait":"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>{autoConnLoading?"…":"✦ AI"}</button>
+                <button onClick={()=>{
+                  try{
+                    localStorage.setItem("sa_cp_prefill",JSON.stringify({title:node.title||"",brief:node.reason||node.action||"",strategyStepId:node.id,strategyStepTitle:node.title||"",ts:Date.now()}));
+                    onNotify?.(t("cp_prefill_ready","Черновик публикации подготовлен. Откройте Контент-план."),"success");
+                  }catch{}
+                }} title={t("cp_create_from_step","Создать пост из шага")} style={{flex:"1 1 80px",padding:"8px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>📝 {t("cp_create_from_step_short","В контент-план")}</button>
                 <button onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"#f04458",cursor:"pointer",fontSize:12,transition:"all .2s"}}>🗑</button>
               </div>
             )}
@@ -2049,7 +2067,7 @@ function EdgeLine({edge,nodes,selected,onClick,etypeMap}){
     <g onClick={e=>{e.stopPropagation();onClick(edge);}} role="button" tabIndex={0} aria-label={edge.label||et.label||t("edge","связь")}
        onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onClick(edge);}}}>
       <path className="sa-edge-hit" d={d} fill="none" stroke="transparent" strokeWidth={14}/>
-      <path className="sa-edge-line" d={d} fill="none" stroke={selected?"url(#sa-edge-grad)":et.c} strokeWidth={selected?2.6:1.6} strokeDasharray={et.d==="none"?"none":et.d} opacity={selected?1:.68}/>
+      <path className="sa-edge-line" d={d} fill="none" stroke={selected?"url(#sa-edge-grad)":et.c} strokeWidth={selected?2.6:Math.max(1.2,Math.min(3.6,(edge.weight||3)*0.6+0.4))} strokeDasharray={et.d==="none"?"none":et.d} opacity={selected?1:.68}/>
       <polygon points="-5,-3 5,0 -5,3" fill={selected?"var(--accent-1)":et.c} transform={`translate(${ep.x},${ep.y}) rotate(${ang})`} opacity={selected?1:.75} style={{transition:"opacity .2s ease"}}/>
       {edge.label&&<text x={bmx} y={bmy-6} textAnchor="middle" fontSize={9.5} fill="var(--text3)" style={{pointerEvents:"none",userSelect:"none"}}>{edge.label}</text>}
     </g>
@@ -2259,8 +2277,10 @@ function EmailVerifyBanner({user,onVerified}:{user:any,onVerified?:()=>void}){
   const{t}=useLang();
   const[sent,setSent]=useState(false);
   const[loading,setLoading]=useState(false);
-  // Если email уже подтверждён или нет API — не показываем
-  if(!API_BASE||user?.emailVerified!==false)return null;
+  const dismissKey=`sa_email_banner_dismissed_${user?.email||""}`;
+  const[dismissed,setDismissed]=useState<boolean>(()=>{try{return localStorage.getItem(dismissKey)==="1";}catch{return false;}});
+  // Если email уже подтверждён или нет API — не показываем; либо пользователь скрыл вручную
+  if(!API_BASE||user?.emailVerified!==false||dismissed)return null;
   async function resend(){
     if(loading||sent)return;
     setLoading(true);
@@ -2270,8 +2290,12 @@ function EmailVerifyBanner({user,onVerified}:{user:any,onVerified?:()=>void}){
     }catch{}
     setLoading(false);
   }
+  function dismiss(){
+    try{localStorage.setItem(dismissKey,"1");}catch{}
+    setDismissed(true);
+  }
   return(
-    <div role="status" style={{background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08))",borderBottom:"1px solid rgba(245,158,11,.35)",padding:"8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13,flexWrap:"wrap"}}>
+    <div role="status" style={{position:"relative",background:"linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.08))",borderBottom:"1px solid rgba(245,158,11,.35)",padding:"8px 40px 8px 20px",display:"flex",alignItems:"center",justifyContent:"center",gap:12,fontSize:13,flexWrap:"wrap"}}>
       <span style={{color:"#f09428",fontWeight:700,display:"inline-flex",alignItems:"center",gap:6}}>
         <span aria-hidden>✉️</span>
         {t("verify_email_banner","Подтвердите ваш email для полного доступа.")}
@@ -2283,6 +2307,7 @@ function EmailVerifyBanner({user,onVerified}:{user:any,onVerified?:()=>void}){
           {loading?"…":t("verify_email_resend","Отправить письмо")}
         </button>
       )}
+      <button type="button" onClick={dismiss} aria-label={t("dismiss","Скрыть")} title={t("dismiss","Скрыть")} style={{position:"absolute",top:"50%",right:8,transform:"translateY(-50%)",width:24,height:24,padding:0,border:"none",background:"transparent",color:"var(--text4)",cursor:"pointer",fontSize:14,lineHeight:1}}>×</button>
     </div>
   );
 }
@@ -2577,8 +2602,16 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
       socket=ioClient(API_BASE,{transports:["websocket","polling"],auth:{token}});
       socketRef.current=socket;
       socket.io.on("reconnect_attempt",()=>{
-        const t=getJWT();
-        if(t)socket.auth={...socket.auth,token:t};
+        const tok=getJWT();
+        if(tok)socket.auth={...socket.auth,token:tok};
+        addToast(t("ws_reconnecting","Соединение потеряно — пробую переподключиться…"),"warn");
+      });
+      socket.io.on("reconnect",()=>{
+        addToast(t("ws_reconnected","Соединение восстановлено"),"success");
+      });
+      socket.on("disconnect",(reason:string)=>{
+        if(reason==="io server disconnect"||reason==="transport close")
+          addToast(t("ws_disconnected","Соединение прервано"),"warn");
       });
       socket.emit("join-map",{mapId:mapData.id,userName:user.name||user.email});
       socket.on("join-error",(payload:any)=>{
@@ -3457,6 +3490,8 @@ ${ctx}
               options={Object.entries(ETYPE).map(([k,e])=>({value:k,label:e.label,dot:e.c}))}
             />
             <input value={selEdge.label||""} onChange={e=>{const ne={...selEdge,label:e.target.value};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder="Подпись…" style={{fontSize:13,padding:"5px 10px",background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit",width:120}}/>
+            <input type="number" min={1} max={5} value={selEdge.weight||3} onChange={e=>{const w=Math.max(1,Math.min(5,Number(e.target.value)||3));const ne={...selEdge,weight:w};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} title={t("edge_weight","Вес 1–5")} style={{fontSize:13,padding:"5px 6px",width:54,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
+            <input value={selEdge.note||""} onChange={e=>{const ne={...selEdge,note:e.target.value};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder={t("edge_note_ph","Заметка…")} title={t("edge_note","Внутренняя заметка о связи")} style={{fontSize:13,padding:"5px 10px",background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit",width:140}}/>
             <button onClick={()=>{pushUndo(nodes,edges);setEdgesUser(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#f04458",cursor:"pointer",fontSize:13,fontWeight:600}}>🗑 Удалить</button>
           </div>
         )}
@@ -4081,6 +4116,42 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
   const[showAIHub,setShowAIHub]=useState(false);
   const[showBriefing,setShowBriefing]=useState(false);
   const tier=TIERS[user?.tier||"free"]||TIERS.free;
+  const[kebabId,setKebabId]=useState<string|null>(null);
+  const[renameId,setRenameId]=useState<string|null>(null);
+  const[renameDraft,setRenameDraft]=useState("");
+  const[sortMode,setSortMode]=useState<string>(()=>{try{return localStorage.getItem("sa_proj_sort")||"recent";}catch{return"recent";}});
+  const[roleFilter,setRoleFilter]=useState<string>(()=>{try{return localStorage.getItem("sa_proj_role")||"all";}catch{return"all";}});
+  useEffect(()=>{try{localStorage.setItem("sa_proj_sort",sortMode);}catch{}},[sortMode]);
+  useEffect(()=>{try{localStorage.setItem("sa_proj_role",roleFilter);}catch{}},[roleFilter]);
+  useEffect(()=>{
+    if(!kebabId)return;
+    const close=(e:any)=>{if(!e.target.closest?.(".sa-proj-kebab"))setKebabId(null);};
+    window.addEventListener("click",close);
+    return()=>window.removeEventListener("click",close);
+  },[kebabId]);
+  async function duplicateProject(p:ProjectLite){
+    const tier2=TIERS[user.tier]||TIERS.free;
+    if(projects.filter(x=>x.owner===user.email).length>=tier2.projects){
+      setToast({msg:t("project_limit","Лимит проектов"),type:"error"});setTimeout(()=>setToast(null),3000);return;
+    }
+    const copy={id:uid(),name:(p.name||"Проект")+" — копия",owner:user.email,members:[{email:user.email,role:"owner"}],createdAt:Date.now()} as any;
+    try{
+      const saved=await saveProject(copy);
+      const finalP=saved||copy;
+      setProjects(ps=>[...ps,finalP]);
+      setMaps(m=>({...m,[finalP.id]:[]}));
+      setToast({msg:t("project_duplicated","Проект скопирован"),type:"success"});setTimeout(()=>setToast(null),2400);
+    }catch(e:any){setToast({msg:e?.message||t("save_error","Ошибка сохранения"),type:"error"});setTimeout(()=>setToast(null),3000);}
+  }
+  async function renameProject(id:string,name:string){
+    const p=projects.find(x=>x.id===id);
+    if(!p||!name.trim())return;
+    const next={...p,name:name.trim()} as any;
+    try{
+      await saveProject(next);
+      setProjects(ps=>ps.map(x=>x.id===id?next:x));
+    }catch(e:any){setToast({msg:e?.message||t("save_error","Ошибка сохранения"),type:"error"});setTimeout(()=>setToast(null),3000);}
+  }
 
   const[loadErr,setLoadErr]=useState<string|null>(null);
   async function loadProjects(){
@@ -4132,7 +4203,16 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
     }catch(e:any){setDelId(null);setToast({msg:e?.message||t("delete_project_err","Ошибка при удалении проекта"),type:"error"});setTimeout(()=>setToast(null),4000);}
   }
 
-  const filtered=projects.filter((p:ProjectLite)=>p.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered=(()=>{
+    let arr=projects.filter((p:ProjectLite)=>p.name.toLowerCase().includes(search.toLowerCase()));
+    if(roleFilter==="owner")arr=arr.filter(p=>p.owner===user.email);
+    else if(roleFilter==="member")arr=arr.filter(p=>p.owner!==user.email);
+    const sorted=[...arr];
+    if(sortMode==="name")sorted.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+    else if(sortMode==="oldest")sorted.sort((a,b)=>((a as any).createdAt||0)-((b as any).createdAt||0));
+    else sorted.sort((a,b)=>((b as any).createdAt||0)-((a as any).createdAt||0));
+    return sorted;
+  })();
   const myCount=projects.filter((p:ProjectLite)=>p.owner===user.email).length;
   const atLimit=myCount>=tier.projects;
   const lastProj=useMemo<ProjectLite|null>(()=>{try{const s=localStorage.getItem("sa_last_project");if(!s)return null;const j=JSON.parse(s);return projects.find((p:ProjectLite)=>p.id===j.id||p.name===j.name)||null;}catch{return null;}},[projects]);
@@ -4226,7 +4306,17 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
               <div style={{fontSize:13.5,color:"var(--text3)"}}>{t("projects_of_limit","{cur} из {max} проектов").replace("{cur}",String(myCount)).replace("{max}",tier.projects==="∞"?"∞":String(tier.projects))}</div>
             </div>
             {!isMobile&&<div style={{flex:1}}/>}
-            <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+            <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center"}}>
+              <select value={roleFilter} onChange={e=>setRoleFilter(e.target.value)} title={t("filter_role","Фильтр по роли")} style={{padding:"9px 12px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+                <option value="all">{t("filter_all","Все")}</option>
+                <option value="owner">{t("filter_owner","Мои")}</option>
+                <option value="member">{t("filter_member","Где я участник")}</option>
+              </select>
+              <select value={sortMode} onChange={e=>setSortMode(e.target.value)} title={t("sort_label","Сортировка")} style={{padding:"9px 12px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",fontFamily:"inherit",cursor:"pointer",outline:"none"}}>
+                <option value="recent">{t("sort_recent","Недавние")}</option>
+                <option value="oldest">{t("sort_oldest","Старые")}</option>
+                <option value="name">{t("sort_name","По имени")}</option>
+              </select>
               <div style={{position:"relative",flex:isMobile?1:undefined}}>
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("search_projects_hint","Поиск по проектам и картам…")} className="input-smooth" style={{padding:"10px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",width:isMobile?"100%":220,minWidth:isMobile?undefined:140,fontFamily:"inherit"}}/>
                 {API_BASE&&((search||"").trim().length>=2)&&(searching||searchResults.length>0)&&(
@@ -4342,9 +4432,21 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                         <div className="icard-title" style={{fontSize:14,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:2}}>{p.name}</div>
                         <div className="icard-desc" style={{fontSize:13}}>{roleLabel} · {(p.createdAt||p.created_at)?new Date(p.createdAt||p.created_at).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"numeric",month:"short"}):"—"}</div>
                       </div>
-                      {p.owner===user.email&&(
-                        <IconButton size={26} danger aria-label={t("delete_project","Удалить проект?")} onClick={(e)=>{e.stopPropagation();setDelId(p.id);}} style={{fontSize:14,opacity:.78}}>×</IconButton>
-                      )}
+                      <div className="sa-proj-kebab" style={{position:"relative"}}>
+                        <button type="button" aria-haspopup="menu" aria-expanded={kebabId===p.id} aria-label={t("more_actions","Действия")} onClick={(e)=>{e.stopPropagation();setKebabId(kebabId===p.id?null:p.id);}} style={{width:28,height:28,borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:16,lineHeight:1,padding:0}}>⋯</button>
+                        {kebabId===p.id&&(
+                          <div role="menu" onClick={e=>e.stopPropagation()} style={{position:"absolute",top:32,right:0,minWidth:180,padding:6,borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",boxShadow:"0 12px 32px rgba(0,0,0,.25)",zIndex:50,display:"flex",flexDirection:"column",gap:2}}>
+                            <button role="menuitem" onClick={()=>{setKebabId(null);onSelectProject(p);}} style={{textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",color:"var(--text)",cursor:"pointer",fontSize:13}}>↗ {t("open","Открыть")}</button>
+                            {p.owner===user.email&&(
+                              <button role="menuitem" onClick={()=>{setKebabId(null);setRenameId(p.id);setRenameDraft(p.name||"");}} style={{textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",color:"var(--text)",cursor:"pointer",fontSize:13}}>✎ {t("rename","Переименовать")}</button>
+                            )}
+                            <button role="menuitem" onClick={()=>{setKebabId(null);duplicateProject(p);}} style={{textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",color:"var(--text)",cursor:"pointer",fontSize:13}}>⎘ {t("duplicate","Дублировать")}</button>
+                            {p.owner===user.email&&(
+                              <button role="menuitem" onClick={()=>{setKebabId(null);setDelId(p.id);}} style={{textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",color:"#f04458",cursor:"pointer",fontSize:13}}>🗑 {t("delete","Удалить")}</button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     {/* Progress bar based on completed nodes */}
                     {(()=>{
@@ -4383,7 +4485,18 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                   <div style={{fontSize:16,fontWeight:800,color:"var(--text)",marginTop:4}}>{search.trim()?t("search_empty","Ничего не найдено"):t("no_projects","Нет проектов")}</div>
                   <div style={{fontSize:13.5,maxWidth:340,lineHeight:1.5,color:"var(--text3)"}}>{search.trim()?t("search_try_other","Попробуйте другой запрос или очистите поиск."):t("click_new_project","Нажмите «+ Проект» чтобы начать")}</div>
                   {!search.trim()&&!atLimit&&(
-                    <button onClick={()=>setCreating(true)} className="btn-smooth" style={{marginTop:8,padding:"11px 22px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,boxShadow:"0 6px 20px var(--accent-glow)"}}>+ {t("new_project","Новый проект")}</button>
+                    <div style={{display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center"}}>
+                      <button onClick={()=>setCreating(true)} className="btn-smooth" style={{marginTop:8,padding:"11px 22px",borderRadius:12,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:14,fontWeight:700,boxShadow:"0 6px 20px var(--accent-glow)"}}>+ {t("new_project","Новый проект")}</button>
+                      <button onClick={()=>setShowAIHub(true)} className="btn-smooth" style={{marginTop:8,padding:"11px 22px",borderRadius:12,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:14,fontWeight:700}}>✦ {t("ask_ai_to_help","Спросить AI с чего начать")}</button>
+                    </div>
+                  )}
+                  {!search.trim()&&projects.length===0&&(
+                    <div style={{marginTop:16,maxWidth:520,fontSize:13,color:"var(--text4)",lineHeight:1.6,textAlign:"left"}}>
+                      <div style={{fontWeight:800,color:"var(--text2)",marginBottom:8}}>{t("onboard_steps_title","Как начать за 3 шага:")}</div>
+                      <div>1. {t("onboard_step1","Создайте проект — это контейнер для карт и контент-плана.")}</div>
+                      <div>2. {t("onboard_step2","Откройте карту, добавьте узлы или примените шаблон.")}</div>
+                      <div>3. {t("onboard_step3","Запустите AI-чат — он подскажет следующий шаг.")}</div>
+                    </div>
                   )}
                 </div>
               )}
@@ -4392,6 +4505,18 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
         </div>
       </div>
       {delId&&<ConfirmDialog title={t("delete_project","Удалить проект?")} message={t("delete_project_desc","Все карты и данные проекта будут удалены без возможности восстановления.")} confirmLabel={t("delete","Удалить")} onConfirm={()=>deleteProj(delId)} onCancel={()=>setDelId(null)} danger={true}/>}
+      {renameId&&(
+        <div className="modal-backdrop" style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.7))",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,backdropFilter:"blur(12px)",padding:16}} onClick={e=>{if(e.target===e.currentTarget){setRenameId(null);setRenameDraft("");}}} onKeyDown={e=>{if(e.key==="Escape"){setRenameId(null);setRenameDraft("");}}}>
+          <div className="glass-panel" role="dialog" aria-modal="true" aria-label={t("rename_project","Переименовать проект")} data-theme={theme} style={{width:"min(96vw,420px)",borderRadius:18,padding:22}}>
+            <div style={{fontSize:15,fontWeight:800,color:"var(--text)",marginBottom:14}}>✎ {t("rename_project","Переименовать проект")}</div>
+            <input autoFocus value={renameDraft} onChange={e=>setRenameDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){renameProject(renameId,renameDraft);setRenameId(null);}else if(e.key==="Escape"){setRenameId(null);setRenameDraft("");}}} placeholder={t("project_name","Название")} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",outline:"none",fontFamily:"inherit",marginBottom:14}}/>
+            <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+              <button type="button" onClick={()=>{setRenameId(null);setRenameDraft("");}} style={{padding:"9px 18px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("cancel","Отмена")}</button>
+              <button type="button" disabled={!renameDraft.trim()} onClick={()=>{renameProject(renameId,renameDraft);setRenameId(null);}} style={{padding:"9px 22px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:renameDraft.trim()?"pointer":"not-allowed",fontSize:13,fontWeight:800,opacity:renameDraft.trim()?1:.5}}>{t("save","Сохранить")}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {showBriefing&&lastMapData&&(
         <WeeklyBriefingModal
           nodes={lastMapData.nodes||[]}
@@ -4570,11 +4695,23 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
   const [loading,setLoading]=useState(true);
   const [editId,setEditId]=useState<string|null>(null);
   const [filterStatus,setFilterStatus]=useState<string>("all");
-  const [viewMode,setViewMode]=useState<"calendar"|"map"|"list"|"tree">("calendar");
+  const [viewMode,setViewMode]=useState<"calendar"|"map"|"list"|"tree">(()=>{try{const v=localStorage.getItem(_viewKey);return(v==="calendar"||v==="map"||v==="list"||v==="tree")?v:"calendar";}catch{return"calendar";}});
+  useEffect(()=>{try{localStorage.setItem(_viewKey,viewMode);}catch{}},[_viewKey,viewMode]);
   const [aiSuggesting,setAiSuggesting]=useState(false);
   const [pendingDeleteId,setPendingDeleteId]=useState<string|null>(null);
-  const [cpCalendarDate,setCpCalendarDate]=useState(()=>new Date());
+  const _cpKey=projectId||"all";
+  const _viewKey=`sa_cp_view_${_cpKey}`;
+  const _dateKey=`sa_cp_date_${_cpKey}`;
+  const [cpCalendarDate,setCpCalendarDate]=useState<Date>(()=>{
+    try{
+      const s=localStorage.getItem(_dateKey);
+      if(s){const d=new Date(s);if(!isNaN(d.getTime()))return d;}
+    }catch{}
+    return new Date();
+  });
+  useEffect(()=>{try{localStorage.setItem(_dateKey,cpCalendarDate.toISOString());}catch{}},[_dateKey,cpCalendarDate]);
   const [newItemPresetDate,setNewItemPresetDate]=useState<string>("");
+  const [toast,setToast]=useState<{msg:string;type:string}|null>(null);
   const isMobile=useIsMobile();
   const treePrefsKey=`sa_cp_tree_${projectId}`;
   const [treeExpandedAll,setTreeExpandedAll]=useState<Record<string,boolean>>({});
@@ -4592,6 +4729,19 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
 
   useEffect(()=>{(async()=>{setLoading(true);const list=await getContentPlan(projectId);setItems(Array.isArray(list)?list:[]);setLoading(false);})();},[projectId]);
   useEffect(()=>{if(editId===null)setNewItemPresetDate("");},[editId]);
+  // ── prefill из стратегии: «Создать пост из шага» ──
+  const[cpPrefill,setCpPrefill]=useState<any>(null);
+  useEffect(()=>{
+    try{
+      const raw=localStorage.getItem("sa_cp_prefill");
+      if(!raw)return;
+      const data=JSON.parse(raw);
+      if(!data||(Date.now()-(data.ts||0))>10*60*1000){localStorage.removeItem("sa_cp_prefill");return;}
+      setCpPrefill(data);
+      setEditId("new");
+      localStorage.removeItem("sa_cp_prefill");
+    }catch{}
+  },[]);
 
   const allNodes=maps.flatMap((m:any)=>(m.nodes||[]).map((n:any)=>({...n,mapName:m.name})));
   const filtered=filterStatus==="all"?items:items.filter((x:any)=>x.status===filterStatus);
@@ -4606,7 +4756,23 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
   async function saveItem(item:any){
     const id=item.id||uid();
     const next={...item,id,updatedAt:Date.now()};
-    const list=items.some((x:any)=>x.id===id)?items.map((x:any)=>x.id===id?next:x):[...items,next];
+    let list=items.some((x:any)=>x.id===id)?items.map((x:any)=>x.id===id?next:x):[...items,next];
+    // Recurring posts: при создании новой записи с recur — генерируем доп. копии вперёд.
+    if(!item.id&&next.recur&&next.scheduledDate){
+      const stepDays=next.recur==="weekly"?7:next.recur==="biweekly"?14:0;
+      if(stepDays){
+        const base=new Date(next.scheduledDate);
+        if(!isNaN(base.getTime())){
+          const copies:any[]=[];
+          for(let i=1;i<=4;i++){
+            const d=new Date(base.getTime()+stepDays*i*864e5);
+            const ymd=d.toISOString().slice(0,10);
+            copies.push({...next,id:uid(),scheduledDate:ymd,recur:"",updatedAt:Date.now(),recurParentId:id});
+          }
+          list=[...list,...copies];
+        }
+      }
+    }
     setItems(list);
     await saveContentPlan(projectId,list);
     setEditId(null);
@@ -4642,7 +4808,12 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
       const list=[...items,...newItems];
       setItems(list);
       await saveContentPlan(projectId,list);
-    }catch{}
+      setToast({msg:t("cp_ai_added","Добавлено идей: {n}").replace("{n}",String(newItems.length)),type:"success"});
+      setTimeout(()=>setToast(null),3000);
+    }catch(e:any){
+      setToast({msg:e?.message||t("cp_ai_err","Не удалось получить идеи. Попробуйте ещё раз."),type:"error"});
+      setTimeout(()=>setToast(null),4000);
+    }
     setAiSuggesting(false);
   }
 
@@ -4693,8 +4864,13 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
     function row(it:any){
       return(
         <div key={it.id} className="btn-interactive" role="button" tabIndex={0}
+          draggable
+          onDragStart={e=>{
+            e.dataTransfer.setData("application/x-sa-cp-id",it.id);
+            e.dataTransfer.effectAllowed="move";
+          }}
           aria-label={t("content_card_open_aria","Открыть публикацию: {title}").replace("{title}",String(it.title||t("untitled","Без названия")).slice(0,120))}
-          style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"pointer",outline:"none"}}
+          style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",cursor:"grab",outline:"none"}}
           onClick={()=>setEditId(it.id)}
           onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setEditId(it.id);}}}
           onFocus={e=>{e.currentTarget.style.boxShadow="0 0 0 2px var(--accent-1)";}}
@@ -4723,6 +4899,14 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
             onDateSelect={(d:Date)=>setCpCalendarDate(d)}
             lang={lang}
             theme={theme==="dark"?"dark":"light"}
+            highlightedDates={Array.from(new Set(filtered.filter((x:any)=>x.scheduledDate).map((x:any)=>x.scheduledDate)))}
+            dropMime="application/x-sa-cp-id"
+            onItemDrop={async(date:Date,id:string)=>{
+              const ymd=dateToYMD(date);
+              const next=items.map((x:any)=>x.id===id?{...x,scheduledDate:ymd,updatedAt:Date.now()}:x);
+              setItems(next);
+              await saveContentPlan(projectId,next);
+            }}
             labels={{
               weekly:t("cp_cal_weekly","Неделя"),
               monthly:t("cp_cal_monthly","Месяц"),
@@ -4959,12 +5143,21 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
       {(editId==="new"||editingItem)&&(
         <ContentPlanItemModal
           formKey={editId||""}
-          item={editingItem||{title:"",type:"post",channel:"blog",status:"draft",brief:"",scheduledDate:newItemPresetDate||"",strategyStepId:"",strategyStepTitle:""}}
+          item={editingItem||{
+            title:cpPrefill?.title||"",
+            type:"post",
+            channel:"blog",
+            status:"draft",
+            brief:cpPrefill?.brief||"",
+            scheduledDate:newItemPresetDate||"",
+            strategyStepId:cpPrefill?.strategyStepId||"",
+            strategyStepTitle:cpPrefill?.strategyStepTitle||"",
+          }}
           allNodes={allNodes}
           t={t}
           theme={theme}
-          onSave={(item)=>saveItem(editId==="new"?{...item,createdAt:Date.now()}:{...editingItem,...item})}
-          onClose={()=>setEditId(null)}
+          onSave={(item)=>{setCpPrefill(null);saveItem(editId==="new"?{...item,createdAt:Date.now()}:{...editingItem,...item});}}
+          onClose={()=>{setCpPrefill(null);setEditId(null);}}
         />
       )}
 
@@ -4978,6 +5171,11 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
           danger={true}
         />
       )}
+      {toast&&(
+        <div role="status" style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:1500,padding:"12px 22px",borderRadius:14,border:`1px solid ${toast.type==="error"?"rgba(239,68,68,.4)":"rgba(16,185,129,.4)"}`,background:toast.type==="error"?"rgba(239,68,68,.15)":"rgba(16,185,129,.15)",color:toast.type==="error"?"#f87171":"#34d399",fontSize:13.5,fontWeight:700,boxShadow:"0 8px 32px rgba(0,0,0,.3)",backdropFilter:"blur(12px)"}}>
+          {toast.type==="error"?"⚠ ":"✓ "}{toast.msg}
+        </div>
+      )}
     </div>
   );
 }
@@ -4990,6 +5188,7 @@ function ContentPlanItemModal({formKey,item,allNodes,t,theme,onSave,onClose}:{fo
   const [brief,setBrief]=useState(item.brief||"");
   const [scheduledDate,setScheduledDate]=useState(item.scheduledDate||"");
   const [stepId,setStepId]=useState(item.strategyStepId||"");
+  const [recur,setRecur]=useState(item.recur||"");
   const [dirty,setDirty]=useState(false);
   const [showDiscard,setShowDiscard]=useState(false);
   useEffect(()=>{
@@ -5000,6 +5199,7 @@ function ContentPlanItemModal({formKey,item,allNodes,t,theme,onSave,onClose}:{fo
     setBrief(item.brief||"");
     setScheduledDate(item.scheduledDate||"");
     setStepId(item.strategyStepId||"");
+    setRecur(item.recur||"");
     setDirty(false);
   },[formKey,item?.id]);
   const stepOptions=allNodes.map((n:any)=>({id:n.id,title:n.title,mapName:n.mapName}));
@@ -5007,9 +5207,15 @@ function ContentPlanItemModal({formKey,item,allNodes,t,theme,onSave,onClose}:{fo
     if(dirty){setShowDiscard(true);return;}
     onClose();
   }
+  useEffect(()=>{
+    if(!dirty)return;
+    const h=(e:BeforeUnloadEvent)=>{e.preventDefault();e.returnValue="";};
+    window.addEventListener("beforeunload",h);
+    return()=>window.removeEventListener("beforeunload",h);
+  },[dirty]);
   function handleSave(){
     const stepTitle=stepOptions.find((s:any)=>s.id===stepId)?.title||"";
-    onSave({title:title.trim()||"Без названия",type,channel,status,brief,scheduledDate,strategyStepId:stepId||"",strategyStepTitle:stepTitle});
+    onSave({title:title.trim()||"Без названия",type,channel,status,brief,scheduledDate,strategyStepId:stepId||"",strategyStepTitle:stepTitle,recur:recur||""});
   }
   return(
     <>
@@ -5031,6 +5237,12 @@ function ContentPlanItemModal({formKey,item,allNodes,t,theme,onSave,onClose}:{fo
         </div>
         <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("scheduled_date_short","Дата публикации")}</div>
         <input type="date" value={scheduledDate} onChange={e=>{setScheduledDate(e.target.value);setDirty(true);}} style={{width:"100%",padding:"10px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}/>
+        <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("recur_label","Повтор")}</div>
+        <select value={recur} onChange={e=>{setRecur(e.target.value);setDirty(true);}} style={{width:"100%",padding:"10px 14px",fontSize:13,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:10,color:"var(--text)",marginBottom:12,outline:"none",fontFamily:"inherit"}}>
+          <option value="">{t("recur_none","Однократно")}</option>
+          <option value="weekly">{t("recur_weekly","Еженедельно (4 недели)")}</option>
+          <option value="biweekly">{t("recur_biweekly","Раз в 2 недели (4 раза)")}</option>
+        </select>
         {stepOptions.length>0&&(
           <>
             <div style={{fontSize:12,fontWeight:700,color:"var(--text4)",marginBottom:6}}>{t("content_link_step","Связать с шагом стратегии")}</div>
@@ -5428,6 +5640,19 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                 )}
               </div>
             ))}
+            {isOwner&&(
+              <div className="glass-card" style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"12px 16px",borderRadius:12,flexWrap:"wrap"}}>
+                <div style={{flex:1,minWidth:200}}>
+                  <div style={{fontSize:13.5,fontWeight:700,color:"var(--text)"}}>🔗 {t("invite_link","Ссылка-приглашение")}</div>
+                  <div style={{fontSize:12,color:"var(--text5)"}}>{t("invite_link_desc","Скопируйте и отправьте — пригласите команду одной ссылкой.")}</div>
+                </div>
+                <button type="button" onClick={async()=>{
+                  const url=`${window.location.origin}/?join=${proj.id}`;
+                  try{await navigator.clipboard.writeText(url);setToast({msg:t("link_copied","Ссылка скопирована"),type:"success"});}
+                  catch{setToast({msg:url,type:"info"});}
+                }} className="btn-interactive" style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:12.5,fontWeight:800}}>{t("copy_link","Скопировать")}</button>
+              </div>
+            )}
             {isOwner&&(proj.members||[]).length<tier.users&&(
               <div className="glass-card" style={{display:"flex",gap:9,padding:"12px 16px",borderRadius:12,border:"1px dashed var(--glass-border-accent,var(--border2))"}}>
                 <input value={newMember} onChange={e=>setNewMember(e.target.value)} placeholder="Email участника" onKeyDown={e=>{if(e.key==="Enter")addMember();}} style={{flex:1,padding:"8px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--input-bg)",color:"var(--text)",fontSize:13,outline:"none"}}/>
@@ -5457,6 +5682,29 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
                   <div style={{fontSize:13,color:"var(--text5)"}}>до {fmt(tier.maps)} карт • {fmt(tier.scenarios)} сценариев • {fmt(tier.users)} участников</div>
                 </div>
                 {onUpgrade&&<button className="btn-interactive" onClick={onUpgrade} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",cursor:"pointer",fontSize:13,fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("upgrade_plan","Улучшить")}</button>}
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:5}}>{t("share_section","Поделиться (read-only)")}</div>
+              <div style={{padding:"11px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,flexWrap:"wrap"}}>
+                <div style={{flex:1,minWidth:200}}>
+                  <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{t("share_link_title","Ссылка только для чтения")}</div>
+                  <div style={{fontSize:12.5,color:"var(--text5)"}}>{t("share_link_desc","Любой с этой ссылкой увидит карты и контент-план без возможности редактировать.")}</div>
+                </div>
+                <button onClick={async()=>{
+                  const url=`${window.location.origin}/?share=${proj.id}`;
+                  try{await navigator.clipboard.writeText(url);setToast({msg:t("link_copied","Ссылка скопирована"),type:"success"});setTimeout(()=>setToast(null),2500);}
+                  catch{setToast({msg:url,type:"info"});setTimeout(()=>setToast(null),5000);}
+                }} className="btn-interactive" style={{padding:"8px 14px",borderRadius:10,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-1)",cursor:"pointer",fontSize:12.5,fontWeight:800}}>🔗 {t("copy_link","Скопировать")}</button>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:13,fontWeight:700,color:"var(--text4)",textTransform:"uppercase",letterSpacing:.5,marginBottom:5}}>{t("versions_section","Версии карт")}</div>
+              <div style={{padding:"11px 14px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",fontSize:12.5,color:"var(--text4)"}}>
+                {regularMaps.length===0
+                  ? t("versions_no_maps","Сначала создайте карту — версии хранятся для каждой карты.")
+                  : t("versions_open_in_map","История версий доступна в редакторе карты — кнопка 📜 на верхней панели.")
+                }
               </div>
             </div>
             {isOwner&&(

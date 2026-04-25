@@ -64,6 +64,9 @@ export interface GlassCalendarProps {
   onNewNote?: () => void;
   onNewEvent?: () => void;
   onOpenSettings?: () => void;
+  highlightedDates?: string[];
+  dropMime?: string;
+  onItemDrop?: (date: Date, payload: string) => void;
   labels: {
     weekly: string;
     monthly: string;
@@ -81,8 +84,13 @@ export function GlassCalendar({
   onNewNote,
   onNewEvent,
   onOpenSettings,
+  highlightedDates,
+  dropMime,
+  onItemDrop,
   labels,
 }: GlassCalendarProps) {
+  const highlightSet = useMemo(() => new Set(highlightedDates || []), [highlightedDates]);
+  const [dragDayKey, setDragDayKey] = useState<string | null>(null);
   const initial = propSelected ? new Date(propSelected) : new Date();
   const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(initial));
   const [selectedDate, setSelectedDate] = useState(() => new Date(initial));
@@ -213,23 +221,49 @@ export function GlassCalendar({
 
       <div className="sa-glass-cal-scrollwrap">
         <div className="sa-glass-cal-row">
-          {daysRow.map((day) => (
-            <div key={day.date.toISOString()} className="sa-glass-cal-col">
-              <span className="sa-glass-cal-wd">{weekdayLetter(day.date)}</span>
-              <button
-                type="button"
-                className={
-                  "sa-glass-cal-day" +
-                  (day.isSelected ? " is-selected" : "") +
-                  (day.isToday && !day.isSelected ? " is-today" : "")
-                }
-                onClick={() => handleDateClick(day.date)}
-              >
-                {day.isToday && !day.isSelected && <span className="sa-glass-cal-dot" aria-hidden />}
-                {day.date.getDate()}
-              </button>
-            </div>
-          ))}
+          {daysRow.map((day) => {
+            const ymd = dateToYMD(day.date);
+            const hasItem = highlightSet.has(ymd);
+            const isDragOver = dragDayKey === ymd;
+            return (
+              <div key={day.date.toISOString()} className="sa-glass-cal-col">
+                <span className="sa-glass-cal-wd">{weekdayLetter(day.date)}</span>
+                <button
+                  type="button"
+                  className={
+                    "sa-glass-cal-day" +
+                    (day.isSelected ? " is-selected" : "") +
+                    (day.isToday && !day.isSelected ? " is-today" : "") +
+                    (hasItem ? " has-item" : "") +
+                    (isDragOver ? " drop-over" : "")
+                  }
+                  onClick={() => handleDateClick(day.date)}
+                  onDragOver={(e) => {
+                    if (!onItemDrop || !dropMime) return;
+                    if (Array.from(e.dataTransfer.types).includes(dropMime)) {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                      setDragDayKey(ymd);
+                    }
+                  }}
+                  onDragLeave={() => {
+                    if (dragDayKey === ymd) setDragDayKey(null);
+                  }}
+                  onDrop={(e) => {
+                    if (!onItemDrop || !dropMime) return;
+                    e.preventDefault();
+                    const payload = e.dataTransfer.getData(dropMime);
+                    setDragDayKey(null);
+                    if (payload) onItemDrop(day.date, payload);
+                  }}
+                >
+                  {day.isToday && !day.isSelected && <span className="sa-glass-cal-dot" aria-hidden />}
+                  {day.date.getDate()}
+                  {hasItem && <span className="sa-glass-cal-pin" aria-hidden />}
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
 

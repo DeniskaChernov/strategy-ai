@@ -2882,6 +2882,14 @@ body,.sa-strategy-ui{transition:background-color .4s ease,color .35s ease}
 .sa-glass-cal.dk .sa-glass-cal-day:hover{background:rgba(255,255,255,.14);}
 .sa-glass-cal.lt .sa-glass-cal-day{color:var(--text);background:transparent;}
 .sa-glass-cal.lt .sa-glass-cal-day:hover{background:rgba(0,0,0,.06);}
+.sa-glass-cal-day.has-item::after{
+  content:"";position:absolute;left:50%;bottom:1px;transform:translateX(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--accent-1,#a050ff);
+}
+.sa-glass-cal-day.drop-over{
+  outline:2px dashed var(--accent-1,#a050ff);outline-offset:1px;
+}
+.sa-glass-cal-pin{display:none;}
 .sa-glass-cal-day.is-selected{
   background:linear-gradient(135deg,#ec4899,#fb923c);
   color:#fff;box-shadow:0 4px 14px rgba(236,72,153,.35);
