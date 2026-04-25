@@ -27,7 +27,10 @@ router.get('/:projectId/maps/:mapId/versions', requireAuth, async (req, res, nex
     if (!role) return res.status(403).json({ error: 'Нет доступа к карте' });
 
     const { rows } = await pool.query(
-      `SELECT id, map_id, user_email, label, created_at FROM map_versions
+      `SELECT id, map_id, user_email, label, created_at,
+              COALESCE(jsonb_array_length(nodes), 0)::int AS node_count,
+              COALESCE(jsonb_array_length(edges), 0)::int AS edge_count
+       FROM map_versions
        WHERE map_id = $1 ORDER BY created_at DESC LIMIT 30`,
       [req.params.mapId]
     );
