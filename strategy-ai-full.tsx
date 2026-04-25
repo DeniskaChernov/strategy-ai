@@ -1280,8 +1280,13 @@ function Onboarding({onDone,onBack,theme="dark"}){
   const[lastAiQuestion,setLastAiQuestion]=useState("");
   const endRef=useRef(null);
   const inputRef=useRef(null);
+  const scrollRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{askNext([]);},[]);
-  useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"});},[msgs,loading]);
+  useEffect(()=>{
+    const el=scrollRef.current;if(!el)return;
+    const reduced=typeof window!=="undefined"&&window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({top:el.scrollHeight,behavior:reduced?"auto":"smooth"});
+  },[msgs,loading]);
   useEffect(()=>{if(!loading&&!generating){const t=setTimeout(()=>inputRef.current?.focus(),80);return()=>clearTimeout(t);}},[loading,generating]);
 
   async function askNext(hist){
@@ -1337,7 +1342,7 @@ function Onboarding({onDone,onBack,theme="dark"}){
           </div>
         </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:12,maxWidth:720,margin:"0 auto",width:"100%"}}>
+      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowAnchor:"auto" as any,padding:"20px",display:"flex",flexDirection:"column",gap:12,maxWidth:720,margin:"0 auto",width:"100%",scrollPaddingBottom:80}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10}}>
             {m.role==="ai"&&<div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:2}}>✦</div>}
@@ -1347,7 +1352,7 @@ function Onboarding({onDone,onBack,theme="dark"}){
           </div>
         ))}
         {(loading||generating)&&(
-          <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          <div style={{display:"flex",gap:10,alignItems:"center",minHeight:42}}>
             <div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13}}>✦</div>
             <div style={{display:"flex",gap:5,padding:"11px 15px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"4px 14px 14px 14px"}}>
               {[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}
@@ -1896,9 +1901,12 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
   const scrollRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{
     const el=scrollRef.current;
-    if(!el){endRef.current?.scrollIntoView({behavior:"smooth"});return;}
+    if(!el){endRef.current?.scrollIntoView({block:"nearest"});return;}
+    const reduced=typeof window!=="undefined"&&window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const nearBottom=el.scrollHeight-el.scrollTop-el.clientHeight<160;
-    if(nearBottom||msgs.length<=1)endRef.current?.scrollIntoView({behavior:"smooth",block:"end"});
+    if(nearBottom||msgs.length<=1){
+      el.scrollTo({top:el.scrollHeight,behavior:reduced?"auto":"smooth"});
+    }
   },[msgs]);
   useEffect(()=>{if(!load)inpRef.current?.focus();},[load]);
 
@@ -2022,7 +2030,7 @@ function AiPanel({nodes,edges,ctx,tier,onAddNode,onClose,externalMsgs=[],onClear
             <div style={{maxWidth:"88%",padding:m.role==="user"?"12px 16px":"12px 16px 12px 20px",borderRadius:m.role==="user"?"14px 14px 4px 14px":m.role==="sys"?"10px":"4px 14px 14px 14px",background:m.role==="user"?"var(--gradient-accent)":m.role==="sys"?"rgba(16,185,129,.12)":"rgba(255,255,255,.04)",backdropFilter:m.role==="user"?"none":"blur(10px)",border:m.role==="user"?"none":m.role==="sys"?"1px solid rgba(16,185,129,.25)":"1px solid var(--glass-border-accent,var(--border))",borderLeft:m.role==="ai"?"3px solid var(--accent-1)":"none",fontSize:13,lineHeight:1.6,color:m.role==="user"?"#fff":m.role==="sys"?"#12c482":"var(--text)",whiteSpace:"pre-wrap",boxShadow:m.role==="user"?"0 2px 12px var(--accent-glow)":m.role==="sys"?"none":"0 2px 12px rgba(0,0,0,.06)"}}>{m.text}</div>
           </div>
         ))}
-        {load&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",borderRadius:"4px 14px 14px 14px",border:"1px solid var(--glass-border-accent,var(--border))"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`,opacity:.7}}/>)}</div></div>}
+        {load&&<div style={{display:"flex",gap:10,alignItems:"center",minHeight:42}}><div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,boxShadow:"0 2px 8px var(--accent-glow)"}}>◆</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"rgba(255,255,255,.04)",backdropFilter:"blur(8px)",borderRadius:"4px 14px 14px 14px",border:"1px solid var(--glass-border-accent,var(--border))"}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`,opacity:.7}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
       <div style={{padding:"16px 18px",borderTop:"1px solid var(--glass-border-accent,var(--border))",flexShrink:0,background:"rgba(255,255,255,.02)",backdropFilter:"blur(8px)",flexDirection:"column",display:"flex",gap:10}}>
@@ -6462,8 +6470,13 @@ ${["pro","team","enterprise"].includes(tKey)?`БАЗА ЗНАНИЙ: ${AI_KNOWLE
 {"nodes":[{"id":"n1","x":200,"y":270,"title":"...","reason":"...","metric":"...","status":"active","priority":"high","progress":35,"tags":[]}],"edges":[{"id":"e1","source":"n1","target":"n2","type":"requires","label":""}]}
 ${mapHint} X:150–900, Y:80–520.`;
 
+  const scrollRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{askNext([]);},[]);
-  useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"});},[msgs,loading]);
+  useEffect(()=>{
+    const el=scrollRef.current;if(!el)return;
+    const reduced=typeof window!=="undefined"&&window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({top:el.scrollHeight,behavior:reduced?"auto":"smooth"});
+  },[msgs,loading]);
   useEffect(()=>{if(!loading&&!generating){const t=setTimeout(()=>inputRef.current?.focus(),80);return()=>clearTimeout(t);}},[loading,generating]);
 
   async function askNext(hist){
@@ -6518,14 +6531,14 @@ ${mapHint} X:150–900, Y:80–520.`;
         </div>
         <button onClick={()=>setShowSkipConfirm(true)} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>{t("skip","Пропустить")}</button>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:12,maxWidth:680,margin:"0 auto",width:"100%"}}>
+      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowAnchor:"auto" as any,padding:"20px",display:"flex",flexDirection:"column",gap:12,maxWidth:680,margin:"0 auto",width:"100%",scrollPaddingBottom:80}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10}}>
             {m.role==="ai"&&<div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,flexShrink:0,marginTop:2,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div>}
             <div style={{maxWidth:"80%",padding:"10px 14px",borderRadius:m.role==="user"?"12px 12px 3px 12px":"3px 12px 12px 12px",background:m.role==="user"?"rgba(104,54,245,.18)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(104,54,245,.3)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>{m.text}</div>
           </div>
         ))}
-        {(loading||generating)&&<div style={{display:"flex",gap:10,alignItems:"center"}}><div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 12px 12px 12px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
+        {(loading||generating)&&<div style={{display:"flex",gap:10,alignItems:"center",minHeight:40}}><div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 12px 12px 12px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
       {mapGenFailed&&(
