@@ -240,6 +240,21 @@ body[data-theme="light"][data-palette="indigo"]::before{
   body[data-theme="dark"][data-palette="indigo"]::before,
   body[data-theme="light"][data-palette="indigo"]::before{animation:none}
 }
+body.sa-route-map::before,
+body.sa-route-map[data-theme="dark"]::before,
+body.sa-route-map[data-theme="light"]::before,
+body.sa-route-map[data-theme="dark"][data-palette="indigo"]::before,
+body.sa-route-map[data-theme="light"][data-palette="indigo"]::before{
+  background:none !important;
+  animation:none !important;
+  opacity:0;
+}
+body.sa-route-map .sa-bgd,
+body.sa-route-map .sa-bgl{opacity:0 !important;}
+body.sa-route-map[data-theme="dark"]{background:#050410}
+body.sa-route-map[data-theme="light"]{background:#ece9ff}
+@keyframes saSlideInR{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.sa-onb-side{animation:none !important}}
 #root{position:relative;z-index:1;min-height:100%;}
 .screen-wrap{position:relative;}
 /* Лендинг Strategy AI — только ReferenceLandingView (.sa-ref-landing), без legacy .lpage */

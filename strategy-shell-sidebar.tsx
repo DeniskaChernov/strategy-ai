@@ -1,4 +1,17 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
+
+const COLLAPSE_KEY = "sa_sb_groups_v1";
+type GroupKey = "workspace" | "ai" | "settings";
+function loadGroups(): Record<GroupKey, boolean> {
+  try {
+    const raw = localStorage.getItem(COLLAPSE_KEY);
+    if (raw) return { workspace: true, ai: true, settings: true, ...JSON.parse(raw) };
+  } catch { /* — */ }
+  return { workspace: true, ai: true, settings: true };
+}
+function saveGroups(g: Record<GroupKey, boolean>) {
+  try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(g)); } catch { /* — */ }
+}
 
 export type StrategyShellNav =
   | "projects"
@@ -34,6 +47,7 @@ export function StrategyShellSidebar({
   onContentPlan,
   showTrialBanner,
   onLogoClick,
+  collapsed,
   t,
 }: {
   theme: string;
@@ -57,10 +71,22 @@ export function StrategyShellSidebar({
   showTrialBanner?: boolean;
   /** Клик по бренду в шапке сайдбара (например «домой» → проекты) */
   onLogoClick?: () => void;
+  /** Скрытый бок (даёт больше места карте) */
+  collapsed?: boolean;
   t: TFn;
 }){
   void _tierColor;
   const initial = (userName || userEmail || "?").trim().split(/\s+/).map(s => s[0]).join("").slice(0, 2).toUpperCase();
+  const [groups, setGroups] = useState<Record<GroupKey, boolean>>(loadGroups);
+  const toggleGroup = useCallback((k: GroupKey) => {
+    setGroups((prev) => { const n = { ...prev, [k]: !prev[k] }; saveGroups(n); return n; });
+  }, []);
+  if (collapsed) return null;
+  const Chevron = ({ open }: { open: boolean }) => (
+    <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden style={{ transition: "transform .22s ease", transform: open ? "rotate(0deg)" : "rotate(-90deg)", opacity: .55, flexShrink: 0 }}>
+      <path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
   return(
     <aside className="sa-sb">
       <div
@@ -78,8 +104,12 @@ export function StrategyShellSidebar({
           <div className={`tpi${theme==="light"?" on":""}`}>☀</div>
         </div>
       </div>
-      <div className="sb-sect">
-        <div className="sb-lbl">{t("shell_workspace", "Workspace")}</div>
+      <div className={"sb-sect"+(groups.workspace?"":" sb-sect--collapsed")}>
+        <button type="button" className="sb-lbl sb-lbl--btn" onClick={()=>toggleGroup("workspace")} aria-expanded={groups.workspace}>
+          <Chevron open={groups.workspace} />
+          <span>{t("shell_workspace", "Workspace")}</span>
+        </button>
+        {groups.workspace&&<>
         <div className={`ni${activeNav==="projects"?" on":""}`} onClick={()=>onNavigate("projects")}>
           <svg viewBox="0 0 15 15" fill="none" aria-hidden><rect x="1" y="1" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".75"/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".4"/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".4"/></svg>
           {t("shell_projects", "Проекты")}
@@ -104,9 +134,14 @@ export function StrategyShellSidebar({
           <svg viewBox="0 0 15 15" fill="none" aria-hidden><rect x="1" y="3" width="13" height="9" rx="2" stroke="currentColor" strokeWidth="1.2" fill="none" opacity=".5"/><rect x="3" y="8" width="4" height="2" rx="1" fill="currentColor" opacity=".65"/><rect x="8" y="8" width="3" height="2" rx="1" fill="currentColor" opacity=".4"/></svg>
           {t("shell_timeline", "Таймлайн")}
         </div>
+        </>}
       </div>
-      <div className="sb-sect">
-        <div className="sb-lbl">{t("shell_ai_insights_section", "AI и инсайты")}</div>
+      <div className={"sb-sect"+(groups.ai?"":" sb-sect--collapsed")}>
+        <button type="button" className="sb-lbl sb-lbl--btn" onClick={()=>toggleGroup("ai")} aria-expanded={groups.ai}>
+          <Chevron open={groups.ai} />
+          <span>{t("shell_ai_insights_section", "AI и инсайты")}</span>
+        </button>
+        {groups.ai&&<>
         <div className={`ni${activeNav==="ai"?" on":""}`} onClick={()=>onNavigate("ai")}>
           <svg viewBox="0 0 15 15" fill="none" aria-hidden><polygon points="7.5,1 9.3,5.5 14,5.5 10.4,8.4 11.8,13 7.5,10.2 3.2,13 4.6,8.4 1,5.5 5.7,5.5" fill="currentColor" opacity=".75"/></svg>
           {t("shell_ai_advisor", "AI советник")}
@@ -116,9 +151,14 @@ export function StrategyShellSidebar({
           <svg viewBox="0 0 15 15" fill="none" aria-hidden><polyline points="1,12 4,7 7.5,9.5 10.5,4.5 14,7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity=".75"/></svg>
           {t("shell_insights", "Инсайты")}
         </div>
+        </>}
       </div>
-      <div className="sb-sect">
-        <div className="sb-lbl">{t("shell_settings_section", "Настройки")}</div>
+      <div className={"sb-sect"+(groups.settings?"":" sb-sect--collapsed")}>
+        <button type="button" className="sb-lbl sb-lbl--btn" onClick={()=>toggleGroup("settings")} aria-expanded={groups.settings}>
+          <Chevron open={groups.settings} />
+          <span>{t("shell_settings_section", "Настройки")}</span>
+        </button>
+        {groups.settings&&<>
         <div className={`ni${activeNav==="team"?" on":""}`} onClick={()=>onNavigate("team")}>
           <svg viewBox="0 0 15 15" fill="none" aria-hidden><circle cx="5.5" cy="4.5" r="2.5" fill="currentColor" opacity=".7"/><circle cx="10" cy="4.5" r="2" fill="currentColor" opacity=".45"/><path d="M1 12c0-2.5 2-4.5 4.5-4.5S10 9.5 10 12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" fill="none" opacity=".5"/></svg>
           {t("shell_team_nav", "Команда")}
@@ -127,6 +167,7 @@ export function StrategyShellSidebar({
           <svg viewBox="0 0 15 15" fill="none" aria-hidden><circle cx="7.5" cy="7.5" r="2.2" fill="currentColor" opacity=".65"/><path d="M7.5 1v1.5M7.5 12.5V14M1 7.5h1.5M12.5 7.5H14M3.2 3.2l1.1 1.1M10.7 10.7l1.1 1.1M3.2 11.8l1.1-1.1M10.7 4.3l1.1-1.1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity=".5"/></svg>
           {t("shell_settings", "Настройки")}
         </div>
+        </>}
       </div>
       <div className="lang-row" style={{marginTop:6}}>
         {(["en","ru","uz"] as const).map(code=>(

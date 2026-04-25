@@ -2513,6 +2513,14 @@ function MapEditor({user,mapData,project,onBack,isNew,onProfile,onToggleTheme,th
   const{t,lang,setLang}=useLang();
   const isMobile=useIsMobile();
   const[accHex,setAccHex]=useState({a1:"#6836f5",a2:"#a050ff"});
+  const[sidebarCollapsed,setSidebarCollapsed]=useState<boolean>(()=>{
+    try{return localStorage.getItem("sa_map_sb_collapsed")==="1";}catch{return false;}
+  });
+  useEffect(()=>{try{localStorage.setItem("sa_map_sb_collapsed",sidebarCollapsed?"1":"0");}catch{}},[sidebarCollapsed]);
+  useEffect(()=>{
+    document.body.classList.add("sa-route-map");
+    return()=>{document.body.classList.remove("sa-route-map");};
+  },[]);
   useLayoutEffect(()=>{
     try{
       const s=getComputedStyle(document.body);
@@ -3185,6 +3193,18 @@ ${ctx}
       {shellUi&&(
         <div className="sa-topbar">
           <div className="tb-l">
+            <button
+              type="button"
+              className={"sa-shell-burger"+(sidebarCollapsed?" on":"")}
+              onClick={()=>setSidebarCollapsed(c=>!c)}
+              title={sidebarCollapsed?t("shell_show_sidebar","Показать панель"):t("shell_hide_sidebar","Скрыть панель")}
+              aria-label={sidebarCollapsed?t("shell_show_sidebar","Показать панель"):t("shell_hide_sidebar","Скрыть панель")}
+              aria-pressed={sidebarCollapsed}
+            >
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden>
+                <path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+            </button>
             <div className="tb-title-wrap">
               <span className="tb-title">{mapData?.name||t("shell_strategy_map","Карта стратегии")}</span>
               <span className="tb-sub">{project?.name||""}</span>
@@ -3276,7 +3296,7 @@ ${ctx}
           </div>
         </div>
 
-        {user&&onOpenContentPlanHub&&(
+        {user&&onOpenContentPlanHub&&!(shellUi&&sidebarCollapsed)&&(
           <div className={shellUi?"sa-map-cp-strip":undefined} style={{padding:shellUi?undefined:"10px 16px",borderBottom:shellUi?undefined:"1px solid var(--border)",background:shellUi?undefined:"var(--surface2)"}}>
             <div className={shellUi?"cp-strip-label":undefined} style={{fontSize:10.5,fontWeight:800,color:"var(--text5)",textTransform:"uppercase",letterSpacing:.08,textAlign:"center",marginBottom:shellUi?0:8}}>{t("cp_map_strip_label","Контент-план и разделы")}</div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:shellUi?14:12,flexWrap:"wrap"}}>
@@ -3664,6 +3684,7 @@ ${ctx}
           onContentPlan={onOpenContentPlanHub||undefined}
           showTrialBanner={(user?.tier||"free")==="free"}
           onLogoClick={() => onShellGlobalNav?.("projects")}
+          collapsed={sidebarCollapsed}
           t={t}
         />
         <div className="sa-main" style={{flex:1,minWidth:0,minHeight:0,display:"flex",flexDirection:"column",overflow:"hidden"}}>{_mapMain}</div>
@@ -4703,13 +4724,13 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
   const [loading,setLoading]=useState(true);
   const [editId,setEditId]=useState<string|null>(null);
   const [filterStatus,setFilterStatus]=useState<string>("all");
+  const _cpKey=projectId||"all";
+  const _viewKey=`sa_cp_view_${_cpKey}`;
+  const _dateKey=`sa_cp_date_${_cpKey}`;
   const [viewMode,setViewMode]=useState<"calendar"|"map"|"list"|"tree">(()=>{try{const v=localStorage.getItem(_viewKey);return(v==="calendar"||v==="map"||v==="list"||v==="tree")?v:"calendar";}catch{return"calendar";}});
   useEffect(()=>{try{localStorage.setItem(_viewKey,viewMode);}catch{}},[_viewKey,viewMode]);
   const [aiSuggesting,setAiSuggesting]=useState(false);
   const [pendingDeleteId,setPendingDeleteId]=useState<string|null>(null);
-  const _cpKey=projectId||"all";
-  const _viewKey=`sa_cp_view_${_cpKey}`;
-  const _dateKey=`sa_cp_date_${_cpKey}`;
   const [cpCalendarDate,setCpCalendarDate]=useState<Date>(()=>{
     try{
       const s=localStorage.getItem(_dateKey);
@@ -6520,37 +6541,37 @@ ${mapHint} X:150–900, Y:80–520.`;
   }
   const pct=Math.min(100,Math.round(qCount/MAX_Q*100));
   return(
-    <div data-theme={theme} style={{position:"fixed",inset:0,background:"var(--modal-overlay-strong,rgba(0,0,0,.92))",display:"flex",flexDirection:"column",zIndex:250,backdropFilter:"blur(20px)",animation:"fadeIn .2s ease"}}>
-<div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
+    <div data-theme={theme} className="sa-onb-side" style={{position:"fixed",top:0,right:0,bottom:0,width:"min(440px,100vw)",background:"var(--bg2,var(--surface,rgba(12,9,28,.96)))",display:"flex",flexDirection:"column",zIndex:250,boxShadow:"-12px 0 40px rgba(0,0,0,.45)",borderLeft:"1px solid var(--border,rgba(255,255,255,.08))",animation:"saSlideInR .25s cubic-bezier(.34,1.56,.64,1)"}}>
+<div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:"1px solid var(--border)",flexShrink:0}}>
         <div style={{width:28,height:28,borderRadius:8,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 12px var(--accent-glow)"}}>✦</div>
-        <div style={{flex:1}}>
-          <div style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>AI создаёт карту · {project?.name}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:13,fontWeight:700,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>AI создаёт карту · {project?.name}</div>
           <div style={{height:3,borderRadius:2,background:"var(--surface2)",marginTop:4,overflow:"hidden"}}>
             <div style={{height:"100%",width:pct+"%",background:"var(--gradient-accent)",borderRadius:2,transition:"width .4s"}}/>
           </div>
         </div>
         <button onClick={()=>setShowSkipConfirm(true)} style={{padding:"5px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>{t("skip","Пропустить")}</button>
       </div>
-      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowAnchor:"auto" as any,padding:"20px",display:"flex",flexDirection:"column",gap:12,maxWidth:680,margin:"0 auto",width:"100%",scrollPaddingBottom:80}}>
+      <div ref={scrollRef} style={{flex:1,overflowY:"auto",overflowAnchor:"auto" as any,padding:"16px",display:"flex",flexDirection:"column",gap:12,width:"100%",scrollPaddingBottom:80}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",gap:10}}>
             {m.role==="ai"&&<div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,flexShrink:0,marginTop:2,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div>}
-            <div style={{maxWidth:"80%",padding:"10px 14px",borderRadius:m.role==="user"?"12px 12px 3px 12px":"3px 12px 12px 12px",background:m.role==="user"?"rgba(104,54,245,.18)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(104,54,245,.3)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>{m.text}</div>
+            <div style={{maxWidth:"86%",padding:"10px 14px",borderRadius:m.role==="user"?"12px 12px 3px 12px":"3px 12px 12px 12px",background:m.role==="user"?"rgba(104,54,245,.18)":"var(--surface)",border:`1px solid ${m.role==="user"?"rgba(104,54,245,.3)":"var(--border)"}`,fontSize:13.5,lineHeight:1.65,color:"var(--text)",whiteSpace:"pre-wrap"}}>{m.text}</div>
           </div>
         ))}
         {(loading||generating)&&<div style={{display:"flex",gap:10,alignItems:"center",minHeight:40}}><div style={{width:26,height:26,borderRadius:7,background:"var(--gradient-accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"var(--accent-on-bg)",fontWeight:900,boxShadow:"0 2px 10px var(--accent-glow)"}}>✦</div><div style={{display:"flex",gap:4,padding:"10px 14px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"3px 12px 12px 12px"}}>{[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:"50%",background:"var(--accent-1)",animation:`thinkDot 1.4s ease ${i*.2}s infinite`}}/>)}</div></div>}
         <div ref={endRef}/>
       </div>
       {mapGenFailed&&(
-        <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,maxWidth:680,margin:"0 auto",width:"100%",flexWrap:"wrap"}}>
+        <div style={{padding:"12px 16px",borderTop:"1px solid var(--border)",display:"flex",gap:10,width:"100%",flexWrap:"wrap"}}>
           <button onClick={()=>{setMapGenFailed(false);buildMap(history);}} style={{padding:"10px 18px",borderRadius:10,border:"1px solid var(--accent-1)",background:"var(--accent-soft)",color:"var(--accent-2)",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("retry","Повторить")}</button>
           <button onClick={useFallbackTemplate} style={{padding:"10px 18px",borderRadius:10,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text3)",fontSize:13,fontWeight:600,cursor:"pointer"}}>{t("use_template","Использовать шаблон")}</button>
         </div>
       )}
       {!generating&&!mapGenFailed&&(
-        <div style={{padding:"14px 20px",borderTop:"1px solid var(--border)",display:"flex",gap:10,maxWidth:680,margin:"0 auto",width:"100%"}}>
-          <input ref={inputRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}} placeholder="Ваш ответ…" style={{flex:1,padding:"11px 16px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"inherit"}} disabled={loading}/>
-          <button onClick={submit} disabled={!inp.trim()||loading} className="btn-interactive" style={{padding:"11px 22px",borderRadius:12,border:"none",background:inp.trim()&&!loading?"var(--gradient-accent)":"var(--surface)",color:inp.trim()&&!loading?"var(--accent-on-bg)":"var(--text4)",fontSize:14,fontWeight:900,cursor:inp.trim()&&!loading?"pointer":"not-allowed",boxShadow:inp.trim()&&!loading?"0 4px 18px var(--accent-glow)":"none"}}>
+        <div style={{padding:"12px 16px",borderTop:"1px solid var(--border)",display:"flex",gap:8,width:"100%"}}>
+          <input ref={inputRef} value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();submit();}}} placeholder="Ваш ответ…" style={{flex:1,padding:"11px 14px",fontSize:14,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:12,color:"var(--text)",outline:"none",fontFamily:"inherit",minWidth:0}} disabled={loading}/>
+          <button onClick={submit} disabled={!inp.trim()||loading} className="btn-interactive" style={{padding:"11px 16px",borderRadius:12,border:"none",background:inp.trim()&&!loading?"var(--gradient-accent)":"var(--surface)",color:inp.trim()&&!loading?"var(--accent-on-bg)":"var(--text4)",fontSize:14,fontWeight:900,cursor:inp.trim()&&!loading?"pointer":"not-allowed",boxShadow:inp.trim()&&!loading?"0 4px 18px var(--accent-glow)":"none",whiteSpace:"nowrap"}}>
             {qCount>=MAX_Q?t("create","Создать")+" ✦":t("answer","Ответить")+" →"}
           </button>
         </div>
