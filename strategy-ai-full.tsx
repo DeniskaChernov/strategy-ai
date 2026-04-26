@@ -77,6 +77,10 @@ import { AppTopBar } from "./client/components/app-top-bar";
 import { SimulationModal } from "./client/strategy-modals/simulation-modal";
 import { PillGroup } from "./client/components/pill-group";
 import { MapConflictModal } from "./client/strategy-modals/map-conflict-modal";
+import { ALL_FEATURES, TIER_FEAT_KEY, TIER_ORDER, TIER_MKT } from "./client/lib/tier-marketing-data";
+import { FeatureValue } from "./client/components/feature-value";
+import { TierSelectionScreen } from "./client/components/tier-selection-screen";
+import { SavingScreen } from "./client/components/saving-screen";
 
 const ROLES_C  ={owner:"#6836f5",editor:"#12c482",viewer:"#a8a4c8"};
 const STATUS  ={planning:{c:"#6836f5"},active:{c:"#06b6d4"},completed:{c:"#12c482"},paused:{c:"#f09428"},blocked:{c:"#f04458"}};
@@ -185,126 +189,6 @@ function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title="",subt
           {onClose&&<button type="button" className="modal-close" onClick={handleClose} aria-label={t("close","Закрыть")}>×</button>}
           <AuthFormContent initialTab={initialTab} onAuth={onAuth} theme={theme} title={title} subtitle={subtitle} variant="modal"/>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ── TierSelectionScreen ──
-const ALL_FEATURES=[
-  {key:"ai",label:"AI-советник",free:"Базовый",str:"Базовый+риски",pro:"OKR·SWOT·Конкурент",team:"McKinsey-уровень",ent:"Стратег+Финансист+Инвестор"},
-  {key:"proj",label:"Проектов",free:"1",str:"3",pro:"10",team:"25",ent:"∞"},
-  {key:"maps",label:"Карт на проект",free:"1",str:"3",pro:"5",team:"15",ent:"∞"},
-  {key:"users",label:"Участников",free:"Только вы",str:"Только вы",pro:"3",team:"10",ent:"∞"},
-  {key:"scen",label:"Сценарии & симуляция",free:false,str:"2",pro:"5",team:"15",ent:"∞"},
-  {key:"inter",label:"AI-интервью при создании",free:true,str:true,pro:true,team:true,ent:true},
-  {key:"gantt",label:"Gantt таймлайн",free:true,str:true,pro:true,team:true,ent:true},
-  {key:"clone",label:"Клонирование карт",free:false,str:false,pro:true,team:true,ent:true},
-  {key:"tmpls",label:"Шаблоны стратегий",free:false,str:false,pro:false,team:true,ent:true},
-  {key:"compet",label:"Конкурентный анализ AI",free:false,str:false,pro:true,team:true,ent:true},
-  {key:"econ",label:"Unit economics разбор",free:false,str:false,pro:false,team:true,ent:true},
-  {key:"auto",label:"AI авто-связи на карте",free:false,str:false,pro:false,team:true,ent:true},
-  {key:"png",label:"Экспорт PNG",free:true,str:true,pro:true,team:true,ent:true},
-  {key:"pptx",label:"Экспорт в PowerPoint",free:false,str:false,pro:false,team:false,ent:true},
-  {key:"report",label:"Ежемесячный AI-отчёт",free:false,str:false,pro:false,team:false,ent:true},
-  {key:"api",label:"API-доступ к картам",free:false,str:false,pro:false,team:false,ent:true},
-  {key:"bcg",label:"BCG·Porter·Blue Ocean",free:false,str:false,pro:false,team:false,ent:true},
-  {key:"wl",label:"White-label",free:false,str:false,pro:false,team:false,ent:true},
-  {key:"supp",label:"Приоритетная поддержка",free:false,str:false,pro:false,team:false,ent:true},
-];
-
-const TIER_MKT={
-  free:{icon:"⬡",color:"#9088b0",badge:null,headline:"Попробуй бесплатно",sub:"Без карты. Навсегда.",accent:"Для первых шагов",features:["1 проект","1 карта","AI-интервью","Gantt таймлайн","Экспорт PNG"],missing:["Команда","Сценарии","Конкурентный анализ"],gradient:"linear-gradient(135deg,#9088b022,#9088b008)",glow:"#9088b0",popular:false},
-  starter:{icon:"◈",color:"#12c482",badge:"🌱 Новинка",headline:"Первый платный шаг",sub:"Мягкий вход в стратегию",accent:"Лучший старт за $9",features:["3 проекта","3 карты","2 сценария","Анализ рисков AI","Gantt + PNG"],missing:["Команда","Конкурентный анализ","Шаблоны"],gradient:"linear-gradient(135deg,#12c48218,#12c48208)",glow:"#12c482",popular:false},
-  pro:{icon:"◆",color:"#a050ff",badge:"🔥 Популярный",headline:"Для профессионала",sub:"Полная стратегическая мощь",accent:"73% платящих выбирают Pro",features:["10 проектов","5 карт","3 участника","Конкурентный анализ AI","OKR·SWOT·Риски","Клонирование карт"],missing:["Unit economics","Шаблоны","McKinsey-AI"],gradient:"linear-gradient(135deg,#a050ff18,#a050ff08)",glow:"#a050ff",popular:true},
-  team:{icon:"✦",color:"#f09428",badge:"⭐ Лучшая ценность",headline:"Для команд",sub:"Стратегия на уровне McKinsey",accent:"В 2× больше функций чем Pro",features:["25 проектов","15 карт","10 участников","Unit economics разбор","AI авто-связи","Шаблоны стратегий"],missing:["BCG·Porter·Blue Ocean","PowerPoint экспорт","AI-отчёты"],gradient:"linear-gradient(135deg,#f0942818,#f0942808)",glow:"#f09428",popular:false,highlight:true},
-  enterprise:{icon:"💎",color:"#06b6d4",badge:"💎 Топ-уровень",headline:"Без компромиссов",sub:"AI-директор по стратегии",accent:"Окупается за 1 решение",features:["∞ проектов и карт","∞ участников","AI = стратег+финансист+инвестор","BCG·Porter·Blue Ocean","PowerPoint экспорт","API-доступ"],missing:[],gradient:"linear-gradient(135deg,#06b6d418,#06b6d408)",glow:"#06b6d4",popular:false},
-};
-
-const TIER_PRICES={free:"Бесплатно",starter:"$9/мес",pro:"$29/мес",team:"$59/мес",enterprise:"$149+/мес"};
-const TIER_PRICE_NUM={free:"0",starter:"9",pro:"29",team:"59",enterprise:"149+"};
-const TIER_ORDER=["free","starter","pro","team","enterprise"];
-const TIER_FEAT_KEY={free:"free",starter:"str",pro:"pro",team:"team",enterprise:"ent"};
-
-function FeatureValue({val}){
-  if(val===false)return <span style={{color:"var(--text6)",fontSize:13}}>—</span>;
-  if(val===true)return <span style={{color:"#12c482",fontWeight:700,fontSize:14}}>✓</span>;
-  return <span style={{color:"var(--text2)",fontSize:13,fontWeight:500}}>{val}</span>;
-}
-
-function TierSelectionScreen({isNew,currentUser,theme="dark",palette="indigo",onSelect,onBack}){
-  const{t}=useLang();
-  const isMobile=useIsMobile();
-  const curTier=currentUser?.tier||"free";
-  const[selected,setSelected]=useState(()=>{const idx=TIER_ORDER.indexOf(curTier);return TIER_ORDER[Math.min(idx+1,TIER_ORDER.length-1)]||"pro";});
-  const[loading,setLoading]=useState(false);
-  const[hovered,setHovered]=useState(null);
-  const curIdx=TIER_ORDER.indexOf(curTier);
-  async function proceed(){setLoading(true);await onSelect(selected);setLoading(false);}
-  const sel=TIERS[selected]||TIERS.pro;
-  const selMkt=TIER_MKT[selected]||TIER_MKT.pro;
-  return(
-    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} data-palette={palette} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",minHeight:"100vh",display:"flex",flexDirection:"column",overflowY:"auto",position:"relative"}}>
-      <StrategyShellBg/>
-      <div style={{position:"fixed",width:800,height:800,borderRadius:"50%",background:`radial-gradient(circle,${selMkt.glow}18 0%,transparent 65%)`,top:"-20%",right:"-15%",filter:"blur(100px)",pointerEvents:"none",transition:"background 1.4s ease",zIndex:0}}/>
-      <div className="sa-app-topbar" style={{zIndex:2}}>
-        <div className="land-logo" style={{gap:10}}>
-          <div className="land-gem" style={{width:34,height:34,borderRadius:11,fontSize:13}}>SA</div>
-          <span className="land-brand">Strategy AI</span>
-        </div>
-        {!isNew&&onBack&&<button type="button" className="btn-g" onClick={onBack}>{t("back_btn","← Назад")}</button>}
-      </div>
-      <div style={{position:"relative",zIndex:1,maxWidth:1300,width:"100%",margin:"0 auto",padding:isMobile?"0 16px 56px":"0 24px 80px",flex:1}}>
-        <div style={{textAlign:"center",padding:isMobile?"28px 0 24px":"40px 0 44px"}}>
-          <h1 style={{fontSize:isMobile?"clamp(26px,7vw,36px)":52,fontWeight:900,color:"var(--text)",letterSpacing:-2,lineHeight:1.05,marginBottom:10,animation:"slideUp .4s .1s both"}}>
-            {t("tier_hero_line_1","Выберите")}<br/>
-            <span style={{background:`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}99,var(--accent-1))`,backgroundSize:"200% 200%",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",animation:"gradShift 4s ease infinite"}}>{t("tier_hero_line_2","свой тариф")}</span>
-          </h1>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:isMobile?"minmax(0,1fr)":"repeat(auto-fill,minmax(200px,1fr))",gap:14,marginBottom:36,alignItems:"stretch",maxWidth:isMobile?420:"none",marginLeft:isMobile?"auto":"",marginRight:isMobile?"auto":""}}>
-          {TIER_ORDER.map((k,cardIdx)=>{
-            const v=TIERS[k],m=TIER_MKT[k];
-            const isSel=selected===k,isCurr=k===curTier,isLower=TIER_ORDER.indexOf(k)<curIdx&&!isCurr,isHov=hovered===k&&!isSel;
-            return(
-              <div key={k} onClick={()=>setSelected(k)} onMouseEnter={()=>setHovered(k)} onMouseLeave={()=>setHovered(null)}
-                style={{borderRadius:22,border:`2px solid ${isSel?v.color+"ee":m.highlight&&!isSel?"rgba(245,158,11,.3)":isHov?v.color+"55":"var(--border)"}`,background:isSel?`${v.color}12`:m.highlight?`${v.color}06`:"var(--surface)",cursor:"pointer",transition:"all .25s cubic-bezier(.34,1.56,.64,1)",transform:isSel?"translateY(-10px) scale(1.02)":m.highlight&&!isSel?"translateY(-3px)":isHov?"translateY(-5px)":"translateY(0)",boxShadow:isSel?`0 28px 70px ${v.color}35,0 0 0 1px ${v.color}22`:isHov?`0 16px 44px ${v.color}20`:"none",position:"relative",opacity:isLower?.45:1,display:"flex",flexDirection:"column",overflow:"hidden",animation:`slideUp .45s ${cardIdx*.07}s both`}}>
-                {(isCurr||m.badge)&&<div style={{position:"absolute",top:-1,left:"50%",transform:"translateX(-50%)",padding:"4px 14px",borderRadius:"0 0 12px 12px",fontSize:13.5,fontWeight:800,color:"#fff",whiteSpace:"nowrap",background:isCurr?v.color:"linear-gradient(90deg,var(--accent-1),var(--accent-2))",boxShadow:`0 4px 14px ${v.color}55`}}>{isCurr?t("your_plan","● Ваш тариф"):m.badge}</div>}
-                <div style={{padding:"28px 22px 20px",paddingTop:(isCurr||m.badge)?"36px":"28px"}}>
-                  <div style={{width:56,height:56,borderRadius:16,background:isSel?`linear-gradient(135deg,${v.color}33,${v.color}18)`:`${v.color}12`,border:`1.5px solid ${isSel?v.color+"66":v.color+"25"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,marginBottom:16}}>{m.icon}</div>
-                  <div style={{fontSize:22,fontWeight:900,color:isSel?v.color:"var(--text)",letterSpacing:-.5,marginBottom:3}}>{v.label}</div>
-                  <div style={{fontSize:13,color:"var(--text4)",marginBottom:18}}>{m.headline}</div>
-                  <div style={{padding:"14px 16px",borderRadius:14,background:isSel?`${v.color}15`:"var(--surface2)",border:`1px solid ${isSel?v.color+"30":"var(--border)"}`,marginBottom:16}}>
-                    {k==="free"?<div style={{fontSize:26,fontWeight:900,color:isSel?v.color:"var(--text)"}}>{t("free_plan","Бесплатно")}</div>:(
-                      <div style={{display:"flex",alignItems:"baseline",gap:2}}><span style={{fontSize:13,color:isSel?v.color:"var(--text4)",fontWeight:600}}>$</span><span style={{fontSize:38,fontWeight:900,color:isSel?v.color:"var(--text)",letterSpacing:-1.5,lineHeight:1}}>{TIER_PRICE_NUM[k]}</span><span style={{fontSize:13,color:"var(--text5)",marginLeft:4}}>{t("per_month_short","/мес")}</span></div>
-                    )}
-                  </div>
-                </div>
-                <div style={{padding:"0 22px 22px",marginTop:"auto"}}>
-                  {isSel?<div style={{padding:"13px",borderRadius:13,textAlign:"center",background:`linear-gradient(135deg,${v.color},${v.color}cc)`,color:"#fff",fontSize:13,fontWeight:800,animation:"tierPop .4s cubic-bezier(.34,1.56,.64,1)"}}>{t("selected","✓ Выбрано")}</div>:<div style={{padding:"11px",borderRadius:13,textAlign:"center",border:`1.5px solid ${v.color}40`,background:`${v.color}0a`,color:v.color,fontSize:13,fontWeight:700}}>{t("choose_btn","Выбрать →")}</div>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div style={{textAlign:"center",marginBottom:48}}>
-          <button onClick={proceed} disabled={loading} style={{padding:"18px 72px",fontSize:17,fontWeight:800,borderRadius:18,border:"none",background:selected==="free"?"rgba(148,163,184,.12)":`linear-gradient(135deg,${selMkt.glow},${selMkt.glow}bb)`,color:selected==="free"?"var(--text4)":"#fff",cursor:loading?"wait":"pointer",boxShadow:selected!=="free"?`0 16px 52px ${selMkt.glow}44`:"none",display:"inline-flex",alignItems:"center",gap:14,letterSpacing:-.3}}>
-            {loading&&<div style={{width:18,height:18,border:"2px solid rgba(255,255,255,.3)",borderTop:"2px solid #fff",borderRadius:"50%",animation:"spin .7s linear infinite"}}/>}
-            {loading?t("saving","Сохраняю…"):selected===curTier?t("tier_stay_on","Остаться на {tier}").replace("{tier}",sel.label):selected==="free"?t("tier_start_free","Начать бесплатно →"):t("tier_go_to","Перейти на {tier} — {price} →").replace("{tier}",sel.label).replace("{price}",TIER_PRICES[selected])}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SavingScreen({theme='dark'}){
-  const{t}=useLang();
-  return(
-    <div className={"sa-strategy-ui "+(theme==="dark"?"dk":"lt")} data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:18,position:"relative",overflow:"hidden"}}>
-      <StrategyShellBg/>
-      <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:18}}>
-        <div style={{width:52,height:52,borderRadius:15,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"float 2s ease infinite",boxShadow:"0 8px 28px var(--accent-glow)"}}>✦</div>
-        <div style={{fontSize:16,fontWeight:600,color:"var(--text)"}}>{t("saving_map","Сохраняю карту")}</div>
       </div>
     </div>
   );
@@ -782,11 +666,12 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
               <div style={{width:190,flexShrink:0,borderRight:"1px solid var(--border)",padding:"12px 8px",overflowY:"auto",display:"flex",flexDirection:"column",gap:3}}>
                 {TIER_ORDER.map(k=>{
                   const tierItem=TIERS[k];
+                  const mkt=TIER_MKT[k];
                   const isSel=k===selected;
                   const isCur=k===user.tier;
                   return(
                     <button key={k} onClick={()=>setSelected(k)} style={{display:"flex",alignItems:"center",gap:9,padding:"10px 11px",borderRadius:12,border:`1px solid ${isSel?tierItem.color+"66":"transparent"}`,background:isSel?tierItem.color+"12":"transparent",cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
-                      <span style={{fontSize:15}}>{tierItem.badge}</span>
+                      <span style={{fontSize:15}}>{mkt?.icon ?? ""}</span>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{fontSize:13.5,fontWeight:700,color:isSel?tierItem.color:"var(--text)"}}>{tierItem.label}</div>
                         <div style={{fontSize:13.5,color:"var(--text4)",marginTop:1}}>{getTierPrice(k,t)}</div>
@@ -811,12 +696,12 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                 )}
                 {!buyPhase&&(
                   <>
-                    <div style={{padding:"14px 16px",borderRadius:14,background:selTier.gradient,border:`1px solid ${selTier.color}33`,marginBottom:16}}>
+                    <div style={{padding:"14px 16px",borderRadius:14,background:TIER_MKT[selected]?.gradient||"var(--surface)",border:`1px solid ${selTier.color}33`,marginBottom:16}}>
                       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-                        <span style={{fontSize:22}}>{selTier.badge}</span>
+                        <span style={{fontSize:22}}>{TIER_MKT[selected]?.icon ?? ""}</span>
                         <div style={{flex:1}}>
                           <div style={{fontSize:16,fontWeight:900,color:selTier.color}}>{selTier.label}</div>
-                          <div style={{fontSize:13.5,color:"var(--text4)"}}>{selTier.desc}</div>
+                          <div style={{fontSize:13.5,color:"var(--text4)"}}>{TIER_MKT[selected]?.sub ?? ""}</div>
                         </div>
                         <div style={{fontSize:18,fontWeight:900,color:selTier.color}}>{getTierPrice(selected,t)}</div>
                       </div>
@@ -841,10 +726,10 @@ function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",
                           <React.Fragment key={f.key}>
                             <div style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",color:"var(--text3)"}}>{f.label}</div>
                             {TIER_ORDER.map(k=>{
-                              const v=f[TIER_FEAT_KEY[k]];
+                              const v=f[TIER_FEAT_KEY[k]] as string|boolean;
                               return(
                                 <div key={k} style={{padding:"6px 8px",borderBottom:"1px solid var(--border)",textAlign:"center"}}>
-                                  {v===false?<span style={{color:"var(--text6)"}}>—</span>:v===true?<span style={{color:"#12c482",fontWeight:700}}>✓</span>:<span style={{color:"var(--text2)"}}>{String(v)}</span>}
+                                  <FeatureValue val={v}/>
                                 </div>
                               );
                             })}
