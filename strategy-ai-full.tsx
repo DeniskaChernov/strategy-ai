@@ -37,7 +37,7 @@ import { GlassCalendar, dateToYMD } from "./client/glass-calendar";
 import { parseMarketingPath } from "./client/spa-path";
 import { applySeoForAppScreen } from "./client/seo-head";
 import { LegalDocumentPage, NotFoundPage } from "./client/legal-pages";
-import { initAnalyticsAfterConsent, bootstrapAnalyticsIfConsented, trackSaEvent } from "./client/analytics";
+import { trackSaEvent } from "./client/analytics";
 import {
   UUID_RE,
   isUUID,
@@ -80,6 +80,9 @@ import { FeatureValue } from "./client/components/feature-value";
 import { TierSelectionScreen } from "./client/components/tier-selection-screen";
 import { SavingScreen } from "./client/components/saving-screen";
 import { AuthModal } from "./client/strategy-modals/auth-modal";
+import { CookieConsent } from "./client/components/cookie-consent";
+import { MiniMap } from "./client/components/mini-map";
+import { GanttView } from "./client/components/gantt-view";
 
 const ROLES_C  ={owner:"#6836f5",editor:"#12c482",viewer:"#a8a4c8"};
 const STATUS  ={planning:{c:"#6836f5"},active:{c:"#06b6d4"},completed:{c:"#12c482"},paused:{c:"#f09428"},blocked:{c:"#f04458"}};
@@ -697,23 +700,6 @@ const MAP_GEN_SYS=`Создай стратегическую карту на о�
 {"nodes":[{"id":"n1","x":200,"y":270,"title":"...","reason":"...","metric":"...","status":"active","priority":"high","progress":35,"tags":[]}],"edges":[{"id":"e1","source":"n1","target":"n2","type":"requires","label":""}]}
 7–9 узлов, X:150–900, Y:80–520. Связи — логичные (воронка, pipeline, последовательность).`;
 
-// ── CookieConsent ──
-function CookieConsent(){
-  const{t}=useLang();
-  const[shown,setShown]=useState(()=>{
-    try{return!localStorage.getItem("sa_cookie_ok");}catch{return true;}
-  });
-  useEffect(()=>{bootstrapAnalyticsIfConsented();},[]);
-  if(!shown)return null;
-  function accept(){try{localStorage.setItem("sa_cookie_ok","1");}catch{}initAnalyticsAfterConsent();setShown(false);}
-  return(
-    <div style={{position:"fixed",bottom:16,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:"rgba(9,7,22,.92)",backdropFilter:"blur(20px) saturate(1.1)",WebkitBackdropFilter:"blur(20px)",border:"1px solid rgba(104,54,245,.28)",borderRadius:16,padding:"14px 20px",display:"flex",alignItems:"center",gap:16,maxWidth:560,width:"92vw",boxShadow:"0 8px 40px rgba(0,0,0,.45),0 0 0 .5px rgba(104,54,245,.12)"}}>
-      <span style={{fontSize:12,color:"rgba(188,186,224,.62)",flex:1,lineHeight:1.5}}>{t("cookie_text","🍪 Мы используем cookies для аналитики и улучшения сервиса. Продолжая, вы соглашаетесь с нашей")} <a href="/privacy" target="_blank" style={{color:"#b4a3ff",textDecoration:"underline"}}>{t("cookie_policy","Политикой конфиденциальности")}</a>.</span>
-      <button onClick={accept} className="btn-interactive" style={{padding:"8px 18px",borderRadius:9,border:"none",background:"var(--gradient-accent)",color:"var(--accent-on-bg)",fontSize:13,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",boxShadow:"0 2px 12px var(--accent-glow)"}}>{t("cookie_accept","Принять")}</button>
-    </div>
-  );
-}
-
 // ── Onboarding ──
 function Onboarding({onDone,onBack,theme="dark"}){
   const{t}=useLang();
@@ -827,45 +813,6 @@ function Onboarding({onDone,onBack,theme="dark"}){
           </button>
         </div>
       )}
-    </div>
-  );
-}
-
-// ── MiniMap ──
-function MiniMap({nodes,edges,viewX,viewY,zoom,canvasW,canvasH,onJump,theme,statusMap}){
-  const{t}=useLang();
-  const STATUS=statusMap||getSTATUS(t);
-  const W=180,H=110;
-  if(!nodes.length)return null;
-  const xs=nodes.map(n=>n.x),ys=nodes.map(n=>n.y);
-  const minX=Math.min(...xs)-20,maxX=Math.max(...xs)+260,minY=Math.min(...ys)-20,maxY=Math.max(...ys)+148;
-  const bw=maxX-minX||1,bh=maxY-minY||1;
-  const sx=W/bw,sy=H/bh,s=Math.min(sx,sy)*.9;
-  const ox=(W-bw*s)/2,oy=(H-bh*s)/2;
-  const tx=n=>(n.x-minX)*s+ox,ty=n=>(n.y-minY)*s+oy;
-  const vpW=(canvasW/zoom)*s,vpH=(canvasH/zoom)*s;
-  const vpX=(-viewX/zoom-minX)*s+ox,vpY=(-viewY/zoom-minY)*s+oy;
-  function handleClick(e){
-    const rect=e.currentTarget.getBoundingClientRect();
-    const cx=(e.clientX-rect.left)/W,cy=(e.clientY-rect.top)/H;
-    const wx=minX+cx*bw,wy=minY+cy*bh;
-    onJump(-(wx-canvasW/zoom/2)*zoom,-(wy-canvasH/zoom/2)*zoom);
-  }
-  return(
-    <div onClick={handleClick} className="sa-mini-map-wrap" aria-label={t("minimap_hint","Миникарта")} title={t("minimap_hint","Миникарта")}
-      style={{position:"absolute",bottom:28,right:28,width:W,height:H,borderRadius:14,overflow:"hidden",background:"var(--bg2)",border:".5px solid var(--b1)",boxShadow:"0 8px 24px rgba(0,0,0,.25)",cursor:"crosshair",zIndex:50}}>
-      <svg width={W} height={H}>
-        {edges.map(e=>{
-          const s2=nodes.find(n=>n.id===e.source),t2=nodes.find(n=>n.id===e.target);
-          if(!s2||!t2)return null;
-          return <line key={e.id} x1={tx(s2)+12} y1={ty(s2)+7} x2={tx(t2)+12} y2={ty(t2)+7} stroke="var(--accent-1)" strokeWidth={1} opacity={0.35}/>;
-        })}
-        {nodes.map(n=>{
-          const st=STATUS[n.status];
-          return <rect key={n.id} x={tx(n)} y={ty(n)} width={24} height={14} rx={3} fill={st?st.c+"33":"var(--accent-soft)"} stroke={st?st.c:"var(--accent-1)"} strokeWidth={.8}/>;
-        })}
-        <rect className="sa-mini-map-vp" x={Math.max(0,vpX)} y={Math.max(0,vpY)} width={Math.min(vpW,W)} height={Math.min(vpH,H)} fill="rgba(104,54,245,.18)" stroke="var(--accent-1)" strokeWidth={1.2} strokeDasharray="4,3" pointerEvents="none"/>
-      </svg>
     </div>
   );
 }
@@ -1504,75 +1451,6 @@ function NodeCard({node,selected,focused=false,connecting,connectSource,onClick,
     </g>
   );
 }
-
-// ── GanttView ──
-function GanttView({nodes,onClose,statusMap,onRowClick}:{nodes:any[],onClose:()=>void,statusMap?:any,onRowClick?:(n:any)=>void}){
-  const{t,lang}=useLang();
-  const STATUS=statusMap||getSTATUS(t);
-  const[exiting,setExiting]=useState(false);
-  const handleClose=()=>{if(exiting)return;setExiting(true);setTimeout(()=>onClose(),280);};
-  const withDates=nodes.filter((n:any)=>n.deadline);
-  const now=new Date();
-  if(withDates.length===0)return(
-    <div className={exiting?"panel-slide-down-out":""} style={{position:"absolute",bottom:70,left:"50%",transform:"translateX(-50%)",background:"var(--bg2)",border:".5px solid var(--b1)",borderRadius:16,padding:"18px 24px",zIndex:30,boxShadow:"0 20px 60px rgba(0,0,0,.4)",textAlign:"center",minWidth:280,animation:exiting?"none":"fadeInUp .3s ease"}}>
-      <div style={{fontSize:22,marginBottom:6}}>📅</div>
-      <div style={{fontSize:13,fontWeight:700,color:"var(--text3)"}}>{t("no_deadlines","Нет дедлайнов")}</div>
-      <div style={{fontSize:13.5,color:"var(--text5)",marginBottom:12}}>{t("gantt_hint","Добавьте дедлайны к шагам в редакторе")}</div>
-      <button onClick={handleClose} className="btn-interactive" style={{padding:"8px 18px",borderRadius:12,border:".5px solid var(--b1)",background:"var(--surface)",color:"var(--text3)",cursor:"pointer",fontSize:13,fontWeight:600}}>{t("close","Закрыть")}</button>
-    </div>
-  );
-  const sorted=[...withDates].sort((a:any,b:any)=>new Date(a.deadline).getTime()-new Date(b.deadline).getTime());
-  const minDate=new Date(sorted[0].deadline);
-  const maxDate=new Date(sorted[sorted.length-1].deadline);
-  const range=Math.max(1,(maxDate.getTime()-minDate.getTime())/864e5);
-  const todayPct=(()=>{
-    const d=(now.getTime()-minDate.getTime())/864e5;
-    if(d<0||d>range)return null;
-    return (d/range)*100;
-  })();
-  const fmtDate=(d:Date)=>d.toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short"});
-
-  return(
-    <div className={exiting?"gantt-panel-out":""} role="dialog" aria-label={t("gantt","Gantt")} style={{position:"absolute",bottom:0,left:0,right:0,height:240,background:"var(--bg2)",borderTop:".5px solid var(--b1)",zIndex:30,display:"flex",flexDirection:"column",animation:exiting?"none":"slideUp .28s cubic-bezier(0.22,1,0.36,1)"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 16px",borderBottom:".5px solid var(--b1)",flexShrink:0,position:"sticky",top:0,background:"var(--bg2)",zIndex:2}}>
-        <span style={{fontSize:13,fontWeight:700,color:"var(--text)"}}>{t("gantt","📅 Gantt")}</span>
-        <span style={{fontSize:13,color:"var(--text5)",flex:1}}>{t("steps_with_deadlines","{n} шагов с дедлайнами").replace("{n}",String(sorted.length))} · {fmtDate(minDate)} → {fmtDate(maxDate)}</span>
-        <button className="modal-close" onClick={handleClose} aria-label={t("close","Закрыть")}>×</button>
-      </div>
-      <div style={{flex:1,overflow:"auto",padding:"10px 14px",position:"relative"}}>
-        {sorted.map((n:any)=>{
-          const st=STATUS[n.status]||STATUS.planning;
-          const dl=new Date(n.deadline);
-          const daysFromStart=Math.max(0,(dl.getTime()-minDate.getTime())/864e5);
-          const pct=Math.min(100,(daysFromStart/range)*100);
-          const isPast=dl<now;
-          const daysLeft=Math.ceil((dl.getTime()-now.getTime())/864e5);
-          const clickable=Boolean(onRowClick);
-          return(
-            <div key={n.id} role={clickable?"button":undefined} tabIndex={clickable?0:-1}
-                 onClick={()=>clickable&&onRowClick?.(n)}
-                 onKeyDown={e=>{if(clickable&&(e.key==="Enter"||e.key===" ")){e.preventDefault();onRowClick?.(n);}}}
-                 className="sa-gantt-row"
-                 style={{display:"flex",alignItems:"center",gap:10,padding:"6px 8px",borderRadius:8,marginBottom:4,cursor:clickable?"pointer":"default",transition:"background .18s ease",position:"relative",minWidth:340}}>
-              <div style={{width:130,fontSize:13,color:"var(--text3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flexShrink:0,fontWeight:600}} title={n.title}>{n.title}</div>
-              <div style={{flex:1,height:22,background:"var(--surface)",borderRadius:6,position:"relative",overflow:"hidden",border:".5px solid var(--b1)"}}>
-                <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${Math.max(2,n.progress||0)}%`,background:st.c+"55",borderRadius:6,transition:"width .35s ease"}}/>
-                <div style={{position:"absolute",left:`${pct}%`,top:"50%",transform:"translate(-50%,-50%)",width:10,height:10,borderRadius:3,background:isPast?"#f04458":st.c,boxShadow:"0 2px 6px rgba(0,0,0,.25)"}}/>
-              </div>
-              <div style={{width:90,fontSize:13,color:isPast?"#f04458":daysLeft<=7?"#f09428":"var(--text4)",textAlign:"right",flexShrink:0,fontWeight:isPast||daysLeft<=7?700:500}}>
-                {isPast?t("days_overdue","просрочено {n}д.").replace("{n}",String(-daysLeft)):daysLeft===0?t("today","Сегодня"):daysLeft===1?t("tomorrow_label","завтра"):t("days_left","{n}д.").replace("{n}",String(daysLeft))}
-              </div>
-            </div>
-          );
-        })}
-        {todayPct!=null&&(
-          <div className="sa-gantt-today" aria-hidden style={{position:"absolute",top:8,bottom:8,left:`calc(14px + 130px + 10px + ${todayPct}% * (100% - 14px - 130px - 10px - 90px - 10px - 14px) / 100)`,width:2,background:"linear-gradient(180deg,var(--accent-1),var(--accent-2))",borderRadius:1,pointerEvents:"none",boxShadow:"0 0 12px var(--accent-glow)"}}/>
-        )}
-      </div>
-    </div>
-  );
-}
-
 
 // ── TrialBanner ──
 function TrialBanner({user,onUpgrade}:{user:any,onUpgrade:()=>void}){
