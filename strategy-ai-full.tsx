@@ -16,8 +16,6 @@ import {
   clearSession,
   seedDefault,
   normalizeUser,
-  register,
-  login,
   patchUser,
   hashPw,
   normalizeProject,
@@ -81,6 +79,7 @@ import { ALL_FEATURES, TIER_FEAT_KEY, TIER_ORDER, TIER_MKT } from "./client/lib/
 import { FeatureValue } from "./client/components/feature-value";
 import { TierSelectionScreen } from "./client/components/tier-selection-screen";
 import { SavingScreen } from "./client/components/saving-screen";
+import { AuthModal } from "./client/strategy-modals/auth-modal";
 
 const ROLES_C  ={owner:"#6836f5",editor:"#12c482",viewer:"#a8a4c8"};
 const STATUS  ={planning:{c:"#6836f5"},active:{c:"#06b6d4"},completed:{c:"#12c482"},paused:{c:"#f09428"},blocked:{c:"#f04458"}};
@@ -90,150 +89,6 @@ const ETYPE_C ={requires:{c:"#6836f5",d:"none"},affects:{c:"#a050ff",d:"8,4"},bl
 // utils карты и сетевой слой — см. client/lib/map-utils.ts и client/lib/maps-api.ts; callAI — client/lib/call-ai.ts
 
 // AI-промпты, база знаний и готовые шаблоны — см. client/lib/ai-prompts.ts и client/lib/templates.ts
-
-// ── Auth: общая форма (модалка) ──
-function AuthFormContent({initialTab="login",onAuth,theme='dark',title="",subtitle="",variant="modal",titleId="auth-modal-title"}){
-  const{lang,setLang,t}=useLang();
-  const[tab,setTab]=useState(initialTab);
-  useEffect(()=>{setTab(initialTab);},[initialTab]);
-  const[email,setEmail]=useState(""),[pw,setPw]=useState(""),[name,setName]=useState(""),[err,setErr]=useState(""),[loading,setLoading]=useState(false);
-  async function submit(){if(!email||!pw){setErr(t("fill_fields","Заполните все поля"));return;}setLoading(true);setErr("");const res=tab==="login"?await login(email,pw):await register(email,pw,name);setLoading(false);if(res.error)setErr(res.error);else onAuth(res.user,res.isNew||false);}
-  const inline=variant==="inline";
-  const langs:Array<[string,string]>=[["RU","ru"],["EN","en"],["UZ","uz"]];
-  const LangSwitch=(
-    <div className="sa-ws-lang-switch" role="group" aria-label={t("select_language","Язык")} style={{display:"inline-flex",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:22,padding:3,gap:1}}>
-      {langs.map(([label,code])=>(
-        <button key={code} type="button" aria-pressed={lang===code} className={"land-lang-btn"+(lang===code?" on":"")} onClick={()=>setLang(code)}>{label}</button>
-      ))}
-    </div>
-  );
-  const SegTabs=(
-    <div role="tablist" aria-label={t("auth_tabs_aria","Вход или регистрация")}
-      style={{position:"relative",display:"grid",gridTemplateColumns:"1fr 1fr",background:"var(--inp)",border:".5px solid var(--b1)",borderRadius:14,padding:4,gap:0,width:"100%",maxWidth:320,margin:"0 auto"}}>
-      <span aria-hidden="true" style={{position:"absolute",top:4,bottom:4,left:tab==="login"?4:"calc(50% + 0px)",width:"calc(50% - 4px)",borderRadius:10,background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",boxShadow:"0 6px 18px rgba(104,54,245,.35),inset 0 1px 0 rgba(255,255,255,.18)",transition:"left .28s cubic-bezier(.34,1.56,.64,1)"}}/>
-      {[["login",t("login","Войти")],["register",t("register","Регистрация")]].map(([key,label])=>{
-        const on=tab===key;
-        return(
-          <button key={key} type="button" role="tab" aria-selected={on} onClick={()=>{setTab(key as any);setErr("");}}
-            style={{position:"relative",zIndex:1,border:"none",background:"transparent",padding:"9px 10px",borderRadius:10,cursor:"pointer",fontFamily:"inherit",fontSize:13.5,fontWeight:on?700:600,letterSpacing:"-0.01em",color:on?"#fff":"var(--t2)",transition:"color .22s ease",textShadow:on?"0 1px 0 rgba(0,0,0,.18)":"none"}}>
-            {label}
-          </button>
-        );
-      })}
-    </div>
-  );
-  return(
-    <div className={inline?"sa-ws-auth-form":undefined}>
-      {inline?(
-        <div className="sa-ws-auth-toolbar" style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:16}}>
-          {SegTabs}
-          {LangSwitch}
-        </div>
-      ):(
-        <div style={{display:"flex",justifyContent:"flex-start",alignItems:"center",marginBottom:8,paddingRight:44,minHeight:30}}>
-          {LangSwitch}
-        </div>
-      )}
-      {inline?(
-        <div style={{textAlign:"center",marginBottom:18}}>
-          <div id={titleId} tabIndex={-1} className="modal-title" style={{fontSize:"clamp(18px,3.8vw,22px)",marginTop:0,marginBottom:subtitle?6:0,outline:"none",letterSpacing:"-0.02em"}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
-          {subtitle&&<div className="modal-sub" style={{marginBottom:0}}>{subtitle}</div>}
-        </div>
-      ):(
-        <div style={{textAlign:"center",marginBottom:16}}>
-          <div className="modal-gem" style={{marginLeft:"auto",marginRight:"auto"}}><img src="/logo.png" alt="" width={28} height={28} style={{objectFit:"contain"}}/></div>
-          <div id={titleId} className="modal-title" style={{marginTop:12,marginBottom:subtitle?4:0}}>{title||(tab==="login"?t("welcome","Добро пожаловать"):t("create_account","Создать аккаунт"))}</div>
-          {subtitle&&<div className="modal-sub">{subtitle}</div>}
-        </div>
-      )}
-      {!inline&&<div style={{marginBottom:18}}>{SegTabs}</div>}
-      {tab==="register"&&<input className="modal-inp" placeholder={t("name","Имя")} value={name} onChange={e=>setName(e.target.value)} autoComplete="name"/>}
-      <input type="email" className="modal-inp" placeholder={t("email","Email")} value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete="email"/>
-      <input type="password" className="modal-inp" placeholder={t("password","Пароль")} value={pw} onChange={e=>setPw(e.target.value)} style={{marginBottom:err?8:4}} onKeyDown={e=>e.key==="Enter"&&submit()} autoComplete={tab==="login"?"current-password":"new-password"}/>
-      {err?<div className="modal-err" style={{marginBottom:10}}>{err}</div>:null}
-      <button type="button" className="modal-btn" onClick={submit} disabled={loading} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,opacity:loading?.65:1,cursor:loading?"wait":"pointer"}}>
-        {loading&&<span style={{width:14,height:14,border:"2px solid rgba(255,255,255,.35)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite",flexShrink:0}}/>}
-        {tab==="login"?t("sign_in","Войти"):t("sign_up","Зарегистрироваться")}
-      </button>
-    </div>
-  );
-}
-
-// ── AuthModal (классы overlay/modal-box из strategy-reference / strategy-shell.css) ──
-function AuthModal({initialTab="login",onClose,onAuth,theme='dark',title="",subtitle=""}){
-  const{t}=useLang();
-  const[closing,setClosing]=useState(false);
-  const boxRef=useRef<HTMLDivElement|null>(null);
-  const handleCloseRef=useRef<()=>void>(()=>{});
-  const handleClose=()=>{if(closing||!onClose)return;setClosing(true);setTimeout(()=>onClose(),220);};
-  handleCloseRef.current=handleClose;
-  useEffect(()=>{
-    if(!onClose)return;
-    const h=(e:KeyboardEvent)=>{if(e.key==="Escape"){e.preventDefault();handleCloseRef.current();}};
-    window.addEventListener("keydown",h);
-    return()=>window.removeEventListener("keydown",h);
-  },[onClose]);
-  useEffect(()=>{
-    const root=boxRef.current;
-    if(!root)return;
-    const email=root.querySelector<HTMLInputElement>('input[type="email"]');
-    const closeBtn=root.querySelector<HTMLButtonElement>(".modal-close");
-    const target=email||closeBtn;
-    requestAnimationFrame(()=>target?.focus({preventScroll:true}));
-  },[]);
-  const dk=theme==="dark"?"dk":"lt";
-  return(
-    <div className={`sa-strategy-ui ${dk} sa-modal-host`} data-theme={theme}>
-      <div className={"overlay open"+(closing?" sa-overlay-fade-out":"")} style={{zIndex:1}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-        <div ref={boxRef} className={"modal-box"+(closing?" sa-modal-shrink-out":"")} style={{width:"min(440px,calc(100vw - 32px))",maxWidth:"100%",boxSizing:"border-box",maxHeight:"88vh",overflowY:"auto",position:"relative",paddingTop:26}} onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-          {onClose&&<button type="button" className="modal-close" onClick={handleClose} aria-label={t("close","Закрыть")}>×</button>}
-          <AuthFormContent initialTab={initialTab} onAuth={onAuth} theme={theme} title={title} subtitle={subtitle} variant="modal"/>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PostOnboardFlow({pendingMap,currentUser,theme='dark',onComplete,onBack}){
-  const{t}=useLang();
-  const[step,setStep]=useState(currentUser?"check":"auth");
-  const[user,setUser]=useState(currentUser);
-  const[isNew,setIsNew]=useState(false);
-  const[targetProject,setTargetProject]=useState(null);
-  const[existingMaps,setExistingMaps]=useState([]);
-  const[saving,setSaving]=useState(false);
-  async function afterAuth(u,newUser){setUser(u);setIsNew(newUser);if(newUser){setStep("tier");}else{await runCheck(u);}}
-  async function afterTierSelect(tier){
-    const upd=await patchUser(user.email,{tier});
-    if(upd){setUser(upd);await runCheck(upd);}
-    else{await runCheck(user);} // patchUser вернул null — используем текущего пользователя
-  }
-  async function runCheck(u){
-    setSaving(true);const tier=TIERS[u.tier]||TIERS.free;let projs=await getProjects(u.email);let proj=projs.find(p=>p.owner===u.email);
-    if(!proj){proj={id:uid(),name:"Моя стратегия",owner:u.email,members:[{email:u.email,role:"owner"}],createdAt:Date.now()};await saveProject(proj);}
-    setTargetProject(proj);const maps=await getMaps(proj.id);const regMaps=maps.filter(m=>!m.isScenario);setSaving(false);
-    if(regMaps.length>=tier.maps){setExistingMaps(regMaps);setStep("conflict");}else{await doSaveAndGo(proj,u,null);}
-  }
-  async function doSaveAndGo(proj,u,replaceMapId){
-    setSaving(true);if(replaceMapId)await deleteMap(proj.id,replaceMapId);
-    const map={id:uid(),name:"Карта от AI",nodes:pendingMap?.nodes||[],edges:pendingMap?.edges||[],ctx:pendingMap?.ctx||"",isScenario:false,createdAt:Date.now()};
-    const saved=await saveMap(proj.id,map);setSaving(false);onComplete(u,proj,saved);
-  }
-  if(saving)return <SavingScreen theme={theme}/>;
-  if(step==="auth")return(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
-<AuthModal initialTab="register" theme={theme} title="Сохранить карту" subtitle="Создайте аккаунт — карта сохранится автоматически" onAuth={afterAuth} onClose={onBack}/>
-      <button onClick={onBack} style={{position:"absolute",top:16,left:16,padding:"5px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:13}}>{t("back_btn","← Назад")}</button>
-    </div>
-  );
-  if(step==="tier")return <TierSelectionScreen isNew={isNew} currentUser={user} theme={theme} onSelect={afterTierSelect} onBack={()=>setStep("auth")}/>;
-  if(step==="conflict")return(
-    <div data-theme={theme} style={{width:"100%",maxWidth:"100%",boxSizing:"border-box",height:"100vh",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
-<MapConflictModal existingMaps={existingMaps} newNodeCount={pendingMap?.nodes?.length||0} tierLabel={(TIERS[user?.tier]||TIERS.free).label} tierMapsCount={(TIERS[user?.tier]||TIERS.free).maps} onReplace={async(mapId)=>{await doSaveAndGo(targetProject,user,mapId);}} onUpgrade={()=>setStep("tier")} theme={theme}/>
-    </div>
-  );
-  return <SavingScreen theme={theme}/>;
-}
 
 // ── ProfileModal ──
 function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme="dark",onToggleTheme,palette="indigo",onPaletteChange}){
@@ -5301,7 +5156,7 @@ export default function App(){
   const[mapFocusNodeId,setMapFocusNodeId]=useState<string|null>(null);
   const[sharedMapData,setSharedMapData]=useState(null);
   const[showAuth,setShowAuth]=useState(false);
-  const[authTab,setAuthTab]=useState("login");
+  const[authTab,setAuthTab]=useState<"login"|"register">("login");
   const[showProfile,setShowProfile]=useState(false);
   const[showTiers,setShowTiers]=useState(false);
   const[verifiedToast,setVerifiedToast]=useState(false);
