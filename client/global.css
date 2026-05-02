@@ -33,6 +33,15 @@ input,textarea,select,button{font-family:'Inter',system-ui,sans-serif;}
     --dur-xs:.01ms;--dur-sm:.01ms;--dur-md:.01ms;--dur-lg:.01ms;--dur-xl:.01ms;
     --tr-reveal:none;--tr-hover:none;--tr-press:none;--tr-theme:none;
   }
+  /* Жёстко вырубаем любые анимации и переходы с захардкоженной длительностью.
+     0.01ms (а не 0), чтобы JS-листенеры transition/animationend всё ещё
+     стреляли. Перекрывается локальными `animation:none` без потери смысла. */
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
 }
 /* ── Accent variables (override by data-palette) ── */
 [data-theme="dark"]{

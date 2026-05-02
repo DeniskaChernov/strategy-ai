@@ -1134,6 +1134,15 @@ html,body{height:100%}.sa-strategy-ui{font-family:'Inter',sans-serif;-webkit-fon
   .sa-ws-phase-enter,.sa-ws-cta-block{animation:none!important}
   .sa-ws-feat-rotator-inner{animation:none!important}
   .sa-ws-feat-rotator--static .sa-ws-feat-rotator-inner{animation:none!important}
+  /* Глобально отключаем все собственные анимации/транзишены оболочки.
+     Заменяем длительность на ~0.01ms (а не 0), чтобы JS-листенеры
+     transitionend/animationend по-прежнему срабатывали. */
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
 }
 
 /* Топбар полноэкранных экранов без shell — как sa-topbar */
