@@ -393,20 +393,49 @@ function startCron() {
   }, 60 * 60 * 1000);
 }
 
+// Проверка обязательных и важных env-переменных. В production падаем при
+// отсутствии критичных секретов; для остальных — печатаем понятный warning.
+function preflightEnv() {
+  const isProd = process.env.NODE_ENV === 'production';
+  const DEFAULT_JWT = 'strategy-ai-secret-change-in-production';
+
+  const hard = []; // критично — exit(1) в проде
+  const soft = []; // желательно — warning
+
+  if (!process.env.DATABASE_URL) hard.push('DATABASE_URL');
+  if (isProd) {
+    if (!process.env.JWT_SECRET || process.env.JWT_SECRET === DEFAULT_JWT) hard.push('JWT_SECRET');
+    if (!process.env.JWT_REFRESH_SECRET) soft.push('JWT_REFRESH_SECRET (использую JWT_SECRET+_refresh)');
+    if (!process.env.ALLOWED_ORIGINS) hard.push('ALLOWED_ORIGINS');
+    if (!process.env.APP_URL) soft.push('APP_URL (нужно для Stripe redirect)');
+    if (!process.env.OPENAI_KEY) soft.push('OPENAI_KEY (AI не будет работать)');
+    if (!process.env.STRIPE_SECRET_KEY) soft.push('STRIPE_SECRET_KEY (платежи отдадут 503)');
+    if (!process.env.STRIPE_WEBHOOK_SECRET) soft.push('STRIPE_WEBHOOK_SECRET (webhook не пройдёт подпись)');
+    if (!process.env.RESEND_API_KEY) soft.push('RESEND_API_KEY (письма не уйдут)');
+    if (!process.env.SENTRY_DSN) soft.push('SENTRY_DSN (мониторинг ошибок выключен)');
+    if (process.env.DEV_EMAILS) soft.push('DEV_EMAILS задан в production — мгновенная смена тарифа без оплаты будет доступна этим email');
+  }
+
+  if (hard.length) {
+    console.error('❌ Критические env-переменные отсутствуют или используют дефолт:');
+    hard.forEach((k) => console.error('   ·', k));
+    if (isProd) {
+      console.error('Сервер не может запуститься в production. Подробнее: RAILWAY_DEPLOY.md');
+      process.exit(1);
+    }
+  }
+  if (soft.length) {
+    console.warn('⚠️  Опциональные env-переменные не заданы:');
+    soft.forEach((k) => console.warn('   ·', k));
+  }
+  if (!isProd && !process.env.JWT_SECRET) {
+    console.warn('⚠️  JWT_SECRET не задан — использую дефолт (только для разработки)');
+  }
+}
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 async function start() {
-  // Проверяем обязательные переменные окружения
-  if (!process.env.DATABASE_URL) {
-    console.error('❌ DATABASE_URL is not set! Add PostgreSQL to your Railway project and link DATABASE_URL.');
-    process.exit(1);
-  }
-  if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-    console.error('❌ JWT_SECRET is required in production. Set a strong random secret.');
-    process.exit(1);
-  }
-  if (!process.env.JWT_SECRET) {
-    console.warn('⚠️  JWT_SECRET not set — using default (development only)');
-  }
+  preflightEnv();
 
   console.log('🔄 Connecting to database...');
   await initDB();
