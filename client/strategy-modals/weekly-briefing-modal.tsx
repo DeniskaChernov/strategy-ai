@@ -48,23 +48,23 @@ export function WeeklyBriefingModal({
 
   return(
     <div data-theme={theme} className={closing?"modal-backdrop modal-backdrop-out":"modal-backdrop"} style={{position:"fixed",inset:0,background:"var(--modal-overlay-bg,rgba(0,0,0,.65))",display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",zIndex:310,backdropFilter:"blur(16px)",padding:isMobile?0:16}} onClick={e=>{if(e.target===e.currentTarget)handleClose();}}>
-      <div className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:isMobile?"18px 18px 0 0":20,width:isMobile?"100%":"min(520px,94vw)",maxHeight:isMobile?"85vh":"none",overflowX:"hidden",display:"flex",flexDirection:"column",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="sa-wb-title" className={`glass-panel glass-panel-lg ${closing?"modal-content-out":"modal-content-pop"}`} style={{borderRadius:isMobile?"18px 18px 0 0":20,width:isMobile?"100%":"min(520px,94vw)",maxHeight:isMobile?"85vh":"none",overflowX:"hidden",display:"flex",flexDirection:"column",overflow:"hidden",animation:isMobile&&!closing?"slideUp .3s cubic-bezier(0.22,1,0.36,1)":undefined}} onClick={e=>e.stopPropagation()}>
         <SheetSwipeHandle enabled={isMobile} onClose={handleClose} />
         <div style={{background:"var(--surface)",padding:"18px 24px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
           <div>
-            <div style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
+            <div id="sa-wb-title" style={{fontSize:16,fontWeight:800,color:"var(--text)"}}>📋 {t("weekly_briefing","Еженедельный брифинг")}</div>
             <div style={{fontSize:12,color:"var(--text3)",marginTop:3}}>{mapName} · {new Date().toLocaleDateString(lang==="uz"?"uz-UZ":lang==="en"?"en-US":"ru-RU",{weekday:"long",day:"numeric",month:"long"})}</div>
           </div>
-          <button onClick={handleClose} style={{width:36,height:36,borderRadius:12,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text4)",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center"}}>×</button>
+          <button type="button" className="sa-pf-close" onClick={handleClose} aria-label={t("close","Закрыть")}>×</button>
         </div>
         <div style={{padding:"22px 26px",flex:1,minHeight:0,overflowY:"auto"}}>
           {/* Метрики */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10,marginBottom:20}}>
             {[
               {label:t("total_steps","Всего"),value:nodes.length,color:"var(--accent-1)"},
-              {label:t("done","Выполнено"),value:done.length,color:"#12c482"},
-              {label:t("blocked","Заблокировано"),value:blocked.length,color:"#f04458"},
-              {label:t("health","Здоровье"),value:`${health}%`,color:health>=70?"#12c482":health>=40?"#f09428":"#f04458"},
+              {label:t("done","Выполнено"),value:done.length,color:"var(--green)"},
+              {label:t("blocked","Заблокировано"),value:blocked.length,color:"var(--red)"},
+              {label:t("health","Здоровье"),value:`${health}%`,color:health>=70?"var(--green)":health>=40?"var(--amber)":"var(--red)"},
             ].map(m=>(
               <div key={m.label} style={{textAlign:"center",padding:"12px 8px",borderRadius:12,background:"var(--bg2)",border:"1px solid var(--border)"}}>
                 <div style={{fontSize:22,fontWeight:800,color:m.color}}>{m.value}</div>
@@ -74,7 +74,7 @@ export function WeeklyBriefingModal({
           </div>
           {/* AI-саммари */}
           <div style={{padding:"16px 18px",borderRadius:12,background:"var(--accent-soft)",border:"1px solid var(--accent-1)",minHeight:80}}>
-            <div style={{fontSize:12,fontWeight:700,color:"var(--accent-2)",marginBottom:8}}>✦ AI-анализ</div>
+            <div style={{fontSize:12,fontWeight:700,color:"var(--accent-2)",marginBottom:8}}><span aria-hidden="true">✦</span> {t("weekly_briefing_ai_analysis","AI-анализ")}</div>
             {loading?(
               <div style={{display:"flex",alignItems:"center",gap:8,color:"var(--text3)",fontSize:13}} role="status" aria-live="polite">
                 <div style={{width:16,height:16,border:"2px solid var(--accent-1)",borderTopColor:"transparent",borderRadius:"50%",animation:"spin 0.7s linear infinite"}}/>
@@ -90,12 +90,12 @@ export function WeeklyBriefingModal({
           {/* Критичные шаги */}
           {critical.length>0&&(
             <div style={{marginTop:16}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#f87171",marginBottom:8}}>⚠️ {t("critical_unfinished","Критичные незавершённые шаги")}</div>
+              <div style={{fontSize:12,fontWeight:700,color:"var(--red)",marginBottom:8}}>⚠️ {t("critical_unfinished","Критичные незавершённые шаги")}</div>
               {critical.slice(0,3).map((n:any)=>(
                 <div key={n.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:9,background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.15)",marginBottom:6}}>
-                  <div style={{width:6,height:6,borderRadius:"50%",background:"#f04458",flexShrink:0}}/>
+                  <div style={{width:6,height:6,borderRadius:"50%",background:"var(--red)",flexShrink:0}}/>
                   <span style={{fontSize:13,color:"var(--text)",fontWeight:600}}>{n.title}</span>
-                  {n.deadline&&<span style={{marginLeft:"auto",fontSize:11,color:"#f87171"}}>{n.deadline}</span>}
+                  {n.deadline&&<span style={{marginLeft:"auto",fontSize:11,color:"var(--red)"}}>{n.deadline}</span>}
                 </div>
               ))}
             </div>

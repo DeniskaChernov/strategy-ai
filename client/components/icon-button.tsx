@@ -33,7 +33,7 @@ export function IconButton({
         borderRadius: 12,
         border: danger ? "1px solid rgba(239,68,68,.35)" : "1px solid var(--border)",
         background: danger ? "rgba(239,68,68,.08)" : "var(--surface)",
-        color: danger ? "#f04458" : "var(--text2)",
+        color: danger ? "var(--red)" : "var(--text2)",
         cursor: disabled ? "not-allowed" : "pointer",
         fontSize: 15,
         display: "flex",

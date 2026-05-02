@@ -5,6 +5,7 @@ import { useIsMobile } from "../hooks/use-is-mobile";
 import { SheetSwipeHandle } from "../components/sheet-swipe-handle";
 import { Toggle } from "../components/toggle";
 import { FeatureValue } from "../components/feature-value";
+import { IconUser, IconLock, IconSettings, IconChart, IconCard } from "../components/icons";
 import { TIERS } from "../lib/tiers";
 import { TIER_ORDER, TIER_MKT, TIER_FEAT_KEY, ALL_FEATURES } from "../lib/tier-marketing-data";
 import { getTierPrice } from "../lib/strategy-labels";
@@ -142,12 +143,12 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
   const handleClose=()=>{if(closing)return;setClosing(true);setTimeout(()=>onClose(),260);};
   useEffect(()=>{const h=e=>{if(e.key==="Escape"&&!buyPhase)handleClose();};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h);},[buyPhase,closing]);
 
-  const TABS=[
-    ["profile","👤",t("profile_title","Профиль")],
-    ["security","🔐",t("security_title","Безопасность")],
-    ["settings","⚙",t("settings_title","Настройки")],
-    ["stats","📊",t("stats_tab","Статистика")],
-    ["tier","💳",t("billing_title","Тариф")],
+  const TABS:Array<[string,React.ReactNode,string]>=[
+    ["profile",<IconUser/>,t("profile_title","Профиль")],
+    ["security",<IconLock/>,t("security_title","Безопасность")],
+    ["settings",<IconSettings/>,t("settings_title","Настройки")],
+    ["stats",<IconChart/>,t("stats_tab","Статистика")],
+    ["tier",<IconCard/>,t("billing_title","Тариф")],
   ];
 
   return(
@@ -173,8 +174,8 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
         {/* Tab bar */}
         <div className="sa-profile-tabs" role="tablist" aria-label={t("profile_title","Профиль")} style={{display:"flex",gap:4,padding:"8px 20px 0",flexShrink:0,borderBottom:"1px solid var(--border)",background:"var(--bg2)"}}>
           {TABS.map(([k,icon,label])=>(
-            <button key={k} type="button" role="tab" aria-selected={tab===k} className={"sa-profile-tab"+(tab===k?" on":"")} onClick={()=>{setTab(k);setMsg(null);}} style={{padding:"10px 14px",border:"none",background:tab===k?"var(--accent-soft)":"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13.5,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?`2px solid ${tier.color}`:"2px solid transparent",borderRadius:"10px 10px 0 0",transition:"all .15s",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap"}}>
-              <span style={{fontSize:13}}>{icon}</span>{label}
+            <button key={k as string} type="button" role="tab" aria-selected={tab===k} className={"sa-profile-tab"+(tab===k?" on":"")} onClick={()=>{setTab(k as string);setMsg(null);}} style={{padding:"10px 14px",border:"none",background:tab===k?"var(--accent-soft)":"transparent",color:tab===k?"var(--text)":"var(--text4)",fontSize:13.5,fontWeight:tab===k?700:500,cursor:"pointer",borderBottom:tab===k?`2px solid ${tier.color}`:"2px solid transparent",borderRadius:"10px 10px 0 0",transition:"all .15s",display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}>
+              <span style={{display:"inline-flex",alignItems:"center"}} aria-hidden="true">{icon}</span>{label}
             </button>
           ))}
           <div style={{flex:1}}/>
@@ -221,7 +222,7 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                   </div>
                 </div>
               </div>
-              {msg&&<div style={{marginTop:16,maxWidth:680,padding:"10px 15px",borderRadius:10,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#12c482":"#f04458",fontSize:13.5}}>{msg.t}</div>}
+              {msg&&<div style={{marginTop:16,maxWidth:680,padding:"10px 15px",borderRadius:10,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"var(--green)":"var(--red)",fontSize:13.5}}>{msg.t}</div>}
             </div>
           )}
 
@@ -235,7 +236,7 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                     <div style={{fontSize:13,fontWeight:600,color:"var(--text)"}}>✉️ Email</div>
                     <div style={{fontSize:12,color:"var(--text4)",marginTop:2}}>{user.email}</div>
                   </div>
-                  <div style={{padding:"4px 10px",borderRadius:8,background:user.emailVerified!==false?"rgba(16,185,129,.12)":"rgba(245,158,11,.12)",border:`1px solid ${user.emailVerified!==false?"rgba(16,185,129,.3)":"rgba(245,158,11,.3)"}`,color:user.emailVerified!==false?"#12c482":"#f09428",fontSize:12,fontWeight:700}}>
+                  <div style={{padding:"4px 10px",borderRadius:8,background:user.emailVerified!==false?"rgba(16,185,129,.12)":"rgba(245,158,11,.12)",border:`1px solid ${user.emailVerified!==false?"rgba(16,185,129,.3)":"rgba(245,158,11,.3)"}`,color:user.emailVerified!==false?"var(--green)":"var(--amber)",fontSize:12,fontWeight:700}}>
                     {user.emailVerified!==false?t("email_verified","Подтверждён"):t("email_not_verified","Не подтверждён")}
                   </div>
                 </div>
@@ -256,7 +257,7 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                     <div style={{fontSize:13,color:"var(--text4)",marginBottom:6}}>{t("pw_strength","Надёжность пароля")}</div>
                     <div style={{display:"flex",gap:3}}>
                       {[np.length>=6,/[A-Z]/.test(np),/[0-9]/.test(np),/[^a-zA-Z0-9]/.test(np)].map((ok,i)=>(
-                        <div key={i} style={{flex:1,height:4,borderRadius:2,background:ok?"#12c482":"var(--border2)",transition:"background .3s"}}/>
+                        <div key={i} style={{flex:1,height:4,borderRadius:2,background:ok?"var(--green)":"var(--border2)",transition:"background .3s"}}/>
                       ))}
                     </div>
                     <div style={{fontSize:13,color:"var(--text5)",marginTop:4}}>{[np.length>=6&&t("chars_6plus","6+"),/[A-Z]/.test(np)&&t("uppercase_chars","A-Z"),/[0-9]/.test(np)&&"0-9",/[^a-zA-Z0-9]/.test(np)&&"!@#"].filter(Boolean).join(" · ")}</div>
@@ -265,14 +266,14 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                 <button onClick={changePw} disabled={loading} style={{padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",marginBottom:12}}>
                   {loading?t("saving","Сохраняю…"):t("change_pw_btn","Изменить пароль")}
                 </button>
-                {msg&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#12c482":"#f04458",fontSize:13.5}}>{msg.t}</div>}
+                {msg&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"var(--green)":"var(--red)",fontSize:13.5}}>{msg.t}</div>}
 
                 <div style={{marginTop:24,paddingTop:24,borderTop:"1px solid var(--border)"}}>
-                  <div style={{fontSize:13,fontWeight:700,color:"#f04458",marginBottom:8}}>{t("danger_zone","Опасная зона")}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:"var(--red)",marginBottom:8}}>{t("danger_zone","Опасная зона")}</div>
                   <div style={{padding:"14px 16px",borderRadius:11,background:"rgba(239,68,68,.05)",border:"1px solid rgba(239,68,68,.15)"}}>
                     <div style={{fontSize:13.5,color:"var(--text)",fontWeight:600}}>{t("delete_account","Удалить аккаунт")}</div>
                     <div style={{fontSize:13.5,color:"var(--text4)",marginTop:3,marginBottom:10}}>{t("all_data_deleted","Все данные будут удалены безвозвратно")}</div>
-                    <button onClick={()=>setShowDeleteConfirm(true)} disabled={loading} style={{padding:"8px 16px",borderRadius:8,border:"1px solid rgba(239,68,68,.35)",background:"transparent",color:"#f04458",fontSize:13,fontWeight:600,cursor:loading?"not-allowed":"pointer"}}>{loading?t("loading_short","Загрузка…"):t("delete_account","Удалить аккаунт")}</button>
+                    <button type="button" onClick={()=>setShowDeleteConfirm(true)} disabled={loading} style={{padding:"8px 16px",borderRadius:8,border:"1px solid rgba(239,68,68,.35)",background:"transparent",color:"var(--red)",fontSize:13,fontWeight:600,cursor:loading?"not-allowed":"pointer"}}>{loading?t("loading_short","Загрузка…"):t("delete_account","Удалить аккаунт")}</button>
                   </div>
                 </div>
                 {showDeleteConfirm&&(
@@ -382,8 +383,8 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                 <button onClick={saveSettings} disabled={loading} style={{padding:"12px 28px",borderRadius:10,border:"none",background:"linear-gradient(135deg,var(--accent-1),var(--accent-2))",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
                   {loading?t("saving","Сохраняю…"):t("save_settings","Сохранить настройки")}
                 </button>
-                {settingsSaved&&<div style={{fontSize:13,color:"#12c482",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span>✓</span> {t("settings_saved","Настройки сохранены")}</div>}
-                {msg&&!settingsSaved&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"#12c482":"#f04458",fontSize:13.5}}>{msg.t}</div>}
+                {settingsSaved&&<div role="status" aria-live="polite" style={{fontSize:13,color:"var(--green)",fontWeight:600,display:"flex",alignItems:"center",gap:5}}><span aria-hidden="true">✓</span> {t("settings_saved","Настройки сохранены")}</div>}
+                {msg&&!settingsSaved&&<div style={{padding:"10px 14px",borderRadius:9,background:msg.ok?"rgba(16,185,129,.08)":"rgba(239,68,68,.08)",border:`1px solid ${msg.ok?"rgba(16,185,129,.25)":"rgba(239,68,68,.25)"}`,color:msg.ok?"var(--green)":"var(--red)",fontSize:13.5}}>{msg.t}</div>}
               </div>
             </div>
           )}
@@ -398,8 +399,8 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                   {icon:"🗺",label:t("maps_available","Карт доступно"),val:fmt(tier.maps),color:"var(--accent-1)"},
                   {icon:"👥",label:t("members","Участников"),val:fmt(tier.users),color:"var(--accent-2)"},
                   {icon:"⎇",label:t("scenarios_available","Сценариев"),val:fmt(tier.scenarios),color:"#06b6d4"},
-                  {icon:"📁",label:t("projects_available","Проектов"),val:fmt(tier.projects),color:"#12c482"},
-                  {icon:"🤖",label:t("ai_level","AI уровень"),val:tier.ai,color:"#f09428"},
+                  {icon:"📁",label:t("projects_available","Проектов"),val:fmt(tier.projects),color:"var(--green)"},
+                  {icon:"🤖",label:t("ai_level","AI уровень"),val:tier.ai,color:"var(--amber)"},
                 ].map(s=>(
                   <div key={s.label} className="icard icard-stat" style={{"--icard-color":s.color,"--icard-glow":s.color+"33","--icard-bg":s.color+"09",padding:"16px",borderRadius:14,background:"var(--surface)",border:"1px solid var(--border)"}}>
                     <div style={{fontSize:22,marginBottom:6}}>{s.icon}</div>
@@ -423,7 +424,7 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                   ].map(f=>(
                     <div key={f.label} className="icard feat-row" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",borderRadius:10,background:"var(--surface)",border:"1px solid var(--border)"}}>
                       <span className="icard-title" style={{fontSize:13,fontWeight:600,color:"var(--text2)"}}>{f.label}</span>
-                      <span style={{fontSize:13,fontWeight:700,color:f.ok?"#12c482":"var(--text5)"}}>{f.ok?"✓ "+t("done","Включено"):"✗ —"}</span>
+                      <span style={{fontSize:13,fontWeight:700,color:f.ok?"var(--green)":"var(--text5)"}}>{f.ok?"✓ "+t("done","Включено"):"✗ —"}</span>
                     </div>
                   ))}
                 </div>
@@ -520,14 +521,14 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                           <input style={{...fi,marginBottom:0}} placeholder={t("card_expiry_ph","ММ/ГГ")} value={cardExp} onChange={e=>setCardExp(formatExp(e.target.value))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                           <input style={{...fi,marginBottom:0}} placeholder={t("card_cvv_ph","CVV")} value={cardCvv} onChange={e=>setCardCvv(e.target.value.replace(/\D/g,"").slice(0,4))} onFocus={e=>e.target.style.borderColor=selTier.color} onBlur={e=>e.target.style.borderColor="var(--input-border)"}/>
                         </div>
-                        {cardError&&<div style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"#f04458",fontSize:13}}>⚠️ {cardError}</div>}
+                        {cardError&&<div role="alert" style={{marginTop:10,padding:"8px 12px",borderRadius:8,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",color:"var(--red)",fontSize:13}}>⚠️ {cardError}</div>}
                         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:12,paddingTop:12,marginTop:12,borderTop:"1px solid var(--border)"}}>
                           {["🔒 SSL","💳 Visa/MC","✓ PCI DSS"].map(b=><div key={b} style={{fontSize:13,color:"var(--text4)",fontWeight:500}}>{b}</div>)}
                         </div>
                       </div>
                     )}
                     {!isCurrentTier&&!isUpgrade&&(
-                      <div style={{marginBottom:12,padding:"12px 14px",borderRadius:10,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.25)",fontSize:13,color:"#f09428"}}>
+                      <div style={{marginBottom:12,padding:"12px 14px",borderRadius:10,background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.25)",fontSize:13,color:"var(--amber)"}}>
                         <div style={{fontWeight:700,marginBottom:6}}>⚠️ {t("downgrade_warning","После смены тарифа часть данных может быть ограничена.")}</div>
                         {usage&&(usage.maps?.used>0||usage.projects?.used>0)&&(
                           <div style={{fontSize:12,marginBottom:6,opacity:.95}}>

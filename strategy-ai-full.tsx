@@ -84,6 +84,7 @@ import { CookieConsent } from "./client/components/cookie-consent";
 import { MiniMap } from "./client/components/mini-map";
 import { GanttView } from "./client/components/gantt-view";
 import { ProfileModal } from "./client/strategy-modals/profile-modal";
+import { IconTrash } from "./client/components/icons";
 
 const ROLES_C  ={owner:"#6836f5",editor:"#12c482",viewer:"#a8a4c8"};
 const STATUS  ={planning:{c:"#6836f5"},active:{c:"#06b6d4"},completed:{c:"#12c482"},paused:{c:"#f09428"},blocked:{c:"#f04458"}};
