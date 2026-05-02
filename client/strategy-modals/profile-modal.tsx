@@ -278,7 +278,7 @@ export function ProfileModal({user,onClose,onUpdate,onLogout,onChangeTier,theme=
                 </div>
                 {showDeleteConfirm&&(
                   <div style={{position:"fixed",inset:0,zIndex:210,background:"var(--modal-overlay-bg,rgba(0,0,0,.6))",display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={()=>setShowDeleteConfirm(false)}>
-                    <div role="alertdialog" aria-modal="true" aria-labelledby="sa-pf-delete-title" aria-describedby="sa-pf-delete-desc" style={{background:"var(--bg2)",borderRadius:16,border:"1px solid var(--border)",padding:"24px 28px",maxWidth:400,width:"100%",boxShadow:"0 24px 48px rgba(0,0,0,.5)"}} onClick={e=>e.stopPropagation()}>
+                    <div role="alertdialog" aria-modal="true" aria-labelledby="sa-pf-delete-title" aria-describedby="sa-pf-delete-desc" style={{background:"var(--bg2)",borderRadius:"var(--radius-lg,16px)",border:"1px solid var(--border)",padding:"24px 28px",maxWidth:400,width:"100%",boxShadow:"0 24px 48px rgba(0,0,0,.5)"}} onClick={e=>e.stopPropagation()}>
                       <div id="sa-pf-delete-title" style={{fontSize:16,fontWeight:800,color:"var(--text)",marginBottom:8}}>{t("delete_account","Удалить аккаунт")}?</div>
                       <div id="sa-pf-delete-desc" style={{fontSize:13.5,color:"var(--text3)",marginBottom:20}}>{t("delete_warning","Все данные будут удалены безвозвратно")}</div>
                       <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>

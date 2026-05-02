@@ -30,7 +30,7 @@ export function IconButton({
       style={{
         width: size,
         height: size,
-        borderRadius: 12,
+        borderRadius: "var(--radius-md, 12px)",
         border: danger ? "1px solid rgba(239,68,68,.35)" : "1px solid var(--border)",
         background: danger ? "rgba(239,68,68,.08)" : "var(--surface)",
         color: danger ? "var(--red)" : "var(--text2)",

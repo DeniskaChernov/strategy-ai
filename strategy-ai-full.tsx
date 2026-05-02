@@ -422,7 +422,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
                     onNotify?.(t("cp_prefill_ready","Черновик публикации подготовлен. Откройте Контент-план."),"success");
                   }catch{}
                 }} title={t("cp_create_from_step","Создать пост из шага")} style={{flex:"1 1 80px",padding:"8px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>📝 {t("cp_create_from_step_short","В контент-план")}</button>
-                <button type="button" aria-label={t("delete","Удалить")} onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"var(--red)",cursor:"pointer",fontSize:12,transition:"all .2s",display:"inline-flex",alignItems:"center",justifyContent:"center"}}><IconTrash/></button>
+                <button type="button" aria-label={t("delete","Удалить")} onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:"var(--radius-sm,8px)",border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"var(--red)",cursor:"pointer",fontSize:12,transition:"all .2s",display:"inline-flex",alignItems:"center",justifyContent:"center"}}><IconTrash/></button>
               </div>
             )}
           </div>

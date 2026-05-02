@@ -8,6 +8,17 @@ input,textarea,select,button{font-family:'Inter',system-ui,sans-serif;}
   --sp-xs:8px;--sp-sm:12px;--sp-md:18px;--sp-lg:24px;--sp-xl:32px;--sp-2xl:48px;--sp-3xl:64px;
   /* ── Border radius ── */
   --r-xs:6px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-2xl:28px;--r-full:9999px;
+  /* Алиасы для design-system (см. STRATEGY_AI_DESIGN_SYSTEM.md):
+     --radius-sm: small controls (chips/pills/iconbtn small)
+     --radius-md: buttons / inputs / toolbar items
+     --radius-lg: cards / sheets
+     --radius-xl: modals / large surfaces
+     --radius-pill: full circle pills */
+  --radius-sm:var(--r-sm);
+  --radius-md:var(--r-md);
+  --radius-lg:var(--r-lg);
+  --radius-xl:var(--r-xl);
+  --radius-pill:var(--r-full);
   /* ── Brand palette ── */
   --brand:#6836f5;--brand2:#a050ff;--brand3:#06b6d4;
   --success:#12c482;--warning:#f09428;--danger:#f04458;--info:#06b6d4;
@@ -2502,7 +2513,7 @@ body,.sa-strategy-ui{transition:background-color .4s ease,color .35s ease}
 
 /* Профиль: кнопка закрытия в шапке (36×36, hover через CSS) */
 .sa-pf-close{
-  width:36px;height:36px;border-radius:12px;
+  width:36px;height:36px;border-radius:var(--radius-md,12px);
   border:1px solid var(--border);
   background:var(--surface);
   color:var(--text4);
@@ -2530,7 +2541,7 @@ body,.sa-strategy-ui{transition:background-color .4s ease,color .35s ease}
 
 /* Профиль: «купить тариф» — hover lift через CSS */
 .sa-pf-buy{
-  width:100%;padding:13px;border-radius:12px;border:none;
+  width:100%;padding:13px;border-radius:var(--radius-md,12px);border:none;
   color:var(--accent-on-bg);
   font-size:13.5px;font-weight:800;cursor:pointer;
   font-family:inherit;
