@@ -614,6 +614,9 @@ export const LANGS = {
     create_map_btn2:"Создать карту ✦",answer_btn:"Ответить →",
     interview_count:"AI-интервью · {n}/{max} вопросов",
     skip_interview_confirm:"Пропустить интервью и начать с пустой карты?",
+    ai_interview:"AI-интервью",questions_short:"вопросов",
+    your_answer_ph:"Ваш ответ…",your_answer_aria:"Ваш ответ AI-интервьюеру",
+    press_enter_to_generate:"Нажмите Enter для генерации карты…",
     // Simulation
     sim_goal:"🎯 Желаемый результат",sim_metric:"📊 Целевая метрика",
     sim_budget:"💰 Бюджет ($)",sim_team:"👥 Команда (чел)",
@@ -1253,6 +1256,9 @@ export const LANGS = {
     create_map_btn2:"Create map ✦",answer_btn:"Answer →",
     interview_count:"AI interview · {n}/{max} questions",
     skip_interview_confirm:"Skip interview and start with blank map?",
+    ai_interview:"AI interview",questions_short:"questions",
+    your_answer_ph:"Your answer…",your_answer_aria:"Your reply to the AI interviewer",
+    press_enter_to_generate:"Press Enter to generate the map…",
     // Simulation
     sim_goal:"🎯 Desired outcome",sim_metric:"📊 Target metric",
     sim_budget:"💰 Budget ($)",sim_team:"👥 Team (people)",
@@ -1892,6 +1898,9 @@ export const LANGS = {
     create_map_btn2:"Xarita yaratish ✦",answer_btn:"Javob berish →",
     interview_count:"AI suhbat · {n}/{max} savol",
     skip_interview_confirm:"Intervyuni o'tkazib yuborib, bo'sh xaritadan boshlashni xohlaysizmi?",
+    ai_interview:"AI intervyu",questions_short:"savol",
+    your_answer_ph:"Sizning javobingiz…",your_answer_aria:"AI intervyuverga javobingiz",
+    press_enter_to_generate:"Xaritani yaratish uchun Enter bosing…",
     // Simulation
     sim_goal:"🎯 Maqsadli natija",sim_metric:"📊 Maqsad metrikasi",
     sim_budget:"💰 Byudjet ($)",sim_team:"👥 Jamoa (kishi)",
