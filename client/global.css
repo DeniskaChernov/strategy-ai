@@ -2491,6 +2491,49 @@ body,.sa-strategy-ui{transition:background-color .4s ease,color .35s ease}
   color:var(--text) !important;
 }
 
+/* Профиль: кнопка закрытия в шапке (36×36, hover через CSS) */
+.sa-pf-close{
+  width:36px;height:36px;border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text4);
+  font-size:18px;line-height:1;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  padding:0;font-family:inherit;
+  transition:background .15s ease,color .15s ease,border-color .15s ease;
+}
+.sa-pf-close:hover{background:var(--surface2);color:var(--text);border-color:var(--bh,var(--border))}
+.sa-pf-close:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px}
+
+/* Профиль: кнопка выхода в табах (hover через opacity) */
+.sa-pf-logout{
+  padding:11px 14px;border:none;background:transparent;
+  color:var(--red);
+  font-size:13px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+  font-family:inherit;
+  transition:opacity .15s ease;
+}
+.sa-pf-logout:hover{opacity:.7}
+.sa-pf-logout:focus-visible{outline:2px solid rgba(240,68,88,.55);outline-offset:2px;border-radius:6px}
+
+/* Профиль: «купить тариф» — hover lift через CSS */
+.sa-pf-buy{
+  width:100%;padding:13px;border-radius:12px;border:none;
+  color:var(--accent-on-bg);
+  font-size:13.5px;font-weight:800;cursor:pointer;
+  font-family:inherit;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.sa-pf-buy:hover{transform:translateY(-2px)}
+.sa-pf-buy:focus-visible{outline:2px solid rgba(104,54,245,.55);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){
+  .sa-pf-close,.sa-pf-logout,.sa-pf-buy{transition:none}
+  .sa-pf-buy:hover{transform:none}
+}
+
 /* ── GlowCard: курсорный spotlight (без Tailwind) ── */
 [data-glow].glow-card{
   --hue:calc(var(--base,265) + (var(--xp,0) * var(--spread,280)));
