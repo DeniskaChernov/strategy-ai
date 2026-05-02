@@ -422,7 +422,7 @@ function RichEditorPanel({node,ctx,readOnly,userName,onUpdate,onDelete,onClose,a
                     onNotify?.(t("cp_prefill_ready","Черновик публикации подготовлен. Откройте Контент-план."),"success");
                   }catch{}
                 }} title={t("cp_create_from_step","Создать пост из шага")} style={{flex:"1 1 80px",padding:"8px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s"}}>📝 {t("cp_create_from_step_short","В контент-план")}</button>
-                <button onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"#f04458",cursor:"pointer",fontSize:12,transition:"all .2s"}}>🗑</button>
+                <button type="button" aria-label={t("delete","Удалить")} onClick={()=>onDelete(node.id)} style={{padding:"8px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.08)",color:"var(--red)",cursor:"pointer",fontSize:12,transition:"all .2s",display:"inline-flex",alignItems:"center",justifyContent:"center"}}><IconTrash/></button>
               </div>
             )}
           </div>
@@ -1965,7 +1965,7 @@ ${ctx}
             <input value={selEdge.label||""} onChange={e=>{const ne={...selEdge,label:e.target.value};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder="Подпись…" style={{fontSize:13,padding:"5px 10px",background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit",width:120}}/>
             <input type="number" min={1} max={5} value={selEdge.weight||3} onChange={e=>{const w=Math.max(1,Math.min(5,Number(e.target.value)||3));const ne={...selEdge,weight:w};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} title={t("edge_weight","Вес 1–5")} style={{fontSize:13,padding:"5px 6px",width:54,background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit"}}/>
             <input value={selEdge.note||""} onChange={e=>{const ne={...selEdge,note:e.target.value};setEdgesUser(es=>es.map(x=>x.id===selEdge.id?ne:x));setSelEdge(ne);}} placeholder={t("edge_note_ph","Заметка…")} title={t("edge_note","Внутренняя заметка о связи")} style={{fontSize:13,padding:"5px 10px",background:"var(--input-bg)",border:"1px solid var(--input-border)",borderRadius:8,color:"var(--text)",outline:"none",fontFamily:"inherit",width:140}}/>
-            <button onClick={()=>{pushUndo(nodes,edges);setEdgesUser(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"#f04458",cursor:"pointer",fontSize:13,fontWeight:600}}>🗑 Удалить</button>
+            <button type="button" onClick={()=>{pushUndo(nodes,edges);setEdgesUser(es=>es.filter(x=>x.id!==selEdge.id));setSelEdge(null);}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.3)",background:"rgba(239,68,68,.08)",color:"var(--red)",cursor:"pointer",fontSize:13,fontWeight:600,display:"inline-flex",alignItems:"center",gap:6}}><IconTrash/> {t("delete","Удалить")}</button>
           </div>
         )}
         {ctxMenu&&(
@@ -1978,7 +1978,7 @@ ${ctx}
                   <button onClick={()=>{duplicateNode(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📋 {t("duplicate","Дублировать")}</button>
                   <button onClick={()=>{setClipboard(ctxMenu.node);addToast(t("copied","📋 Скопировано"),"info");setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>📄 {t("copy_short","Копировать")}</button>
                   <button onClick={()=>{startConnect(ctxMenu.node);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--text2)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>⇒ {t("link_btn","Связать")}</button>
-                  <button onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdgesUser(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"#f04458",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>🗑 {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
+                  <button type="button" onClick={()=>{const ids=selNodes.size>1?Array.from(selNodes):[ctxMenu.node.id];pushUndo(nodes,edges);setNodes(ns=>ns.filter(n=>!ids.includes(n.id)));setEdgesUser(es=>es.filter(e=>!ids.includes(e.source)&&!ids.includes(e.target)));setSelNodes(new Set());setSelNode(null);setCtxMenu(null);}} style={{width:"100%",padding:"12px 20px",border:"none",background:"none",color:"var(--red)",fontSize:13,textAlign:"left",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}><IconTrash/> {selNodes.size>1?t("delete_selected","Удалить выбранные")+` (${selNodes.size})`:t("delete","Удалить")}</button>
                 </>}
               </>
             ):(
@@ -2857,7 +2857,7 @@ function ProjectsPage({user,onSelectProject,onOpenMap,onLogout,onChangeTier,onPr
                             )}
                             <button role="menuitem" onClick={()=>{setKebabId(null);duplicateProject(p);}} style={{textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",color:"var(--text)",cursor:"pointer",fontSize:13}}>⎘ {t("duplicate","Дублировать")}</button>
                             {p.owner===user.email&&(
-                              <button role="menuitem" onClick={()=>{setKebabId(null);setDelId(p.id);}} style={{textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",color:"#f04458",cursor:"pointer",fontSize:13}}>🗑 {t("delete","Удалить")}</button>
+                              <button type="button" role="menuitem" onClick={()=>{setKebabId(null);setDelId(p.id);}} style={{textAlign:"left",padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",color:"var(--red)",cursor:"pointer",fontSize:13,display:"inline-flex",alignItems:"center",gap:8}}><IconTrash/> {t("delete","Удалить")}</button>
                             )}
                           </div>
                         )}
@@ -3215,7 +3215,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
               <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:11.5,fontWeight:700}}>
                 {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft",CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.fb||"Черновик")}
               </div>
-              <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
+              <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"var(--red)",cursor:"pointer",fontSize:12,flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center"}}><IconTrash/></button>
             </div>
           </div>
         ))}
@@ -3259,7 +3259,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
           <div style={{padding:"4px 10px",borderRadius:8,background:it.status==="published"?"rgba(16,185,129,.12)":it.status==="scheduled"?"var(--accent-soft)":"var(--surface2)",color:it.status==="published"?"#12c482":it.status==="scheduled"?"var(--accent-1)":"var(--text3)",fontSize:12,fontWeight:700}}>
             {t(CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.labelKey||"content_status_draft",CONTENT_STATUSES.find((x:any)=>x.id===it.status)?.fb||"Черновик")}
           </div>
-          <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,flexShrink:0}}>🗑</button>
+          <button type="button" className="btn-interactive" onClick={e=>{e.stopPropagation();removeItem(it.id);}} title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",String(it.title||"").slice(0,80))} style={{padding:"6px 10px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"var(--red)",cursor:"pointer",fontSize:12,flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center"}}><IconTrash/></button>
         </div>
       );
     }
@@ -3505,7 +3505,7 @@ function ContentPlanTab({projectId,projectName,maps,user,theme,lang,t,onChangeTi
                     {t(CONTENT_STATUSES.find(x=>x.id===it.status)?.labelKey||"content_status_draft",CONTENT_STATUSES.find(x=>x.id===it.status)?.fb||"Черновик")}
                   </div>
                   <button type="button" onClick={()=>setEditId(it.id)} className="btn-interactive" title={t("edit","Редактировать")} aria-label={t("content_edit_item_aria","Редактировать: {title}").replace("{title}",(it.title||t("untitled","Без названия")).slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--surface)",color:"var(--text2)",cursor:"pointer",fontSize:12,fontWeight:700}}>✏️</button>
-                  <button type="button" onClick={()=>removeItem(it.id)} className="btn-interactive" title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",(it.title||"").slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:12,fontWeight:800}}>🗑</button>
+                  <button type="button" onClick={()=>removeItem(it.id)} className="btn-interactive" title={t("delete","Удалить")} aria-label={t("content_delete_item_aria","Удалить из плана: {title}").replace("{title}",(it.title||"").slice(0,80))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"var(--red)",cursor:"pointer",fontSize:12,fontWeight:800,display:"inline-flex",alignItems:"center",justifyContent:"center"}}><IconTrash/></button>
                 </div>
               ))}
             </div>
@@ -3783,7 +3783,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
             <div style={{fontSize:13.5,fontWeight:800,color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name||t("untitled","Без названия")}</div>
             <div style={{fontSize:13.5,color:"var(--text5)"}}>{ns.length} {t("steps_label","шагов")} • {t("updated_label","обновлено")} {(m as any).updatedAt?new Date((m as any).updatedAt).toLocaleDateString(lang==="en"?"en-US":lang==="uz"?"uz-UZ":"ru",{day:"2-digit",month:"short"}):"—"}</div>
           </div>
-          {canEdit&&<button className="sa-map-card__del" onClick={e=>{e.stopPropagation();delMap(m.id);}} aria-label={t("confirm_delete_map","Удалить карту?")} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"#f04458",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .22s ease"}}>🗑</button>}
+          {canEdit&&<button type="button" className="sa-map-card__del" onClick={e=>{e.stopPropagation();delMap(m.id);}} aria-label={t("confirm_delete_map","Удалить карту?")} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(239,68,68,.2)",background:"rgba(239,68,68,.06)",color:"var(--red)",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",opacity:0,transition:"opacity .22s ease"}}><IconTrash size={12}/></button>}
         </div>
         {ns.length>0&&(
           <div>
@@ -4080,7 +4080,7 @@ function ProjectDetail({user,project,onBack,onOpenMap,onProfile,theme,onToggleTh
               </div>
             </div>
             {isOwner&&(
-              <button onClick={()=>setDelProjConfirm(true)} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"#f04458",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10}}>🗑 {t("delete_project","Удалить проект")}</button>
+              <button type="button" onClick={()=>setDelProjConfirm(true)} style={{padding:"10px",borderRadius:10,border:"1px solid rgba(239,68,68,.25)",background:"rgba(239,68,68,.05)",color:"var(--red)",cursor:"pointer",fontSize:13,fontWeight:700,marginTop:10,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:8}}><IconTrash/> {t("delete_project","Удалить проект")}</button>
             )}
           </div>
         )}
